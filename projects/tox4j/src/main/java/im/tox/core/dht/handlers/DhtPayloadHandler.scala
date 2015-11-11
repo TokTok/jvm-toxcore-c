@@ -1,10 +1,10 @@
 package im.tox.core.dht.handlers
 
 import im.tox.core.ModuleCompanion
-import im.tox.core.crypto.{PublicKey, KeyPair, Nonce, PlainText}
+import im.tox.core.crypto.{KeyPair, Nonce, PlainText, PublicKey}
 import im.tox.core.dht.packets.DhtEncryptedPacket
 import im.tox.core.dht.{Dht, NodeInfo}
-import im.tox.core.error.DecoderError
+import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.packets.ToxPacket
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
@@ -16,18 +16,22 @@ import scalaz.\/
  */
 abstract class DhtPayloadHandler[T](val module: ModuleCompanion[T]) {
 
-  def apply(dht: Dht, sender: NodeInfo, packet: T): DecoderError \/ IO[Dht]
+  def apply(dht: Dht, sender: NodeInfo, packet: T): CoreError \/ IO[Dht]
 
   private def makeResponse[Response, Kind <: PacketKind](
     packetModule: PacketModuleCompanion[Response, Kind],
     dhtPacket: DhtEncryptedPacket[Response]
-  ): ToxPacket[packetModule.PacketKind] = {
+  ): CoreError \/ ToxPacket[Kind] = {
     val encryptedPacketModule = DhtEncryptedPacket.Make(packetModule)
 
-    ToxPacket(
-      packetModule.packetKind,
-      PlainText(encryptedPacketModule.toBytes(dhtPacket))
-    )
+    for {
+      bytes <- encryptedPacketModule.toBytes(dhtPacket)
+    } yield {
+      ToxPacket(
+        packetModule.packetKind,
+        PlainText(bytes)
+      )
+    }
   }
 
   def makeResponse[Response, Kind <: PacketKind](
@@ -35,17 +39,20 @@ abstract class DhtPayloadHandler[T](val module: ModuleCompanion[T]) {
     receiverPublicKey: PublicKey,
     packetModule: PacketModuleCompanion[Response, Kind],
     packet: Response
-  ): ToxPacket[packetModule.PacketKind] = {
+  ): CoreError \/ ToxPacket[Kind] = {
     val encryptedPacketModule = DhtEncryptedPacket.Make(packetModule)
 
-    val dhtPacket = encryptedPacketModule.encrypt(
-      receiverPublicKey,
-      senderKeyPair,
-      Nonce.random(),
-      packet
-    )
-
-    makeResponse(packetModule, dhtPacket)
+    for {
+      dhtPacket <- encryptedPacketModule.encrypt(
+        receiverPublicKey,
+        senderKeyPair,
+        Nonce.random(),
+        packet
+      )
+      response <- makeResponse(packetModule, dhtPacket)
+    } yield {
+      response
+    }
   }
 
   override def toString: String = {

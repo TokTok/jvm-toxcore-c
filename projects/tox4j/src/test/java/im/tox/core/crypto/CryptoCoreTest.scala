@@ -25,12 +25,17 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     "be detectable" in {
       forAll { (keyPair: KeyPair, nonce: Nonce, plainText: PlainText, extraData: Array[Byte], useKeyCache: Boolean) =>
         whenever(extraData.nonEmpty) {
-          val cipherText = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText, useKeyCache)
+          val cipherText =
+            CryptoCore
+              .encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText, useKeyCache)
+              .getOrElse(fail("Encryption failed"))
+
           val decrypted = CryptoCore.decrypt(PlainText)(
             keyPair.publicKey, keyPair.secretKey, nonce,
             cipherText.copy(cipherText.data ++ ByteVector.view(extraData)),
             useKeyCache
           )
+
           assert(decrypted.isLeft)
         }
       }
@@ -80,7 +85,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
             secretKey,
             nonce,
             plainText,
-            cipherText
+            cipherText.getOrElse(fail("Encryption failed"))
           )
       })
 

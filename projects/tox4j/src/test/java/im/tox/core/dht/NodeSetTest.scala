@@ -9,10 +9,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
-import scodec.bits.ByteVector
+import scodec.bits.BitVector
 
 import scala.util.Random
-import scalaz.{-\/, \/-}
 
 object NodeSetTest {
 
@@ -188,10 +187,7 @@ final class NodeSetTest extends FunSuite with PropertyChecks {
    */
   def makePublicKey(firstByte: Byte): PublicKey = {
     val bytes = firstByte +: (0 until PublicKey.Size - 1).map(_ => 0.toByte)
-    PublicKey.fromBytes(ByteVector(bytes)) match {
-      case -\/(_)   => fail("Unable to generate public key with first byte " + firstByte)
-      case \/-(key) => key
-    }
+    PublicKey.fromBits(BitVector(bytes)).getOrElse(fail("Public key creation failed"))
   }
 
   def genCustomNodeInfo(firstByte: Byte): Gen[NodeInfo] = {

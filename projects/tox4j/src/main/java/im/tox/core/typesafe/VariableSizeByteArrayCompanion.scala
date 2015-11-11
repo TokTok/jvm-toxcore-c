@@ -1,12 +1,15 @@
 package im.tox.core.typesafe
 
-import java.io.DataInputStream
-
-import im.tox.core.error.DecoderError
-
-import scalaz.{-\/, \/, \/-}
+import im.tox.core.error.CoreError
+import scodec.codecs._
+import scodec.{Attempt, Err}
 
 abstract class VariableSizeByteArrayCompanion[T <: AnyVal](val MaxSize: Int) extends ByteArrayCompanion[T] {
+
+  final override val codec = variableSizeBytes(uint16, bytes).exmap[T](
+    { bytes => Attempt.fromOption(fromByteArray(bytes.toArray), new Err.General(s"Validation failed for $this")) },
+    { self => CoreError.toAttempt(toBytes(self)) }
+  )
 
   def validate(value: Array[Byte]): Boolean = true
 
@@ -16,17 +19,6 @@ abstract class VariableSizeByteArrayCompanion[T <: AnyVal](val MaxSize: Int) ext
       () <- require(validate(value))
     } yield {
       unsafeFromByteArray(value)
-    }
-  }
-
-  final override def read(packetData: DataInputStream): DecoderError \/ T = {
-    val size = packetData.readUnsignedShort()
-    if (size <= MaxSize) {
-      val data = Array.ofDim[Byte](size)
-      packetData.read(data)
-      \/-(unsafeFromByteArray(data))
-    } else {
-      -\/(DecoderError.InvalidFormat(s"Message too large for $this; MaxSize = $MaxSize"))
     }
   }
 

@@ -1,6 +1,5 @@
 package im.tox.tox4j
 
-import im.tox.tox4j.av.SamplingRate
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.ToxConnection
 import org.jetbrains.annotations.NotNull

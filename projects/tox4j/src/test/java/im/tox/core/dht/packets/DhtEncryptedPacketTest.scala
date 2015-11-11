@@ -25,7 +25,7 @@ object DhtEncryptedPacketTest {
             keyPair,
             nonce,
             payload
-          )
+          ).getOrElse(throw new AssertionError("Encryption failed"))
           (encryptedPacket, keyPair.secretKey)
       }
     )
@@ -49,7 +49,7 @@ final class DhtEncryptedPacketTest extends ModuleCompanionTest(DhtEncryptedPacke
         senderKeyPair,
         nonce,
         payload
-      )
+      ).getOrElse(fail("Encryption failed"))
       val decryptedPayload = DhtEncryptedPacket.Make(PlainText).decrypt(encrypted, receiverKeyPair.secretKey)
 
       assert(decryptedPayload == \/-(payload))
@@ -67,9 +67,9 @@ final class DhtEncryptedPacketTest extends ModuleCompanionTest(DhtEncryptedPacke
         senderKeyPair,
         nonce,
         payload
-      )
+      ).getOrElse(fail("Encryption failed"))
 
-      val packet = DhtEncryptedPacket.Make(PlainText).toBytes(encrypted)
+      val packet = DhtEncryptedPacket.Make(PlainText).toBytes(encrypted).getOrElse(fail("Encoding failed"))
       assert(packet.length - payload.data.length == 72)
     }
   }

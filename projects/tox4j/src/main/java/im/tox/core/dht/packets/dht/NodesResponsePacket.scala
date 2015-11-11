@@ -1,14 +1,9 @@
 package im.tox.core.dht.packets.dht
 
-import java.io.{DataInputStream, DataOutput}
-
 import im.tox.core.dht.NodeInfo
-import im.tox.core.error.DecoderError
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
-
-import scala.annotation.tailrec
-import scala.collection.GenTraversable
-import scalaz.{-\/, \/, \/-}
+import scodec.codecs._
+import scodec.{Attempt, Err}
 
 /**
  * Send_nodes (response):
@@ -29,68 +24,36 @@ import scalaz.{-\/, \/, \/-}
  * that was sent in the request.
  */
 final case class NodesResponsePacket(
-  nodes: GenTraversable[NodeInfo],
-  pingId: Long
-)
+    nodes: List[NodeInfo],
+    pingId: Long
+) {
+  require(nodes.size <= NodesResponsePacket.MaxNodes)
+}
 
 object NodesResponsePacket
     extends PacketModuleCompanion[NodesResponsePacket, PacketKind.NodesResponse.type](PacketKind.NodesResponse) {
 
   val MaxNodes = 4
 
-  override def write(self: NodesResponsePacket, packetData: DataOutput): Unit = {
+  override val codec =
     /**
-     * [uint8_t number of nodes in this packet]
-     *
-     * (maximum of 4 nodes)
-     */
-    assert(self.nodes.size <= MaxNodes)
-    packetData.write(self.nodes.size)
-
-    /**
+     * [uint8_t number of nodes in this packet] (maximum of 4 nodes)
      * [Nodes in packed node format, length = (39 bytes for ipv4, 41 bytes for ipv6) * (number of nodes (maximum of 4 nodes)) bytes]
-     */
-    for (node <- self.nodes) {
-      NodeInfo.write(node, packetData)
-    }
-
-    /**
      * [ping_id, length=8 bytes]
      */
-    packetData.writeLong(self.pingId)
-  }
-
-  @tailrec
-  private def readNodes(packetData: DataInputStream, count: Int, nodes: Seq[NodeInfo]): DecoderError \/ Seq[NodeInfo] = {
-    count match {
-      case 0 =>
-        \/-(nodes.reverse)
-
-      case _ =>
-        NodeInfo.read(packetData) match {
-          case error @ -\/(_) => error
-          case \/-(node)      => readNodes(packetData, count - 1, node +: nodes)
-        }
-    }
-  }
-
-  override def read(packetData: DataInputStream): DecoderError \/ NodesResponsePacket = {
-    for {
-      nodes <- {
-        val nodeCount = packetData.read()
-        if (nodeCount > MaxNodes) {
-          -\/(DecoderError.InvalidFormat(s"Too many nodes: $nodeCount > $MaxNodes"))
-        } else {
-          readNodes(packetData, nodeCount, Nil)
-        }
-      }
-    } yield {
-      val pingId = packetData.readLong()
-      NodesResponsePacket(
-        nodes,
-        pingId
-      )
-    }
-  }
+    (listOfN(uint8, NodeInfo.codec) ~ int64).exmap[NodesResponsePacket](
+      {
+        case (nodes, pingId) =>
+          Attempt.fromOption(
+            for {
+              () <- require(nodes.size <= MaxNodes)
+            } yield {
+              NodesResponsePacket(nodes, pingId)
+            },
+            new Err.General(s"Too many nodes in $this: ${nodes.size} > $MaxNodes")
+          )
+      },
+      { case NodesResponsePacket(nodes, pingId) => Attempt.successful((nodes, pingId)) }
+    )
 
 }

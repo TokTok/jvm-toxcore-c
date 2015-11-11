@@ -7,6 +7,7 @@ import im.tox.core.crypto.{Nonce, PlainText, PublicKey}
 import im.tox.core.dht.Dht
 import im.tox.core.dht.packets.DhtEncryptedPacket
 import im.tox.core.dht.packets.dht._
+import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.packets.ToxPacket
 import im.tox.tox4j.core.ToxCoreConstants
@@ -16,7 +17,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scalaz.stream._
 import scalaz.stream.udp.{Connection, Packet}
-import scalaz.{-\/, \/-}
+import scalaz.{-\/, \/, \/-}
 
 /**
  * The network module is the lowest file in toxcore that everything else depends
@@ -69,10 +70,12 @@ object NetworkCore {
     action match {
       case IO.Action.SendTo(node, outPacket) =>
         logger.debug("Sending %s to %s".format(outPacket.kind, node.address))
-        udp.send(
-          to = node.address,
-          ToxPacket.toBytes(outPacket)
-        )
+        ToxPacket.toBytes(outPacket) match {
+          case -\/(error) =>
+            Process.fail(error.exception)
+          case \/-(packetData) =>
+            udp.send(to = node.address, packetData)
+        }
     }
   }
 
@@ -114,46 +117,57 @@ object NetworkCore {
     }
   }
 
-  def start(): Unit = {
-    val address = new InetSocketAddress("192.210.149.121", ToxCoreConstants.DefaultStartPort)
+  val EncryptedNodesRequestPacket = DhtEncryptedPacket.Make(NodesRequestPacket)
+
+  val nodes = Seq(
+    ("192.210.149.121", "F404ABAA1C99A9D37D61AB54898F56793E1DEF8BD46B1038B9D822E8460FAB67"),
+    ("178.62.250.138", "788236D34978D1D5BD822F0A5BEBD2C53C64CC31CD3149350EE27D4D9A2F9B6B")
+  )
+
+  def start(): \/[CoreError, Option[Dht]] = {
+    val node = nodes(0)
+    val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
     for {
-      receiverPublicKey <- PublicKey.fromString("F404ABAA1C99A9D37D61AB54898F56793E1DEF8BD46B1038B9D822E8460FAB67")
-    } yield {
-      val dht = Dht()
+      receiverPublicKey <- PublicKey.fromString(node._2)
+      result <- {
+        val dht = Dht()
 
-      val dhtNodesRequestPacket = DhtEncryptedPacket.Make(NodesRequestPacket)
+        val nodesRequestPacket = NodesRequestPacket(dht.keyPair.publicKey, 1)
 
-      val nodesRequestPacket = NodesRequestPacket(dht.keyPair.publicKey, 1)
-
-      val bytes = ToxPacket.toBytes(ToxPacket(
-        NodesRequestPacket.packetKind,
-        PlainText(
-          dhtNodesRequestPacket.toBytes(
-            dhtNodesRequestPacket.encrypt(
-              receiverPublicKey,
-              dht.keyPair,
-              Nonce.random(),
-              nodesRequestPacket
-            )
-          )
-        )
-      ))
-
-      val timer = udp.lift(time.awakeEvery(1 seconds).take(5).map(TimeEvent))
-      val receiver = udp.receives(MaxUdpPacketSize, Some(5 seconds)).take(20).map(NetworkEvent)
-
-      val client = udp.listen(ToxCoreConstants.DefaultStartPort) {
         for {
-          () <- udp.send(to = address, bytes)
-          event <- udp.merge(timer, receiver)
-          dht <- processEvent(dht, event)
+          request <- EncryptedNodesRequestPacket.encrypt(
+            receiverPublicKey,
+            dht.keyPair,
+            Nonce.random(),
+            nodesRequestPacket
+          )
+          request <- EncryptedNodesRequestPacket.toBytes(request)
+          request <- ToxPacket.toBytes(ToxPacket(
+            NodesRequestPacket.packetKind,
+            PlainText(request)
+          ))
         } yield {
-          logger.info("Finished: " + dht)
-          dht
+          val timer = udp.lift(time.awakeEvery(1 seconds).take(5).map(TimeEvent))
+          val receiver = udp.receives(MaxUdpPacketSize, Some(5 seconds)).take(20).map(NetworkEvent)
+
+          val client = udp.listen(ToxCoreConstants.DefaultStartPort) {
+            for {
+              () <- udp.send(to = address, request)
+              event <- udp.merge(timer, receiver)
+              dht <- processEvent(dht, event)
+            } yield {
+              logger.info("Finished: " + dht)
+              dht
+            }
+          }
+
+          val result = client.runLast.run
+          logger.info("Final state: " + result)
+          result
         }
       }
-
-      logger.info("Final state: " + client.runLast.run)
+    } yield {
+      result
     }
   }
 

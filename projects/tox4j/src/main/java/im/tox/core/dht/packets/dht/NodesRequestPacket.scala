@@ -1,12 +1,8 @@
 package im.tox.core.dht.packets.dht
 
-import java.io.{DataInputStream, DataOutput}
-
 import im.tox.core.crypto.PublicKey
-import im.tox.core.error.DecoderError
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
-
-import scalaz.\/
+import scodec.codecs.int64
 
 /**
  * Get nodes (Request):
@@ -36,21 +32,10 @@ final case class NodesRequestPacket(
 object NodesRequestPacket
     extends PacketModuleCompanion[NodesRequestPacket, PacketKind.NodesRequest.type](PacketKind.NodesRequest) {
 
-  override def write(self: NodesRequestPacket, packetData: DataOutput): Unit = {
-    PublicKey.write(self.requestedNode, packetData)
-    packetData.writeLong(self.pingId)
-  }
-
-  override def read(packetData: DataInputStream): DecoderError \/ NodesRequestPacket = {
-    for {
-      requestedNode <- PublicKey.read(packetData)
-    } yield {
-      val pingId = packetData.readLong()
-      NodesRequestPacket(
-        requestedNode,
-        pingId
-      )
-    }
-  }
+  override val codec =
+    (PublicKey.codec ~ int64).xmap[NodesRequestPacket](
+      { case (publicKey, pingId) => NodesRequestPacket(publicKey, pingId) },
+      { case NodesRequestPacket(publicKey, pingId) => (publicKey, pingId) }
+    )
 
 }

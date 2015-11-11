@@ -12,7 +12,7 @@ object NodesResponsePacketTest {
 
   implicit val arbNodesResponse: Arbitrary[NodesResponsePacket] = {
     Arbitrary(Gen.zip(
-      arbitrary[Seq[NodeInfo]],
+      arbitrary[List[NodeInfo]],
       arbitrary[Long]
     ).map {
       case (nodes, pingId) =>

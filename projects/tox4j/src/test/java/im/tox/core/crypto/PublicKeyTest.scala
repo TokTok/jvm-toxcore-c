@@ -11,7 +11,7 @@ object PublicKeyTest {
 
 }
 
-final class PublicKeyTest extends ModuleCompanionTest[PublicKey](PublicKey) {
+final class PublicKeyTest extends ModuleCompanionTest(PublicKey) {
 
   override val arbT = PublicKeyTest.arbPublicKey
 

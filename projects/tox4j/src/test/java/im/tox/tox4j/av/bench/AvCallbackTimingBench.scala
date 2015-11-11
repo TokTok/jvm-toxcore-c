@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.bench
 
-import im.tox.tox4j.av.{SamplingRate, AudioChannels, ToxAv}
+import im.tox.tox4j.av.{AudioChannels, SamplingRate, ToxAv}
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.ToxCoreConstants

@@ -1,13 +1,8 @@
 package im.tox.core.crypto
 
-import java.io.{DataInputStream, DataOutput}
-
-import im.tox.core.ModuleCompanion
-import im.tox.core.error.DecoderError
 import im.tox.core.random.RandomCore
+import im.tox.core.typesafe.FixedSizeByteArrayCompanion
 import im.tox.tox4j.crypto.ToxCryptoConstants
-
-import scalaz.{\/, \/-}
 
 final case class Nonce private[crypto] (data: Seq[Byte]) extends AnyVal {
   override def toString: String = {
@@ -15,19 +10,10 @@ final case class Nonce private[crypto] (data: Seq[Byte]) extends AnyVal {
   }
 }
 
-object Nonce extends ModuleCompanion[Nonce] {
+object Nonce extends FixedSizeByteArrayCompanion[Nonce](ToxCryptoConstants.NonceLength) {
 
-  val Size = ToxCryptoConstants.NonceLength
-
-  override def write(self: Nonce, packetData: DataOutput): Unit = {
-    packetData.write(self.data.toArray)
-  }
-
-  override def read(packetData: DataInputStream): DecoderError \/ Nonce = {
-    val data = Array.ofDim[Byte](Size)
-    packetData.read(data)
-    \/-(Nonce(data))
-  }
+  override protected def unsafeFromByteArray(value: Array[Byte]): Nonce = new Nonce(value)
+  override def toByteArray(self: Nonce): Array[Byte] = self.data.toArray
 
   /**
    * The random nonce generation function is used everywhere in toxcore to

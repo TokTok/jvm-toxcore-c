@@ -18,7 +18,7 @@ object PacketKindTest {
 
 }
 
-final class PacketKindTest extends ModuleCompanionTest[PacketKind](PacketKind) {
+final class PacketKindTest extends ModuleCompanionTest(PacketKind) {
 
   override val arbT = PacketKindTest.arbPacketKind
 

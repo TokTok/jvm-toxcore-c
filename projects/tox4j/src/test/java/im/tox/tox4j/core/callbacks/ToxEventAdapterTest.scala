@@ -1,8 +1,8 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core._
 import im.tox.tox4j.core.enums._
 import im.tox.tox4j.core.proto.Core._
-import im.tox.tox4j.core._
 import org.scalatest.FunSuite
 
 final class ToxEventAdapterTest extends FunSuite {

@@ -11,7 +11,7 @@ object PortTest {
 
 }
 
-final class PortTest extends ModuleCompanionTest[Port](Port) {
+final class PortTest extends ModuleCompanionTest(Port) {
 
   override val arbT = PortTest.arbPort
 

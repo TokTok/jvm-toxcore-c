@@ -1,6 +1,5 @@
 package im.tox.core.dht
 
-import java.io.{ByteArrayOutputStream, DataOutputStream}
 import java.net.InetSocketAddress
 
 import im.tox.core.ModuleCompanionTest
@@ -40,27 +39,21 @@ object NodeInfoTest {
 
 }
 
-final class NodeInfoTest extends ModuleCompanionTest[NodeInfo](NodeInfo) {
+final class NodeInfoTest extends ModuleCompanionTest(NodeInfo) {
 
   override val arbT = NodeInfoTest.arbNodeInfo
 
   test("a serialised ipv4 node info is 39 bytes") {
     forAll { (protocol: Protocol, port: Port, publicKey: PublicKey) =>
-      val packet = new DataOutputStream(new ByteArrayOutputStream)
-
       val nodeInfo = NodeInfo(protocol, new InetSocketAddress("127.0.0.1", port.value), publicKey)
-      NodeInfo.write(nodeInfo, packet)
-      assert(packet.size == 39)
+      assert(NodeInfo.toBytes(nodeInfo).getOrElse(fail("Encoding failed")).size == 39)
     }
   }
 
   test("a serialised ipv6 node info is 51 bytes") {
     forAll { (protocol: Protocol, port: Port, publicKey: PublicKey) =>
-      val packet = new DataOutputStream(new ByteArrayOutputStream)
-
       val nodeInfo = NodeInfo(protocol, new InetSocketAddress("::1", port.value), publicKey)
-      NodeInfo.write(nodeInfo, packet)
-      assert(packet.size == 51)
+      assert(NodeInfo.toBytes(nodeInfo).getOrElse(fail("Encoding failed")).size == 51)
     }
   }
 

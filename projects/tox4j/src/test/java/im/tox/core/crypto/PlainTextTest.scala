@@ -12,7 +12,7 @@ object PlainTextTest {
 
 }
 
-final class PlainTextTest extends ModuleCompanionTest[PlainText](PlainText) {
+final class PlainTextTest extends ModuleCompanionTest(PlainText) {
 
   override val arbT = PlainTextTest.arbPlainText
 

@@ -31,7 +31,8 @@ libraryDependencies ++= Seq(
   "im.tox" %% "macros" % version.value,
   "org.json" % "json" % "20131018",
   "org.scalaz" %% "scalaz-core" % "7.2.0-M1",
-  "org.scalaz.stream" %% "scalaz-stream" % "0.8"
+  "org.scalaz.stream" %% "scalaz-stream" % "0.8",
+  "org.scodec" %% "scodec-core" % "1.8.2"
 )
 
 // Test dependencies.

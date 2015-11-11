@@ -1,11 +1,8 @@
 package im.tox.core.network
 
-import java.io.{DataInputStream, DataOutput}
-
 import im.tox.core.ModuleCompanion
-import im.tox.core.error.DecoderError
-
-import scalaz.{-\/, \/, \/-}
+import scodec.codecs._
+import scodec.{Attempt, Err}
 
 sealed abstract class PacketKind(val id: Int)
 
@@ -64,35 +61,32 @@ object PacketKind extends ModuleCompanion[PacketKind] {
   case object OnionReceive2 extends PacketKind(141)
   case object OnionReceive1 extends PacketKind(142)
 
-  override def write(self: PacketKind, packetData: DataOutput): Unit = {
-    packetData.write(self.id)
-  }
+  override val codec = uint8.exmap[PacketKind](
+    {
+      case PingRequest.id       => Attempt.successful(PingRequest)
+      case PingResponse.id      => Attempt.successful(PingResponse)
+      case NodesRequest.id      => Attempt.successful(NodesRequest)
+      case NodesResponse.id     => Attempt.successful(NodesResponse)
+      case CookieRequest.id     => Attempt.successful(CookieRequest)
+      case CookieResponse.id    => Attempt.successful(CookieResponse)
+      case CryptoHandshake.id   => Attempt.successful(CryptoHandshake)
+      case CryptoData.id        => Attempt.successful(CryptoData)
+      case DhtRequest.id        => Attempt.successful(DhtRequest)
+      case LanDiscovery.id      => Attempt.successful(CryptoData)
+      case OnionSend1.id        => Attempt.successful(OnionSend1)
+      case OnionSend2.id        => Attempt.successful(OnionSend2)
+      case OnionSend3.id        => Attempt.successful(OnionSend3)
+      case AnnounceRequest.id   => Attempt.successful(AnnounceRequest)
+      case AnnounceResponse.id  => Attempt.successful(AnnounceResponse)
+      case OnionDataRequest.id  => Attempt.successful(OnionDataRequest)
+      case OnionDataResponse.id => Attempt.successful(OnionDataResponse)
+      case OnionReceive3.id     => Attempt.successful(OnionReceive3)
+      case OnionReceive2.id     => Attempt.successful(OnionReceive2)
+      case OnionReceive1.id     => Attempt.successful(OnionReceive1)
 
-  override def read(packetData: DataInputStream): DecoderError \/ PacketKind = { // scalastyle:ignore cyclomatic.complexity
-    packetData.readUnsignedByte() match {
-      case PingRequest.id       => \/-(PingRequest)
-      case PingResponse.id      => \/-(PingResponse)
-      case NodesRequest.id      => \/-(NodesRequest)
-      case NodesResponse.id     => \/-(NodesResponse)
-      case CookieRequest.id     => \/-(CookieRequest)
-      case CookieResponse.id    => \/-(CookieResponse)
-      case CryptoHandshake.id   => \/-(CryptoHandshake)
-      case CryptoData.id        => \/-(CryptoData)
-      case DhtRequest.id        => \/-(DhtRequest)
-      case LanDiscovery.id      => \/-(CryptoData)
-      case OnionSend1.id        => \/-(OnionSend1)
-      case OnionSend2.id        => \/-(OnionSend2)
-      case OnionSend3.id        => \/-(OnionSend3)
-      case AnnounceRequest.id   => \/-(AnnounceRequest)
-      case AnnounceResponse.id  => \/-(AnnounceResponse)
-      case OnionDataRequest.id  => \/-(OnionDataRequest)
-      case OnionDataResponse.id => \/-(OnionDataResponse)
-      case OnionReceive3.id     => \/-(OnionReceive3)
-      case OnionReceive2.id     => \/-(OnionReceive2)
-      case OnionReceive1.id     => \/-(OnionReceive1)
-
-      case invalidId            => -\/(DecoderError.InvalidFormat("Invalid packed id: " + invalidId))
-    }
-  }
+      case invalidId            => Attempt.failure(new Err.General("Invalid packed id: " + invalidId))
+    },
+    { self => Attempt.successful(self.id) }
+  )
 
 }

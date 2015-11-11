@@ -23,7 +23,7 @@ object ToxPacketTest {
 
 }
 
-final class ToxPacketTest extends ModuleCompanionTest[ToxPacket[PacketKind]](ToxPacket) {
+final class ToxPacketTest extends ModuleCompanionTest(ToxPacket) {
 
   override val arbT = ToxPacketTest.arbPacket
 

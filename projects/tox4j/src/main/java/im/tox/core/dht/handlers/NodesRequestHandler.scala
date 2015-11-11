@@ -2,10 +2,10 @@ package im.tox.core.dht.handlers
 
 import im.tox.core.dht.packets.dht.{NodesRequestPacket, NodesResponsePacket}
 import im.tox.core.dht.{Dht, NodeInfo}
-import im.tox.core.error.DecoderError
+import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 
-import scalaz.{\/, \/-}
+import scalaz.\/
 
 /**
  * Get node requests are responded to by send node responses. Send node
@@ -19,17 +19,17 @@ object NodesRequestHandler extends DhtPayloadHandler(NodesRequestPacket) {
    * lists, closest to the public key in the packet and send them in the send node
    * response.
    */
-  override def apply(dht: Dht, sender: NodeInfo, packet: NodesRequestPacket): DecoderError \/ IO[Dht] = {
-    val nearNodes = dht.getNearNodes(NodesResponsePacket.MaxNodes, packet.requestedNode)
+  override def apply(dht: Dht, sender: NodeInfo, packet: NodesRequestPacket): CoreError \/ IO[Dht] = {
+    val nearNodes = dht.getNearNodes(NodesResponsePacket.MaxNodes, packet.requestedNode).toList
 
-    val response = makeResponse(
-      dht.keyPair,
-      sender.publicKey,
-      NodesResponsePacket,
-      NodesResponsePacket(nearNodes, packet.pingId)
-    )
-
-    \/- {
+    for {
+      response <- makeResponse(
+        dht.keyPair,
+        sender.publicKey,
+        NodesResponsePacket,
+        NodesResponsePacket(nearNodes, packet.pingId)
+      )
+    } yield {
       for {
         () <- IO.sendTo(sender, response)
       } yield {

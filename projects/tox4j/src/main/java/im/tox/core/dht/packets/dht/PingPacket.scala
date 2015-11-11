@@ -1,11 +1,8 @@
 package im.tox.core.dht.packets.dht
 
-import java.io.{DataInputStream, DataOutput}
-
-import im.tox.core.error.DecoderError
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
-
-import scalaz.{-\/, \/, \/-}
+import scodec.bits.ByteVector
+import scodec.codecs._
 
 /**
  * Ping(Request and response):
@@ -46,44 +43,25 @@ final case class PingPacket(
 abstract class PingPacketCompanion[Kind <: PacketKind](packetKind: Kind)
     extends PacketModuleCompanion[PingPacket, Kind](packetKind) {
 
-  def isResponse: Boolean
-
-  final override def write(self: PingPacket, packetData: DataOutput): Unit = {
+  override val codec = {
     /**
      * [1 byte type (0 for request, 1 for response)]
+     *
+     * The reason for the 1 byte value in the encrypted part is because the key
+     * used to encrypt both the request and response will be the same due to how
+     * the encryption works it prevents a possible attacked from being able to
+     * create a ping response without needing to decrypt the ping request.
      */
-    packetData.write(
-      if (isResponse) {
-        1.toByte
-      } else {
-        0.toByte
-      }
-    )
-
+    val echoType = constant(ByteVector(if (isResponse) 1 else 0))
     /**
      * [8 byte (ping_id)]
      */
-    packetData.writeLong(self.pingId)
+    (echoType ~> int64).xmap[PingPacket](
+      { case pingId => PingPacket(pingId) },
+      { case PingPacket(pingId) => pingId }
+    )
   }
 
-  final override def read(packetData: DataInputStream): DecoderError \/ PingPacket = {
-    for {
-      /**
-       * The reason for the 1 byte value in the encrypted part is because the key
-       * used to encrypt both the request and response will be the same due to how
-       * the encryption works it prevents a possible attacked from being able to
-       * create a ping response without needing to decrypt the ping request.
-       */
-      _ <- packetData.readUnsignedByte() match {
-        case 0 if isResponse  => -\/(DecoderError.InvalidFormat("Expected ping response but got request"))
-        case 1 if !isResponse => -\/(DecoderError.InvalidFormat("Expected ping request but got response"))
-        case 1 | 0            => \/-(())
-        case invalid          => -\/(DecoderError.InvalidFormat("Invalid first byte of ping packet: " + invalid))
-      }
-    } yield {
-      val pingId = packetData.readLong()
-      PingPacket(pingId)
-    }
-  }
+  def isResponse: Boolean
 
 }

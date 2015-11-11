@@ -10,7 +10,7 @@ object NonceTest {
 
 }
 
-final class NonceTest extends ModuleCompanionTest[Nonce](Nonce) {
+final class NonceTest extends ModuleCompanionTest(Nonce) {
 
   override val arbT = NonceTest.arbNonce
 

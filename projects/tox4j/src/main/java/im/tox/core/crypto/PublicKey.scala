@@ -1,6 +1,6 @@
 package im.tox.core.crypto
 
-import im.tox.core.error.DecoderError
+import im.tox.core.error.CoreError
 import im.tox.core.typesafe.FixedSizeByteArrayCompanion
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
@@ -18,10 +18,10 @@ object PublicKey extends FixedSizeByteArrayCompanion[PublicKey](ToxCryptoConstan
 
   def toByteArray(self: PublicKey): Array[Byte] = self.value.toArray
 
-  def fromString(string: String): DecoderError \/ PublicKey = {
+  def fromString(string: String): CoreError \/ PublicKey = {
     val bytes = parsePublicKey(string)
     if (bytes.length != Size) {
-      -\/(DecoderError.InvalidFormat(s"Invalid size of public key (${bytes.length} != $Size)"))
+      -\/(CoreError.InvalidFormat(s"Invalid size of public key (${bytes.length} != $Size)"))
     } else {
       \/-(new PublicKey(bytes))
     }

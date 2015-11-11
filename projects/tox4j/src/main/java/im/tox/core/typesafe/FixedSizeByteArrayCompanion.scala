@@ -1,12 +1,17 @@
 package im.tox.core.typesafe
 
-import java.io.DataInputStream
-
-import im.tox.core.error.DecoderError
-
-import scalaz.{\/, \/-}
+import scodec.bits.ByteVector
+import scodec.codecs._
 
 abstract class FixedSizeByteArrayCompanion[T <: AnyVal](val Size: Int) extends ByteArrayCompanion[T] {
+
+  /**
+   * [char array (node_id), length=32 bytes]
+   */
+  override val codec = bytes(Size).xmap[T](
+    byteVector => unsafeFromByteArray(byteVector.toArray),
+    self => ByteVector(toByteArray(self))
+  )
 
   def validate(value: Array[Byte]): Boolean = true
 
@@ -17,12 +22,6 @@ abstract class FixedSizeByteArrayCompanion[T <: AnyVal](val Size: Int) extends B
     } yield {
       unsafeFromByteArray(value)
     }
-  }
-
-  final override def read(packetData: DataInputStream): DecoderError \/ T = {
-    val data = Array.ofDim[Byte](Size)
-    packetData.read(data)
-    \/-(unsafeFromByteArray(data))
   }
 
 }

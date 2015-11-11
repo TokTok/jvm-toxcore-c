@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.exceptions
 
 import im.tox.core.network.Port
-import im.tox.tox4j.core.{ToxPublicKey, ToxCoreConstants}
+import im.tox.tox4j.core.{ToxCoreConstants, ToxPublicKey}
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 

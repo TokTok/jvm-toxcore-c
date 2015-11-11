@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.callbacks
 
-import im.tox.tox4j.av.{SamplingRate, AudioChannels}
+import im.tox.tox4j.av.{AudioChannels, SamplingRate}
 import org.jetbrains.annotations.NotNull
 
 /**

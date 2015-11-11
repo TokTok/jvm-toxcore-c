@@ -1,27 +1,17 @@
 package im.tox.core.typesafe
 
-import java.io.{DataInputStream, DataOutput}
-
 import im.tox.core.ModuleCompanion
-import im.tox.core.error.DecoderError
+import scodec.codecs._
+import scodec.{Attempt, Codec, Err}
 
-import scalaz.{-\/, \/, \/-}
+abstract class IntCompanion[T <: AnyVal](valueCodec: Codec[Int] = int32) extends ModuleCompanion[T] {
 
-abstract class IntCompanion[T <: AnyVal] extends ModuleCompanion[T] {
+  final override val codec = valueCodec.exmap[T](
+    { value => Attempt.fromOption(fromInt(value), new Err.General("Validation failed for " + this)) },
+    { self => Attempt.successful(toInt(self)) }
+  )
 
   def fromInt(value: Int): Option[T]
   def toInt(self: T): Int
-
-  override def write(self: T, packetData: DataOutput): Unit = {
-    packetData.writeInt(toInt(self))
-  }
-
-  override def read(packetData: DataInputStream): DecoderError \/ T = {
-    val value = packetData.readInt()
-    fromInt(value) match {
-      case None       => -\/(DecoderError.InvalidFormat(s"Invalid value for $this: $value"))
-      case Some(self) => \/-(self)
-    }
-  }
 
 }

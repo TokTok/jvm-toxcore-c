@@ -1,9 +1,8 @@
 package im.tox.core
 
-import java.io._
-
-import im.tox.core.error.DecoderError
-import scodec.bits.ByteVector
+import im.tox.core.error.CoreError
+import scodec.Codec
+import scodec.bits.{BitVector, ByteVector}
 
 import scalaz.\/
 
@@ -14,7 +13,7 @@ object ModuleCompanion {
 
 abstract class ModuleCompanion[T] {
 
-  final def require(condition: Boolean): Option[Unit] = {
+  protected final def require(condition: Boolean): Option[Unit] = {
     if (!condition) {
       ModuleCompanion.noneValue
     } else {
@@ -22,17 +21,21 @@ abstract class ModuleCompanion[T] {
     }
   }
 
-  def write(self: T, packetData: DataOutput): Unit
-  def read(packetData: DataInputStream): DecoderError \/ T
+  def codec: Codec[T]
 
-  final def toBytes(self: T): ByteVector = {
-    val packetData = new ByteArrayOutputStream()
-    write(self, new DataOutputStream(packetData))
-    ByteVector(packetData.toByteArray)
+  final def toBytes(self: T): CoreError \/ ByteVector = {
+    CoreError(codec.encode(self).map { bits =>
+      assert(bits.size % java.lang.Byte.SIZE == 0)
+      bits.toByteVector
+    })
   }
 
-  final def fromBytes(bytes: ByteVector): DecoderError \/ T = {
-    read(new DataInputStream(new ByteArrayInputStream(bytes.toArray)))
+  final def fromBits(bits: BitVector): CoreError \/ T = {
+    CoreError(codec.decode(bits).map(_.value))
+  }
+
+  final def fromBytes(bytes: ByteVector): CoreError \/ T = {
+    fromBits(bytes.toBitVector)
   }
 
   final override def toString: String = {

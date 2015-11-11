@@ -4,7 +4,7 @@ import im.tox.core.network.Port
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.callbacks.ToxEventAdapter
-import im.tox.tox4j.core.{ToxPublicKey, ToxCore, ToxCoreConstants}
+import im.tox.tox4j.core.{ToxCore, ToxCoreConstants, ToxPublicKey}
 import org.scalameter.api._
 
 final class ToxCoreTimingBench extends TimingReport {
