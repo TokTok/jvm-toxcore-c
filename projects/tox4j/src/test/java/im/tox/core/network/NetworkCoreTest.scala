@@ -7,7 +7,7 @@ import scala.util.Try
 final class NetworkCoreTest extends FunSuite {
 
   test("bootstrapping and communicating with the DHT") {
-    println(Try(NetworkCore.start()))
+    System.out.println(Try(NetworkCore.start()))
   }
 
 }

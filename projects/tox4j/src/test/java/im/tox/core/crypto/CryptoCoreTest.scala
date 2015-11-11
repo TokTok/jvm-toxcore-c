@@ -72,9 +72,9 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     )
 
     implicit val arbEncryptedText: Arbitrary[EncryptedText] =
-      Arbitrary(Gen.zip(arbitrary[KeyPair], arbitrary[Nonce], arbitrary[PlainText]).map {
-        case (KeyPair(publicKey, secretKey), nonce, plainText) =>
-          val cipherText = CryptoCore.encrypt(PlainText)(publicKey, secretKey, nonce, plainText)
+      Arbitrary(Gen.zip(arbitrary[KeyPair], arbitrary[Nonce], arbitrary[PlainText], arbitrary[Boolean]).map {
+        case (KeyPair(publicKey, secretKey), nonce, plainText, useKeyCache) =>
+          val cipherText = CryptoCore.encrypt(PlainText)(publicKey, secretKey, nonce, plainText, useKeyCache)
           EncryptedText(
             publicKey,
             secretKey,
@@ -126,6 +126,14 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
       forAll { (plainText: PlainText, nonce: Nonce, keyPair: KeyPair) =>
         val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText)
         val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText)
+        assert(cipherText1 == cipherText2)
+      }
+    }
+
+    "produce the same output with and without key cache" in {
+      forAll { (plainText: PlainText, nonce: Nonce, keyPair: KeyPair) =>
+        val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText, useKeyCache = true)
+        val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText, useKeyCache = false)
         assert(cipherText1 == cipherText2)
       }
     }
