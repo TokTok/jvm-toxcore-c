@@ -3,6 +3,7 @@ package im.tox.core.dht.packets
 import im.tox.core.ModuleCompanion
 import im.tox.core.crypto.PublicKey
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
+import im.tox.core.typesafe.Security
 
 /**
  * DHT Request packets:
@@ -26,8 +27,8 @@ final case class DhtRequestPacket[Payload](
 
 object DhtRequestPacket {
 
-  final case class Make[Payload](module: ModuleCompanion[Payload])
-      extends PacketModuleCompanion[DhtRequestPacket[Payload], PacketKind.DhtRequest.type](PacketKind.DhtRequest) {
+  final case class Make[Payload, S <: Security](module: ModuleCompanion[Payload, S])
+      extends PacketModuleCompanion[DhtRequestPacket[Payload], PacketKind.DhtRequest.type, Security.NonSensitive](PacketKind.DhtRequest) {
 
     override val codec =
       (PublicKey.codec ~ DhtEncryptedPacket.Make(module).codec).xmap[DhtRequestPacket[Payload]](

@@ -2,6 +2,7 @@ package im.tox.core.dht.packets.dht
 
 import im.tox.core.dht.NodeInfo
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
+import im.tox.core.typesafe.Security
 import scodec.codecs._
 import scodec.{Attempt, Err}
 
@@ -31,7 +32,7 @@ final case class NodesResponsePacket(
 }
 
 object NodesResponsePacket
-    extends PacketModuleCompanion[NodesResponsePacket, PacketKind.NodesResponse.type](PacketKind.NodesResponse) {
+    extends PacketModuleCompanion[NodesResponsePacket, PacketKind.NodesResponse.type, Security.Sensitive](PacketKind.NodesResponse) {
 
   val MaxNodes = 4
 

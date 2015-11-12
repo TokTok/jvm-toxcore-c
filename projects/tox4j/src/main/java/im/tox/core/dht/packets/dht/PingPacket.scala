@@ -1,6 +1,7 @@
 package im.tox.core.dht.packets.dht
 
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
+import im.tox.core.typesafe.Security
 import scodec.bits.ByteVector
 import scodec.codecs._
 
@@ -41,7 +42,7 @@ final case class PingPacket(
 ) extends AnyVal
 
 abstract class PingPacketCompanion[Kind <: PacketKind](packetKind: Kind)
-    extends PacketModuleCompanion[PingPacket, Kind](packetKind) {
+    extends PacketModuleCompanion[PingPacket, Kind, Security.Sensitive](packetKind) {
 
   override val codec = {
     /**

@@ -2,8 +2,10 @@ package im.tox.core.crypto
 
 import im.tox.core.crypto.CryptoCoreTest._
 import im.tox.core.crypto.NonceTest._
+import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.crypto.PlainTextTest._
 import im.tox.core.random.RandomCore
+import im.tox.core.typesafe.Security
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.WordSpec
@@ -15,7 +17,7 @@ import scalaz.\/-
 object CryptoCoreTest {
 
   implicit val arbKeyPair: Arbitrary[KeyPair] =
-    Arbitrary(Gen.const(()).map(_ => CryptoCore.keyPair()))
+    Arbitrary(Gen.resultOf[Unit, KeyPair](_ => CryptoCore.keyPair()))
 
 }
 
@@ -23,7 +25,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
 
   "corruption" should {
     "be detectable" in {
-      forAll { (keyPair: KeyPair, nonce: Nonce, plainText: PlainText, extraData: Array[Byte], useKeyCache: Boolean) =>
+      forAll { (keyPair: KeyPair, nonce: Nonce, plainText: PlainText[Security.NonSensitive], extraData: Array[Byte], useKeyCache: Boolean) =>
         whenever(extraData.nonEmpty) {
           val cipherText =
             CryptoCore
@@ -72,12 +74,12 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
       publicKey: PublicKey,
       secretKey: SecretKey,
       nonce: Nonce,
-      plainText: PlainText,
-      cipherText: CipherText[PlainText]
+      plainText: PlainText[Security.NonSensitive],
+      cipherText: CipherText[PlainText[Security.NonSensitive]]
     )
 
     implicit val arbEncryptedText: Arbitrary[EncryptedText] =
-      Arbitrary(Gen.zip(arbitrary[KeyPair], arbitrary[Nonce], arbitrary[PlainText], arbitrary[Boolean]).map {
+      Arbitrary(Gen.zip(arbitrary[KeyPair], arbitrary[Nonce], arbitrary[PlainText[Security.NonSensitive]], arbitrary[Boolean]).map {
         case (KeyPair(publicKey, secretKey), nonce, plainText, useKeyCache) =>
           val cipherText = CryptoCore.encrypt(PlainText)(publicKey, secretKey, nonce, plainText, useKeyCache)
           EncryptedText(
@@ -103,21 +105,21 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
 
     "produce a different text than the input" in {
       forAll { (encryptedText: EncryptedText) =>
-        assert(encryptedText.cipherText.data != encryptedText.plainText.data)
+        assert(encryptedText.cipherText.data != encryptedText.plainText.toByteVector)
       }
     }
 
     "have a constant overhead" in {
       forAll { (encryptedText1: EncryptedText, encryptedText2: EncryptedText) =>
-        val overhead1 = encryptedText1.cipherText.data.length - encryptedText1.plainText.data.length
-        val overhead2 = encryptedText2.cipherText.data.length - encryptedText2.plainText.data.length
+        val overhead1 = encryptedText1.cipherText.data.length - encryptedText1.plainText.toByteVector.length
+        val overhead2 = encryptedText2.cipherText.data.length - encryptedText2.plainText.toByteVector.length
         assert(overhead1 == overhead2)
       }
     }
 
     "produce high entropy output" in {
       forAll { (encryptedText: EncryptedText) =>
-        val length = encryptedText.plainText.data.length
+        val length = encryptedText.plainText.toByteVector.length
         val entropy = RandomCore.entropy(encryptedText.cipherText.data.toSeq)
 
         if (length > 60) assert(entropy > 0.7)
@@ -128,7 +130,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     }
 
     "produce the same output for the same input" in {
-      forAll { (plainText: PlainText, nonce: Nonce, keyPair: KeyPair) =>
+      forAll { (plainText: PlainText[Security.NonSensitive], nonce: Nonce, keyPair: KeyPair) =>
         val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText)
         val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText)
         assert(cipherText1 == cipherText2)
@@ -136,7 +138,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     }
 
     "produce the same output with and without key cache" in {
-      forAll { (plainText: PlainText, nonce: Nonce, keyPair: KeyPair) =>
+      forAll { (plainText: PlainText[Security.NonSensitive], nonce: Nonce, keyPair: KeyPair) =>
         val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText, useKeyCache = true)
         val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText, useKeyCache = false)
         assert(cipherText1 == cipherText2)
@@ -144,7 +146,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     }
 
     "produce different output for different input" in {
-      forAll { (plainText1: PlainText, plainText2: PlainText, nonce: Nonce, keyPair: KeyPair) =>
+      forAll { (plainText1: PlainText[Security.NonSensitive], plainText2: PlainText[Security.NonSensitive], nonce: Nonce, keyPair: KeyPair) =>
         whenever(plainText1 != plainText2) {
           val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText1)
           val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce, plainText2)
@@ -156,7 +158,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     }
 
     "produce different output for the same input with different keys" in {
-      forAll { (plainText: PlainText, nonce: Nonce, keyPair1: KeyPair, keyPair2: KeyPair) =>
+      forAll { (plainText: PlainText[Security.NonSensitive], nonce: Nonce, keyPair1: KeyPair, keyPair2: KeyPair) =>
         val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair1.publicKey, keyPair1.secretKey, nonce, plainText)
         val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair2.publicKey, keyPair2.secretKey, nonce, plainText)
         // Arbitrary keys should always be different.
@@ -166,7 +168,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     }
 
     "produce different output for the same input with different nonces" in {
-      forAll { (plainText: PlainText, nonce1: Nonce, nonce2: Nonce, keyPair: KeyPair) =>
+      forAll { (plainText: PlainText[Security.NonSensitive], nonce1: Nonce, nonce2: Nonce, keyPair: KeyPair) =>
         val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce1, plainText)
         val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair.publicKey, keyPair.secretKey, nonce2, plainText)
         // Arbitrary nonces should always be different.
@@ -176,7 +178,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
     }
 
     "be symmetric" in {
-      forAll { (plainText: PlainText, nonce: Nonce, keyPair1: KeyPair, keyPair2: KeyPair) =>
+      forAll { (plainText: PlainText[Security.NonSensitive], nonce: Nonce, keyPair1: KeyPair, keyPair2: KeyPair) =>
         val cipherText1 = CryptoCore.encrypt(PlainText)(keyPair1.publicKey, keyPair2.secretKey, nonce, plainText)
         val cipherText2 = CryptoCore.encrypt(PlainText)(keyPair2.publicKey, keyPair1.secretKey, nonce, plainText)
         assert(cipherText1 == cipherText2)

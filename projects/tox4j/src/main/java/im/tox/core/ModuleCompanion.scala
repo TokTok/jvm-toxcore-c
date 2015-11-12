@@ -1,6 +1,8 @@
 package im.tox.core
 
+import im.tox.core.crypto.PlainText
 import im.tox.core.error.CoreError
+import im.tox.core.typesafe.Security
 import scodec.Codec
 import scodec.bits.{BitVector, ByteVector}
 
@@ -11,7 +13,7 @@ object ModuleCompanion {
   private val someValue = Some(())
 }
 
-abstract class ModuleCompanion[T] {
+abstract class ModuleCompanion[T, +S <: Security] extends Security.EvidenceCompanion[S] {
 
   protected final def require(condition: Boolean): Option[Unit] = {
     if (!condition) {
@@ -23,10 +25,10 @@ abstract class ModuleCompanion[T] {
 
   def codec: Codec[T]
 
-  final def toBytes(self: T): CoreError \/ ByteVector = {
+  final def toBytes(self: T): CoreError \/ PlainText[S] = {
     CoreError(codec.encode(self).map { bits =>
       assert(bits.size % java.lang.Byte.SIZE == 0)
-      bits.toByteVector
+      PlainText(bits.toByteVector)
     })
   }
 

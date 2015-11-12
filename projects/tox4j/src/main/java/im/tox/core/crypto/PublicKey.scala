@@ -1,7 +1,7 @@
 package im.tox.core.crypto
 
 import im.tox.core.error.CoreError
-import im.tox.core.typesafe.FixedSizeByteArrayCompanion
+import im.tox.core.typesafe.{Security, FixedSizeByteArrayCompanion}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 import scalaz.{-\/, \/, \/-}
@@ -12,7 +12,7 @@ final class PublicKey private[crypto] (val value: Seq[Byte]) extends AnyVal {
   }
 }
 
-object PublicKey extends FixedSizeByteArrayCompanion[PublicKey](ToxCryptoConstants.PublicKeyLength) {
+object PublicKey extends FixedSizeByteArrayCompanion[PublicKey, Security.NonSensitive](ToxCryptoConstants.PublicKeyLength) {
 
   protected def unsafeFromByteArray(value: Array[Byte]): PublicKey = new PublicKey(value)
 

@@ -3,6 +3,7 @@ package im.tox.core.network
 import java.net.InetSocketAddress
 
 import com.typesafe.scalalogging.Logger
+import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.crypto.{Nonce, PlainText, PublicKey}
 import im.tox.core.dht.Dht
 import im.tox.core.dht.packets.DhtEncryptedPacket
@@ -74,7 +75,7 @@ object NetworkCore {
           case -\/(error) =>
             Process.fail(error.exception)
           case \/-(packetData) =>
-            udp.send(to = node.address, packetData)
+            udp.send(to = node.address, packetData.toByteVector)
         }
     }
   }
@@ -144,7 +145,7 @@ object NetworkCore {
           request <- EncryptedNodesRequestPacket.toBytes(request)
           request <- ToxPacket.toBytes(ToxPacket(
             NodesRequestPacket.packetKind,
-            PlainText(request)
+            request
           ))
         } yield {
           val timer = udp.lift(time.awakeEvery(1 seconds).take(5).map(TimeEvent))
@@ -152,7 +153,7 @@ object NetworkCore {
 
           val client = udp.listen(ToxCoreConstants.DefaultStartPort) {
             for {
-              () <- udp.send(to = address, request)
+              () <- udp.send(to = address, request.toByteVector)
               event <- udp.merge(timer, receiver)
               dht <- processEvent(dht, event)
             } yield {

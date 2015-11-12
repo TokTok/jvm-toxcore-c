@@ -2,7 +2,6 @@ package im.tox.core.dht.handlers
 
 import java.net.InetSocketAddress
 
-import im.tox.core.crypto.PlainText
 import im.tox.core.dht.packets.DhtRequestPacket
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
@@ -10,10 +9,11 @@ import im.tox.core.io.IO
 import im.tox.core.network.PacketKind
 import im.tox.core.network.handlers.ToxPacketHandler
 import im.tox.core.network.packets.ToxPacket
+import im.tox.core.typesafe.Security
 
 import scalaz.{\/, \/-}
 
-final case class DhtRequestHandler[T](handler: ToxPacketHandler[T])
+final case class DhtRequestHandler[T, S <: Security](handler: ToxPacketHandler[T, S])
     extends ToxPacketHandler(DhtRequestPacket.Make(handler.module)) {
 
   private val adapter = DhtEncryptedHandler(new DhtPayloadHandler(handler.module) {
@@ -56,7 +56,7 @@ final case class DhtRequestHandler[T](handler: ToxPacketHandler[T])
                 receiver,
                 ToxPacket(
                   PacketKind.DhtRequest,
-                  PlainText(forwardedData)
+                  forwardedData
                 )
               )
             } yield {

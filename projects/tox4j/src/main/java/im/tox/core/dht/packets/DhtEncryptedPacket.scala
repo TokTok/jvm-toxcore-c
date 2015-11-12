@@ -3,6 +3,7 @@ package im.tox.core.dht.packets
 import im.tox.core.ModuleCompanion
 import im.tox.core.crypto._
 import im.tox.core.error.CoreError
+import im.tox.core.typesafe.Security
 
 import scalaz.\/
 
@@ -20,8 +21,8 @@ final case class DhtEncryptedPacket[Payload] private (
 
 object DhtEncryptedPacket {
 
-  final case class Make[Payload](module: ModuleCompanion[Payload])
-      extends ModuleCompanion[DhtEncryptedPacket[Payload]] {
+  final case class Make[Payload, S <: Security](module: ModuleCompanion[Payload, S])
+      extends ModuleCompanion[DhtEncryptedPacket[Payload], Security.NonSensitive] {
 
     private val CipherTextModule = CipherText.Make(module)
 

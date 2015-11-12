@@ -3,6 +3,7 @@ package im.tox.core.dht
 import java.net.InetSocketAddress
 
 import im.tox.core.ModuleCompanionTest
+import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.crypto.PublicKey
 import im.tox.core.crypto.PublicKeyTest._
 import im.tox.core.dht.ProtocolTest._
@@ -46,14 +47,22 @@ final class NodeInfoTest extends ModuleCompanionTest(NodeInfo) {
   test("a serialised ipv4 node info is 39 bytes") {
     forAll { (protocol: Protocol, port: Port, publicKey: PublicKey) =>
       val nodeInfo = NodeInfo(protocol, new InetSocketAddress("127.0.0.1", port.value), publicKey)
-      assert(NodeInfo.toBytes(nodeInfo).getOrElse(fail("Encoding failed")).size == 39)
+      val byteCount =
+        NodeInfo.toBytes(nodeInfo)
+          .getOrElse(fail("Encoding failed"))
+          .size
+      assert(byteCount == 39)
     }
   }
 
   test("a serialised ipv6 node info is 51 bytes") {
     forAll { (protocol: Protocol, port: Port, publicKey: PublicKey) =>
       val nodeInfo = NodeInfo(protocol, new InetSocketAddress("::1", port.value), publicKey)
-      assert(NodeInfo.toBytes(nodeInfo).getOrElse(fail("Encoding failed")).size == 51)
+      val byteCount =
+        NodeInfo.toBytes(nodeInfo)
+          .getOrElse(fail("Encoding failed"))
+          .size
+      assert(byteCount == 51)
     }
   }
 

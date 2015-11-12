@@ -5,6 +5,7 @@ import im.tox.core.crypto.PlainText
 import im.tox.core.crypto.PlainTextTest._
 import im.tox.core.network.PacketKind
 import im.tox.core.network.PacketKindTest._
+import im.tox.core.typesafe.Security
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 
@@ -14,7 +15,7 @@ object ToxPacketTest {
     Arbitrary(
       Gen.zip(
         arbitrary[PacketKind],
-        arbitrary[PlainText]
+        arbitrary[PlainText[Security.NonSensitive]]
       ).map {
         case (kind, payload) =>
           ToxPacket(kind, payload)

@@ -2,6 +2,7 @@ package im.tox.core.dht.packets.dht
 
 import im.tox.core.crypto.PublicKey
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
+import im.tox.core.typesafe.Security
 import scodec.codecs.int64
 
 /**
@@ -30,7 +31,7 @@ final case class NodesRequestPacket(
 )
 
 object NodesRequestPacket
-    extends PacketModuleCompanion[NodesRequestPacket, PacketKind.NodesRequest.type](PacketKind.NodesRequest) {
+    extends PacketModuleCompanion[NodesRequestPacket, PacketKind.NodesRequest.type, Security.Sensitive](PacketKind.NodesRequest) {
 
   override val codec =
     (PublicKey.codec ~ int64).xmap[NodesRequestPacket](

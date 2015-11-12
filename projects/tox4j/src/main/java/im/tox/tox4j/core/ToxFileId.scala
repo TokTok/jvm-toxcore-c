@@ -1,6 +1,6 @@
 package im.tox.tox4j.core
 
-import im.tox.core.typesafe.FixedSizeByteArrayCompanion
+import im.tox.core.typesafe.{Security, FixedSizeByteArrayCompanion}
 
 final class ToxFileId private (val value: Array[Byte]) extends AnyVal {
   override def toString: String = {
@@ -8,7 +8,7 @@ final class ToxFileId private (val value: Array[Byte]) extends AnyVal {
   }
 }
 
-object ToxFileId extends FixedSizeByteArrayCompanion[ToxFileId](ToxCoreConstants.FileIdLength) {
+object ToxFileId extends FixedSizeByteArrayCompanion[ToxFileId, Security.Sensitive](ToxCoreConstants.FileIdLength) {
 
   val empty = new ToxFileId(Array.empty)
 

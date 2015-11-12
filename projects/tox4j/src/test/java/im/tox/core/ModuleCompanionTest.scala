@@ -1,10 +1,13 @@
 package im.tox.core
 
+import im.tox.core.crypto.PlainText.Conversions._
+import im.tox.core.typesafe.Security
+import im.tox.core.typesafe.Security.EvidenceCompanion
 import org.scalacheck.Arbitrary
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
 
-abstract class ModuleCompanionTest[T](module: ModuleCompanion[T]) extends FunSuite with PropertyChecks {
+abstract class ModuleCompanionTest[T, S <: Security](module: ModuleCompanion[T, S]) extends FunSuite with PropertyChecks {
 
   implicit def arbT: Arbitrary[T]
 
@@ -12,7 +15,7 @@ abstract class ModuleCompanionTest[T](module: ModuleCompanion[T]) extends FunSui
     forAll { (value: T) =>
       val decoded = module
         .fromBits(
-          module.toBytes(value).map(_.toBitVector)
+          module.toBytes(value).map(_.unsafeIgnoreSecurity.toBitVector)
             .getOrElse(fail("Encoding failed"))
         ).getOrElse(fail("Decoding failed"))
       assert(decoded == value)

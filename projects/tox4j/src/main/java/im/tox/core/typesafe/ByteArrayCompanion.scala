@@ -2,7 +2,7 @@ package im.tox.core.typesafe
 
 import im.tox.core.ModuleCompanion
 
-abstract class ByteArrayCompanion[T <: AnyVal] extends ModuleCompanion[T] {
+abstract class ByteArrayCompanion[T <: AnyVal, S <: Security] extends ModuleCompanion[T, S] {
 
   protected def unsafeFromByteArray(value: Array[Byte]): T
 

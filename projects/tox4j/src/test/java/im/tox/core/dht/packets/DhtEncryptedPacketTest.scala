@@ -3,8 +3,10 @@ package im.tox.core.dht.packets
 import im.tox.core.ModuleCompanionTest
 import im.tox.core.crypto.CryptoCoreTest._
 import im.tox.core.crypto.NonceTest._
+import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.crypto.PlainTextTest._
 import im.tox.core.crypto._
+import im.tox.core.typesafe.Security
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
@@ -12,12 +14,12 @@ import scalaz.\/-
 
 object DhtEncryptedPacketTest {
 
-  implicit val arbDhtEncryptedPacketWithSecretKey: Arbitrary[(DhtEncryptedPacket[PlainText], SecretKey)] =
+  implicit val arbDhtEncryptedPacketWithSecretKey: Arbitrary[(DhtEncryptedPacket[PlainText[Security.NonSensitive]], SecretKey)] =
     Arbitrary(
       Gen.zip(
         arbitrary[KeyPair],
         arbitrary[Nonce],
-        arbitrary[PlainText]
+        arbitrary[PlainText[Security.NonSensitive]]
       ).map {
         case (keyPair, nonce, payload) =>
           val encryptedPacket = DhtEncryptedPacket.Make(PlainText).encrypt(
@@ -42,7 +44,7 @@ final class DhtEncryptedPacketTest extends ModuleCompanionTest(DhtEncryptedPacke
       senderKeyPair: KeyPair,
       receiverKeyPair: KeyPair,
       nonce: Nonce,
-      payload: PlainText
+      payload: PlainText[Security.NonSensitive]
     ) =>
       val encrypted = DhtEncryptedPacket.Make(PlainText).encrypt(
         receiverKeyPair.publicKey,
@@ -60,7 +62,7 @@ final class DhtEncryptedPacketTest extends ModuleCompanionTest(DhtEncryptedPacke
     forAll { (
       senderKeyPair: KeyPair,
       nonce: Nonce,
-      payload: PlainText
+      payload: PlainText[Security.NonSensitive]
     ) =>
       val encrypted = DhtEncryptedPacket.Make(PlainText).encrypt(
         senderKeyPair.publicKey,
@@ -69,8 +71,12 @@ final class DhtEncryptedPacketTest extends ModuleCompanionTest(DhtEncryptedPacke
         payload
       ).getOrElse(fail("Encryption failed"))
 
-      val packet = DhtEncryptedPacket.Make(PlainText).toBytes(encrypted).getOrElse(fail("Encoding failed"))
-      assert(packet.length - payload.data.length == 72)
+      val packet =
+        DhtEncryptedPacket.Make(PlainText)
+          .toBytes(encrypted)
+          .getOrElse(fail("Encoding failed"))
+          .toByteVector
+      assert(packet.length - payload.toByteVector.length == 72)
     }
   }
 

@@ -1,6 +1,7 @@
 package im.tox.core.network
 
 import im.tox.core.ModuleCompanion
+import im.tox.core.typesafe.Security
 import scodec.codecs._
 import scodec.{Attempt, Err}
 
@@ -12,7 +13,7 @@ sealed abstract class PacketKind(val id: Int)
  * sorted to the right module that can handle it.
  */
 // scalastyle:off magic.number
-object PacketKind extends ModuleCompanion[PacketKind] {
+object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive] {
   /**
    * Ping(Request and response):
    *

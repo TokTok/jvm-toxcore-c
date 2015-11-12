@@ -5,6 +5,7 @@ import java.net.{Inet4Address, Inet6Address, InetSocketAddress}
 import im.tox.core.ModuleCompanion
 import im.tox.core.crypto.PublicKey
 import im.tox.core.network.Port
+import im.tox.core.typesafe.Security
 
 /**
  * Packed node format:
@@ -30,7 +31,7 @@ final case class NodeInfo(
   publicKey: PublicKey
 )
 
-object NodeInfo extends ModuleCompanion[NodeInfo] {
+object NodeInfo extends ModuleCompanion[NodeInfo, Security.Sensitive] {
 
   override val codec = {
     /**

@@ -1,6 +1,6 @@
 package im.tox.tox4j.av
 
-import im.tox.core.typesafe.DiscreteValueCompanion
+import im.tox.core.typesafe.{Security, DiscreteValueCompanion}
 import scodec.codecs._
 import scodec.{Attempt, Err}
 

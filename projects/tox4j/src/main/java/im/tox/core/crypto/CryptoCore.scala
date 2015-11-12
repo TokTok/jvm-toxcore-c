@@ -1,7 +1,9 @@
 package im.tox.core.crypto
 
 import im.tox.core.ModuleCompanion
+import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.error.CoreError
+import im.tox.core.typesafe.Security
 import im.tox.tox4j.crypto.ToxCryptoConstants
 import im.tox.tox4j.impl.jni.ToxCryptoJni
 import scodec.bits.{BitVector, ByteVector}
@@ -54,6 +56,72 @@ object CryptoCore {
     }
   }
 
+  private def encrypt(
+    publicKey: PublicKey,
+    secretKey: SecretKey,
+    nonce: Nonce,
+    plainText: Seq[Byte],
+    useKeyCache: Boolean
+  ): Array[Byte] = {
+    val plainTextData = Array.ofDim[Byte](ToxCryptoConstants.ZeroBytes) ++ plainText
+    val cipherTextData = Array.ofDim[Byte](plainTextData.length)
+    if (useKeyCache) {
+      val sharedKey = getSharedKey(publicKey, secretKey)
+      ToxCryptoJni.cryptoBoxAfternm(
+        cipherTextData,
+        plainTextData,
+        nonce.data.toArray,
+        sharedKey.data
+      )
+    } else {
+      ToxCryptoJni.cryptoBox(
+        cipherTextData,
+        plainTextData,
+        nonce.data.toArray,
+        publicKey.value.toArray,
+        secretKey.value.toArray
+      )
+    }
+    cipherTextData.drop(ToxCryptoConstants.BoxZeroBytes)
+  }
+
+  private def decrypt(
+    publicKey: PublicKey,
+    secretKey: SecretKey,
+    nonce: Nonce,
+    cipherText: Seq[Byte],
+    useKeyCache: Boolean
+  ): Option[Array[Byte]] = {
+    val cipherTextData = Array.ofDim[Byte](ToxCryptoConstants.BoxZeroBytes) ++ cipherText
+    val plainTextData = Array.ofDim[Byte](cipherTextData.length)
+
+    val result = {
+      if (useKeyCache) {
+        val sharedKey = getSharedKey(publicKey, secretKey)
+        ToxCryptoJni.cryptoBoxOpenAfternm(
+          plainTextData,
+          cipherTextData,
+          nonce.data.toArray,
+          sharedKey.data
+        )
+      } else {
+        ToxCryptoJni.cryptoBoxOpen(
+          plainTextData,
+          cipherTextData,
+          nonce.data.toArray,
+          publicKey.value.toArray,
+          secretKey.value.toArray
+        )
+      }
+    }
+
+    if (result != 0) {
+      None
+    } else {
+      Some(plainTextData.drop(ToxCryptoConstants.ZeroBytes))
+    }
+  }
+
   /**
    * All public keys in toxcore are 32 bytes and are generated with the
    * crypto_box_keypair() function of the NaCl crypto library.
@@ -85,8 +153,8 @@ object CryptoCore {
    * and decrypt valid packets. It also means that packets being sent could be
    * replayed back to the sender if there is nothing to prevent it.
    */
-  def encrypt[Payload](
-    module: ModuleCompanion[Payload]
+  def encrypt[Payload, S <: Security](
+    module: ModuleCompanion[Payload, S]
   )(
     publicKey: PublicKey,
     secretKey: SecretKey,
@@ -97,31 +165,18 @@ object CryptoCore {
     for {
       payload <- module.toBytes(payload)
     } yield {
-      val plainTextData = Array.ofDim[Byte](ToxCryptoConstants.ZeroBytes) ++ payload.toSeq
-      val cipherTextData = Array.ofDim[Byte](plainTextData.length)
-      if (useKeyCache) {
-        val sharedKey = getSharedKey(publicKey, secretKey)
-        ToxCryptoJni.cryptoBoxAfternm(
-          cipherTextData,
-          plainTextData,
-          nonce.data.toArray,
-          sharedKey.data
-        )
-      } else {
-        ToxCryptoJni.cryptoBox(
-          cipherTextData,
-          plainTextData,
-          nonce.data.toArray,
-          publicKey.value.toArray,
-          secretKey.value.toArray
-        )
-      }
-      CipherText(ByteVector.view(cipherTextData.drop(ToxCryptoConstants.BoxZeroBytes)))
+      /**
+       * The [[Security]] attribute is ignored here because we're immediately
+       * encrypting the data, making it viable for [[Security.NonSensitive]]
+       * regardless of what it was before.
+       */
+      val plainText = payload.unsafeIgnoreSecurity.toSeq
+      CipherText(ByteVector.view(encrypt(publicKey, secretKey, nonce, plainText, useKeyCache)))
     }
   }
 
-  def decrypt[Payload](
-    module: ModuleCompanion[Payload]
+  def decrypt[Payload, S <: Security](
+    module: ModuleCompanion[Payload, S]
   )(
     publicKey: PublicKey,
     secretKey: SecretKey,
@@ -129,33 +184,15 @@ object CryptoCore {
     cipherText: CipherText[Payload],
     useKeyCache: Boolean = true
   ): CoreError \/ Payload = {
-    val cipherTextData = Array.ofDim[Byte](ToxCryptoConstants.BoxZeroBytes) ++ cipherText.data.toSeq
-    val plainTextData = Array.ofDim[Byte](cipherTextData.length)
-
-    val result = {
-      if (useKeyCache) {
-        val sharedKey = getSharedKey(publicKey, secretKey)
-        ToxCryptoJni.cryptoBoxOpenAfternm(
-          plainTextData,
-          cipherTextData,
-          nonce.data.toArray,
-          sharedKey.data
-        )
-      } else {
-        ToxCryptoJni.cryptoBoxOpen(
-          plainTextData,
-          cipherTextData,
-          nonce.data.toArray,
-          publicKey.value.toArray,
-          secretKey.value.toArray
-        )
-      }
-    }
-
-    if (result != 0) {
-      -\/(CoreError.DecryptionError())
-    } else {
-      module.fromBits(BitVector.view(plainTextData.drop(ToxCryptoConstants.ZeroBytes)))
+    decrypt(
+      publicKey,
+      secretKey,
+      nonce,
+      cipherText.data.toSeq,
+      useKeyCache
+    ) match {
+      case None            => -\/(CoreError.DecryptionError())
+      case Some(plainText) => module.fromBits(BitVector.view(plainText))
     }
   }
 

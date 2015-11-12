@@ -3,7 +3,7 @@ package im.tox.core.typesafe
 import scodec.bits.ByteVector
 import scodec.codecs._
 
-abstract class FixedSizeByteArrayCompanion[T <: AnyVal](val Size: Int) extends ByteArrayCompanion[T] {
+abstract class FixedSizeByteArrayCompanion[T <: AnyVal, S <: Security](val Size: Int) extends ByteArrayCompanion[T, S] {
 
   /**
    * [char array (node_id), length=32 bytes]

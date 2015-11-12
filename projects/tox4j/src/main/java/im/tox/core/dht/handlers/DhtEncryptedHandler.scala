@@ -7,10 +7,11 @@ import im.tox.core.dht.{Dht, NodeInfo, Protocol}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.handlers.ToxPacketHandler
+import im.tox.core.typesafe.Security
 
 import scalaz.\/
 
-final case class DhtEncryptedHandler[T](handler: DhtPayloadHandler[T])
+final case class DhtEncryptedHandler[T, S <: Security](handler: DhtPayloadHandler[T, S])
     extends ToxPacketHandler(DhtEncryptedPacket.Make(handler.module)) {
 
   override val module = DhtEncryptedPacket.Make(handler.module)
