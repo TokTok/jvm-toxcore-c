@@ -30,7 +30,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
     withTox(fatalErrors = false) { tox =>
       tox.callback(new ToxEventListener[Unit] {
         override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
-          throw new RuntimeException("oi")
+          throw new RuntimeException("This exception is expected; ignore it")
         }
       })
       tox.asInstanceOf[ToxCoreImpl[Unit]].invokeSelfConnectionStatus(ToxConnection.NONE)
