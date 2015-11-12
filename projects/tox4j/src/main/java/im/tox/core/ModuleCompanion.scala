@@ -13,7 +13,7 @@ object ModuleCompanion {
   private val someValue = Some(())
 }
 
-abstract class ModuleCompanion[T, +S <: Security] extends Security.EvidenceCompanion[S] {
+abstract class ModuleCompanion[T, +S <: Security] {
 
   protected final def require(condition: Boolean): Option[Unit] = {
     if (!condition) {

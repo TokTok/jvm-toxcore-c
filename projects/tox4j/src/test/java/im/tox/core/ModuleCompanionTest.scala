@@ -2,7 +2,6 @@ package im.tox.core
 
 import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.typesafe.Security
-import im.tox.core.typesafe.Security.EvidenceCompanion
 import org.scalacheck.Arbitrary
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks

@@ -9,20 +9,6 @@ import scala.language.implicitConversions
 
 final case class PlainText[+S <: Security](private val value: ByteVector) extends AnyVal {
 
-  /**
-   * Convert a [[Security.Sensitive]] [[PlainText]] to a [[Security.NonSensitive]]
-   * one. This method can only be called from within a class derived from a
-   * [[Security.EvidenceCompanion]] with security type argument [[Security.Sensitive]].
-   * In other words, it is safe to convert a sensitive [[PlainText]] to non-sensitive
-   * if and only if the containing class is itself security sensitive. As always, it is
-   * still up to that class not to leak its information.
-   *
-   * @param evidence Implicit evidence parameter to prove that the caller is security-sensitive.
-   */
-  def toNonSensitive(implicit evidence: Security.Evidence[Security.Sensitive]): PlainText[Security.NonSensitive] = {
-    PlainText(value)
-  }
-
   private[core] def unsafeIgnoreSecurity: PlainText[Security.NonSensitive] = PlainText(value)
 
 }
