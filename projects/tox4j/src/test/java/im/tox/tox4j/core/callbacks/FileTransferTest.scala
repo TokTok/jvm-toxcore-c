@@ -40,7 +40,7 @@ final class FileTransferTest extends AliceBobTest {
             ToxFileKind.DATA,
             fileData.length,
             ToxFileId.empty,
-            ToxFilename.unsafeFromByteArray(s"file for $expectedFriendName.png".getBytes)
+            ToxFilename.fromByteArray(s"file for $expectedFriendName.png".getBytes).get
           )
           state.map(_.copy(sentFileNumber = sentFileNumber))
         }

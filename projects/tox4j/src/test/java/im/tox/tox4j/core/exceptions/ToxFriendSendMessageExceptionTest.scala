@@ -9,13 +9,13 @@ final class ToxFriendSendMessageExceptionTest extends FunSuite with ToxTestMixin
 
   test("SendMessageNotFound") {
     interceptWithTox(ToxFriendSendMessageException.Code.FRIEND_NOT_FOUND)(
-      _.friendSendMessage(1, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromByteArray("hello".getBytes))
+      _.friendSendMessage(1, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").get)
     )
   }
 
   test("SendMessageNotConnected") {
     interceptWithTox(ToxFriendSendMessageException.Code.FRIEND_NOT_CONNECTED)(
-      _.friendSendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromByteArray("hello".getBytes))
+      _.friendSendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").get)
     )
   }
 

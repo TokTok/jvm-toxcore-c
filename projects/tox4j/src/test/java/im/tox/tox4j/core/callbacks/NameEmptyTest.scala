@@ -20,7 +20,7 @@ final class NameEmptyTest extends AliceBobTest {
           assert(name.value.isEmpty)
 
           state.addTask { (tox, state) =>
-            tox.setName(ToxNickname.unsafeFromByteArray("One".getBytes))
+            tox.setName(ToxNickname.fromString("One").get)
             state
           }.set(1)
 
@@ -28,7 +28,7 @@ final class NameEmptyTest extends AliceBobTest {
           assert(new String(name.value) == "One")
 
           state.addTask { (tox, state) =>
-            tox.setName(ToxNickname.unsafeFromByteArray("".getBytes))
+            tox.setName(ToxNickname.fromString("").get)
             state
           }.set(2)
 

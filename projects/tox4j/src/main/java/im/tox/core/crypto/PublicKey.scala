@@ -1,10 +1,7 @@
 package im.tox.core.crypto
 
-import im.tox.core.error.CoreError
-import im.tox.core.typesafe.{Security, FixedSizeByteArrayCompanion}
+import im.tox.core.typesafe.{FixedSizeByteArrayCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
-
-import scalaz.{-\/, \/, \/-}
 
 final class PublicKey private[crypto] (val value: Seq[Byte]) extends AnyVal {
   override def toString: String = {
@@ -18,13 +15,8 @@ object PublicKey extends FixedSizeByteArrayCompanion[PublicKey, Security.NonSens
 
   def toByteArray(self: PublicKey): Array[Byte] = self.value.toArray
 
-  def fromString(string: String): CoreError \/ PublicKey = {
-    val bytes = parsePublicKey(string)
-    if (bytes.length != Size) {
-      -\/(CoreError.InvalidFormat(s"Invalid size of public key (${bytes.length} != $Size)"))
-    } else {
-      \/-(new PublicKey(bytes))
-    }
+  override def fromString(string: String): Option[PublicKey] = {
+    fromByteArray(parsePublicKey(string))
   }
 
   private def parsePublicKey(id: String): Array[Byte] = {

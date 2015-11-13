@@ -17,7 +17,7 @@ final class FriendLosslessPacketCallbackTest extends AliceBobTest {
         state.addTask { (tox, state) =>
           val packet = s"_My name is $selfName".getBytes
           packet(0) = 160.toByte
-          tox.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.unsafeFromByteArray(packet))
+          tox.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.fromByteArray(packet).get)
           state
         }
       } else {

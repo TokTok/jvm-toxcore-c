@@ -23,7 +23,7 @@ final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
             ToxFileKind.DATA,
             fileData.length,
             fileId,
-            ToxFilename.unsafeFromByteArray(("file for " + expectedFriendName + ".png").getBytes)
+            ToxFilename.fromByteArray(("file for " + expectedFriendName + ".png").getBytes).get
           )
         )
       } else {

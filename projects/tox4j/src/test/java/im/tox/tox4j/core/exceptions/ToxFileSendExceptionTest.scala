@@ -10,21 +10,21 @@ final class ToxFileSendExceptionTest extends FunSuite with ToxTestMixin {
   test("FileSendNotConnected") {
     interceptWithTox(ToxFileSendException.Code.FRIEND_NOT_CONNECTED)(
       _.fileSend(0, ToxFileKind.DATA, 123, ToxFileId.empty,
-        ToxFilename.unsafeFromByteArray("filename".getBytes))
+        ToxFilename.fromString("filename").get)
     )
   }
 
   test("FileSendNotFound") {
     interceptWithTox(ToxFileSendException.Code.FRIEND_NOT_FOUND)(
       _.fileSend(1, ToxFileKind.DATA, 123, ToxFileId.empty,
-        ToxFilename.unsafeFromByteArray("filename".getBytes))
+        ToxFilename.fromString("filename").get)
     )
   }
 
   test("FileSendNameTooLong") {
     interceptWithTox(ToxFileSendException.Code.NAME_TOO_LONG)(
       _.fileSend(0, ToxFileKind.DATA, 123, ToxFileId.empty,
-        ToxFilename.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.MaxFilenameLength + 1)))
+        ToxFilename.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxFilenameLength + 1)))
     )
   }
 

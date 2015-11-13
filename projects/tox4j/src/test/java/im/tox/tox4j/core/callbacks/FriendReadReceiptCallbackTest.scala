@@ -24,7 +24,7 @@ final class FriendReadReceiptCallbackTest extends AliceBobTest {
             case (receipts, i) =>
               val receipt = tox.friendSendMessage(
                 friendNumber, ToxMessageType.NORMAL, 0,
-                ToxFriendMessage.unsafeFromByteArray(String.valueOf(i).getBytes)
+                ToxFriendMessage.fromString(String.valueOf(i)).get
               )
               assert(!receipts.contains(receipt))
               receipts + receipt

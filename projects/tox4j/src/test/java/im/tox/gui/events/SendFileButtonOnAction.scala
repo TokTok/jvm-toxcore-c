@@ -30,7 +30,7 @@ final class SendFileButtonOnAction(toxGui: MainView) extends ActionListener {
             ToxFileKind.DATA,
             file.length,
             ToxFileId.empty,
-            ToxFilename.unsafeFromByteArray(file.getName.getBytes)
+            ToxFilename.fromString(file.getName).get
           )
         )
       }

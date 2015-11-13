@@ -22,11 +22,11 @@ final class ToxEventAdapterTest extends FunSuite {
   }
 
   test[FileRecv] {
-    listener.fileRecv(0, 0, ToxFileKind.DATA, 0, ToxFilename.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
+    listener.fileRecv(0, 0, ToxFileKind.DATA, 0, ToxFilename.fromString("").get)(())
   }
 
   test[FileRecvChunk] {
-    listener.fileRecvChunk(0, 0, 0, Array.ofDim[Byte](0))(())
+    listener.fileRecvChunk(0, 0, 0, Array.empty)(())
   }
 
   test[FileChunkRequest] {
@@ -38,18 +38,18 @@ final class ToxEventAdapterTest extends FunSuite {
   }
 
   test[FriendMessage] {
-    listener.friendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
+    listener.friendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").get)(())
   }
 
   test[FriendName] {
-    listener.friendName(0, ToxNickname.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
+    listener.friendName(0, ToxNickname.fromString("").get)(())
   }
 
   test[FriendRequest] {
     listener.friendRequest(
       ToxPublicKey.unsafeFromByteArray(null),
       0,
-      ToxFriendRequestMessage.unsafeFromByteArray(Array.ofDim[Byte](0))
+      ToxFriendRequestMessage.fromString("").get
     )(())
   }
 
@@ -58,7 +58,7 @@ final class ToxEventAdapterTest extends FunSuite {
   }
 
   test[FriendStatusMessage] {
-    listener.friendStatusMessage(0, ToxStatusMessage.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
+    listener.friendStatusMessage(0, ToxStatusMessage.fromString("").get)(())
   }
 
   test[FriendTyping] {
@@ -66,11 +66,11 @@ final class ToxEventAdapterTest extends FunSuite {
   }
 
   test[FriendLosslessPacket] {
-    listener.friendLosslessPacket(0, ToxLosslessPacket.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
+    listener.friendLosslessPacket(0, ToxLosslessPacket.fromByteArray(160, Array.empty).get)(())
   }
 
   test[FriendLossyPacket] {
-    listener.friendLossyPacket(0, ToxLossyPacket.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
+    listener.friendLossyPacket(0, ToxLossyPacket.fromByteArray(200, Array.empty).get)(())
   }
 
   test[FriendReadReceipt] {

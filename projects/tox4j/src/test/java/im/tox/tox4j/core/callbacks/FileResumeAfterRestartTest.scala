@@ -22,7 +22,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
   override def initialState: State = ()
 
   private val fileData = new Array[Byte](13710)
-  private var aliceAddress = ToxFriendAddress.unsafeFromByteArray(Array.ofDim[Byte](0))
+  private var aliceAddress = ToxFriendAddress.unsafeFromByteArray(Array.empty)
   new Random().nextBytes(fileData)
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new Alice(name, expectedFriendName)
@@ -36,7 +36,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
     private val receivedData = new Array[Byte](fileData.length)
     private var bobSentFileNumber = -1
     private var bobOffset = 0L
-    private var selfPublicKey = ToxPublicKey.unsafeFromByteArray(Array.ofDim[Byte](0))
+    private var selfPublicKey = ToxPublicKey.unsafeFromByteArray(Array.empty)
 
     override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: ChatState): ChatState = {
       assert(isAlice)
@@ -60,7 +60,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
               ToxFileKind.DATA,
               fileData.length,
               ToxFileId.empty,
-              ToxFilename.unsafeFromByteArray(s"file for $expectedFriendName.png".getBytes)
+              ToxFilename.fromByteArray(s"file for $expectedFriendName.png".getBytes).get
             )
             fileId = tox.getFileFileId(friendNumber, aliceSentFileNumber)
             aliceAddress = tox.getAddress
@@ -78,7 +78,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           debug("See alice go off-line")
           state.addTask { (tox, state) =>
             tox.deleteFriend(friendNumber)
-            tox.addFriend(aliceAddress, ToxFriendRequestMessage.unsafeFromByteArray("Please add me back".getBytes))
+            tox.addFriend(aliceAddress, ToxFriendRequestMessage.fromByteArray("Please add me back".getBytes).get)
             state
           }
         }

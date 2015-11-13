@@ -9,8 +9,8 @@ import org.scalameter.api._
 
 final class ToxCoreTimingBench extends TimingReport {
 
-  val port = Port.unsafeFromInt(8080)
-  val publicKey = ToxPublicKey.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize))
+  val port = Port.fromInt(8080).get
+  val publicKey = ToxPublicKey.fromByteArray(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
 
   timing of classOf[ToxCore[Unit]] in {
 

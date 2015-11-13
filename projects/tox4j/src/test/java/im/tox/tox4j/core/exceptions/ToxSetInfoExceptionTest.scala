@@ -23,15 +23,15 @@ final class ToxSetInfoExceptionTest extends FunSuite with ToxTestMixin {
     )
   }
 
-  test("SetStatusMessageNull") {
-    interceptWithTox(ToxSetInfoException.Code.NULL)(
-      _.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(null))
-    )
-  }
-
   test("SetNameNull") {
     interceptWithTox(ToxSetInfoException.Code.NULL)(
       _.setName(ToxNickname.unsafeFromByteArray(null))
+    )
+  }
+
+  test("SetStatusMessageNull") {
+    interceptWithTox(ToxSetInfoException.Code.NULL)(
+      _.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(null))
     )
   }
 

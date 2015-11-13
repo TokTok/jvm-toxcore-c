@@ -122,8 +122,8 @@ object ToxBenchBase {
    */
   def makeToxWithFriends(friendCount: Int): ToxCore[Unit] = {
     val tox = ToxCoreFactory.make[Unit](toxOptions)
-    tox.setName(ToxNickname.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxNameLength)))
-    tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxStatusMessageLength)))
+    tox.setName(ToxNickname.fromByteArray(Array.ofDim(ToxCoreConstants.MaxNameLength)).get)
+    tox.setStatusMessage(ToxStatusMessage.fromByteArray(Array.ofDim(ToxCoreConstants.MaxStatusMessageLength)).get)
     friendKeys(friendCount) foreach tox.addFriendNorequest
     tox
   }
@@ -266,7 +266,7 @@ object ToxBenchBase {
     }
   }
 
-  val names = nameLengths.map(Array.ofDim[Byte]).map(ToxNickname.unsafeFromByteArray)
-  val statusMessages = statusMessageLengths.map(Array.ofDim[Byte]).map(ToxStatusMessage.unsafeFromByteArray)
+  val names = nameLengths.map(Array.ofDim[Byte]).map(ToxNickname.fromByteArray(_).get)
+  val statusMessages = statusMessageLengths.map(Array.ofDim[Byte]).map(ToxStatusMessage.fromByteArray(_).get)
 
 }

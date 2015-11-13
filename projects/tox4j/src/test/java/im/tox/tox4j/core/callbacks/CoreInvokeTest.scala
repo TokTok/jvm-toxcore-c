@@ -61,7 +61,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
     Arbitrary(Gen.const(ToxCoreConstants.PublicKeySize).map(Array.ofDim[Byte]).map { array =>
       random.nextBytes(array)
       array(array.length - 1) = 0
-      ToxPublicKey.unsafeFromByteArray(array)
+      ToxPublicKey.fromByteArray(array).get
     })
   }
 

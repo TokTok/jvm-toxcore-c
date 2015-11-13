@@ -129,7 +129,10 @@ object NetworkCore {
     val node = nodes(0)
     val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
     for {
-      receiverPublicKey <- PublicKey.fromString(node._2)
+      receiverPublicKey <- \/.fromEither(
+        PublicKey.fromString(node._2)
+          .toRight(CoreError.InvalidFormat("Public key: " + node._2))
+      )
       result <- {
         val dht = Dht()
 

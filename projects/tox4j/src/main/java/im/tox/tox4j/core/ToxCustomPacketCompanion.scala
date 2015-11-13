@@ -16,4 +16,8 @@ abstract class ToxCustomPacketCompanion[T <: AnyVal](
     }
   }
 
+  final def fromByteArray(packetId: Int, value: Array[Byte]): Option[T] = {
+    fromByteArray(packetId.toByte +: value)
+  }
+
 }

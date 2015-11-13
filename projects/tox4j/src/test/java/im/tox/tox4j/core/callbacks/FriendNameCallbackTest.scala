@@ -15,7 +15,7 @@ final class FriendNameCallbackTest extends AliceBobTest {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         state.addTask { (tox, state) =>
-          tox.setName(ToxNickname.unsafeFromByteArray(selfName.getBytes))
+          tox.setName(ToxNickname.fromByteArray(selfName.getBytes).get)
           state
         }
       } else {

@@ -19,7 +19,7 @@ final class StatusMessageEmptyTest extends AliceBobTest {
           assert(message.value.isEmpty)
           if (isAlice) {
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray("One".getBytes))
+              tox.setStatusMessage(ToxStatusMessage.fromString("One").get)
               state
             }
           } else {
@@ -31,13 +31,13 @@ final class StatusMessageEmptyTest extends AliceBobTest {
           if (isAlice) {
             assert(new String(message.value) == "Two")
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.ofDim[Byte](0)))
+              tox.setStatusMessage(ToxStatusMessage.fromString("").get)
               state
             }
           } else {
             assert(new String(message.value) == "One")
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray("Two".getBytes))
+              tox.setStatusMessage(ToxStatusMessage.fromString("Two").get)
               state
             }
           }
@@ -47,7 +47,7 @@ final class StatusMessageEmptyTest extends AliceBobTest {
           assert(message.value.isEmpty)
           if (isBob) {
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.ofDim[Byte](0)))
+              tox.setStatusMessage(ToxStatusMessage.fromString("").get)
               state
             }
           } else {

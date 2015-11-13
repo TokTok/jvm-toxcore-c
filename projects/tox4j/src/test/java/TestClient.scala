@@ -28,7 +28,7 @@ object TestClient extends App {
         fromHexDigit(id.charAt(i * 2 + 1))
       ).toByte
     }
-    ToxPublicKey.unsafeFromByteArray(publicKey)
+    ToxPublicKey.fromByteArray(publicKey).get
   }
 
   private def fromHexDigit(c: Char): Byte = {
