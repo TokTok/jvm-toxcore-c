@@ -33,7 +33,7 @@ object Confidence {
   )
 
   /**
-   * The usual configuration used in benchmarks based on [[PerformanceReportBase]]. Usually this is the right choice for
+   * The usual configuration used in benchmarks based on [[ToxBenchBase]]. Usually this is the right choice for
    * production benchmarks.
    *
    * VM invocation overhead: 4 seconds.
@@ -76,13 +76,13 @@ object Confidence {
    * If you find yourself using this mode, your test is most likely very poorly parametrised and you would benefit more
    * from making the snippet itself take more time by increasing the iteration count inside the snippet.
    *
-   * For comparison, the iterationInterval test with [[PerformanceReportBase.iterations10k]] takes 2 seconds on [[low]]
+   * For comparison, the iterationInterval test with [[ToxBenchBase.iterations10k]] takes 2 seconds on [[low]]
    * and 7 minutes and 15 seconds on [[insane]]. That is 216 times slower. On [[normal]], it takes 4 seconds (108 times
    * faster than [[insane]]). On [[high]], it takes 9 seconds (48 times faster), and on [[extreme]], it takes 57 seconds
    * (7 times faster). Only on [[insane]], this test actually has accurate results.
    *
-   * This shows that [[PerformanceReportBase.iterations10k]] is the wrong parameter set for the iterationInterval test.
-   * Running with [[PerformanceReportBase.iterations100k]] on [[normal]] takes 9 seconds and gives a linear graph with
+   * This shows that [[ToxBenchBase.iterations10k]] is the wrong parameter set for the iterationInterval test.
+   * Running with [[ToxBenchBase.iterations100k]] on [[normal]] takes 9 seconds and gives a linear graph with
    * reasonable confidence. Increasing the number of [[exec.benchRuns]] to 100 produces a completely accurate linear
    * graph with high confidence in 18 seconds.
    *

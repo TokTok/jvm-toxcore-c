@@ -1,7 +1,7 @@
 package im.tox.tox4j.bench
 
 import im.tox.tox4j.av.ToxAv
-import im.tox.tox4j.bench.PerformanceReportBase._
+import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.picklers.Implicits._
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.exceptions.ToxNewException
@@ -32,7 +32,7 @@ import scala.util.Random
  * confidence usually gives no better insight. Lower levels may turn out to be very flaky and hinder effective
  * regression testing.
  */
-abstract class PerformanceReportBase extends PerformanceTest.OfflineRegressionReport {
+abstract class ToxBenchBase extends Bench.OfflineRegressionReport {
 
   protected def confidence = Confidence.normal
 
@@ -68,7 +68,7 @@ abstract class PerformanceReportBase extends PerformanceTest.OfflineRegressionRe
 
 }
 
-object PerformanceReportBase {
+object ToxBenchBase {
 
   /**
    * We keep a private PRNG for various generators.

@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.bench
 
-import im.tox.tox4j.bench.PerformanceReportBase._
+import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.enums.ToxUserStatus
