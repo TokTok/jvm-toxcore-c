@@ -61,6 +61,14 @@ final case class ChatStateT[T](
     copy[T](state = value)
   }
 
+  def map(f: T => T): ChatStateT[T] = {
+    copy[T](state = f(state))
+  }
+
+  def flatMap(f: T => ChatStateT[T]): ChatStateT[T] = {
+    f(state)
+  }
+
 }
 
 class ChatClientT[T](val selfName: String, val expectedFriendName: String) extends ToxEventAdapter[ChatStateT[T]] {

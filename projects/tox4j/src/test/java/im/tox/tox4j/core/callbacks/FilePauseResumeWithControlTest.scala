@@ -14,26 +14,29 @@ final class FilePauseResumeWithControlTest extends FilePauseResumeTestBase {
       bobSentFileNumber: Int,
       fileId: ToxFileId,
       tox: ToxCore[ChatState]
-    ): Unit = {
+    )(state: State): State = {
       debug("send resume control")
       if (isBob) {
         tox.fileControl(friendNumber, bobSentFileNumber, ToxFileControl.RESUME)
-        bobShouldPause = 1
+        state.copy(bobShouldPause = 1)
       } else if (isAlice) {
-        tox.fileControl(friendNumber, aliceSentFileNumber, ToxFileControl.RESUME)
-        aliceShouldPause = 1
+        tox.fileControl(friendNumber, state.aliceSentFileNumber, ToxFileControl.RESUME)
+        state.copy(aliceShouldPause = 1)
+      } else {
+        fail("Unexpected client (not Alice or Bob)")
+        state
       }
     }
 
     protected override def addFileRecvTask(
       friendNumber: Int,
-      fileNumber: Int,
       bobSentFileNumber: Int,
       bobOffset: Long,
       tox: ToxCore[ChatState]
-    ): Unit = {
-      debug(s"sending control RESUME for $fileNumber")
-      tox.fileControl(friendNumber, fileNumber, ToxFileControl.RESUME)
+    )(state: State): State = {
+      debug(s"sending control RESUME for $bobSentFileNumber")
+      tox.fileControl(friendNumber, bobSentFileNumber, ToxFileControl.RESUME)
+      state
     }
 
   }

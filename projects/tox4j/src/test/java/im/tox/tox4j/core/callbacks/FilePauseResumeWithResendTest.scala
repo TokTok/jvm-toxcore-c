@@ -9,39 +9,41 @@ final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
 
   final class Alice(name: String, expectedFriendName: String) extends super.Alice(name, expectedFriendName) {
 
-    protected override def addFileRecvTask(
-      friendNumber: Int,
-      fileNumber: Int,
-      bobSentFileNumber: Int,
-      bobOffset: Long,
-      tox: ToxCore[ChatState]
-    ): Unit = {
-      debug(s"seek file to $bobOffset")
-      tox.fileSeek(friendNumber, bobSentFileNumber, bobOffset)
-      bobShouldPause = 1
-      debug(s"sending control RESUME for $fileNumber")
-      tox.fileControl(friendNumber, fileNumber, ToxFileControl.RESUME)
-    }
-
     protected override def addFriendMessageTask(
       friendNumber: Int,
       bobSentFileNumber: Int,
       fileId: ToxFileId,
       tox: ToxCore[ChatState]
-    ): Unit = {
+    )(state: State): State = {
       if (isAlice) {
-        aliceSentFileNumber = tox.fileSend(
-          friendNumber,
-          ToxFileKind.DATA,
-          fileData.length,
-          fileId,
-          ToxFilename.unsafeFromByteArray(("file for " + expectedFriendName + ".png").getBytes)
+        state.copy(
+          aliceShouldPause = 1,
+          aliceSentFileNumber = tox.fileSend(
+            friendNumber,
+            ToxFileKind.DATA,
+            fileData.length,
+            fileId,
+            ToxFilename.unsafeFromByteArray(("file for " + expectedFriendName + ".png").getBytes)
+          )
         )
-        aliceShouldPause = 1
       } else {
         debug("Send resume file transmission control")
         tox.fileControl(friendNumber, bobSentFileNumber, ToxFileControl.RESUME)
+        state
       }
+    }
+
+    protected override def addFileRecvTask(
+      friendNumber: Int,
+      bobSentFileNumber: Int,
+      bobOffset: Long,
+      tox: ToxCore[ChatState]
+    )(state: State): State = {
+      debug(s"seek file to $bobOffset")
+      tox.fileSeek(friendNumber, bobSentFileNumber, bobOffset)
+      debug(s"sending control RESUME for $bobSentFileNumber")
+      tox.fileControl(friendNumber, bobSentFileNumber, ToxFileControl.RESUME)
+      state.copy(bobShouldPause = 1)
     }
 
   }
