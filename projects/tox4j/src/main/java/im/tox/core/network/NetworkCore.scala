@@ -70,7 +70,7 @@ object NetworkCore {
   def performAction(action: IO.Action): Process[Connection, Unit] = {
     action match {
       case IO.Action.SendTo(node, outPacket) =>
-        logger.debug("Sending %s to %s".format(outPacket.kind, node.address))
+        logger.debug(s"Sending ${outPacket.kind} to ${node.address}")
         ToxPacket.toBytes(outPacket) match {
           case -\/(error) =>
             Process.fail(error.exception)
