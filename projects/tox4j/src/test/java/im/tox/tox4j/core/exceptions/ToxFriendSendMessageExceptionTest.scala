@@ -21,13 +21,13 @@ final class ToxFriendSendMessageExceptionTest extends FunSuite with ToxTestMixin
 
   test("SendMessageNull") {
     interceptWithTox(ToxFriendSendMessageException.Code.NULL)(
-      _.friendSendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromByteArray(null))
+      _.friendSendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromValue(null))
     )
   }
 
   test("SendMessageEmpty") {
     interceptWithTox(ToxFriendSendMessageException.Code.EMPTY)(
-      _.friendSendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromByteArray("".getBytes))
+      _.friendSendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.unsafeFromValue("".getBytes))
     )
   }
 

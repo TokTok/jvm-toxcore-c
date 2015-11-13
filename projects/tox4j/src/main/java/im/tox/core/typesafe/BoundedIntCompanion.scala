@@ -9,7 +9,7 @@ abstract class BoundedIntCompanion[T <: AnyVal](
     valueCodec: Codec[Int] = int32
 ) extends IntCompanion[T](valueCodec) {
 
-  def unsafeFromInt(value: Int): T
+  protected def unsafeFromInt(value: Int): T
 
   final override def fromInt(value: Int): Option[T] = {
     if (MinValue <= value && value <= MaxValue) {

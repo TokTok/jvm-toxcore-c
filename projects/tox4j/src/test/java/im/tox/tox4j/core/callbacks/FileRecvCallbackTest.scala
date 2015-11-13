@@ -29,7 +29,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
             ToxFileKind.DATA,
             state.get.length,
             ToxFileId.empty,
-            ToxFilename.fromByteArray(s"file for $expectedFriendName.png".getBytes).get
+            ToxFilename.fromValue(s"file for $expectedFriendName.png".getBytes).get
           )
           state
         }

@@ -11,7 +11,7 @@ final class ToxSetInfoExceptionTest extends FunSuite with ToxTestMixin {
     val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxNameLength + 1)
 
     interceptWithTox(ToxSetInfoException.Code.TOO_LONG)(
-      _.setName(ToxNickname.unsafeFromByteArray(array))
+      _.setName(ToxNickname.unsafeFromValue(array))
     )
   }
 
@@ -19,19 +19,19 @@ final class ToxSetInfoExceptionTest extends FunSuite with ToxTestMixin {
     val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxStatusMessageLength + 1)
 
     interceptWithTox(ToxSetInfoException.Code.TOO_LONG)(
-      _.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(array))
+      _.setStatusMessage(ToxStatusMessage.unsafeFromValue(array))
     )
   }
 
   test("SetNameNull") {
     interceptWithTox(ToxSetInfoException.Code.NULL)(
-      _.setName(ToxNickname.unsafeFromByteArray(null))
+      _.setName(ToxNickname.unsafeFromValue(null))
     )
   }
 
   test("SetStatusMessageNull") {
     interceptWithTox(ToxSetInfoException.Code.NULL)(
-      _.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(null))
+      _.setStatusMessage(ToxStatusMessage.unsafeFromValue(null))
     )
   }
 

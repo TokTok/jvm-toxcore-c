@@ -9,7 +9,7 @@ abstract class ToxCustomPacketCompanion[T <: AnyVal](
 
   require(MinPacketId <= MaxPacketId)
 
-  override def validate(value: Array[Byte]): Boolean = {
+  override def validate: Validator = super.validate { value =>
     value.nonEmpty && {
       val firstByte = value(0) & 0xff
       MinPacketId <= firstByte && firstByte <= MaxPacketId
@@ -17,7 +17,7 @@ abstract class ToxCustomPacketCompanion[T <: AnyVal](
   }
 
   final def fromByteArray(packetId: Int, value: Array[Byte]): Option[T] = {
-    fromByteArray(packetId.toByte +: value)
+    fromValue(packetId.toByte +: value)
   }
 
 }

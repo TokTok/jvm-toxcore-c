@@ -11,8 +11,8 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     intercept[IllegalArgumentException] {
       ToxCoreFactory.withTox(
         _.addFriend(
-          ToxFriendAddress.unsafeFromByteArray(Array.ofDim(1)),
-          ToxFriendRequestMessage.fromByteArray(Array.ofDim(1)).get
+          ToxFriendAddress.unsafeFromValue(Array.ofDim(1)),
+          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
         )
       )
     }
@@ -22,8 +22,8 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     intercept[IllegalArgumentException] {
       ToxCoreFactory.withTox(
         _.addFriend(
-          ToxFriendAddress.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.AddressSize - 1)),
-          ToxFriendRequestMessage.fromByteArray(Array.ofDim(1)).get
+          ToxFriendAddress.unsafeFromValue(Array.ofDim(ToxCoreConstants.AddressSize - 1)),
+          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
         )
       )
     }
@@ -33,8 +33,8 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     intercept[IllegalArgumentException] {
       ToxCoreFactory.withTox(
         _.addFriend(
-          ToxFriendAddress.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.AddressSize + 1)),
-          ToxFriendRequestMessage.fromByteArray(Array.ofDim(1)).get
+          ToxFriendAddress.unsafeFromValue(Array.ofDim(ToxCoreConstants.AddressSize + 1)),
+          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
         )
       )
     }
@@ -43,15 +43,15 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   test("Null1") {
     interceptWithTox(ToxFriendAddException.Code.NULL)(
       _.addFriend(
-        ToxFriendAddress.unsafeFromByteArray(null),
-        ToxFriendRequestMessage.fromByteArray(Array.ofDim(1)).get
+        ToxFriendAddress.unsafeFromValue(null),
+        ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
       )
     )
   }
 
   test("Null2") {
     interceptWithTox(ToxFriendAddException.Code.NULL)(
-      _.addFriend(validAddress, ToxFriendRequestMessage.unsafeFromByteArray(null))
+      _.addFriend(validAddress, ToxFriendRequestMessage.unsafeFromValue(null))
     )
   }
 
@@ -59,7 +59,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     ToxCoreFactory.withTox(
       _.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromByteArray(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength - 1)).get
+        ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength - 1)).get
       )
     )
   }
@@ -68,7 +68,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     ToxCoreFactory.withTox(
       _.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromByteArray(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength)).get
+        ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength)).get
       )
     )
   }
@@ -77,7 +77,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.TOO_LONG)(
       _.addFriend(
         validAddress,
-        ToxFriendRequestMessage.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength + 1))
+        ToxFriendRequestMessage.unsafeFromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength + 1))
       )
     )
   }
@@ -116,7 +116,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   test("BadChecksum") {
     interceptWithTox(ToxFriendAddException.Code.BAD_CHECKSUM)(
       _.addFriend(
-        ToxFriendAddress.unsafeFromByteArray(validAddress.value.updated(0, (validAddress.value(0) + 1).toByte)),
+        ToxFriendAddress.unsafeFromValue(validAddress.value.updated(0, (validAddress.value(0) + 1).toByte)),
         ToxFriendRequestMessage.fromString("hello").get
       )
     )

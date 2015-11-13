@@ -61,12 +61,12 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
     Arbitrary(Gen.const(ToxCoreConstants.PublicKeySize).map(Array.ofDim[Byte]).map { array =>
       random.nextBytes(array)
       array(array.length - 1) = 0
-      ToxPublicKey.fromByteArray(array).get
+      ToxPublicKey.fromValue(array).get
     })
   }
 
   private implicit val arbNickname: Arbitrary[ToxNickname] = {
-    Arbitrary(arbitrary[Array[Byte]].map(ToxNickname.unsafeFromByteArray))
+    Arbitrary(arbitrary[Array[Byte]].map(ToxNickname.unsafeFromValue))
   }
 
   private implicit val arbToxConnection: Arbitrary[ToxConnection] = {

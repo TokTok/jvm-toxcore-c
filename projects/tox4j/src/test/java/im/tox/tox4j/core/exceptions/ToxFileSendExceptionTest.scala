@@ -24,7 +24,7 @@ final class ToxFileSendExceptionTest extends FunSuite with ToxTestMixin {
   test("FileSendNameTooLong") {
     interceptWithTox(ToxFileSendException.Code.NAME_TOO_LONG)(
       _.fileSend(0, ToxFileKind.DATA, 123, ToxFileId.empty,
-        ToxFilename.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxFilenameLength + 1)))
+        ToxFilename.unsafeFromValue(Array.ofDim(ToxCoreConstants.MaxFilenameLength + 1)))
     )
   }
 

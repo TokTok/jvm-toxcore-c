@@ -51,7 +51,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
               ToxFileKind.DATA,
               fileData.length,
               ToxFileId.empty,
-              ToxFilename.fromByteArray(("file for " + expectedFriendName + ".png").getBytes).get
+              ToxFilename.fromValue(("file for " + expectedFriendName + ".png").getBytes).get
             )
             state.map(_.copy(
               fileId = tox.getFileFileId(friendNumber, aliceSentFileNumber),
@@ -125,7 +125,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
         } else if (control == ToxFileControl.PAUSE) {
           state.addTask { (tox, state) =>
             tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
-              ToxFriendMessage.fromByteArray("Please resume the file transfer".getBytes).get)
+              ToxFriendMessage.fromValue("Please resume the file transfer".getBytes).get)
             state.map(_.copy(aliceShouldPause = 0))
           }
         } else {
@@ -137,7 +137,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
           state.addTask { (tox, state) =>
             debug("request to resume file transmission")
             tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
-              ToxFriendMessage.fromByteArray("Please resume the file transfer".getBytes).get)
+              ToxFriendMessage.fromValue("Please resume the file transfer".getBytes).get)
             state
           }
         } else {

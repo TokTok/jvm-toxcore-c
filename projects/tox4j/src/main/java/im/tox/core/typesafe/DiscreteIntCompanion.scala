@@ -1,8 +1,10 @@
 package im.tox.core.typesafe
 
-abstract class DiscreteIntCompanion[T <: AnyVal](values: Int*) extends IntCompanion[T] {
+abstract class DiscreteIntCompanion[T <: AnyVal](
+    protected val values: Int*
+) extends IntCompanion[T] {
 
-  def unsafeFromInt(value: Int): T
+  protected def unsafeFromInt(value: Int): T
 
   final override def fromInt(value: Int): Option[T] = {
     if (values.contains(value)) {

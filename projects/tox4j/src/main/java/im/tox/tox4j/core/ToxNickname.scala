@@ -6,7 +6,7 @@ final class ToxNickname private (val value: Array[Byte]) extends AnyVal
 
 object ToxNickname extends VariableSizeByteArrayCompanion[ToxNickname](ToxCoreConstants.MaxNameLength) {
 
-  override def unsafeFromByteArray(value: Array[Byte]): ToxNickname = new ToxNickname(value)
-  override def toByteArray(self: ToxNickname): Array[Byte] = self.value
+  override def unsafeFromValue(value: Array[Byte]): ToxNickname = new ToxNickname(value)
+  override def toValue(self: ToxNickname): Array[Byte] = self.value
 
 }

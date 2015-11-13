@@ -8,7 +8,7 @@ import org.scalatest.FunSuite
 final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
 
   val host = "192.254.75.98"
-  val publicKey = ToxPublicKey.fromByteArray(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
+  val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
   val port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get
 
   test("BootstrapBadPort1") {
@@ -66,7 +66,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         host,
         port,
-        ToxPublicKey.unsafeFromByteArray(null)
+        ToxPublicKey.unsafeFromValue(null)
       )
     )
   }
@@ -76,7 +76,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         host,
         port,
-        ToxPublicKey.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.PublicKeySize - 1))
+        ToxPublicKey.unsafeFromValue(Array.ofDim(ToxCoreConstants.PublicKeySize - 1))
       )
     )
   }
@@ -86,7 +86,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         host,
         port,
-        ToxPublicKey.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.PublicKeySize + 1))
+        ToxPublicKey.unsafeFromValue(Array.ofDim(ToxCoreConstants.PublicKeySize + 1))
       )
     )
   }

@@ -6,7 +6,7 @@ final class ToxFriendRequestMessage private (val value: Array[Byte]) extends Any
 
 object ToxFriendRequestMessage extends VariableSizeByteArrayCompanion[ToxFriendRequestMessage](ToxCoreConstants.MaxFriendRequestLength) {
 
-  override def unsafeFromByteArray(value: Array[Byte]): ToxFriendRequestMessage = new ToxFriendRequestMessage(value)
-  override def toByteArray(self: ToxFriendRequestMessage): Array[Byte] = self.value
+  override def unsafeFromValue(value: Array[Byte]): ToxFriendRequestMessage = new ToxFriendRequestMessage(value)
+  override def toValue(self: ToxFriendRequestMessage): Array[Byte] = self.value
 
 }

@@ -87,9 +87,9 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
     logger.info(s"[${Thread.currentThread.getId}] $selfName: $message")
   }
 
-  var expectedFriendAddress = ToxFriendAddress.unsafeFromByteArray(null)
+  var expectedFriendAddress = ToxFriendAddress.unsafeFromValue(null)
   protected def expectedFriendPublicKey: ToxPublicKey = {
-    ToxPublicKey.fromByteArray(expectedFriendAddress.value.slice(0, ToxPublicKey.Size)).get
+    ToxPublicKey.fromValue(expectedFriendAddress.value.slice(0, ToxPublicKey.Size)).get
   }
 
   protected def isAlice = selfName == "Alice"

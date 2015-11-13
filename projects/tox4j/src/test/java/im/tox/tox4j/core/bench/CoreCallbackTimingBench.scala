@@ -8,8 +8,8 @@ import im.tox.tox4j.impl.jni.ToxCoreImpl
 
 final class CoreCallbackTimingBench extends TimingReport {
 
-  val publicKey = ToxPublicKey.fromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).get
-  val nickname = ToxNickname.fromByteArray(Array.ofDim[Byte](ToxNickname.MaxSize)).get
+  val publicKey = ToxPublicKey.fromValue(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).get
+  val nickname = ToxNickname.fromValue(Array.ofDim[Byte](ToxNickname.MaxSize)).get
   val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
 
   def invokePerformance(method: String, f: ToxCoreImpl[Unit] => Unit): Unit = {

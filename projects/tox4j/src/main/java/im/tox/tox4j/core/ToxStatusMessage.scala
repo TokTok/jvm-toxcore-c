@@ -6,7 +6,7 @@ final class ToxStatusMessage private (val value: Array[Byte]) extends AnyVal
 
 object ToxStatusMessage extends VariableSizeByteArrayCompanion[ToxStatusMessage](ToxCoreConstants.MaxStatusMessageLength) {
 
-  override def unsafeFromByteArray(value: Array[Byte]): ToxStatusMessage = new ToxStatusMessage(value)
-  override def toByteArray(self: ToxStatusMessage): Array[Byte] = self.value
+  override def unsafeFromValue(value: Array[Byte]): ToxStatusMessage = new ToxStatusMessage(value)
+  override def toValue(self: ToxStatusMessage): Array[Byte] = self.value
 
 }

@@ -11,7 +11,7 @@ final class ToxPublicKey private (val value: Array[Byte]) extends AnyVal {
 
 object ToxPublicKey extends FixedSizeByteArrayCompanion[ToxPublicKey, Security.NonSensitive](ToxCryptoConstants.PublicKeyLength) {
 
-  override def unsafeFromByteArray(value: Array[Byte]): ToxPublicKey = new ToxPublicKey(value)
-  override def toByteArray(self: ToxPublicKey): Array[Byte] = self.value.toArray
+  override def unsafeFromValue(value: Array[Byte]): ToxPublicKey = new ToxPublicKey(value)
+  override def toValue(self: ToxPublicKey): Array[Byte] = self.value.toArray
 
 }

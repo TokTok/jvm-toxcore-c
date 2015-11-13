@@ -32,14 +32,14 @@ final class LoadSaveTest extends FunSuite {
 
   test("Name") {
     testLoadSave(new Check() {
-      private var expected = ToxNickname.unsafeFromByteArray(null)
+      private var expected = ToxNickname.unsafeFromValue(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
         expected =
           if (expected.value == null) {
             ToxNickname.fromString("").get
           } else {
-            ToxNickname.fromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1)).get
+            ToxNickname.fromValue(ToxCoreTestBase.randomBytes(expected.value.length + 1)).get
           }
         tox.setName(expected)
         expected.value.length < ToxCoreConstants.MaxNameLength
@@ -53,13 +53,13 @@ final class LoadSaveTest extends FunSuite {
 
   test("StatusMessage") {
     testLoadSave(new Check() {
-      private var expected = ToxStatusMessage.unsafeFromByteArray(null)
+      private var expected = ToxStatusMessage.unsafeFromValue(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
         if (expected.value == null) {
           expected = ToxStatusMessage.fromString("").get
         } else {
-          expected = ToxStatusMessage.fromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1)).get
+          expected = ToxStatusMessage.fromValue(ToxCoreTestBase.randomBytes(expected.value.length + 1)).get
         }
         tox.setStatusMessage(expected)
         expected.value.length < ToxCoreConstants.MaxNameLength

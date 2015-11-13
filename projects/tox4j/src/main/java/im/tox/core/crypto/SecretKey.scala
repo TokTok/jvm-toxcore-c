@@ -11,7 +11,7 @@ final class SecretKey private[crypto] (val value: Seq[Byte]) extends AnyVal {
 
 object SecretKey extends FixedSizeByteArrayCompanion[SecretKey, Security.Sensitive](ToxCryptoConstants.SecretKeyLength) {
 
-  protected def unsafeFromByteArray(value: Array[Byte]): SecretKey = new SecretKey(value)
-  def toByteArray(self: SecretKey): Array[Byte] = self.value.toArray
+  protected def unsafeFromValue(value: Array[Byte]): SecretKey = new SecretKey(value)
+  def toValue(self: SecretKey): Array[Byte] = self.value.toArray
 
 }

@@ -11,7 +11,7 @@ abstract class IntCompanion[T <: AnyVal](valueCodec: Codec[Int] = int32) extends
     { self => Attempt.successful(toInt(self)) }
   )
 
-  def fromInt(value: Int): Option[T]
-  def toInt(self: T): Int
+  protected def fromInt(value: Int): Option[T]
+  protected def toInt(self: T): Int
 
 }

@@ -8,7 +8,7 @@ final class ToxFriendByPublicKeyExceptionTest extends FunSuite with ToxTestMixin
 
   test("Null") {
     interceptWithTox(ToxFriendByPublicKeyException.Code.NULL)(
-      _.friendByPublicKey(ToxPublicKey.unsafeFromByteArray(null))
+      _.friendByPublicKey(ToxPublicKey.unsafeFromValue(null))
     )
   }
 

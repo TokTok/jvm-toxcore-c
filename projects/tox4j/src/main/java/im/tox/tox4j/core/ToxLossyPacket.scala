@@ -7,7 +7,7 @@ object ToxLossyPacket extends ToxCustomPacketCompanion[ToxLossyPacket](
   MaxPacketId = 254 // scalastyle:ignore magic.number
 ) {
 
-  override def unsafeFromByteArray(value: Array[Byte]): ToxLossyPacket = new ToxLossyPacket(value)
-  override def toByteArray(self: ToxLossyPacket): Array[Byte] = self.value
+  override def unsafeFromValue(value: Array[Byte]): ToxLossyPacket = new ToxLossyPacket(value)
+  override def toValue(self: ToxLossyPacket): Array[Byte] = self.value
 
 }

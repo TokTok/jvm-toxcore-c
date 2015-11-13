@@ -47,7 +47,7 @@ final class ToxEventAdapterTest extends FunSuite {
 
   test[FriendRequest] {
     listener.friendRequest(
-      ToxPublicKey.unsafeFromByteArray(null),
+      ToxPublicKey.unsafeFromValue(null),
       0,
       ToxFriendRequestMessage.fromString("").get
     )(())

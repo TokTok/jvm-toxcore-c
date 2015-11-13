@@ -18,7 +18,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
             withTox { friend =>
               val friendNumber = tox.addFriend(
                 friend.getAddress,
-                ToxFriendRequestMessage.fromByteArray(message).get
+                ToxFriendRequestMessage.fromValue(message).get
               )
               assert(friendNumber == i)
             }

@@ -1,6 +1,6 @@
 package im.tox.tox4j.av
 
-import im.tox.core.typesafe.{Security, DiscreteValueCompanion}
+import im.tox.core.typesafe.DiscreteValueCompanion
 import scodec.codecs._
 import scodec.{Attempt, Err}
 
@@ -12,9 +12,7 @@ final class AudioLength private (private val value: Duration) extends AnyVal {
 }
 
 // scalastyle:off magic.number
-object AudioLength extends DiscreteValueCompanion[AudioLength, Duration](
-  value => new AudioLength(value)
-)(
+object AudioLength extends DiscreteValueCompanion[Duration, AudioLength](
   2500 microseconds,
   5000 microseconds,
   10000 microseconds,
@@ -22,6 +20,9 @@ object AudioLength extends DiscreteValueCompanion[AudioLength, Duration](
   40000 microseconds,
   60000 microseconds
 ) {
+
+  protected override def unsafeFromValue(value: Duration): AudioLength = new AudioLength(value)
+  protected override def toValue(self: AudioLength): Duration = self.value
 
   override val codec = uint16.exmap[AudioLength](
     { micros => Attempt.fromOption(fromValue(micros microseconds), new Err.General(s"Invalid value for $this: $micros")) },

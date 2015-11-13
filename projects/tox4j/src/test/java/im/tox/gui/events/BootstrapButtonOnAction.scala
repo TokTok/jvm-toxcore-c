@@ -19,7 +19,7 @@ final class BootstrapButtonOnAction(toxGui: MainView) extends ActionListener {
       ) foreach (_(
         toxGui.bootstrapHost.getText,
         Port.unsafeFromInt(toxGui.bootstrapPort.getText.toInt),
-        ToxPublicKey.fromByteArray(parsePublicKey(toxGui.bootstrapKey.getText.trim)).get
+        ToxPublicKey.fromValue(parsePublicKey(toxGui.bootstrapKey.getText.trim)).get
       ))
     } catch {
       case e: ToxBootstrapException =>

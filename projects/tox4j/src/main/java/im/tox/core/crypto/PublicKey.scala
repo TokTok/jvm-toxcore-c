@@ -11,12 +11,12 @@ final class PublicKey private[crypto] (val value: Seq[Byte]) extends AnyVal {
 
 object PublicKey extends FixedSizeByteArrayCompanion[PublicKey, Security.NonSensitive](ToxCryptoConstants.PublicKeyLength) {
 
-  protected def unsafeFromByteArray(value: Array[Byte]): PublicKey = new PublicKey(value)
+  protected def unsafeFromValue(value: Array[Byte]): PublicKey = new PublicKey(value)
 
-  def toByteArray(self: PublicKey): Array[Byte] = self.value.toArray
+  def toValue(self: PublicKey): Array[Byte] = self.value.toArray
 
   override def fromString(string: String): Option[PublicKey] = {
-    fromByteArray(parsePublicKey(string))
+    fromValue(parsePublicKey(string))
   }
 
   private def parsePublicKey(id: String): Array[Byte] = {

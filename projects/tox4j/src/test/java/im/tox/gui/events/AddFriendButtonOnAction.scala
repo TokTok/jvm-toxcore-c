@@ -16,17 +16,17 @@ final class AddFriendButtonOnAction(toxGui: MainView) extends ActionListener {
 
       val friendNumber =
         if (toxGui.friendRequest.getText.isEmpty) {
-          toxGui.tox.addFriendNorequest(ToxPublicKey.fromByteArray(publicKey).get)
+          toxGui.tox.addFriendNorequest(ToxPublicKey.fromValue(publicKey).get)
         } else {
           toxGui.tox.addFriend(
-            ToxFriendAddress.fromByteArray(publicKey).get,
-            ToxFriendRequestMessage.fromByteArray(toxGui.friendRequest.getText.getBytes).get
+            ToxFriendAddress.fromValue(publicKey).get,
+            ToxFriendRequestMessage.fromValue(toxGui.friendRequest.getText.getBytes).get
           )
         }
 
       toxGui.friendListModel.add(
         friendNumber,
-        ToxPublicKey.fromByteArray(publicKey.slice(0, ToxCoreConstants.PublicKeySize)).get
+        ToxPublicKey.fromValue(publicKey.slice(0, ToxCoreConstants.PublicKeySize)).get
       )
       toxGui.addMessage("Added friend number ", friendNumber)
       toxGui.save()

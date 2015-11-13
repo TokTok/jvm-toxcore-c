@@ -12,8 +12,8 @@ final case class Nonce private[crypto] (data: Seq[Byte]) extends AnyVal {
 
 object Nonce extends FixedSizeByteArrayCompanion[Nonce, Security.NonSensitive](ToxCryptoConstants.NonceLength) {
 
-  override protected def unsafeFromByteArray(value: Array[Byte]): Nonce = new Nonce(value)
-  override def toByteArray(self: Nonce): Array[Byte] = self.data.toArray
+  override protected def unsafeFromValue(value: Array[Byte]): Nonce = new Nonce(value)
+  override def toValue(self: Nonce): Array[Byte] = self.data.toArray
 
   /**
    * The random nonce generation function is used everywhere in toxcore to

@@ -12,7 +12,7 @@ object ToxFileId extends FixedSizeByteArrayCompanion[ToxFileId, Security.Sensiti
 
   val empty = new ToxFileId(Array.empty)
 
-  override def unsafeFromByteArray(value: Array[Byte]): ToxFileId = new ToxFileId(value)
-  override def toByteArray(self: ToxFileId): Array[Byte] = self.value.toArray
+  override def unsafeFromValue(value: Array[Byte]): ToxFileId = new ToxFileId(value)
+  override def toValue(self: ToxFileId): Array[Byte] = self.value.toArray
 
 }

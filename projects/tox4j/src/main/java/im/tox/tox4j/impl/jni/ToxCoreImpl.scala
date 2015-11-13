@@ -176,7 +176,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
     Port.unsafeFromInt(ToxCoreJni.toxSelfGetTcpPort(instanceNumber))
 
   override def getDhtId: ToxPublicKey =
-    ToxPublicKey.unsafeFromByteArray(ToxCoreJni.toxSelfGetDhtId(instanceNumber))
+    ToxPublicKey.unsafeFromValue(ToxCoreJni.toxSelfGetDhtId(instanceNumber))
 
   override def iterationInterval: Int =
     ToxCoreJni.toxIterationInterval(instanceNumber)
@@ -195,7 +195,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
       case (state, FriendName(friendNumber, name)) =>
         tryAndLog(options.fatalErrors, state, eventListener)(_.friendName(
           friendNumber,
-          ToxNickname.unsafeFromByteArray(name.toByteArray)
+          ToxNickname.unsafeFromValue(name.toByteArray)
         ))
     }
   }
@@ -205,7 +205,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
       case (state, FriendStatusMessage(friendNumber, message)) =>
         tryAndLog(options.fatalErrors, state, eventListener)(_.friendStatusMessage(
           friendNumber,
-          ToxStatusMessage.unsafeFromByteArray(message.toByteArray)
+          ToxStatusMessage.unsafeFromValue(message.toByteArray)
         ))
     }
   }
@@ -254,9 +254,9 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
     friendRequest.foldLeft(state) {
       case (state, FriendRequest(publicKey, timeDelta, message)) =>
         tryAndLog(options.fatalErrors, state, eventListener)(_.friendRequest(
-          ToxPublicKey.unsafeFromByteArray(publicKey.toByteArray),
+          ToxPublicKey.unsafeFromValue(publicKey.toByteArray),
           timeDelta,
-          ToxFriendRequestMessage.unsafeFromByteArray(message.toByteArray)
+          ToxFriendRequestMessage.unsafeFromValue(message.toByteArray)
         ))
     }
   }
@@ -268,7 +268,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
           friendNumber,
           convert(messageType),
           timeDelta,
-          ToxFriendMessage.unsafeFromByteArray(message.toByteArray)
+          ToxFriendMessage.unsafeFromValue(message.toByteArray)
         ))
     }
   }
@@ -304,7 +304,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
           fileNumber,
           kind,
           fileSize,
-          ToxFilename.unsafeFromByteArray(filename.toByteArray)
+          ToxFilename.unsafeFromValue(filename.toByteArray)
         ))
     }
   }
@@ -326,7 +326,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
       case (state, FriendLossyPacket(friendNumber, data)) =>
         tryAndLog(options.fatalErrors, state, eventListener)(_.friendLossyPacket(
           friendNumber,
-          ToxLossyPacket.unsafeFromByteArray(data.toByteArray)
+          ToxLossyPacket.unsafeFromValue(data.toByteArray)
         ))
     }
   }
@@ -336,7 +336,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
       case (state, FriendLosslessPacket(friendNumber, data)) =>
         tryAndLog(options.fatalErrors, state, eventListener)(_.friendLosslessPacket(
           friendNumber,
-          ToxLosslessPacket.unsafeFromByteArray(data.toByteArray)
+          ToxLosslessPacket.unsafeFromValue(data.toByteArray)
         ))
     }
   }
@@ -367,10 +367,10 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
   }
 
   override def getPublicKey: ToxPublicKey =
-    ToxPublicKey.unsafeFromByteArray(ToxCoreJni.toxSelfGetPublicKey(instanceNumber))
+    ToxPublicKey.unsafeFromValue(ToxCoreJni.toxSelfGetPublicKey(instanceNumber))
 
   override def getSecretKey: ToxSecretKey =
-    ToxSecretKey.unsafeFromByteArray(ToxCoreJni.toxSelfGetSecretKey(instanceNumber))
+    ToxSecretKey.unsafeFromValue(ToxCoreJni.toxSelfGetSecretKey(instanceNumber))
 
   override def setNospam(nospam: Int): Unit =
     ToxCoreJni.toxSelfSetNospam(instanceNumber, nospam)
@@ -379,7 +379,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
     ToxCoreJni.toxSelfGetNospam(instanceNumber)
 
   override def getAddress: ToxFriendAddress =
-    ToxFriendAddress.unsafeFromByteArray(ToxCoreJni.toxSelfGetAddress(instanceNumber))
+    ToxFriendAddress.unsafeFromValue(ToxCoreJni.toxSelfGetAddress(instanceNumber))
 
   @throws[ToxSetInfoException]
   override def setName(name: ToxNickname): Unit = {
@@ -388,7 +388,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
   }
 
   override def getName: ToxNickname = {
-    ToxNickname.unsafeFromByteArray(ToxCoreJni.toxSelfGetName(instanceNumber))
+    ToxNickname.unsafeFromValue(ToxCoreJni.toxSelfGetName(instanceNumber))
   }
 
   @throws[ToxSetInfoException]
@@ -398,7 +398,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
   }
 
   override def getStatusMessage: ToxStatusMessage =
-    ToxStatusMessage.unsafeFromByteArray(ToxCoreJni.toxSelfGetStatusMessage(instanceNumber))
+    ToxStatusMessage.unsafeFromValue(ToxCoreJni.toxSelfGetStatusMessage(instanceNumber))
 
   override def setStatus(status: ToxUserStatus): Unit =
     ToxCoreJni.toxSelfSetStatus(instanceNumber, status.ordinal)
@@ -428,7 +428,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
 
   @throws[ToxFriendGetPublicKeyException]
   override def getFriendPublicKey(friendNumber: Int): ToxPublicKey =
-    ToxPublicKey.unsafeFromByteArray(ToxCoreJni.toxFriendGetPublicKey(instanceNumber, friendNumber))
+    ToxPublicKey.unsafeFromValue(ToxCoreJni.toxFriendGetPublicKey(instanceNumber, friendNumber))
 
   override def friendExists(friendNumber: Int): Boolean =
     ToxCoreJni.toxFriendExists(instanceNumber, friendNumber)
@@ -462,7 +462,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
 
   @throws[ToxFileGetException]
   override def getFileFileId(friendNumber: Int, fileNumber: Int): ToxFileId =
-    ToxFileId.unsafeFromByteArray(ToxCoreJni.toxFileGetFileId(instanceNumber, friendNumber, fileNumber))
+    ToxFileId.unsafeFromValue(ToxCoreJni.toxFileGetFileId(instanceNumber, friendNumber, fileNumber))
 
   @throws[ToxFriendCustomPacketException]
   override def friendSendLossyPacket(friendNumber: Int, data: ToxLossyPacket): Unit =
