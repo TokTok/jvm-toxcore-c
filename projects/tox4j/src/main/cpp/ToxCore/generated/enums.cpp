@@ -4,9 +4,9 @@
 
 template<>
 jint
-enum_ordinal<TOX_CONNECTION> (JNIEnv *env, TOX_CONNECTION value)
+Enum::ordinal<TOX_CONNECTION> (JNIEnv *env, TOX_CONNECTION valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOX_CONNECTION_NONE: return 0;
     case TOX_CONNECTION_TCP: return 1;
@@ -17,7 +17,7 @@ enum_ordinal<TOX_CONNECTION> (JNIEnv *env, TOX_CONNECTION value)
 
 template<>
 TOX_CONNECTION
-enum_value<TOX_CONNECTION> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOX_CONNECTION> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {
@@ -43,9 +43,9 @@ print_arg<TOX_CONNECTION> (protolog::Value &value, TOX_CONNECTION arg)
 
 template<>
 jint
-enum_ordinal<TOX_FILE_CONTROL> (JNIEnv *env, TOX_FILE_CONTROL value)
+Enum::ordinal<TOX_FILE_CONTROL> (JNIEnv *env, TOX_FILE_CONTROL valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOX_FILE_CONTROL_RESUME: return 0;
     case TOX_FILE_CONTROL_PAUSE: return 1;
@@ -56,7 +56,7 @@ enum_ordinal<TOX_FILE_CONTROL> (JNIEnv *env, TOX_FILE_CONTROL value)
 
 template<>
 TOX_FILE_CONTROL
-enum_value<TOX_FILE_CONTROL> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOX_FILE_CONTROL> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {
@@ -82,9 +82,9 @@ print_arg<TOX_FILE_CONTROL> (protolog::Value &value, TOX_FILE_CONTROL arg)
 
 template<>
 jint
-enum_ordinal<TOX_MESSAGE_TYPE> (JNIEnv *env, TOX_MESSAGE_TYPE value)
+Enum::ordinal<TOX_MESSAGE_TYPE> (JNIEnv *env, TOX_MESSAGE_TYPE valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOX_MESSAGE_TYPE_NORMAL: return 0;
     case TOX_MESSAGE_TYPE_ACTION: return 1;
@@ -94,7 +94,7 @@ enum_ordinal<TOX_MESSAGE_TYPE> (JNIEnv *env, TOX_MESSAGE_TYPE value)
 
 template<>
 TOX_MESSAGE_TYPE
-enum_value<TOX_MESSAGE_TYPE> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOX_MESSAGE_TYPE> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {
@@ -118,9 +118,9 @@ print_arg<TOX_MESSAGE_TYPE> (protolog::Value &value, TOX_MESSAGE_TYPE arg)
 
 template<>
 jint
-enum_ordinal<TOX_PROXY_TYPE> (JNIEnv *env, TOX_PROXY_TYPE value)
+Enum::ordinal<TOX_PROXY_TYPE> (JNIEnv *env, TOX_PROXY_TYPE valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOX_PROXY_TYPE_NONE: return 0;
     case TOX_PROXY_TYPE_HTTP: return 1;
@@ -131,7 +131,7 @@ enum_ordinal<TOX_PROXY_TYPE> (JNIEnv *env, TOX_PROXY_TYPE value)
 
 template<>
 TOX_PROXY_TYPE
-enum_value<TOX_PROXY_TYPE> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOX_PROXY_TYPE> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {
@@ -157,9 +157,9 @@ print_arg<TOX_PROXY_TYPE> (protolog::Value &value, TOX_PROXY_TYPE arg)
 
 template<>
 jint
-enum_ordinal<TOX_SAVEDATA_TYPE> (JNIEnv *env, TOX_SAVEDATA_TYPE value)
+Enum::ordinal<TOX_SAVEDATA_TYPE> (JNIEnv *env, TOX_SAVEDATA_TYPE valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOX_SAVEDATA_TYPE_NONE: return 0;
     case TOX_SAVEDATA_TYPE_TOX_SAVE: return 1;
@@ -170,7 +170,7 @@ enum_ordinal<TOX_SAVEDATA_TYPE> (JNIEnv *env, TOX_SAVEDATA_TYPE value)
 
 template<>
 TOX_SAVEDATA_TYPE
-enum_value<TOX_SAVEDATA_TYPE> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOX_SAVEDATA_TYPE> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {
@@ -196,9 +196,9 @@ print_arg<TOX_SAVEDATA_TYPE> (protolog::Value &value, TOX_SAVEDATA_TYPE arg)
 
 template<>
 jint
-enum_ordinal<TOX_USER_STATUS> (JNIEnv *env, TOX_USER_STATUS value)
+Enum::ordinal<TOX_USER_STATUS> (JNIEnv *env, TOX_USER_STATUS valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOX_USER_STATUS_NONE: return 0;
     case TOX_USER_STATUS_AWAY: return 1;
@@ -209,7 +209,7 @@ enum_ordinal<TOX_USER_STATUS> (JNIEnv *env, TOX_USER_STATUS value)
 
 template<>
 TOX_USER_STATUS
-enum_value<TOX_USER_STATUS> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOX_USER_STATUS> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {

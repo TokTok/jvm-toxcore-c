@@ -77,7 +77,7 @@ TOX_METHOD (void, CallControl,
   jint instanceNumber, jint friendNumber, jint control)
 {
   return instances.with_instance_ign (env, instanceNumber,
-    toxav_call_control, friendNumber, enum_value<TOXAV_CALL_CONTROL> (env, control)
+    toxav_call_control, friendNumber, Enum::valueOf<TOXAV_CALL_CONTROL> (env, control)
   );
 }
 
@@ -107,7 +107,7 @@ TOX_METHOD (void, AudioSendFrame,
   tox4j_assert (channels <= 255);
   tox4j_assert (samplingRate >= 0);
 
-  ShortArray pcmData (env, pcm);
+  auto pcmData = fromJavaArray (env, pcm);
   if (pcmData.size () != size_t (sampleCount * channels))
     return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
 
@@ -126,9 +126,9 @@ TOX_METHOD (void, VideoSendFrame,
 {
   size_t pixel_count = width * height;
 
-  ByteArray yData (env, y);
-  ByteArray uData (env, u);
-  ByteArray vData (env, v);
+  auto yData = fromJavaArray (env, y);
+  auto uData = fromJavaArray (env, u);
+  auto vData = fromJavaArray (env, v);
   if (yData.size () != pixel_count ||
       uData.size () != pixel_count ||
       vData.size () != pixel_count)

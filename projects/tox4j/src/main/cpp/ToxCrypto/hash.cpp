@@ -11,9 +11,9 @@
 JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxHash
   (JNIEnv *env, jclass, jbyteArray dataArray)
 {
-  ByteArray data (env, dataArray);
-  std::vector<uint8_t> hash (TOX_HASH_LENGTH);
-  bool result = tox_hash (hash.data (), data.data (), data.size ());
+  auto data = fromJavaArray (env, dataArray);
+  uint8_t hash[TOX_HASH_LENGTH];
+  bool result = tox_hash (hash, data.data (), data.size ());
   tox4j_assert (result);
   return toJavaArray (env, hash);
 }

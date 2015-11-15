@@ -215,7 +215,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeAudioReceiveFra
     [=] (ToxAV *av, Events &events)
       {
         assert (av != nullptr);
-        ShortArray pcmData (env, pcm);
+        auto pcmData = fromJavaArray (env, pcm);
         tox4j_assert (pcmData.size () % channels == 0);
         tox4j_audio_receive_frame_cb (friendNumber, pcmData.data (), pcmData.size () / channels, channels, samplingRate, &events);
       }
@@ -268,9 +268,9 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeVideoReceiveFra
     [=] (ToxAV *av, Events &events)
       {
         assert (av != nullptr);
-        ByteArray yData (env, y);
-        ByteArray uData (env, u);
-        ByteArray vData (env, v);
+        auto yData = fromJavaArray (env, y);
+        auto uData = fromJavaArray (env, u);
+        auto vData = fromJavaArray (env, v);
         tox4j_assert (yData.size () == std::max<std::size_t> (width    , std::abs (yStride)) * height);
         tox4j_assert (uData.size () == std::max<std::size_t> (width / 2, std::abs (uStride)) * (height / 2));
         tox4j_assert (vData.size () == std::max<std::size_t> (width / 2, std::abs (vStride)) * (height / 2));

@@ -4,9 +4,9 @@
 
 template<>
 jint
-enum_ordinal<TOXAV_CALL_CONTROL> (JNIEnv *env, TOXAV_CALL_CONTROL value)
+Enum::ordinal<TOXAV_CALL_CONTROL> (JNIEnv *env, TOXAV_CALL_CONTROL valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOXAV_CALL_CONTROL_RESUME: return 0;
     case TOXAV_CALL_CONTROL_PAUSE: return 1;
@@ -21,7 +21,7 @@ enum_ordinal<TOXAV_CALL_CONTROL> (JNIEnv *env, TOXAV_CALL_CONTROL value)
 
 template<>
 TOXAV_CALL_CONTROL
-enum_value<TOXAV_CALL_CONTROL> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOXAV_CALL_CONTROL> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {
@@ -55,9 +55,9 @@ print_arg<TOXAV_CALL_CONTROL> (protolog::Value &value, TOXAV_CALL_CONTROL arg)
 
 template<>
 jint
-enum_ordinal<TOXAV_FRIEND_CALL_STATE> (JNIEnv *env, TOXAV_FRIEND_CALL_STATE value)
+Enum::ordinal<TOXAV_FRIEND_CALL_STATE> (JNIEnv *env, TOXAV_FRIEND_CALL_STATE valueOf)
 {
-  switch (value)
+  switch (valueOf)
     {
     case TOXAV_FRIEND_CALL_STATE_ERROR: return 0;
     case TOXAV_FRIEND_CALL_STATE_FINISHED: return 1;
@@ -71,7 +71,7 @@ enum_ordinal<TOXAV_FRIEND_CALL_STATE> (JNIEnv *env, TOXAV_FRIEND_CALL_STATE valu
 
 template<>
 TOXAV_FRIEND_CALL_STATE
-enum_value<TOXAV_FRIEND_CALL_STATE> (JNIEnv *env, jint ordinal)
+Enum::valueOf<TOXAV_FRIEND_CALL_STATE> (JNIEnv *env, jint ordinal)
 {
   switch (ordinal)
     {

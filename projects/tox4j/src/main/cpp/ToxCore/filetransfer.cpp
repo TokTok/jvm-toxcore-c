@@ -14,7 +14,7 @@ TOX_METHOD (void, FileControl,
   jint instanceNumber, jint friendNumber, jint fileNumber, jint control)
 {
   return instances.with_instance_ign (env, instanceNumber,
-    tox_file_control, friendNumber, fileNumber, enum_value<TOX_FILE_CONTROL> (env, control)
+    tox_file_control, friendNumber, fileNumber, Enum::valueOf<TOX_FILE_CONTROL> (env, control)
   );
 }
 
@@ -39,8 +39,8 @@ TOX_METHOD (void, FileSeek,
 TOX_METHOD (jint, FileSend,
   jint instanceNumber, jint friendNumber, jint kind, jlong fileSize, jbyteArray fileId, jbyteArray filename)
 {
-  ByteArray fileIdData (env, fileId);
-  ByteArray filenameData (env, filename);
+  auto fileIdData = fromJavaArray (env, fileId);
+  auto filenameData = fromJavaArray (env, filename);
 
   // In Java, we only have 63 bit positive file sizes, so all negative values
   // are streaming.
@@ -61,7 +61,7 @@ TOX_METHOD (jint, FileSend,
 TOX_METHOD (void, FileSendChunk,
   jint instanceNumber, jint friendNumber, jint fileNumber, jlong position, jbyteArray chunk)
 {
-  ByteArray chunkData (env, chunk);
+  auto chunkData = fromJavaArray (env, chunk);
   return instances.with_instance_ign (env, instanceNumber,
     tox_file_send_chunk, friendNumber, fileNumber, position, chunkData.data (), chunkData.size ()
   );
@@ -75,13 +75,13 @@ TOX_METHOD (void, FileSendChunk,
 TOX_METHOD (jbyteArray, FileGetFileId,
   jint instanceNumber, jint friendNumber, jint fileNumber)
 {
-  std::vector<uint8_t> file_id (TOX_FILE_ID_LENGTH);
+  uint8_t file_id[TOX_FILE_ID_LENGTH];
   return instances.with_instance_err (env, instanceNumber,
     [env, &file_id] (bool)
       {
         return toJavaArray (env, file_id);
       },
-    tox_file_get_file_id, friendNumber, fileNumber, file_id.data ()
+    tox_file_get_file_id, friendNumber, fileNumber, file_id
   );
 }
 

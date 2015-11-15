@@ -29,7 +29,7 @@ namespace core
 
 
 template<typename T, size_t get_size (Tox const *), void get_data (Tox const *, T *)>
-typename java_array_t<T>::array_type
+auto
 get_vector (Tox const *tox, JNIEnv *env)
 {
   std::vector<T> name (get_size (tox));

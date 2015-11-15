@@ -20,7 +20,7 @@ object JniEnums extends CodeGenerator {
       typeArgs = Seq(Typename(cxxEnum)),
       fun = Fun(
         returnType = to.ty,
-        name = "enum_" + to.name,
+        name = "Enum::" + to.name,
         params = Seq(
           Param(Pointer(Typename("JNIEnv")), "env"),
           Param(from.ty, from.name)
@@ -36,7 +36,7 @@ object JniEnums extends CodeGenerator {
   }
 
   def enumMappings[E <: Enum[E]](values: Seq[E], cxxEnum: String): TranslationUnit = {
-    val from = Side[E](Typename(cxxEnum), "value", "toxcore", value => Identifier(cxxEnum + "_" + value.name))
+    val from = Side[E](Typename(cxxEnum), "valueOf", "toxcore", value => Identifier(cxxEnum + "_" + value.name))
     val to = Side[E](Type.jint, "ordinal", "Java", value => IntegerLiteral(value.ordinal))
 
     Seq(

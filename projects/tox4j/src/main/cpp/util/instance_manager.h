@@ -8,18 +8,24 @@
 #include <vector>
 
 #include "util/exceptions.h"
+#include "util/unused.h"
 
 
 /**
  * The base instance_manager class. Contains functions to add, destroy, and
- * finalise pairs of objects. It manages an Instance and an Events object
- * together, with
+ * finalise pairs of objects. It manages an @ref Object and an @ref Events
+ * object together with a mutex to lock the pair during a native function
+ * execution.
  *
- * The creation of an ObjectP and EventsP is the responsibility of the caller.
- * After handing them to the manager, the manager will take care of cleaning
- * them up. Instance numbers returned by add() are used to access and delete
- * instances. Instance numbers may be reused after finalize() is called on them.
- * The finalize() function may not be called before kill(). The kill() function
+ * The creation of an @ref ObjectP and @ref EventsP is the responsibility of
+ * the caller. After handing them to the manager, the manager will take care
+ * of cleaning them up.
+ *
+ * Instance numbers returned by @ref add() are used to access and delete
+ * instances. Instance numbers may be reused after @ref finalize() is called
+ * on them.
+ *
+ * The @ref finalize() function may not be called before @ref kill().
  */
 template<typename ObjectP, typename EventsP>
 class instance_manager
@@ -70,8 +76,8 @@ private:
 
     /**
      * Copies the pointers together with their lock into a single object without
-     * pointers or references into the instance_pointers object, which may be
-     * moved when its containing vector reallocates.
+     * pointers or references into the @ref instance_pointers object, which may be
+     * moved when its containing @ref instances vector reallocates.
      */
     locked
     get (std::unique_lock<std::mutex> lock) const
@@ -92,14 +98,38 @@ private:
   std::deque<std::mutex> locks;
 
   // Contains indices (+1) into the instances/locks lists of finalised objects.
+  // The most recently finalised object is at the end of this list.
   std::vector<jint> freelist;
   // The global lock for the instance manager.
   std::mutex mutex;
 
 
+  /**
+   * Check whether an instance number is currently valid within this instance manager.
+   *
+   * For the duration of this function execution, the instance_manager mutex
+   * must be locked.
+   *
+   * This function returns true if and only if:
+   * - The instance number is greater than 0 (negative and zero-indices are invalid);
+   * - The instance number is within the range of the @ref instances list;
+   * - The instance referenced by this number is not on the @ref freelist.
+   *
+   * All of these checks throw an IllegalStateException except the zero-check
+   * if @ref allow_zero is true.
+   *
+   * @param instanceNumber An instance number as returned by @ref add.
+   * @param allow_zero If false, throw an IllegalStateException if instanceNumber is 0.
+   * @param lock A proof that a mutex (hopefully the manager mutex) was locked.
+   *
+   * @return Whether or not to proceed with the instance number.
+   */
   bool
-  check_instance_number (JNIEnv *env, jint instanceNumber, bool allow_zero)
+  check_instance_number (JNIEnv *env, jint instanceNumber, bool allow_zero,
+                         std::lock_guard<std::mutex> const &lock)
   {
+    unused (lock);
+
     if (instanceNumber < 0)
       {
         throw_illegal_state_exception (env, instanceNumber,
@@ -191,6 +221,7 @@ public:
     instances.push_back (std::move (instance_p));
     locks.emplace_back ();
 
+    // Check invariant.
     tox4j_assert (instances.size () == locks.size ());
     return instances.size ();
   }
@@ -209,7 +240,7 @@ public:
     // be modifying them.
     std::lock_guard<std::mutex> lock (mutex);
 
-    if (!check_instance_number (env, instanceNumber, true))
+    if (!check_instance_number (env, instanceNumber, true, lock))
       return;
 
     // Lock before moving the pointers out.
@@ -237,7 +268,7 @@ public:
     std::lock_guard<std::mutex> lock (mutex);
 
     // Don't throw on null instances, but also don't put it on the freelist.
-    if (!check_instance_number (env, instanceNumber, true))
+    if (!check_instance_number (env, instanceNumber, true, lock))
       return;
 
     // The C++ side should already have been killed.
@@ -277,7 +308,7 @@ public:
         // Lock the instance manager only while accessing the list.
         std::lock_guard<std::mutex> lock (mutex);
 
-        if (!check_instance_number (env, instanceNumber, false))
+        if (!check_instance_number (env, instanceNumber, false, lock))
           return typename instance_pointers::locked { };
 
         // Lock the instance, get the pointers out of the instance vector, and

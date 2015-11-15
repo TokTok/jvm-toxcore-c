@@ -263,7 +263,7 @@ TOX_METHOD (jint, New,
   opts->ipv6_enabled = ipv6Enabled;
   opts->udp_enabled = udpEnabled;
 
-  opts->proxy_type = enum_value<TOX_PROXY_TYPE> (env, proxyType);
+  opts->proxy_type = Enum::valueOf<TOX_PROXY_TYPE> (env, proxyType);
   UTFChars proxy_host (env, proxyHost);
   opts->proxy_host = proxy_host.data ();
   opts->proxy_port = proxyPort;
@@ -282,8 +282,8 @@ TOX_METHOD (jint, New,
   assert_valid_uint16 (endPort);
   assert_valid_uint16 (tcpPort);
 
-  ByteArray save_data (env, saveData);
-  opts->savedata_type = enum_value<TOX_SAVEDATA_TYPE> (env, saveDataType);
+  auto save_data = fromJavaArray (env, saveData);
+  opts->savedata_type = Enum::valueOf<TOX_SAVEDATA_TYPE> (env, saveDataType);
   opts->savedata_data   = save_data.data ();
   opts->savedata_length = save_data.size ();
 
@@ -362,7 +362,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeSelfConnectio
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        tox4j_self_connection_status_cb (enum_value<TOX_CONNECTION> (env, connection_status), &events);
+        tox4j_self_connection_status_cb (Enum::valueOf<TOX_CONNECTION> (env, connection_status), &events);
       }
   );
 }
@@ -379,7 +379,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFileRecvContr
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        tox4j_file_recv_control_cb (friend_number, file_number, enum_value<TOX_FILE_CONTROL> (env, control), &events);
+        tox4j_file_recv_control_cb (friend_number, file_number, Enum::valueOf<TOX_FILE_CONTROL> (env, control), &events);
       }
   );
 }
@@ -396,7 +396,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFileRecv
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray filenameArray (env, filename);
+        auto filenameArray = fromJavaArray (env, filename);
         tox4j_file_recv_cb (friend_number, file_number, kind, file_size, filenameArray.data (), filenameArray.size (), &events);
       }
   );
@@ -414,7 +414,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFileRecvChunk
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray dataArray (env, data);
+        auto dataArray = fromJavaArray (env, data);
         tox4j_file_recv_chunk_cb (friend_number, file_number, position, dataArray.data (), dataArray.size (), &events);
       }
   );
@@ -449,7 +449,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendConnect
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        tox4j_friend_connection_status_cb (friend_number, enum_value<TOX_CONNECTION> (env, connection_status), &events);
+        tox4j_friend_connection_status_cb (friend_number, Enum::valueOf<TOX_CONNECTION> (env, connection_status), &events);
       }
   );
 }
@@ -466,7 +466,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendLossles
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray dataArray (env, data);
+        auto dataArray = fromJavaArray (env, data);
         tox4j_friend_lossless_packet_cb (friend_number, dataArray.data (), dataArray.size (), &events);
       }
   );
@@ -484,7 +484,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendLossyPa
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray dataArray (env, data);
+        auto dataArray = fromJavaArray (env, data);
         tox4j_friend_lossy_packet_cb (friend_number, dataArray.data (), dataArray.size (), &events);
       }
   );
@@ -502,8 +502,8 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendMessage
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray messageArray (env, message);
-        tox4j_friend_message_cb (friend_number, enum_value<TOX_MESSAGE_TYPE> (env, type), /*time_delta, */ messageArray.data (), messageArray.size (), &events);
+        auto messageArray = fromJavaArray (env, message);
+        tox4j_friend_message_cb (friend_number, Enum::valueOf<TOX_MESSAGE_TYPE> (env, type), /*time_delta, */ messageArray.data (), messageArray.size (), &events);
       }
   );
 }
@@ -520,7 +520,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendName
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray nameArray (env, name);
+        auto nameArray = fromJavaArray (env, name);
         tox4j_friend_name_cb (friend_number, nameArray.data (), nameArray.size (), &events);
       }
   );
@@ -538,8 +538,8 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendRequest
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray public_keyArray (env, public_key);
-        ByteArray messageArray (env, message);
+        auto public_keyArray = fromJavaArray (env, public_key);
+        auto messageArray = fromJavaArray (env, message);
         tox4j_friend_request_cb (public_keyArray.data (), /*time_delta, */ messageArray.data (), messageArray.size (), &events);
       }
   );
@@ -557,7 +557,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendStatus
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        tox4j_friend_status_cb (friend_number, enum_value<TOX_USER_STATUS> (env, status), &events);
+        tox4j_friend_status_cb (friend_number, Enum::valueOf<TOX_USER_STATUS> (env, status), &events);
       }
   );
 }
@@ -574,7 +574,7 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendStatusM
     [=] (Tox *tox, Events &events)
       {
         assert (tox != nullptr);
-        ByteArray messageArray (env, message);
+        auto messageArray = fromJavaArray (env, message);
         tox4j_friend_status_message_cb (friend_number, messageArray.data (), messageArray.size (), &events);
       }
   );

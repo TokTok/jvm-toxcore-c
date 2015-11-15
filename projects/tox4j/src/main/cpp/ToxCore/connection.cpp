@@ -20,7 +20,7 @@ toxBootstrapLike (bool function (Tox *tox,
   tox4j_assert (port >= 0);
   tox4j_assert (port <= 65535);
 
-  ByteArray public_key (env, publicKey);
+  auto public_key = fromJavaArray (env, publicKey);
   tox4j_assert (!publicKey || public_key.size () == TOX_PUBLIC_KEY_SIZE);
 
   return instances.with_instance_ign (env, instanceNumber,

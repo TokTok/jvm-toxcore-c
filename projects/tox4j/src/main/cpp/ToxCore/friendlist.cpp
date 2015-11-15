@@ -13,8 +13,8 @@ using namespace core;
 TOX_METHOD (jint, FriendAdd,
   jint instanceNumber, jbyteArray address, jbyteArray message)
 {
-  ByteArray messageData (env, message);
-  ByteArray addressData (env, address);
+  auto messageData = fromJavaArray (env, message);
+  auto addressData = fromJavaArray (env, address);
   tox4j_assert (!address || addressData.size () == TOX_ADDRESS_SIZE);
   return instances.with_instance_err (env, instanceNumber,
     identity,
@@ -30,7 +30,7 @@ TOX_METHOD (jint, FriendAdd,
 TOX_METHOD (jint, FriendAddNorequest,
   jint instanceNumber, jbyteArray publicKey)
 {
-  ByteArray public_key (env, publicKey);
+  auto public_key = fromJavaArray (env, publicKey);
   tox4j_assert (!publicKey || public_key.size () == TOX_PUBLIC_KEY_SIZE);
   return instances.with_instance_err (env, instanceNumber,
     identity,
@@ -59,7 +59,7 @@ TOX_METHOD (void, FriendDelete,
 TOX_METHOD (jint, FriendByPublicKey,
   jint instanceNumber, jbyteArray publicKey)
 {
-  ByteArray public_key (env, publicKey);
+  auto public_key = fromJavaArray (env, publicKey);
   tox4j_assert (!publicKey || public_key.size () == TOX_PUBLIC_KEY_SIZE);
   return instances.with_instance_err (env, instanceNumber,
     identity,
@@ -75,13 +75,13 @@ TOX_METHOD (jint, FriendByPublicKey,
 TOX_METHOD (jbyteArray, FriendGetPublicKey,
   jint instanceNumber, jint friendNumber)
 {
-  std::vector<uint8_t> buffer (TOX_PUBLIC_KEY_SIZE);
+  uint8_t public_key[TOX_PUBLIC_KEY_SIZE];
   return instances.with_instance_err (env, instanceNumber,
     [&] (bool)
       {
-        return toJavaArray (env, buffer);
+        return toJavaArray (env, public_key);
       },
-    tox_friend_get_public_key, friendNumber, buffer.data ()
+    tox_friend_get_public_key, friendNumber, public_key
   );
 }
 

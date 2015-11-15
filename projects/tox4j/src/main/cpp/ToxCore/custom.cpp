@@ -13,7 +13,7 @@ using namespace core;
 TOX_METHOD (void, FriendSendLossyPacket,
   jint instanceNumber, jint friendNumber, jbyteArray packet)
 {
-  ByteArray packetData (env, packet);
+  auto packetData = fromJavaArray (env, packet);
   return instances.with_instance_ign (env, instanceNumber,
     tox_friend_send_lossy_packet, friendNumber, packetData.data (), packetData.size ()
   );
@@ -27,7 +27,7 @@ TOX_METHOD (void, FriendSendLossyPacket,
 TOX_METHOD (void, FriendSendLosslessPacket,
   jint instanceNumber, jint friendNumber, jbyteArray packet)
 {
-  ByteArray packetData (env, packet);
+  auto packetData = fromJavaArray (env, packet);
   return instances.with_instance_ign (env, instanceNumber,
     tox_friend_send_lossless_packet, friendNumber, packetData.data (), packetData.size ()
   );

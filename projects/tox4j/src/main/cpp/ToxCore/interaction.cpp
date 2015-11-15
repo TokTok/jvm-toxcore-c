@@ -27,11 +27,11 @@ TOX_METHOD (void, SelfSetTyping,
 TOX_METHOD (jint, FriendSendMessage,
   jint instanceNumber, jint friendNumber, jint messageType, jint timeDelta, jbyteArray message)
 {
-  ByteArray const message_array (env, message);
+  auto message_array = fromJavaArray (env, message);
 
   return instances.with_instance_err (env, instanceNumber,
     identity,
-    tox_friend_send_message, friendNumber, enum_value<TOX_MESSAGE_TYPE> (env, messageType), message_array.data (), message_array.size ()
+    tox_friend_send_message, friendNumber, Enum::valueOf<TOX_MESSAGE_TYPE> (env, messageType), message_array.data (), message_array.size ()
   );
 }
 

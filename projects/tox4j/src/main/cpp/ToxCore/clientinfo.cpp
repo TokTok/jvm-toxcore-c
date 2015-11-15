@@ -62,7 +62,7 @@ TOX_METHOD (jbyteArray, SelfGetAddress,
 TOX_METHOD (void, SelfSetName,
   jint instanceNumber, jbyteArray name)
 {
-  ByteArray name_array (env, name);
+  auto name_array = fromJavaArray (env, name);
   return instances.with_instance_ign (env, instanceNumber,
     tox_self_set_name, name_array.data (), name_array.size ());
 }
@@ -91,7 +91,7 @@ TOX_METHOD (jbyteArray, SelfGetName,
 TOX_METHOD (void, SelfSetStatusMessage,
   jint instanceNumber, jbyteArray statusMessage)
 {
-  ByteArray status_message_array (env, statusMessage);
+  auto status_message_array = fromJavaArray (env, statusMessage);
   return instances.with_instance_ign (env, instanceNumber,
     tox_self_set_status_message, status_message_array.data (), status_message_array.size ());
 }
@@ -121,7 +121,7 @@ TOX_METHOD (void, SelfSetStatus,
   jint instanceNumber, jint status)
 {
   return instances.with_instance_noerr (env, instanceNumber,
-    tox_self_set_status, enum_value<TOX_USER_STATUS> (env, status));
+    tox_self_set_status, Enum::valueOf<TOX_USER_STATUS> (env, status));
 }
 
 #endif

@@ -1,7 +1,10 @@
 #pragma once
 
 #include "ToxInstances.h"
-#include "util/jniutil.h"
+#include "util/jni/ArrayFromJava.h"
+#include "util/jni/ArrayToJava.h"
+#include "util/jni/Enum.h"
+#include "util/jni/UTFChars.h"
 #include "util/pp_cat.h"
 
 
