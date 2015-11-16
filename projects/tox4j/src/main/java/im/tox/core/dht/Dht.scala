@@ -26,6 +26,8 @@ final case class Dht(
     nodeSets: Map[PublicKey, NodeSet]
 ) {
 
+  def size: Int = nodeSets.values.map(_.size).sum
+
   def canAddNode(nodeInfo: NodeInfo): Boolean = {
     nodeSets.exists(_._2.canAdd(nodeInfo))
   }

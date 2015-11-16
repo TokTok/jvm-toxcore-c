@@ -23,7 +23,7 @@ object PingRequestHandler extends DhtPayloadHandler(PingRequestPacket) {
       )
     } yield {
       for {
-        () <- IO.sendTo(sender, response)
+        _ <- IO.sendTo(sender, response)
       } yield {
         dht
       }

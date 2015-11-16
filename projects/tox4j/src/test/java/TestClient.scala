@@ -1,5 +1,5 @@
 import com.typesafe.scalalogging.Logger
-import im.tox.core.network.Port
+import im.tox.core.network.{NetworkCoreTest, Port}
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
@@ -45,13 +45,20 @@ object TestClient extends App {
     (c - subtract).toByte
   }
 
+  // val DefaultBootstrapNode = ("144.76.60.215", 33445, "04119E835DF3E78BACF0F84235B300546AF8B936F035185E2A8E9E0A67C8924F")
+  val DefaultBootstrapNode = NetworkCoreTest.nodes.map {
+    case (address, key) => (address, ToxCoreConstants.DefaultStartPort, key)
+  }.head
+
   (args match {
     case Array("--bootstrap", host, port, key, count) =>
       (Some((host, Integer.parseInt(port), key)), Integer.parseInt(count))
     case Array("--bootstrap", host, port, key) =>
       (Some((host, Integer.parseInt(port), key)), 1)
     case Array("--bootstrap", count) =>
-      (Some(("144.76.60.215", 33445, "04119E835DF3E78BACF0F84235B300546AF8B936F035185E2A8E9E0A67C8924F")), Integer.parseInt(count))
+      (Some(DefaultBootstrapNode), Integer.parseInt(count))
+    case Array("--bootstrap") =>
+      (Some(DefaultBootstrapNode), 1)
     case Array(count) =>
       (None, Integer.parseInt(count))
     case _ =>
@@ -64,7 +71,9 @@ object TestClient extends App {
         val tox = new ToxCoreImpl[Unit](new ToxOptions(true, bootstrap.isEmpty))
 
         tox.callback(new TestEventListener(id))
-        logger.info(s"[$id] Key: ${readablePublicKey(tox.getPublicKey.value)}")
+        logger.info(s"[$id] Long-term public key: ${readablePublicKey(tox.getPublicKey.value)}")
+        logger.info(s"[$id] DHT public key: ${readablePublicKey(tox.getDhtId.value)}")
+        logger.info(s"[$id] UDP port: ${tox.getUdpPort}")
 
         bootstrap match {
           case Some((host, port, key)) =>

@@ -47,6 +47,7 @@ object ToxHandler extends ToxPacketHandler(PlainText) {
 
   override def apply(dht: Dht, origin: InetSocketAddress, packetData: PlainText[NonSensitive]): CoreError \/ IO[Dht] = {
     logger.debug("Handling incoming packet: " + packetData)
+    logger.info("DHT state: " + dht)
     for {
       packet <- ToxPacket.fromBytes(packetData.toByteVector)
       dht <- {

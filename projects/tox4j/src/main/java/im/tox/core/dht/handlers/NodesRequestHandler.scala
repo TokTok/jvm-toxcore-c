@@ -31,7 +31,7 @@ object NodesRequestHandler extends DhtPayloadHandler(NodesRequestPacket) {
       )
     } yield {
       for {
-        () <- IO.sendTo(sender, response)
+        _ <- IO.sendTo(sender, response)
       } yield {
         dht
       }

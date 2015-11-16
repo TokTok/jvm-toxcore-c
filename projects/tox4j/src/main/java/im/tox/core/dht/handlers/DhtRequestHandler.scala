@@ -52,7 +52,7 @@ final case class DhtRequestHandler[T, S <: Security](handler: ToxPacketHandler[T
             forwardedData <- module.toBytes(requestPacket)
           } yield {
             for {
-              () <- IO.sendTo(
+              _ <- IO.sendTo(
                 receiver,
                 ToxPacket(
                   PacketKind.DhtRequest,

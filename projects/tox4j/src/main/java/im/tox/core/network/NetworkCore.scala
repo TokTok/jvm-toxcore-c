@@ -4,21 +4,19 @@ import java.net.InetSocketAddress
 
 import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto.PlainText.Conversions._
-import im.tox.core.crypto.{Nonce, PlainText, PublicKey}
-import im.tox.core.dht.Dht
-import im.tox.core.dht.packets.DhtEncryptedPacket
-import im.tox.core.dht.packets.dht._
-import im.tox.core.error.CoreError
-import im.tox.core.io.IO
+import im.tox.core.crypto.PublicKey
+import im.tox.core.dht.packets.dht.{NodesRequestPacket, PingRequestPacket}
+import im.tox.core.dht.{Dht, NodeInfo, Protocol}
+import im.tox.core.io.{EventActor, TimeActor, UdpActor, IO}
 import im.tox.core.network.packets.ToxPacket
 import im.tox.tox4j.core.ToxCoreConstants
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scalaz.concurrent.Task
 import scalaz.stream._
-import scalaz.stream.udp.{Connection, Packet}
-import scalaz.{-\/, \/, \/-}
+import scalaz.{-\/, \/-}
 
 /**
  * The network module is the lowest file in toxcore that everything else depends
@@ -45,134 +43,63 @@ import scalaz.{-\/, \/, \/-}
  * The goal of this module is to provide an easy interface to a UDP socket and
  * other networking related functions.
  */
-@SuppressWarnings(Array(
-  "org.brianmckenna.wartremover.warts.Any",
-  "org.brianmckenna.wartremover.warts.AsInstanceOf",
-  "org.brianmckenna.wartremover.warts.IsInstanceOf"
-)) // scalastyle:off
+@SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Any")) // scalastyle:off
 object NetworkCore {
-
-  implicit val scheduler = scalaz.stream.DefaultScheduler
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   /**
-   * Things of note in this module are the maximum UDP packet size define
-   * (MAX_UDP_PACKET_SIZE) which sets the maximum UDP packet size toxcore can send
-   * and receive.
+   * Create a new DHT node.
+   *
+   * The initial packet should be a [[PingRequestPacket]] or [[NodesRequestPacket]].
+   *
+   * @param dht The initial DHT state.
+   * @param bootstrapAddress Network address of the first node we send the initial packet to.
+   * @param bootstrapPublicKey DHT public key of the node we're sending the packet to.
+   * @param bootstrapRequest The initial packet data.
    */
-  val MaxUdpPacketSize = 2048
+  def client(
+    dht: Dht,
+    bootstrapAddress: InetSocketAddress,
+    bootstrapPublicKey: PublicKey,
+    bootstrapRequest: ToxPacket[PacketKind]
+  ): Process[Task, Unit] = {
+    val eventQueue = async.boundedQueue[IO.Event](10)
+    val actionTopic = async.topic[IO.Action]()
 
-  trait Event
-  final case class TimeEvent(duration: Duration) extends Event
-  final case class NetworkEvent(packet: Packet) extends Event
+    val actionLoop = EventActor.make(dht)(eventQueue.dequeue, actionTopic.publish)
 
-  def performAction(action: IO.Action): Process[Connection, Unit] = {
-    action match {
-      case IO.Action.SendTo(node, outPacket) =>
-        logger.debug(s"Sending ${outPacket.kind} to ${node.address}")
-        ToxPacket.toBytes(outPacket) match {
-          case -\/(error) =>
-            Process.fail(error.exception)
-          case \/-(packetData) =>
-            udp.send(to = node.address, packetData.toByteVector)
-        }
-    }
-  }
+    val udpLoop = UdpActor.make(actionTopic.subscribe, eventQueue.enqueue)
+    val timeLoop = TimeActor.make(actionTopic.subscribe, eventQueue.enqueue)
 
-  def processNetworkEvent(dht: Dht, packet: Packet): Process[Connection, Dht] = {
-    logger.debug("Network event: " + packet)
+    val bootstrapAction = Process(
+      IO.Action.SendTo(
+        NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
+        bootstrapRequest
+      ),
+      IO.Action.SendTo(
+        NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
+        bootstrapRequest
+      ),
+      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
+      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
+      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
+      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
+      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.ShutdownEvent) }
+    ).toSource.to(actionTopic.publish)
 
-    val result =
-      for {
-        dht <- ToxHandler(dht, packet.origin, PlainText(packet.bytes))
-      } yield {
-        for {
-          action <- Process.emitAll(dht.actions): Process[Connection, IO.Action]
-          () <- performAction(action)
-        } yield {
-          dht.value
-        }
+    val startLoop = bootstrapAction.merge(udpLoop).merge(timeLoop).merge(actionLoop)
+
+    val shutdownLoop =
+      actionTopic.subscribe.flatMap {
+        case IO.Action.Shutdown =>
+          println("SHUTDOWN")
+          startLoop.kill ++ Process.halt
+        case _ =>
+          Process.empty[Task, Unit]
       }
 
-    result match {
-      case -\/(error) =>
-        logger.error(s"Fail: $error on $packet", error.exception)
-        Process.emit(dht)
-      case \/-(dht) =>
-        dht
-    }
-  }
-
-  def processTimingEvent(dht: Dht, duration: Duration): Process[Connection, Dht] = {
-    logger.debug("Time event: " + duration.toSeconds)
-    Process.emit(dht)
-  }
-
-  def processEvent(dht: Dht, event: Event): Process[Connection, Dht] = {
-    event match {
-      case NetworkEvent(packet) =>
-        processNetworkEvent(dht, packet)
-      case TimeEvent(duration) =>
-        processTimingEvent(dht, duration)
-    }
-  }
-
-  val EncryptedNodesRequestPacket = DhtEncryptedPacket.Make(NodesRequestPacket)
-
-  val nodes = Seq(
-    ("192.210.149.121", "F404ABAA1C99A9D37D61AB54898F56793E1DEF8BD46B1038B9D822E8460FAB67"),
-    ("178.62.250.138", "788236D34978D1D5BD822F0A5BEBD2C53C64CC31CD3149350EE27D4D9A2F9B6B")
-  )
-
-  def start(): \/[CoreError, Option[Dht]] = {
-    val node = nodes(0)
-    val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
-    for {
-      receiverPublicKey <- \/.fromEither(
-        PublicKey.fromString(node._2)
-          .toRight(CoreError.InvalidFormat("Public key: " + node._2))
-      )
-      result <- {
-        val dht = Dht()
-
-        val nodesRequestPacket = NodesRequestPacket(dht.keyPair.publicKey, 1)
-
-        for {
-          request <- EncryptedNodesRequestPacket.encrypt(
-            receiverPublicKey,
-            dht.keyPair,
-            Nonce.random(),
-            nodesRequestPacket
-          )
-          request <- EncryptedNodesRequestPacket.toBytes(request)
-          request <- ToxPacket.toBytes(ToxPacket(
-            NodesRequestPacket.packetKind,
-            request
-          ))
-        } yield {
-          val timer = udp.lift(time.awakeEvery(1 seconds).take(5).map(TimeEvent))
-          val receiver = udp.receives(MaxUdpPacketSize, Some(5 seconds)).take(20).map(NetworkEvent)
-
-          val client = udp.listen(ToxCoreConstants.DefaultStartPort) {
-            for {
-              () <- udp.send(to = address, request.toByteVector)
-              event <- udp.merge(timer, receiver)
-              dht <- processEvent(dht, event)
-            } yield {
-              logger.info("Finished: " + dht)
-              dht
-            }
-          }
-
-          val result = client.runLast.run
-          logger.info("Final state: " + result)
-          result
-        }
-      }
-    } yield {
-      result
-    }
+    startLoop.merge(shutdownLoop.drain)
   }
 
 }

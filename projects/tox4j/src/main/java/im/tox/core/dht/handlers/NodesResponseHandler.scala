@@ -31,13 +31,8 @@ object NodesResponseHandler extends DhtPayloadHandler(NodesResponsePacket) {
       packets <- packets
     } yield {
       packets.foldLeft(IO(dht)) {
-        case (dht, (node, packet)) =>
-          for {
-            dht <- dht
-            () <- IO.sendTo(node, packet)
-          } yield {
-            dht
-          }
+        case (dht: IO[Dht], (node, packet)) =>
+          IO.sendTo(node, packet).flatMap(_ => dht)
       }
     }
   }

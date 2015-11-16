@@ -6,7 +6,7 @@ import scodec.codecs._
 /**
  * IP_Port stores an IP datastructure with a port.
  */
-final class Port private[network] (val value: Int) extends AnyVal
+final case class Port private[network] (value: Int) extends AnyVal
 
 object Port extends BoundedIntCompanion[Port](1, 0xffff, uint16) { // scalastyle:ignore magic.number
 

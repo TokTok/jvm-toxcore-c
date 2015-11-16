@@ -21,7 +21,7 @@ object PingResponseHandler extends DhtPayloadHandler(PingResponsePacket) {
       )
     } yield {
       for {
-        () <- IO.sendTo(sender, response)
+        _ <- IO.sendTo(sender, response)
       } yield {
         dht.addNode(sender)
       }
