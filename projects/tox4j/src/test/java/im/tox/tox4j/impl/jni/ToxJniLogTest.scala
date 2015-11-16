@@ -1,7 +1,7 @@
 package im.tox.tox4j.impl.jni
 
 import im.tox.tox4j.core.ToxCoreFactory
-import im.tox.tox4j.impl.jni.proto.ProtoLog.JniLog
+import im.tox.tox4j.impl.jni.proto.JniLog
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -54,6 +54,21 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
       assert(ToxJniLog.fromBytes(bytes) == JniLog.defaultInstance)
     }
   }
+
+  // TODO(iphydf): Enable this when javaConversions in protobufConfig can be enabled.
+  /*
+  test("Java conversions") {
+    ToxJniLog() // clear
+
+    ToxJniLog.maxSize = TestMaxSize
+    assert(ToxJniLog().entries.isEmpty)
+    ToxCoreFactory.withTox { tox => }
+
+    val log = ToxJniLog()
+    assert(JniLog.fromJavaProto(JniLog.toJavaProto(log)) == log)
+    assert(JniLog.fromAscii(log.toString) == log)
+  }
+  */
 
   test("concurrent logging works") {
     ToxJniLog() // clear

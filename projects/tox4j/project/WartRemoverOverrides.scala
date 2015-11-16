@@ -26,7 +26,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "CallState",
         "InternalFields_avProto",
         "VideoReceiveFrame"
-      ).map(_ + ".scala").map(proto / "av" / "proto" / "Av" / _)
+      ).map(_ + ".scala").map(proto / "av" / "proto" / _)
 
       val coreProtos = Seq(
         "Connection",
@@ -50,7 +50,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "MessageType",
         "SelfConnectionStatus",
         "UserStatus"
-      ).map(_ + ".scala").map(proto / "core" / "proto" / "Core" / _)
+      ).map(_ + ".scala").map(proto / "core" / "proto" / _)
 
       val protoLogProtos = Seq(
         "JniLogEntry",
@@ -59,7 +59,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "TimeVal",
         "Value",
         "InternalFields_ProtoLogProto"
-      ).map(_ + ".scala").map(proto / "impl" / "jni" / "proto" / "ProtoLog" / _)
+      ).map(_ + ".scala").map(proto / "impl" / "jni" / "proto" / _)
 
       avProtos ++ coreProtos ++ protoLogProtos
     }

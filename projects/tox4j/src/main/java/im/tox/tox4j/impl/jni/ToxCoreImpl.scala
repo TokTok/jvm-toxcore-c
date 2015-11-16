@@ -8,7 +8,7 @@ import im.tox.tox4j.core.callbacks._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.exceptions._
 import im.tox.tox4j.core.options.ToxOptions
-import im.tox.tox4j.core.proto.Core._
+import im.tox.tox4j.core.proto._
 import im.tox.tox4j.impl.ToxImplBase.tryAndLog
 import im.tox.tox4j.impl.jni.ToxCoreImpl.{convert, logger}
 import im.tox.tox4j.impl.jni.internal.Event

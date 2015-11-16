@@ -2,7 +2,7 @@ package sbt.tox4j
 
 import java.io.File
 
-import com.trueaccord.scalapb.ScalaPbPlugin
+import com.trueaccord.scalapb.ScalaPbPlugin._
 import sbt.Keys._
 import sbt._
 import sbt.tox4j.Jni.Keys._
@@ -31,8 +31,10 @@ object ProtobufJni extends OptionalPlugin {
       protoc
     ) map sourceGeneratorTask
 
-  )) ++ ScalaPbPlugin.protobufSettings ++ Seq(
-    version in ScalaPbPlugin.protobufConfig := "3.0.0-alpha-3",
+  )) ++ protobufSettings ++ Seq(
+    version in protobufConfig := "3.0.0-alpha-3",
+    javaConversions in protobufConfig := false, // TODO(iphydf): Set this to true.
+    flatPackage in protobufConfig := true,
 
     sourceGenerators in Compile <+= generate in Protobuf,
     jniSourceFiles in Compile ++= ((managedNativeSource in Compile).value ** "*.pb.cpp").get

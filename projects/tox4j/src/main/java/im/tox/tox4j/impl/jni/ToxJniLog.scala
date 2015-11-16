@@ -2,7 +2,7 @@ package im.tox.tox4j.impl.jni
 
 import com.google.protobuf.InvalidProtocolBufferException
 import com.typesafe.scalalogging.Logger
-import im.tox.tox4j.impl.jni.proto.ProtoLog._
+import im.tox.tox4j.impl.jni.proto._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.{Duration, SECONDS}
