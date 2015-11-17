@@ -24,7 +24,7 @@ object UdpActor {
    */
   private val MaxUdpPacketSize = 2048
 
-  private val timeout = Some(5 seconds)
+  private val timeout = Some(30 seconds)
 
   def make(
     actionSource: Process[Task, IO.Action],
@@ -47,9 +47,8 @@ object UdpActor {
               udp.send(node.address, packetData.toByteVector)
           }
 
-        case action =>
-          logger.debug("UDP loop ignored " + action)
-          Process.empty
+        case IO.Action.Shutdown => receiver.kill ++ Process.halt
+        case action             => Process.empty
       }
 
       for {

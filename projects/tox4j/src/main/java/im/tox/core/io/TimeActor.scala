@@ -18,31 +18,25 @@ object TimeActor {
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
-    for {
-      action <- actionSource
-      () <- installTimer(eventSink, action)
-    } yield {
-      logger.debug("Performed time action")
+    actionSource.take(1).flatMap { action =>
+      make(actionSource, eventSink).merge(installTimer(eventSink, action))
     }
   }
 
   private def installTimer(eventSink: Sink[Task, IO.Event], action: IO.Action): Process[Task, Unit] = {
     action match {
       case startTimer @ Action.StartTimer(delay, repeat) =>
-        for {
-          duration <- time.awakeEvery(delay).take(repeat)
-          () <- emitEvent(startTimer.event(duration), eventSink)
-        } yield {
-          logger.debug("Installed timer")
-        }
-      case _ =>
-        Process.empty
-    }
-  }
+        val timer = time.awakeEvery(delay)
+        repeat
+          .fold(timer)(timer.take)
+          .flatMap { duration =>
+            startTimer.event(duration)
+              .fold(Process.empty[Task, IO.Event])(Process.emit)
+              .to(eventSink)
+          }
 
-  private def emitEvent(event: Option[IO.Event], eventSink: Sink[Task, IO.Event]): Process[Task, Unit] = {
-    val eventSource = event.fold(Process.empty[Task, IO.Event])(Process.emit)
-    eventSource.to(eventSink)
+      case _ => Process.empty
+    }
   }
 
 }

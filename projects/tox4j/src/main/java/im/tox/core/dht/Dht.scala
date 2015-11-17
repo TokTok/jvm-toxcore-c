@@ -1,9 +1,12 @@
 package im.tox.core.dht
 
-import com.github.nscala_time.time.Imports._
 import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto._
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
+
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 /**
  * Toxcore stores the 32 nodes closest to its DHT public key and 8 nodes closest
@@ -129,8 +132,8 @@ object Dht {
    * are still being stored in the lists. Decreasing these delays would do the
    * opposite.
    */
-  val PingTimeout = 122.seconds
-  val PingInterval = 20.seconds
+  val PingTimeout = 122 seconds
+  val PingInterval = 20 seconds
 
   /**
    * If the 8 nodes closest to each public key were increased to 16 it would

@@ -70,6 +70,7 @@ object NetworkCore {
     val timeLoop = TimeActor.make(actionTopic.subscribe, eventQueue.enqueue)
 
     val bootstrapAction = Process(
+      // TODO(iphydf): Remove first one when https://github.com/scalaz/scalaz-stream/issues/488 is fixed.
       IO.Action.SendTo(
         NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
         bootstrapRequest
@@ -78,11 +79,7 @@ object NetworkCore {
         NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
         bootstrapRequest
       ),
-      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
-      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
-      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
-      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.TimeEvent(duration)) },
-      IO.Action.StartTimer(1 second, 1) { duration => Some(IO.ShutdownEvent) }
+      IO.Action.StartTimer(60 seconds) { duration => Some(IO.ShutdownEvent) }
     ).toSource.to(actionTopic.publish)
 
     val startLoop = bootstrapAction.merge(udpLoop).merge(timeLoop).merge(actionLoop)

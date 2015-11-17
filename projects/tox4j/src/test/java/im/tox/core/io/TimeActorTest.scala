@@ -22,7 +22,7 @@ final class TimeActorTest extends FunSuite {
     val eventQueue = async.boundedQueue[IO.Event](10)
 
     val actionActor = Process(
-      IO.Action.StartTimer(delay, repeats) { duration => Some(IO.TimeEvent(duration)) }
+      IO.Action.StartTimer(delay, Some(repeats))(_ => Some(IO.ShutdownEvent))
     ).repeat.take(timers).toSource.to(actionQueue.enqueue)
 
     val timeActor = TimeActor.make(actionQueue.dequeue, eventQueue.enqueue)
@@ -42,7 +42,10 @@ final class TimeActorTest extends FunSuite {
         }
 
     val start = System.currentTimeMillis()
-    actionActor.merge(timeActor).merge(testActor).run.run
+    actionActor
+      .merge(timeActor)
+      .merge(testActor)
+      .run.run
     val end = System.currentTimeMillis()
 
     assert(end - start < (delay.toMillis * repeats * timers))

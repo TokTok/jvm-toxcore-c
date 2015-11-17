@@ -18,21 +18,23 @@ object NodesResponseHandler extends DhtPayloadHandler(NodesResponsePacket) {
   override def apply(dht: Dht, sender: NodeInfo, packet: NodesResponsePacket): CoreError \/ IO[Dht] = {
     val nodes = packet.nodes.filter(dht.canAddNode)
 
-    val packets = nodes.foldLeft(\/-(Nil): CoreError \/ List[(NodeInfo, ToxPacket[PingRequestPacket.PacketKind])]) { (packets, node) =>
-      for {
-        packets <- packets
-        response <- makeResponse(dht.keyPair, node.publicKey, PingRequestPacket, PingPacket(0))
-      } yield {
-        (node, response) +: packets
+    val packets =
+      nodes.foldLeft(\/-(Nil): CoreError \/ List[(NodeInfo, ToxPacket[PingRequestPacket.PacketKind])]) {
+        (packets, node) =>
+          for {
+            packets <- packets
+            response <- makeResponse(dht.keyPair, node.publicKey, PingRequestPacket, PingPacket(0))
+          } yield {
+            (node, response) +: packets
+          }
       }
-    }
 
     for {
       packets <- packets
     } yield {
       packets.foldLeft(IO(dht)) {
         case (dht: IO[Dht], (node, packet)) =>
-          IO.sendTo(node, packet).flatMap(_ => dht)
+          IO.sendTo(node, packet).flatMap { case () => dht }
       }
     }
   }

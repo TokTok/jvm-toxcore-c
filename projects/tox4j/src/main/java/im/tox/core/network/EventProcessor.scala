@@ -7,7 +7,6 @@ import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scalaz._
 import scalaz.stream.udp.Packet
@@ -39,10 +38,22 @@ object EventProcessor {
     }
   }
 
-  def processTimingEvent(duration: Duration): State[Dht, CoreError \/ Seq[IO.Action]] = {
-    logger.debug("Time event: " + duration.toSeconds)
+  def processTimedActionEvent(action: Dht => IO[Dht]): State[Dht, CoreError \/ Seq[IO.Action]] = {
+    logger.debug("Processing time event")
 
-    State(dht => (dht, \/-(Nil)))
+    for {
+      dht <- State.get[Dht]
+      actions <- {
+        val (actions, newDht) = action(dht).run(Nil)
+        for {
+          _ <- State.put(newDht)
+        } yield {
+          actions
+        }
+      }
+    } yield {
+      \/-(actions)
+    }
   }
 
   def processShutdownEvent: State[Dht, CoreError \/ Seq[IO.Action]] = {
@@ -55,8 +66,8 @@ object EventProcessor {
     event match {
       case IO.NetworkEvent(packet) =>
         processNetworkEvent(packet)
-      case IO.TimeEvent(duration) =>
-        processTimingEvent(duration)
+      case IO.TimedActionEvent(action) =>
+        processTimedActionEvent(action)
       case IO.ShutdownEvent =>
         processShutdownEvent
     }
