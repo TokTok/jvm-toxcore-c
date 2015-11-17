@@ -24,6 +24,8 @@ object UdpActor {
    */
   private val MaxUdpPacketSize = 2048
 
+  private val timeout = Some(5 seconds)
+
   def make(
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
@@ -31,8 +33,7 @@ object UdpActor {
     udp.listen(ToxCoreConstants.DefaultStartPort - 1) {
       import udp.syntax._
 
-      val receiver = udp.receives(MaxUdpPacketSize, Some(6 seconds))
-        .take(5)
+      val receiver = udp.receives(MaxUdpPacketSize, timeout)
         .map(IO.NetworkEvent)
         .to(eventSink)
 

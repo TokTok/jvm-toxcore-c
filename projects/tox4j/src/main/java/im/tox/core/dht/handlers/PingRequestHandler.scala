@@ -5,7 +5,7 @@ import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 
-import scalaz.\/
+import scalaz.{\/-, \/}
 
 object PingRequestHandler extends DhtPayloadHandler(PingRequestPacket) {
 

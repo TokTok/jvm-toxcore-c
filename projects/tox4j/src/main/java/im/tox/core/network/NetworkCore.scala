@@ -3,20 +3,17 @@ package im.tox.core.network
 import java.net.InetSocketAddress
 
 import com.typesafe.scalalogging.Logger
-import im.tox.core.crypto.PlainText.Conversions._
 import im.tox.core.crypto.PublicKey
 import im.tox.core.dht.packets.dht.{NodesRequestPacket, PingRequestPacket}
 import im.tox.core.dht.{Dht, NodeInfo, Protocol}
-import im.tox.core.io.{EventActor, TimeActor, UdpActor, IO}
+import im.tox.core.io.{EventActor, IO, TimeActor, UdpActor}
 import im.tox.core.network.packets.ToxPacket
-import im.tox.tox4j.core.ToxCoreConstants
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scalaz.concurrent.Task
 import scalaz.stream._
-import scalaz.{-\/, \/-}
 
 /**
  * The network module is the lowest file in toxcore that everything else depends

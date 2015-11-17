@@ -2,6 +2,7 @@ package im.tox.core.dht.handlers
 
 import java.net.InetSocketAddress
 
+import im.tox.core.crypto.KeyPair
 import im.tox.core.dht.packets.DhtRequestPacket
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
@@ -64,6 +65,15 @@ final case class DhtRequestHandler[T, S <: Security](handler: ToxPacketHandler[T
             }
           }
       }
+    }
+  }
+
+  override def toString(keyPair: KeyPair, requestPacket: DhtRequestPacket[T]): String = {
+    if (requestPacket.receiverPublicKey == keyPair.publicKey) {
+      val string = adapter.toString(keyPair, requestPacket.payload)
+      s"${requestPacket.getClass.getSimpleName}($string)"
+    } else {
+      requestPacket.toString
     }
   }
 

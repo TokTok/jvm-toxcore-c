@@ -2,11 +2,12 @@ package im.tox.core.network
 
 import java.net.InetSocketAddress
 
-import im.tox.core.crypto.{Nonce, PublicKey}
+import im.tox.core.crypto.{KeyPair, Nonce, PublicKey}
 import im.tox.core.dht.Dht
 import im.tox.core.dht.packets.DhtEncryptedPacket
 import im.tox.core.dht.packets.dht.{PingPacket, PingRequestPacket}
 import im.tox.core.error.CoreError
+import im.tox.core.network.PacketKind.PingRequest
 import im.tox.core.network.packets.ToxPacket
 import im.tox.tox4j.core.ToxCoreConstants
 import org.scalatest.FunSuite
@@ -24,11 +25,34 @@ object NetworkCoreTest {
     ("localhost", "9570FFA4644F8B6AF6DEBDCF3BE2E50553182C8D148F5AB1B4D292F293E5413D") // TestClient
   )
 
+  val EncryptedPingRequestPacket = DhtEncryptedPacket.Make(PingRequestPacket)
+
+  def makePingRequest(
+    senderKeyPair: KeyPair,
+    receiverPublicKey: PublicKey,
+    pingId: Long
+  ): \/[CoreError, ToxPacket[PingRequest.type]] = {
+    val pingRequestPacket = PingPacket(pingId)
+
+    for {
+      request <- NetworkCoreTest.EncryptedPingRequestPacket.encrypt(
+        receiverPublicKey,
+        senderKeyPair,
+        Nonce.random(),
+        pingRequestPacket
+      )
+      request <- NetworkCoreTest.EncryptedPingRequestPacket.toBytes(request)
+    } yield {
+      ToxPacket(
+        PingRequestPacket.packetKind,
+        request
+      )
+    }
+  }
+
 }
 
 final class NetworkCoreTest extends FunSuite {
-
-  val EncryptedPingRequestPacket = DhtEncryptedPacket.Make(PingRequestPacket)
 
   def start(): \/[CoreError, Unit] = {
     val node = NetworkCoreTest.nodes.head
@@ -42,21 +66,9 @@ final class NetworkCoreTest extends FunSuite {
       result <- {
         val dht = Dht()
 
-        val pingRequestPacket = PingPacket(1)
-
         for {
-          request <- EncryptedPingRequestPacket.encrypt(
-            receiverPublicKey,
-            dht.keyPair,
-            Nonce.random(),
-            pingRequestPacket
-          )
-          request <- EncryptedPingRequestPacket.toBytes(request)
+          packet <- NetworkCoreTest.makePingRequest(dht.keyPair, receiverPublicKey, 0)
         } yield {
-          val packet = ToxPacket(
-            PingRequestPacket.packetKind,
-            request
-          )
           NetworkCore.client(dht, address, receiverPublicKey, packet).run.run
         }
       }
