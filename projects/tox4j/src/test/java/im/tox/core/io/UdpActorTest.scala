@@ -10,9 +10,10 @@ import im.tox.tox4j.core.ToxCoreConstants
 import org.scalatest.FunSuite
 import org.slf4j.LoggerFactory
 
+import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scalaz.concurrent.Task
-import scalaz.stream.{Process, Sink, async}
+import scalaz.stream.{udp, Process, Sink, async}
 
 final class UdpActorTest extends FunSuite {
 
@@ -32,7 +33,7 @@ final class UdpActorTest extends FunSuite {
     IO.Action.SendTo(NodeInfo(Protocol.Udp, address, receiverPublicKey), pingRequestPacket)
   }
 
-  val packetCount = 2
+  val packetCount = 1
   val minCompletionRatio = 1.0
   val minResponses = (packetCount * minCompletionRatio).toInt max 1
 
@@ -65,6 +66,50 @@ final class UdpActorTest extends FunSuite {
         }
 
     actionActor.merge(udpActor).merge(testActor).run.run
+  }
+
+  test("process ints with pubsub in udp.Connection context") {
+    val actionQueue = async.topic[Int]()
+
+    val numbers = Seq(1, 2, 3)
+    val publisher = Process.emitAll(numbers).toSource.to(actionQueue.publish)
+
+    val received = new ArrayBuffer[Int]
+    val subscriber = udp.listen(12345) {
+      udp.lift(
+        actionQueue.subscribe.flatMap { i =>
+          received += i
+          if (i == 3) {
+            publisher.kill ++ Process.halt
+          } else {
+            Process.empty[Task, Unit]
+          }
+        }
+      )
+    }
+
+    publisher.merge(subscriber).run.run
+    assert(received.toSeq == numbers)
+  }
+
+  test("process ints with pubsub in Task context") {
+    val actionQueue = async.topic[Int]()
+
+    val numbers = Seq(1, 2, 3)
+    val publisher = Process.emitAll(numbers).toSource.to(actionQueue.publish)
+
+    val received = new ArrayBuffer[Int]
+    val subscriber = actionQueue.subscribe.flatMap { i =>
+      received += i
+      if (i == 3) {
+        publisher.kill ++ Process.halt
+      } else {
+        Process.empty[Task, Unit]
+      }
+    }
+
+    publisher.merge(subscriber).run.run
+    assert(received.toSeq == numbers)
   }
 
   test("process actions with queue") {

@@ -37,6 +37,8 @@ libraryDependencies ++= Seq(
 
 // Test dependencies.
 libraryDependencies ++= Seq(
+  "com.assembla.scala-incubator" %% "graph-core" % "1.9.4",
+  "com.assembla.scala-incubator" %% "graph-dot" % "1.10.0",
   "com.google.guava" % "guava" % "18.0",
   "com.intellij" % "forms_rt" % "7.0.3",
   "com.storm-enroute" %% "scalameter" % "0.8-SNAPSHOT",

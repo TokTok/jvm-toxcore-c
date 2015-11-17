@@ -21,21 +21,53 @@ import org.slf4j.LoggerFactory
  * the lists after a valid ping response of send node packet is received from
  * them.
  */
-final case class Dht(
+final case class Dht private (
     keyPair: KeyPair,
     nodeSets: Map[PublicKey, NodeSet]
 ) {
 
   def size: Int = nodeSets.values.map(_.size).sum
 
+  def canAddFriend(publicKey: PublicKey): Boolean = {
+    !nodeSets.contains(publicKey)
+  }
+
+  def addFriend(publicKey: PublicKey): Dht = {
+    assert(canAddFriend(publicKey), s"Public key $publicKey is already a friend")
+    copy(
+      nodeSets = nodeSets + (publicKey -> NodeSet(Dht.MaxFriendNodes, publicKey))
+    )
+  }
+
+  def tryAddFriend(publicKey: PublicKey): Dht = {
+    if (canAddFriend(publicKey)) {
+      addFriend(publicKey)
+    } else {
+      this
+    }
+  }
+
   def canAddNode(nodeInfo: NodeInfo): Boolean = {
-    nodeSets.exists(_._2.canAdd(nodeInfo))
+    nodeInfo.publicKey != keyPair.publicKey &&
+      nodeSets.exists(_._2.canAdd(nodeInfo))
   }
 
   def addNode(nodeInfo: NodeInfo): Dht = {
+    assert(
+      canAddNode(nodeInfo),
+      s"Node with key ${nodeInfo.publicKey} can not be added to any node list of node ${keyPair.publicKey}"
+    )
     copy(
       nodeSets = nodeSets.mapValues(_.add(nodeInfo))
     )
+  }
+
+  def tryAddNode(nodeInfo: NodeInfo): Dht = {
+    if (canAddNode(nodeInfo)) {
+      addNode(nodeInfo)
+    } else {
+      this
+    }
   }
 
   def getNode(nodeId: PublicKey): Option[NodeInfo] = {
@@ -114,12 +146,14 @@ object Dht {
    * temporary DHT public key. This address is temporary and is wiped every time
    * the tox instance is closed/restarted.
    */
-  def apply(): Dht = {
-    val keyPair = CryptoCore.keyPair()
-
+  def apply(
+    keyPair: KeyPair = CryptoCore.keyPair(),
+    maxClosestNodes: Int = MaxClosestNodes,
+    maxFriendNodes: Int = MaxFriendNodes
+  ): Dht = {
     Dht(
       keyPair,
-      Map(keyPair.publicKey -> NodeSet(Dht.MaxClosestNodes, keyPair.publicKey))
+      Map(keyPair.publicKey -> NodeSet(maxClosestNodes, keyPair.publicKey))
     )
   }
 

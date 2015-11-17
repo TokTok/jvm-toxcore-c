@@ -25,7 +25,7 @@ final class PortTest extends ModuleCompanionTest(Port) {
   }
 
   test("creation from invalid values") {
-    for (portNumber <- Seq(-1, 0, Int.MinValue, Int.MaxValue, 0x10000)) {
+    for (portNumber <- Seq(-1, Int.MinValue, Int.MaxValue, 0x10000)) {
       assert(Port.fromInt(portNumber).isEmpty)
     }
   }
