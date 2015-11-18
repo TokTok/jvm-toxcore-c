@@ -12,37 +12,41 @@ cache:
 
 env:
   matrix:
-    - TARGET=arm-linux-androideabi
+    #- TARGET=arm-linux-androideabi
     - TARGET=i686-linux-android
-    - TARGET=host TEST_GOAL=coverage
-    - TARGET=host TEST_GOAL=performance
+    #- TEST_GOAL=coverage
+    #- TEST_GOAL=performance
 
 matrix:
   fast_finish: true
   allow_failures:
-    - env: TARGET=host TEST_GOAL=performance
+    - env: TEST_GOAL=performance
 
 install:
   # Move files from cache directory.
-  - rm -rf $HOME/.ivy2 $HOME/.sbt $HOME/.usr
-  - mkdir -p $HOME/cache/ivy2 $HOME/cache/sbt $HOME/cache/usr
+  - rm -rf $HOME/.ivy2 $HOME/.sbt
+  - mkdir -p $HOME/cache/ivy2 $HOME/cache/sbt
   - ln -s $HOME/cache/ivy2 $HOME/.ivy2
   - ln -s $HOME/cache/sbt  $HOME/.sbt
-  - ln -s $HOME/cache/usr  $HOME/.usr
   # Set-up step.
-  - make setup-$TARGET TARGET=$TARGET
+  - export NDK_HOME=$HOME/android-ndk
+  - buildscripts/00_dependencies_host
+  - buildscripts/01_ndk
+  - buildscripts/02_toolchain
+  - buildscripts/03_dependencies_target
 
 script:
   # Build/install step.
-  - make install GOAL=$TEST_GOAL
+  - buildscripts/04_build
+  - readelf projects/tox4j/target/cpp/bin/libtox4j.so | grep '(TEXTREL)'
 
 before_cache:
+  # Hack to make sbt-coveralls work with our non-standard directory layout.
   - ln -s $PWD/.git projects/tox4j/
   - ln -s $PWD/projects/tox4j/src/main/java/* $PWD/projects/tox4j/
   - if [ "$TEST_GOAL" = "coverage" ]; then cd projects/tox4j && sbt coveralls; fi
   # Clean up cache.
   - find $HOME/cache/ivy2 -type f -name "ivydata-*.properties" -delete
-  - find $HOME/cache/ivy2 -type d -name "im.tox" -exec rm -rf {} ";"
   - find $HOME/cache/sbt/boot -name "sbt.*.lock" -delete
 
 branches:

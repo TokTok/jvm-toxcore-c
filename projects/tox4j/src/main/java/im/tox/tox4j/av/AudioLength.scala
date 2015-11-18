@@ -7,9 +7,7 @@ import scodec.{Attempt, Err}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-final class AudioLength private (private val value: Duration) extends AnyVal {
-  def toMicros: Int = value.toMicros.toInt
-}
+final class AudioLength private (val value: Duration) extends AnyVal
 
 // scalastyle:off magic.number
 object AudioLength extends DiscreteValueCompanion[Duration, AudioLength](
@@ -26,7 +24,7 @@ object AudioLength extends DiscreteValueCompanion[Duration, AudioLength](
 
   override val codec = uint16.exmap[AudioLength](
     { micros => Attempt.fromOption(fromValue(micros microseconds), new Err.General(s"Invalid value for $this: $micros")) },
-    { self => Attempt.successful(self.toMicros) }
+    { self => Attempt.successful(self.value.toMicros.toInt) }
   )
 
   val Length2_5 = new AudioLength(values(0))

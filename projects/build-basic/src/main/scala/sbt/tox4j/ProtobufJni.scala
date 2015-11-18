@@ -13,7 +13,6 @@ object ProtobufJni extends OptionalPlugin {
   val Protobuf = config("protoc")
 
   object Keys {
-    val protoc = settingKey[File]("The path+name of the protoc executable.")
     val generate = taskKey[Seq[File]]("Compile the protobuf sources.")
   }
 
@@ -22,13 +21,10 @@ object ProtobufJni extends OptionalPlugin {
   override val moduleSettings = inConfig(Protobuf)(Seq(
     sourceDirectory := (sourceDirectory in Compile).value / "protobuf",
 
-    protoc := file("protoc"),
-
     generate <<= (
       streams,
       managedNativeSource in Compile,
-      sourceDirectory,
-      protoc
+      sourceDirectory
     ) map sourceGeneratorTask
 
   )) ++ protobufSettings ++ Seq(
@@ -43,14 +39,13 @@ object ProtobufJni extends OptionalPlugin {
   private def sourceGeneratorTask(
     streams: TaskStreams,
     managedNativeSource: File,
-    sourceDirectory: File,
-    protoc: File
+    sourceDirectory: File
   ) = {
     val compile = { (in: Set[File]) =>
       in.foreach(schema => streams.log.debug(s"Compiling schema $schema"))
 
       // Compile to C++ sources.
-      compileProtoc(protoc, in, managedNativeSource, sourceDirectory, streams.log)
+      compileProtoc(in, managedNativeSource, sourceDirectory, streams.log)
 
       Set.empty[File]
     }
@@ -65,7 +60,6 @@ object ProtobufJni extends OptionalPlugin {
   }
 
   private def compileProtoc(
-    protoc: File,
     schemas: Set[File],
     managedNativeSource: File,
     sourceDirectory: File,
@@ -81,8 +75,9 @@ object ProtobufJni extends OptionalPlugin {
 
     val exitCode =
       try {
-        val command = Seq(protoc.getPath) ++ Seq("-I" + sourceDirectory.absolutePath) ++ protocOptions ++ schemas.map(_.absolutePath)
-        command ! log
+        com.github.os72.protocjar.Protoc.runProtoc(
+          (Seq("-v3.0.0", "-I" + sourceDirectory.absolutePath) ++ protocOptions ++ schemas.map(_.absolutePath)).toArray
+        )
       } catch {
         case e: Exception =>
           throw new RuntimeException(s"error occured while compiling protobuf files: ${e.getMessage}", e)

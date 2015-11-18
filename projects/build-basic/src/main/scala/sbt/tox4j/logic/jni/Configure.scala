@@ -1,37 +1,74 @@
 package sbt.tox4j.logic.jni
 
-import java.io.{File, PrintWriter}
+import java.io.{IOException, File, PrintWriter}
 
-import org.apache.commons.io.FilenameUtils
-import sbt._
+import org.apache.commons.io.{FilenameUtils, IOUtils}
+import sbt.tox4j.logic.jni.Configure.NativeCompiler.C
+
+import scala.collection.JavaConverters._
 
 object Configure {
 
-  object configLog extends AnyRef with ProcessLogger {
+  object configLog extends AnyRef with sbt.ProcessLogger {
     val logFile = new PrintWriter("config.log")
 
-    def buffer[T](f: => T): T = {
-      val result = f
+    def buffer[T](f: => T): T = f
+
+    def error(s: => String): Unit = {
+      logFile.println("[error] " + s)
       logFile.flush()
-      result
     }
-    def error(s: => String) = logFile.println("[error] " + s)
-    def info(s: => String) = logFile.println("[info] " + s)
+    def info(s: => String): Unit = {
+      logFile.println("[info] " + s)
+      logFile.flush()
+    }
+  }
+
+  sealed trait NativeCompiler {
+    def program: String
+  }
+  object NativeCompiler {
+    final case class C(program: String) extends NativeCompiler
+    final case class Cxx(program: String) extends NativeCompiler
   }
 
   /**
    * Extensions of source files.
    */
-  private val cppExtensions = Seq(".cpp", ".cc", ".cxx", ".c")
+  private val cExtensions = Seq(".c")
+  private val cxxExtensions = Seq(".cpp", ".cc", ".cxx", ".C")
 
-  def isNativeSource(file: File): Boolean = {
-    file.isFile && cppExtensions.exists(file.getName.toLowerCase.endsWith)
+  private def extensions(nativeCompiler: NativeCompiler): Seq[String] = {
+    nativeCompiler match {
+      case NativeCompiler.C(_)   => cExtensions
+      case NativeCompiler.Cxx(_) => cxxExtensions
+    }
   }
 
-  private def findCcOptions(compiler: String, required: Boolean = false, code: String = "")(flags: Seq[String]*) = {
-    val sourceFile = File.createTempFile("configtest", cppExtensions.head); sourceFile.deleteOnExit()
+  def isNativeSource(file: File): Boolean = {
+    file.isFile && (cxxExtensions ++ cExtensions).exists(file.getName.toLowerCase.endsWith)
+  }
+
+  final case class CompilerResult[T <: NativeCompiler](
+    compiler: T,
+    code: String,
+    flags: Seq[String],
+    sysroot: Option[File],
+    sysrootFlag: Option[String],
+    output: Seq[String],
+    success: Boolean
+  )
+
+  private def checkCompilerResult[T <: NativeCompiler](
+    compiler: T,
+    code: String,
+    flags: Seq[String],
+    extraFlags: Seq[String],
+    sysroot: Option[File]
+  ): Option[CompilerResult[T]] = {
+    val sourceFile = File.createTempFile("configtest", extensions(compiler).head); sourceFile.deleteOnExit()
     val targetFile = File.createTempFile("configtest", ".out"); targetFile.deleteOnExit()
-    val gcnoFile = file(FilenameUtils.removeExtension(sourceFile.getName) + ".gcno"); gcnoFile.deleteOnExit()
+    val gcnoFile = new File(FilenameUtils.removeExtension(sourceFile.getName) + ".gcno"); gcnoFile.deleteOnExit()
 
     try {
       val out = new PrintWriter(sourceFile)
@@ -42,20 +79,35 @@ object Configure {
         out.close()
       }
 
-      val found =
-        flags find { flags =>
-          configLog.info(s"Trying compiler '$compiler' with code '$code' and flags $flags (required = $required)")
-          Seq(compiler, sourceFile.getPath, "-o", targetFile.getPath, "-Werror") ++ flags !< configLog match {
-            case 0 => true
-            case _ => false
-          }
-        }
+      val sysrootFlag = sysroot.map("--sysroot=" + _.getPath)
 
-      if (found.isEmpty && required) {
-        sys.error(s"No valid flags found with compiler $compiler; tried [${flags.map(_.mkString).mkString("; ")}]")
+      val command = (
+        compiler.program +: sourceFile.getPath +: "-o" +: targetFile.getPath +:
+        (flags ++ extraFlags)
+      ) ++ sysrootFlag
+
+      val process = new ProcessBuilder(command: _*)
+        .redirectErrorStream(true)
+        .start()
+
+      val result = CompilerResult(
+        compiler,
+        code,
+        flags,
+        sysroot,
+        sysrootFlag,
+        IOUtils.readLines(process.getInputStream).asScala,
+        process.waitFor() == 0
+      )
+
+      if (result.success) {
+        configLog.info("Success: " + result.toString)
       }
-
-      found
+      Some(result)
+    } catch {
+      case exn: IOException =>
+        configLog.info(exn.getMessage)
+        None
     } finally {
       targetFile.delete()
       sourceFile.delete()
@@ -63,17 +115,13 @@ object Configure {
     }
   }
 
-  def checkCcOptions(compiler: String, required: Boolean = false, code: String = "")(flags: Seq[String]*) = {
-    findCcOptions(compiler, required, code)(flags: _*).getOrElse(Nil)
-  }
+  private def makeToolchainCandidates(
+    toolchainPath: Option[File],
+    toolchainPrefix: Option[String],
+    tools: Seq[String]
+  ): Seq[String] = {
+    import sbt._
 
-  def ccFeatureTest(compiler: String, cxxFlags: Seq[String], flag: String, code: String, headers: String*) = {
-    checkCcOptions(compiler, code =
-      headers.map("#include <" + _ + ">").mkString("\n") + "\n" +
-        s"void configtest() { $code; }")(s"-DHAVE_$flag" +: cxxFlags).take(1)
-  }
-
-  private def mkToolchain(toolchainPath: Option[File], toolchainPrefix: Option[String], tools: Seq[String]) = {
     val toolchainTools =
       for {
         toolchainPath <- toolchainPath
@@ -85,45 +133,66 @@ object Configure {
     toolchainTools.getOrElse(tools)
   }
 
-  private def findTool(
-    toolName: String,
+  def findTool[T <: NativeCompiler](
+    makeTool: String => T,
     toolchainPath: Option[File],
     toolchainPrefix: Option[String],
-    code: String
-  )(
-    flags: Seq[String]*
-  )(
-    candidates: Seq[String]
-  ) = {
-    mkToolchain(toolchainPath, toolchainPrefix, candidates) find { cc =>
-      try {
-        val flagsOpt = Nil +: flags
-        configLog.info(s"Trying $cc with flags '$flagsOpt'")
-        Seq(cc, "--version") !< configLog == 0 && findCcOptions(cc, required = false, code)(flagsOpt: _*).isDefined
-      } catch {
-        case _: java.io.IOException => false
-      }
-    } getOrElse {
-      sys.error(s"Could not find a working $toolName; tried: " + candidates)
-    }
-  }
+    tools: Seq[String],
+    code: String,
+    flagsCandidates: Seq[Seq[String]]
+  ): CompilerResult[T] = {
+    import sbt._
 
-  def findCc(toolchainPath: Option[File], toolchainPrefix: Option[String]) = {
-    findTool(
-      "C89 compiler",
-      toolchainPath, toolchainPrefix,
-      ""
-    )(
-        Seq("-std=c89")
-      )(
-          sys.env.get("CC").toSeq ++ Seq("clang-3.6", "clang-3.5", "clang35", "gcc-4.9", "clang", "gcc", "cc")
+    val toolchainCandidates = makeToolchainCandidates(
+      toolchainPath,
+      toolchainPrefix,
+      tools
+    )
+
+    val sysroot = toolchainPath.map(_ / "sysroot")
+
+    val results =
+      for {
+        candidate <- toolchainCandidates
+        flagsCandidate <- flagsCandidates
+        result <- checkCompilerResult(
+          makeTool(candidate),
+          code,
+          flagsCandidate,
+          Nil,
+          sysroot
         )
+      } yield {
+        result
+      }
+
+    val result = results.find(_.success).getOrElse {
+      sys.error("Could not find a viable compiler; attempts: " + results)
+    }
+
+    configLog.info("Selected tool: " + result)
+    result
   }
 
-  def findCxx(toolchainPath: Option[File], toolchainPrefix: Option[String]) = {
+  def findCc(toolchainPath: Option[File], toolchainPrefix: Option[String]): CompilerResult[NativeCompiler.C] = {
     findTool(
-      "C++14 compiler",
-      toolchainPath, toolchainPrefix,
+      NativeCompiler.C,
+      toolchainPath,
+      toolchainPrefix,
+      sys.env.get("CC").toSeq ++ Seq("clang-3.6", "clang-3.5", "clang35", "gcc-4.9", "clang", "gcc", "cc"),
+      "",
+      Seq(
+        Seq("-std=c89")
+      )
+    )
+  }
+
+  def findCxx(toolchainPath: Option[File], toolchainPrefix: Option[String]): CompilerResult[NativeCompiler.Cxx] = {
+    findTool(
+      NativeCompiler.Cxx,
+      toolchainPath,
+      toolchainPrefix,
+      sys.env.get("CXX").toSeq ++ Seq("clang++-3.6", "clang++-3.5", "clang35++", "g++-4.9", "clang++", "g++", "c++"),
       """
       |auto f = [](auto i) mutable { return i; };
       |
@@ -140,13 +209,51 @@ object Configure {
       |auto foo (Args ...args) {
       |  return [&] { return bar (args...); };
       |}
-      |""".stripMargin
-    )(
+      |""".stripMargin,
+      Seq(
         Seq("-std=c++14"),
         Seq("-std=c++1y")
-      )(
-          sys.env.get("CXX").toSeq ++ Seq("clang++-3.6", "clang++-3.5", "clang35++", "g++-4.9", "clang++", "g++", "c++")
+      )
+    )
+  }
+
+  def checkCcOptions[T <: NativeCompiler](
+    compilerResult: CompilerResult[T],
+    cxxFlags: Option[Seq[String]],
+    flagsCandidates: Seq[String]*
+  ): Seq[String] = {
+    val results =
+      for {
+        flagsCandidate <- flagsCandidates
+        result <- checkCompilerResult(
+          compilerResult.compiler,
+          compilerResult.code,
+          flagsCandidate,
+          cxxFlags.getOrElse(Nil),
+          compilerResult.sysroot
         )
+      } yield {
+        result
+      }
+
+    results.find(_.success).toSeq.flatMap(_.flags)
+  }
+
+  def ccFeatureTest[T <: NativeCompiler](
+    compilerResult: CompilerResult[T],
+    cxxFlags: Seq[String],
+    flag: String,
+    code: String,
+    headers: String*
+  ): Seq[String] = {
+    checkCcOptions(
+      compilerResult.copy(
+        code = headers.map("#include <" + _ + ">").mkString("\n") + "\n" +
+        s"void configtest() { $code; }"
+      ),
+      Some(cxxFlags),
+      Seq(s"-DHAVE_$flag")
+    )
   }
 
 }

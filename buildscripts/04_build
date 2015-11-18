@@ -1,0 +1,168 @@
+#!/usr/bin/env perl
+
+use strict;
+use utf8;
+use lib 'buildscripts';
+
+use Data::Dumper;
+use Digest::SHA;
+use File::Find;
+
+use BuildScript;
+my $C = require C;
+
+
+##############################################################################
+#
+# :: Install modules.
+#
+##############################################################################
+
+
+{
+   # Remove any left-over local.sbt.
+   my $local_sbt = 'projects/tox4j/local.sbt';
+   unlink $local_sbt;
+
+   # Copy the target-specific SBT configuration if one exists.
+   my $local_sbt_config = "projects/tox4j/android/local.". $C->TARGET . ".sbt";
+   must_system "cp", $local_sbt_config, $local_sbt
+      if -f $local_sbt_config;
+}
+
+
+my @TEST_COMMANDS;
+
+push @TEST_COMMANDS, (
+   'clean',
+   'coverage',
+   'test',
+) if $C->TEST_GOAL eq 'coverage';
+
+push @TEST_COMMANDS, (
+   'testOnly *TravisBenchSuite'
+) if $C->TEST_GOAL eq 'performance';
+
+
+# Common sbt commands for all modules except build-basic:
+my @COMMANDS = (
+   'scalastyle',
+   'test:scalastyle',
+   'checkstyle',
+   'test:checkstyle',
+   'publishLocal',
+   'makeScripts',
+   @TEST_COMMANDS,
+);
+
+
+# Returns undef if the hash didn't change, or a hash string if it did.
+sub update_sha {
+   my ($state, $module) = @_;
+
+   my @files;
+
+   find {
+      wanted => sub {
+         # Skip IDEA and generated target files (classes and logs).
+         next if m|^projects/$module/\.idea|;
+         next if m|^projects/$module/project/project|;
+         next if m|^projects/$module/project/target|;
+         next if m|^projects/$module/target|;
+         next unless -f;
+
+         push @files, $_;
+      },
+      no_chdir => 1,
+   }, "projects/$module";
+
+   my $sha = do {
+      my $sha = new Digest::SHA;
+      $sha->addfile ($_)
+         for sort @files;
+      $sha->hexdigest
+   };
+
+   # If the hash is the same and we didn't request a force build of this
+   # module, skip it.
+   if ($state->{$module} eq $sha) {
+      undef
+   } else {
+      $sha
+   }
+}
+
+
+sub plan_build {
+   my %todo;
+
+   # If any files changed, this module needs to be rebuilt.
+   for my $index (0 .. $#_) {
+      my ($platform_dependent, $dependencies, $module, @commands) = @{ $_[$index] };
+
+      my $state =
+         $platform_dependent
+            ? \%{ $C->STATE->{$C->TARGET} }
+            : \%{ $C->STATE->{$C->HOST} }
+            ;
+
+      $todo{$module} = {
+         module => $module,
+         index => $index,
+         commands => \@commands,
+         state => $state,
+         sha => (update_sha $state, $module),
+      };
+   }
+
+   # If any dependency is rebuilt, this module also needs to be rebuilt.
+   for (@_) {
+      my (undef, $dependencies, $module) = @$_;
+
+      if (grep { $todo{$_}{sha} } @$dependencies) {
+         $todo{$module}{sha} //= $todo{$module}{state}->{$module};
+      }
+   }
+
+   sort { $a->{index} <=> $b->{index} } values %todo
+}
+
+
+sub install_modules {
+   for (@_) {
+      my $module   = $_->{module};
+      my $sha      = $_->{sha};
+      my $state    = $_->{state};
+      my $commands = $_->{commands};
+
+      if ($sha or $C->ALWAYS_BUILD ($module)) {
+         # Build and install the module.
+         print "Building module '$module'.\n";
+         pushd {
+            must_system $C->SBT, '-batch', @$commands;
+         } "projects/$module";
+
+         # Update directory hash in persistent state.
+         $state->{$module} = $sha;
+      } else {
+         print "Module '$module' already up-to-date.\n";
+      }
+   }
+}
+
+
+# Install all the project modules if they changed.
+install_modules (plan_build (
+   # <platform_dependent> <dependencies> <module> [commands...]
+   [0, [], 'build-basic',     'publishLocal', @TEST_COMMANDS],
+   [0, ['build-basic'],       'build-extra', @COMMANDS],
+   [0, ['build-extra'],       'linters', @COMMANDS],
+   [0, ['build-extra'],       'macros', @COMMANDS],
+   [1, ['linters', 'macros'], 'tox4j', @COMMANDS], # only tox4j is platform-dependent (1)
+));
+
+
+# Update generated files.
+pushd {
+   must_system $_ for <bin/Jni*>;
+} 'projects/tox4j';

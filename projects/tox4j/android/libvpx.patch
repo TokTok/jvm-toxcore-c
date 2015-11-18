@@ -1,8 +1,8 @@
 diff --git a/build/make/Makefile b/build/make/Makefile
-index da5721a..5a701eb 100644
+index 3081a92..b6ed5a9 100644
 --- a/build/make/Makefile
 +++ b/build/make/Makefile
-@@ -124,6 +124,8 @@ else
+@@ -126,6 +126,8 @@ else
  STACKREALIGN=
  endif
  
@@ -11,3 +11,17 @@ index da5721a..5a701eb 100644
  $(BUILD_PFX)%_mmx.c.d: CFLAGS += -mmmx
  $(BUILD_PFX)%_mmx.c.o: CFLAGS += -mmmx
  $(BUILD_PFX)%_sse2.c.d: CFLAGS += -msse2 $(STACKREALIGN)
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index 37ed86f..af242df 100644
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -1137,6 +1137,9 @@ EOF
+           LD=${LD:-${CROSS}gcc}
+           CROSS=${CROSS:-g}
+           ;;
++        android*)
++          CROSS=${CROSS:-i686-linux-android-}
++          ;;
+         os2)
+           disable_feature pic
+           AS=${AS:-nasm}

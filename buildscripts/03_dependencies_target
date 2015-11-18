@@ -1,0 +1,67 @@
+#!/usr/bin/env perl
+
+use strict;
+use utf8;
+use lib 'buildscripts';
+
+use Cwd;
+use Data::Dumper;
+
+use BuildScript;
+my $C = require C;
+$C = "C";
+
+my @dependencies = do 'buildscripts/dependencies.pl';
+
+
+##############################################################################
+#
+# :: Install external dependencies (target platform).
+#
+##############################################################################
+
+
+my $TARGET = $C->TARGET;
+my $NDK_HOME = $C->NDK_HOME;
+
+my $toolchain = cwd . "/toolchains/$TARGET";
+my $sysroot = "$toolchain/sysroot";
+my $prefix = "$sysroot/usr";
+
+
+sub expand_vars {
+   for (@_) {
+      s/\$SYSROOT/$sysroot/g;
+      s/\$TARGET/$TARGET/g;
+      s/\$NDK_HOME/$NDK_HOME/g;
+   }
+}
+
+
+sub install_dependency {
+   my ($baseurl, $repo, $branch, @flags) = @_;
+
+   # Not abs_path here, because it should be relative to the sysroot.
+   unshift @flags, "--prefix=$prefix";
+
+   @flags = flatten_flags $TARGET, @flags;
+   my $state = \%{ $C->STATE->{$TARGET} };
+
+   expand_vars $_ for @flags;
+
+   local $ENV{PATH} = "$toolchain/bin:$ENV{PATH}";
+   local $ENV{PKG_CONFIG_PATH} = "$prefix/lib/pkgconfig";
+   local $ENV{CPPFLAGS} = undef;
+   local $ENV{LDFLAGS} = undef;
+
+   # Apply patch if one exists.
+   my $patch = "projects/tox4j/android/$repo.patch";
+
+   git_install $state, $patch, $C->JOBS, $baseurl, $repo, $branch, @flags;
+}
+
+
+# Install external dependencies from git.
+if ($C->HOST ne $C->TARGET) {
+   install_dependency @$_ for @dependencies;
+}

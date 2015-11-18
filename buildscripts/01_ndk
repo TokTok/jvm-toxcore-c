@@ -1,0 +1,89 @@
+#!/usr/bin/env perl
+
+use strict;
+use utf8;
+use lib 'buildscripts';
+
+use File::Path 'remove_tree';
+
+use BuildScript;
+my $C = require C;
+
+
+##############################################################################
+#
+# :: Download and unpack Android NDK.
+#
+##############################################################################
+
+
+my @NDK_EXCLUDES = qw(
+   arch-mips
+   */platforms/android-12
+   */platforms/android-13
+   */platforms/android-14
+   */platforms/android-15
+   */platforms/android-16
+   */platforms/android-17
+   */platforms/android-18
+   */platforms/android-19
+   */platforms/android-20
+   */platforms/android-21
+   */platforms/android-3
+   */platforms/android-4
+   */platforms/android-5
+   */platforms/android-8
+   */prebuilt/android-arm64
+   */prebuilt/android-mips*
+   */prebuilt/android-x86_64
+   */sources/cxx-stl/llvm-libc++*
+   */sources/cxx-stl/gnu-libstdc++/4.9
+   */tests
+   */toolchains/*-4.9
+   */toolchains/*-clang3.5
+   */toolchains/aarch64*
+   */toolchains/llvm-3.5
+   */toolchains/mips*
+);
+
+
+my $NDK_DIR = "android-ndk-r10e";
+my $NDK_PACKAGE = "$NDK_DIR-$^O-x86_64.bin";
+
+if ($C->HOST ne $C->TARGET) {
+   die "No NDK path set" unless defined $C->NDK_HOME;
+
+   # Download NDK package if it wasn't downloaded, yet.
+   if (not -f $NDK_PACKAGE) {
+      my $url = "http://dl.google.com/android/ndk/$NDK_PACKAGE";
+      print "Downloading NDK package from $url\n";
+      system "curl", "-s", $url, "-o", $NDK_PACKAGE;
+      if ($?) {
+         must_system "wget", "-q", $url;
+      }
+   }
+
+   # Remove old NDK and left-over extracted dir if one exists.
+   remove_tree $NDK_DIR;
+   remove_tree $C->NDK_HOME;
+
+   print "Extracting $NDK_PACKAGE...\n";
+   my @lines = eval {
+      my @lines = must_popen "7z", "x", $NDK_PACKAGE, map { "-xr!$_" } @NDK_EXCLUDES;
+   };
+
+   if ($@ =~ /No such file or directory/) {
+      # 7z didn't exist, so just run the self-extracting archive.
+      chmod 0700, $NDK_PACKAGE;
+      @lines = must_popen "./$NDK_PACKAGE";
+   }
+
+   my $extracted = grep { /^Extracting/ } @lines;
+   my $skipped   = grep { /^Skipping/   } @lines;
+   my (@rest)    = grep { !/^(Extract|Skipp)ing/ } @lines;
+   print "Extracted: $extracted\n";
+   print "Skipped: $skipped\n";
+   print "$_\n" for @rest;
+
+   must_system "mv", $NDK_DIR, $C->NDK_HOME;
+}

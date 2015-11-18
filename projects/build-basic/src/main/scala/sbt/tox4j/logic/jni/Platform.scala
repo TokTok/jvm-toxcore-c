@@ -21,11 +21,12 @@ object Platform {
         // Try $TOOLCHAIN first, then try some other possible candidate paths.
         sys.env.get("TOOLCHAIN").map(file) ++
           Seq(
+            baseDirectory.value.getParentFile.getParentFile / "toolchains" / platform,
             baseDirectory.value / "android" / platform,
             baseDirectory.value.getParentFile / "android" / platform
           )
       candidates.find { candidate =>
-        Configure.configLog.info(s"Toolchain path '$candidate' exists: ${candidate.exists}")
+        Configure.configLog.info(s"Toolchain path '$candidate' exists? ${candidate.exists}")
         candidate.exists
       }
     },

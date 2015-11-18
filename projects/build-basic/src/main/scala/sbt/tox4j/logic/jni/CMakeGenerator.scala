@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 
 import org.apache.commons.io.FilenameUtils
 import sbt._
+import sbt.tox4j.logic.jni.Configure.{CompilerResult, NativeCompiler}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -56,15 +57,16 @@ object CMakeGenerator {
     toolchainPath: File
   )(
     nativeTarget: File,
-    nativeCC: String,
-    nativeCXX: String
+    nativeCC: CompilerResult[NativeCompiler.C],
+    nativeCXX: CompilerResult[NativeCompiler.Cxx]
   ): File = {
     val targetFile = nativeTarget / "Toolchain.cmake"
     val lines = new ArrayBuffer[String]
 
     lines += "SET(CMAKE_SYSTEM_NAME Linux)"
-    lines += s"SET(CMAKE_C_COMPILER $nativeCC)"
-    lines += s"SET(CMAKE_CXX_COMPILER $nativeCXX)"
+    lines += s"SET(CMAKE_C_COMPILER ${nativeCC.compiler.program})"
+    lines += s"SET(CMAKE_CXX_COMPILER ${nativeCXX.compiler.program})"
+    lines += s"SET(CMAKE_SYSROOT ${toolchainPath / "sysroot"})"
     lines += s"SET(CMAKE_FIND_ROOT_PATH ${toolchainPath / "sysroot"})"
     lines += "SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)"
     lines += "SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)"
@@ -75,7 +77,6 @@ object CMakeGenerator {
 
   def commonFile(log: Logger)(
     nativeTarget: File,
-    cppFlags: Seq[String],
     cFlags: Seq[String],
     cxxFlags: Seq[String],
     ldFlags: Seq[String],
@@ -91,9 +92,8 @@ object CMakeGenerator {
         Nil
       }
 
-    val cppflags = cppFlags ++ featureTestFlags
-    val cflags = (cppflags ++ cFlags).mkString("\"", " ", "\"")
-    val cxxflags = (cppflags ++ cxxFlags ++ coverageflags).mkString("\"", " ", "\"")
+    val cflags = (featureTestFlags ++ cFlags).mkString("\"", " ", "\"")
+    val cxxflags = (featureTestFlags ++ cxxFlags ++ coverageflags).mkString("\"", " ", "\"")
     val ldflags = (ldFlags ++ coverageflags).mkString("\"", " ", "\"")
 
     val targetFile = nativeTarget / "Common.cmake"

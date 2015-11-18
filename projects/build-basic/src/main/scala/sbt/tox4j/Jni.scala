@@ -4,6 +4,7 @@ import java.io.File
 
 import sbt.Keys._
 import sbt._
+import sbt.tox4j.logic.jni.Configure.{CompilerResult, NativeCompiler}
 import sbt.tox4j.logic.jni.{BuildTool, CMakeGenerator, Configure}
 import sbt.tox4j.util.NativeFinder
 
@@ -28,8 +29,8 @@ object Jni extends OptionalPlugin {
 
     val binPath = settingKey[File]("Shared libraries produced by JNI")
 
-    val nativeCC = settingKey[String]("Compiler to use")
-    val nativeCXX = settingKey[String]("Compiler to use")
+    val nativeCC = settingKey[CompilerResult[NativeCompiler.C]]("Compiler to use")
+    val nativeCXX = settingKey[CompilerResult[NativeCompiler.Cxx]]("Compiler to use")
     val toolchainPrefix = settingKey[Option[String]]("Optional toolchain prefix for the compiler")
     val toolchainPath = settingKey[Option[File]]("Optional toolchain location; must contain sysroot/ and bin/")
     val pkgConfigPath = settingKey[Seq[File]]("Directories to look in for pkg-config's .pc files")
@@ -179,51 +180,54 @@ object Jni extends OptionalPlugin {
       nativeCXX := Configure.findCxx(toolchainPath.value, toolchainPrefix.value),
 
       // Defaults from the environment.
-      cppFlags := Configure.checkCcOptions(nativeCXX.value)(getEnvFlags("CPPFLAGS")),
-      cFlags := Configure.checkCcOptions(nativeCC.value)(getEnvFlags("CFLAGS")),
-      cxxFlags := Configure.checkCcOptions(nativeCXX.value)(getEnvFlags("CXXFLAGS")),
-      ldFlags := Configure.checkCcOptions(nativeCXX.value)(getEnvFlags("LDFLAGS")),
+      cppFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("CPPFLAGS")),
+      cFlags := Configure.checkCcOptions(nativeCC.value, None, getEnvFlags("CFLAGS")),
+      cxxFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("CXXFLAGS")),
+      ldFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("LDFLAGS")),
 
       // Build with parallel tasks by default.
       buildTool := BuildTool.tool,
       buildFlags := Seq("-j" + java.lang.Runtime.getRuntime.availableProcessors),
 
       // C++14 flags.
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(
+      cxxFlags ++= Configure.checkCcOptions(
+        nativeCXX.value, None,
         Seq("-std=c++14"),
         Seq("-std=c++1y")
       ),
 
       // Debug flags.
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(
+      cxxFlags ++= Configure.checkCcOptions(
+        nativeCXX.value, None,
         Seq("-ggdb3"),
         Seq("-g3"),
         Seq("-g")
       ),
 
       // Warning flags.
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-Wall")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-Wextra")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-pedantic")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-fcolor-diagnostics")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wall")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wextra")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-pedantic")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-fcolor-diagnostics")),
 
       // Use libc++ if available.
       //ccOptions ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-stdlib=libc++")),
 
       // No RTTI and no exceptions.
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-fno-exceptions")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-fno-rtti")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-DGOOGLE_PROTOBUF_NO_RTTI")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-DGTEST_HAS_RTTI=0")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-fno-exceptions")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-fno-rtti")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-DGOOGLE_PROTOBUF_NO_RTTI")),
+      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-DGTEST_HAS_RTTI=0")),
 
       // Error on undefined references in shared object.
-      ldFlags ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-Wl,-z,defs")),
+      ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wl,-z,defs")),
 
       // Enable test coverage collection.
       coverageEnabled := true,
-      coverageFlags := Configure.checkCcOptions(nativeCXX.value)(
-        Seq("--coverage"),
-        Seq("-fprofile-arcs", "-ftest-coverage")
+      coverageFlags := Configure.checkCcOptions(
+        nativeCXX.value, Some(cxxFlags.value),
+        Seq("--coverage", "-DHAVE_COVERAGE"),
+        Seq("-fprofile-arcs", "-ftest-coverage", "-DHAVE_COVERAGE")
       ),
 
       // Feature tests.
@@ -290,9 +294,8 @@ object Jni extends OptionalPlugin {
       cmakeCommonFile := {
         CMakeGenerator.commonFile(streams.value.log)(
           nativeTarget.value,
-          cppFlags.value,
-          cFlags.value,
-          cxxFlags.value,
+          cFlags.value ++ nativeCC.value.sysrootFlag,
+          cxxFlags.value ++ nativeCXX.value.sysrootFlag,
           ldFlags.value,
           featureTestFlags.value,
           coverageEnabled.value,
@@ -397,11 +400,12 @@ object Jni extends OptionalPlugin {
         val buildPath = nativeTarget.value / "_build"
         buildPath.mkdirs()
 
+        Configure.configLog.info(s"PKG_CONFIG_PATH = $pkgConfigDirs")
         val env = (toolchainPath.value match {
           case None =>
             Seq(
-              ("CC", nativeCC.value),
-              ("CXX", nativeCXX.value)
+              ("CC", nativeCC.value.compiler.program),
+              ("CXX", nativeCXX.value.compiler.program)
             )
 
           case Some(toolchainPath) =>
@@ -412,6 +416,8 @@ object Jni extends OptionalPlugin {
                 (toolchainPath / "bin"))
             )
         }) ++ Seq(
+          ("CFLAGS", nativeCC.value.sysrootFlag.getOrElse("")),
+          ("CXXFLAGS", nativeCXX.value.sysrootFlag.getOrElse("")),
           ("PKG_CONFIG_PATH", pkgConfigDirs)
         )
 

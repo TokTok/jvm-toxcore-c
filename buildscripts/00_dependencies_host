@@ -1,0 +1,35 @@
+#!/usr/bin/env perl
+
+use strict;
+use utf8;
+use lib 'buildscripts';
+
+use Data::Dumper;
+
+use BuildScript;
+my $C = require C;
+
+my @dependencies = do 'buildscripts/dependencies.pl';
+
+
+##############################################################################
+#
+# :: Install external dependencies (host platform).
+#
+##############################################################################
+
+
+sub install_dependency {
+   my ($baseurl, $repo, $branch, @flags) = @_;
+
+   unshift @flags, "--prefix=" . $C->PREFIX;
+
+   @flags = flatten_flags $C->HOST, @flags;
+   my $state = \%{ $C->STATE->{$C->HOST} };
+
+   git_install $state, undef, $C->JOBS, $baseurl, $repo, $branch, @flags;
+}
+
+
+# Install external dependencies from git.
+install_dependency @$_ for @dependencies;

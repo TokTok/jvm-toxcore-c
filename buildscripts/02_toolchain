@@ -1,0 +1,55 @@
+#!/usr/bin/env perl
+
+use strict;
+use utf8;
+use lib 'buildscripts';
+
+use File::Path 'make_path', 'remove_tree';
+
+use BuildScript;
+my $C = require C;
+
+
+##############################################################################
+#
+# :: Install Android toolchain.
+#
+##############################################################################
+
+
+my %PLATFORM = (
+   'arm-linux-androideabi' => 'arm-linux-androideabi',
+   'i686-linux-android'    => 'x86',
+);
+
+
+if ($C->HOST ne $C->TARGET) {
+   die "No NDK path set" unless defined $C->NDK_HOME;
+
+   my $toolchain = "toolchains/" . $C->TARGET;
+   # Remove the old toolchain and create a new empty directory for it.
+   remove_tree $toolchain;
+   make_path $toolchain;
+
+   # Install a standalone Android NDK toolchain.
+   must_system (
+      $C->NDK_HOME . "/build/tools/make-standalone-toolchain.sh",
+      "--ndk-dir=" . $C->NDK_HOME,
+      "--toolchain=$PLATFORM{$C->TARGET}-clang3.6",
+      "--install-dir=$toolchain",
+      "--platform=android-9",
+   );
+
+   my $cached_sysroot = $C->CACHEDIR . "/" . $C->TARGET;
+   if (-d $cached_sysroot) {
+      # If we have a cached sysroot/usr, remove the NDK one.
+      remove_tree "$toolchain/sysroot/usr";
+   } else {
+      # Otherwise, move the NDK one into the cache.
+      must_system "mv", "$toolchain/sysroot/usr", $cached_sysroot;
+   }
+
+   # Then symlink the cached sysroot/usr to the toolchain path.
+   symlink $cached_sysroot, "$toolchain/sysroot/usr"
+      or die "Could not symlink cached sysroot: $!";
+}

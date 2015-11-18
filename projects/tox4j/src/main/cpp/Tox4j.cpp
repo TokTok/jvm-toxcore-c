@@ -16,12 +16,14 @@ JNI_OnLoad (JavaVM *, void *)
   return JNI_VERSION_1_4;
 }
 
+#ifdef HAVE_COVERAGE
 extern "C" void __gcov_flush ();
+#endif
 
 void
 JNI_OnUnload (JavaVM, void *)
 {
-#ifndef __ANDROID__
+#ifdef HAVE_COVERAGE
   __gcov_flush ();
 #endif
 }

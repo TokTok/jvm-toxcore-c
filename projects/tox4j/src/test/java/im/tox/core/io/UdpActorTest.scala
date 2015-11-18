@@ -68,7 +68,28 @@ final class UdpActorTest extends FunSuite {
     actionActor.merge(udpActor).merge(testActor).run.run
   }
 
-  test("process ints with pubsub in udp.Connection context") {
+  test("process ints with pubsub in Task context") {
+    val actionQueue = async.topic[Int]()
+
+    val numbers = Seq(1, 2, 3)
+    val publisher = Process.emitAll(numbers).toSource.to(actionQueue.publish)
+
+    val received = new ArrayBuffer[Int]
+    val subscriber = actionQueue.subscribe.flatMap { i =>
+      received += i
+      if (i == 3) {
+        publisher.kill ++ Process.halt
+      } else {
+        Process.empty[Task, Unit]
+      }
+    }
+
+    publisher.merge(subscriber).run.run
+    assert(received.toSeq == numbers)
+  }
+
+  // TODO(iphydf): https://github.com/scalaz/scalaz-stream/issues/488
+  ignore("process ints with pubsub in udp.Connection context") {
     val actionQueue = async.topic[Int]()
 
     val numbers = Seq(1, 2, 3)
@@ -92,33 +113,14 @@ final class UdpActorTest extends FunSuite {
     assert(received.toSeq == numbers)
   }
 
-  test("process ints with pubsub in Task context") {
-    val actionQueue = async.topic[Int]()
-
-    val numbers = Seq(1, 2, 3)
-    val publisher = Process.emitAll(numbers).toSource.to(actionQueue.publish)
-
-    val received = new ArrayBuffer[Int]
-    val subscriber = actionQueue.subscribe.flatMap { i =>
-      received += i
-      if (i == 3) {
-        publisher.kill ++ Process.halt
-      } else {
-        Process.empty[Task, Unit]
-      }
-    }
-
-    publisher.merge(subscriber).run.run
-    assert(received.toSeq == numbers)
-  }
-
   test("process actions with queue") {
     val actionQueue = async.boundedQueue[IO.Action](10)
 
     runTest(actionQueue.enqueue, actionQueue.dequeue)
   }
 
-  test("process actions with pubsub") {
+  // TODO(iphydf): https://github.com/scalaz/scalaz-stream/issues/488
+  ignore("process actions with pubsub") {
     val actionQueue = async.topic[IO.Action]()
 
     runTest(actionQueue.publish, actionQueue.subscribe)
