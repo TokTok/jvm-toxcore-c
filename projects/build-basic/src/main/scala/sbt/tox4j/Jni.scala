@@ -35,7 +35,6 @@ object Jni extends OptionalPlugin {
     val toolchainPath = settingKey[Option[File]]("Optional toolchain location; must contain sysroot/ and bin/")
     val pkgConfigPath = settingKey[Seq[File]]("Directories to look in for pkg-config's .pc files")
 
-    val cppFlags = settingKey[Seq[String]]("Flags to be passed to the preprocessor when compiling native code")
     val cFlags = settingKey[Seq[String]]("Flags to be passed to the native C compiler when compiling")
     val cxxFlags = settingKey[Seq[String]]("Flags to be passed to the native C++ compiler when compiling")
     val ldFlags = settingKey[Seq[String]]("Flags to be passed to the native compiler when linking")
@@ -180,7 +179,6 @@ object Jni extends OptionalPlugin {
       nativeCXX := Configure.findCxx(toolchainPath.value, toolchainPrefix.value),
 
       // Defaults from the environment.
-      cppFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("CPPFLAGS")),
       cFlags := Configure.checkCcOptions(nativeCC.value, None, getEnvFlags("CFLAGS")),
       cxxFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("CXXFLAGS")),
       ldFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("LDFLAGS")),

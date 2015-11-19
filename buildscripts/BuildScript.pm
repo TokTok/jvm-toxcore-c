@@ -73,7 +73,7 @@ sub pushd(&;$) {
 # block returns normally.
 sub tempd(&) {
    my ($block) = @_;
-   my $dir = tempdir (CLEANUP => 1);
+   my $dir = tempdir ("tox4j-XXXXXXXX", CLEANUP => 1);
    pushd { $block->() } $dir;
 }
 
@@ -109,7 +109,7 @@ sub git_install {
       chdir $repo;
 
       my ($rev) = must_popen "git", "rev-parse", "HEAD";
-      if ($state->{$repo} eq $rev) {
+      if ($state->{$repo} eq $rev and not C::ALWAYS_BUILD (undef, $repo)) {
          print "Dependency '$repo' already up-to-date.\n";
       } else {
          # Apply patch if it exists.

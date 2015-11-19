@@ -31,7 +31,6 @@ object Platform {
       }
     },
     pkgConfigPath := toolchainPath.value.map(_ / "sysroot/usr/lib/pkgconfig").toSeq,
-    cppFlags := Nil,
     ldFlags := Nil,
 
     jniSourceFiles in Compile += {
