@@ -151,8 +151,7 @@ object Dht {
    */
   def apply(
     keyPair: KeyPair = CryptoCore.keyPair(),
-    maxClosestNodes: Int = MaxClosestNodes,
-    maxFriendNodes: Int = MaxFriendNodes
+    maxClosestNodes: Int = MaxClosestNodes
   ): Dht = {
     Dht(
       keyPair,

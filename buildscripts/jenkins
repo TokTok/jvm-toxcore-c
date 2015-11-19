@@ -41,7 +41,9 @@ export SBT="sbt -Dsbt.log.noformat=true"
 export ALWAYS_BUILD=tox4j
 buildscripts/04_build
 
-# strip the .so to save space
-$TARGET-strip -s projects/tox4j/target/cpp/bin/libtox4j.so
-cp projects/tox4j/target/cpp/bin/*.so $WORKSPACE/artifacts/$ARCH
+# Copy artifacts
+cp projects/tox4j/target/cpp/bin/*.so $WORKSPACE/artifacts/
 cp projects/tox4j/target/scala-2.11/*.jar $WORKSPACE/artifacts/
+
+# Strip the .so to save space
+$TARGET-strip -s $WORKSPACE/artifacts/*.so

@@ -55,7 +55,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
     }
   }
 
-  def toDot(graph: Graph[PublicKey, DiEdge]): Unit = {
+  def graphToDot(graph: Graph[PublicKey, DiEdge]): Unit = {
     val root = DotRootGraph(directed = true, id = Some(Id("G")))
     val dot = graph.toDot(root, edgeTransformer(root))
     Files.write(dot, new File("graph.dot"), Charset.forName("UTF-8"))
@@ -63,7 +63,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
   }
 
   test("get 4 closest nodes") {
-    forAll(genDht()) { (dht) =>
+    forAll(genDht()) { dht =>
     }
   }
 
@@ -97,7 +97,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
         // The DHT can sometimes get partitions when using small keys and small node lists and no friends.
         if (!DhtTest.AllowPartitions) {
           if (!graph.isConnected) {
-            toDot(graph)
+            graphToDot(graph)
           }
           assert(graph.isConnected)
         }
