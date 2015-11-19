@@ -38,7 +38,7 @@ install:
 script:
   # Build/install step.
   - buildscripts/04_build
-  - readelf projects/tox4j/target/cpp/bin/libtox4j.so | grep '(TEXTREL)'
+  - buildscripts/05_upload
 
 before_cache:
   # Hack to make sbt-coveralls work with our non-standard directory layout.
