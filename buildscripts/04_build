@@ -155,7 +155,7 @@ sub install_modules {
 # Install all the project modules if they changed.
 install_modules (plan_build (
    # <platform_dependent> <dependencies> <module> [commands...]
-   [0, [], 'build-basic',     'publishLocal', @TEST_COMMANDS],
+   [0, [], 'build-basic',     'publishLocal', 'publishM2', @TEST_COMMANDS],
    [0, ['build-basic'],       'build-extra', @COMMANDS],
    [0, ['build-extra'],       'linters', @COMMANDS],
    [0, ['build-extra'],       'macros', @COMMANDS],

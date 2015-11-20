@@ -23,7 +23,7 @@ ProtobufJni.moduleSettings
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 // Tox4j support libraries.
-resolvers += "Tox4j" at "https://tox4j.github.io/snapshots/"
+resolvers += "Tox4j snapshots" at "https://tox4j.github.io/repositories/snapshots/"
 
 // Build dependencies.
 libraryDependencies ++= Seq(

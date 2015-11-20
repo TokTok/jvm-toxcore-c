@@ -42,6 +42,18 @@ sub SBT { split /\s+/, ($ENV{SBT} || 'sbt') }
 sub JOBS { $ENV{TOX4J_JOBS} || 4 }
 sub PREFIX { CACHEDIR . "/usr" }
 
+sub GITHUB_KEY {
+   $ENV{GITHUB_KEY} || do {
+      my $keyfile = "$ENV{HOME}/.github";
+      if (-f $keyfile) {
+         open my $fh, $keyfile or die "Could not open $keyfile for reading: $!";
+         my ($key) = <$fh>;
+         chomp $key;
+         $key
+      }
+   };
+}
+
 # Ensure that the cache path exists.
 make_path CACHEDIR;
 
