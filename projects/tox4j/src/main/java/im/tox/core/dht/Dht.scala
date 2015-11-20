@@ -71,6 +71,10 @@ final case class Dht private (
     }
   }
 
+  def removeNode(nodeInfo: NodeInfo): Dht = {
+    copy(nodeSets = nodeSets.mapValues(_.remove(nodeInfo)))
+  }
+
   def getNode(nodeId: PublicKey): Option[NodeInfo] = {
     for {
       nodeSet <- nodeSets.values.find(_.contains(nodeId))

@@ -22,6 +22,7 @@ object PingResponseHandler extends DhtPayloadHandler(PingResponsePacket) {
     } yield {
       for {
         _ <- installPingTimer(dht, sender, pingRequest)
+        _ <- installPingTimeoutTimer(dht, sender, pingRequest)
       } yield {
         dht.addNode(sender)
       }
@@ -40,6 +41,18 @@ object PingResponseHandler extends DhtPayloadHandler(PingResponsePacket) {
         } yield {
           dht
         }
+      })
+    }
+  }
+
+  private def installPingTimeoutTimer(
+    dht: Dht,
+    sender: NodeInfo,
+    pingRequest: ToxPacket[PacketKind.PingRequest.type]
+  ): IO[Unit] = {
+    IO.startTimer(Dht.PingTimeout, Some(1)) { _ =>
+      Some(IO.TimedActionEvent { dht =>
+        IO(dht.removeNode(sender))
       })
     }
   }
