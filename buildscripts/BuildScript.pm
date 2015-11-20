@@ -73,7 +73,7 @@ sub pushd(&;$) {
 # block returns normally.
 sub tempd(&) {
    my ($block) = @_;
-   my $dir = tempdir ("tox4j-XXXXXXXX", CLEANUP => 1);
+   my $dir = tempdir CLEANUP => 1;
    pushd { $block->() } $dir;
 }
 

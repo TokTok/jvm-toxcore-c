@@ -22,6 +22,9 @@ ProtobufJni.moduleSettings
 // Snapshot and linter repository.
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
+// Tox4j support libraries.
+resolvers += "Tox4j" at "https://tox4j.github.io/snapshots/"
+
 // Build dependencies.
 libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "2.4.0",

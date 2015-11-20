@@ -51,6 +51,7 @@ my @COMMANDS = (
    'checkstyle',
    'test:checkstyle',
    'publishLocal',
+   'publishM2',
    'makeScripts',
    @TEST_COMMANDS,
 );

@@ -6,6 +6,7 @@
  */
 
 resolvers += Classpaths.sbtPluginReleases
+resolvers += "Tox4j" at "https://tox4j.github.io/snapshots/"
 resolvers += "sonatype-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 // Code style.
