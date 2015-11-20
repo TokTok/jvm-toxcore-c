@@ -11,7 +11,7 @@ object KeyPairTest {
     )
   }
 
-  implicit val arbPublicKey: Arbitrary[KeyPair] =
+  implicit val arbKeyPair: Arbitrary[KeyPair] =
     Arbitrary(Gen.resultOf[Unit, KeyPair](_ => CryptoCore.keyPair()))
 
 }

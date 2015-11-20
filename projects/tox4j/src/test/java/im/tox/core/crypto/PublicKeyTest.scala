@@ -11,7 +11,7 @@ object PublicKeyTest {
   }
 
   implicit val arbPublicKey: Arbitrary[PublicKey] =
-    Arbitrary(Gen.const(()).map(_ => new PublicKey(RandomCore.randomBytes(PublicKey.Size))))
+    Arbitrary(Gen.resultOf[Unit, PublicKey] { case () => new PublicKey(RandomCore.randomBytes(PublicKey.Size)) })
 
 }
 

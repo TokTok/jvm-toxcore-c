@@ -15,17 +15,11 @@ import scala.util.Random
 
 object NodeSetTest {
 
-  /**
-   * Stable time so that passing time does not affect equality tests.
-   */
-  private val testRunStart = DateTime.now()
-
   private def addNodes(
     nodeSet: NodeSet,
-    nodeInfos: TraversableOnce[NodeInfo],
-    insertionTime: DateTime = testRunStart
+    nodeInfos: TraversableOnce[NodeInfo]
   ): NodeSet = {
-    nodeInfos.foldLeft(nodeSet) { (nodeSet, nodeInfo) => nodeSet.add(nodeInfo, insertionTime) }
+    nodeInfos.foldLeft(nodeSet) { (nodeSet, nodeInfo) => nodeSet.add(nodeInfo) }
   }
 
   implicit val arbNodeSet: Arbitrary[NodeSet] =
@@ -46,7 +40,7 @@ final class NodeSetTest extends FunSuite with PropertyChecks {
   }
 
   def genFullNodeSet(freeCapacity: Int = 0): Gen[NodeSet] = {
-    Gen.zip(arbitrary[Set[NodeInfo]], arbitrary[PublicKey]).map {
+    Gen.resultOf[(Set[NodeInfo], PublicKey), NodeSet] {
       case (nodeInfos, publicKey) =>
         addNodes(NodeSet(nodeInfos.size + freeCapacity, publicKey), nodeInfos)
     }
@@ -213,47 +207,6 @@ final class NodeSetTest extends FunSuite with PropertyChecks {
       val nodeSet = NodeSet(1, ownKey).add(farNode)
       assert(nodeSet.canAdd(nearNode))
       assert(nodeSet.add(nearNode) != nodeSet)
-    }
-  }
-
-  test("inactive nodes are removed after a timeout") {
-    forAll(genEmptyNodeSet, arbitrary[NodeInfo]) { (emptyNodeSet, nodeInfo) =>
-      val nodeSet = emptyNodeSet.add(nodeInfo, testRunStart - 60.seconds)
-      assert(nodeSet.size == 1)
-      assert(nodeSet.removeStale(testRunStart - 30.seconds).isEmpty)
-    }
-  }
-
-  test("active nodes are not removed after the timeout") {
-    forAll { (publicKey: PublicKey, nodeInfos: Set[NodeInfo]) =>
-      val emptyNodeSet = NodeSet(nodeInfos.size, publicKey)
-
-      val (left, right) = nodeInfos.splitAt(nodeInfos.size / 2)
-
-      val halfNodeSet = addNodes(emptyNodeSet, left, testRunStart - 60.seconds)
-      val fullNodeSet = addNodes(halfNodeSet, right, testRunStart - 15.seconds)
-
-      val activeNodeSet = fullNodeSet.removeStale(testRunStart - 30.seconds)
-
-      assert(activeNodeSet.size == right.size)
-      assert(right.forall(activeNodeSet.contains))
-      assert(!left.exists(activeNodeSet.contains))
-    }
-  }
-
-  test("removeStale is idempotent") {
-    forAll(genEmptyNodeSet, arbitrary[NodeInfo]) { (emptyNodeSet, nodeInfo) =>
-      val nodeSet = emptyNodeSet.add(nodeInfo, testRunStart - 60.seconds)
-      assert(
-        {
-          nodeSet
-            .removeStale(testRunStart - 30.seconds)
-            .removeStale(testRunStart - 30.seconds)
-        } == {
-          nodeSet
-            .removeStale(testRunStart - 30.seconds)
-        }
-      )
     }
   }
 

@@ -7,7 +7,7 @@ import java.nio.charset.Charset
 import com.google.common.io.Files
 import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto.KeyPairTest._
-import im.tox.core.crypto.{KeyPair, KeyPairTest, PublicKey}
+import im.tox.core.crypto._
 import im.tox.core.dht.DhtTest._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
@@ -26,7 +26,7 @@ object DhtTest {
   val ExtraNodeCount = 4
 
   def genDht(maxKeyLength: Int = PublicKey.Size, maxClosestNodes: Int = Dht.MaxClosestNodes): Gen[Dht] = {
-    Gen.resultOf[KeyPair, Dht] { keyPair =>
+    Arbitrary.arbitrary[KeyPair].map { keyPair =>
       Dht(KeyPairTest.take(keyPair, maxKeyLength), maxClosestNodes)
     }
   }

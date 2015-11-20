@@ -9,10 +9,7 @@ import org.scalacheck.{Arbitrary, Gen}
 object NodesRequestPacketTest {
 
   implicit val arbNodesRequest: Arbitrary[NodesRequestPacket] =
-    Arbitrary(Gen.zip(
-      arbitrary[PublicKey],
-      arbitrary[Long]
-    ).map {
+    Arbitrary(Gen.resultOf[(PublicKey, Long), NodesRequestPacket] {
       case (requestedNode, pingId) =>
         NodesRequestPacket(requestedNode, pingId)
     })

@@ -1,15 +1,15 @@
 package im.tox.core.dht
 
-import com.github.nscala_time.time.Imports._
-import im.tox.core.SortedLruSet
 import im.tox.core.crypto.PublicKey
+
+import scala.annotation.tailrec
+import scala.collection.immutable.SortedSet
 
 /**
  * Ordered set of [[NodeInfo]] objects. Always keeps the list of nodes closest
  * to a given [[PublicKey]] in terms of [[XorDistance]].
  *
- * The set size is kept below or equal to its capacity, but client code must
- * explicitly call [[removeStale]] to remove old elements.
+ * The set size is kept below or equal to its capacity.
  *
  * @param capacity Maximum number of nodes in this set.
  * @param nodes The underlying [[NodeInfo]] set with associated last-active times.
@@ -17,7 +17,7 @@ import im.tox.core.crypto.PublicKey
  */
 final case class NodeSet private (
     capacity: Int,
-    private val nodes: SortedLruSet[NodeInfo]
+    private val nodes: SortedSet[NodeInfo]
 )(implicit val ord: Ordering[NodeInfo]) {
 
   require(capacity >= 0)
@@ -32,12 +32,12 @@ final case class NodeSet private (
     add(nodeInfo).nodes.contains(nodeInfo)
   }
 
-  def add(nodeInfo: NodeInfo, lastActive: DateTime = DateTime.now()): NodeSet = {
-    copy(nodes = nodes + (nodeInfo, lastActive, capacity))
+  def add(nodeInfo: NodeInfo): NodeSet = {
+    copy(nodes = NodeSet.truncate(nodes + nodeInfo, capacity))
   }
 
-  def ++(nodeSet: NodeSet): NodeSet = { // scalastyle:ignore method.name
-    copy(nodes = nodes ++ (nodeSet.nodes, capacity))
+  def addAll(nodeSet: NodeSet): NodeSet = {
+    copy(nodes = NodeSet.truncate(nodes ++ nodeSet.nodes, capacity))
   }
 
   def remove(nodeInfo: NodeInfo): NodeSet = {
@@ -52,10 +52,6 @@ final case class NodeSet private (
     nodes.exists(_.publicKey == nodeId)
   }
 
-  def removeStale(timeHorizon: DateTime): NodeSet = {
-    copy(nodes = nodes.removeStale(timeHorizon))
-  }
-
   /**
    * Circular get: any index is good, as long as there is at least 1 node in
    * the set.
@@ -66,7 +62,7 @@ final case class NodeSet private (
     } else {
       val iterator = nodes.iterator.drop(Math.abs(index % size))
       assert(iterator.hasNext)
-      Some(iterator.next._1)
+      Some(iterator.next)
     }
   }
 
@@ -85,7 +81,24 @@ object NodeSet {
 
   def apply(capacity: Int, publicKey: PublicKey): NodeSet = {
     implicit val ord = NodeInfo.distanceOrdering(publicKey)
-    NodeSet(capacity, SortedLruSet.empty(ord))
+    NodeSet(capacity, SortedSet.empty(ord))
+  }
+
+  /**
+   * Remove the largest elements from the set until the size is less than or
+   * equal to capacity.
+   *
+   * @param capacity Maximum size of the set.
+   */
+  @tailrec
+  private def truncate[A](nodes: SortedSet[A], capacity: Int)(implicit ord: Ordering[A]): SortedSet[A] = {
+    assert(capacity >= 0)
+
+    if (capacity >= nodes.size) {
+      nodes
+    } else {
+      truncate(nodes - nodes.max, capacity)
+    }
   }
 
 }

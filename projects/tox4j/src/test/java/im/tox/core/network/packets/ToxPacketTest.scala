@@ -13,10 +13,7 @@ object ToxPacketTest {
 
   implicit val arbPacket: Arbitrary[ToxPacket[PacketKind]] =
     Arbitrary(
-      Gen.zip(
-        arbitrary[PacketKind],
-        arbitrary[PlainText[Security.NonSensitive]]
-      ).map {
+      Gen.resultOf[(PacketKind, PlainText[Security.NonSensitive]), ToxPacket[PacketKind]] {
         case (kind, payload) =>
           ToxPacket(kind, payload)
       }

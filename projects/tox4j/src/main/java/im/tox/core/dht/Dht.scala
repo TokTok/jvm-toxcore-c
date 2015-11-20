@@ -2,7 +2,6 @@ package im.tox.core.dht
 
 import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto._
-import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
@@ -20,9 +19,8 @@ import scala.language.postfixOps
  * it adds a possible attack vector) in each of these lists of nodes every 20
  * seconds, with the search public key being its public key for the closest node
  * and the public key being searched for being the ones in the DHT friends list.
- * Nodes are removed after 122 seconds of no response. Nodes are only added to
- * the lists after a valid ping response of send node packet is received from
- * them.
+ * Nodes are only added to the lists after a valid ping response of send node
+ * packet is received from them.
  */
 final case class Dht private (
     keyPair: KeyPair,
@@ -88,14 +86,8 @@ final case class Dht private (
     // closest nodes in that NodeSet.
     nodeSets.values.foldLeft(NodeSet(count, publicKey)) {
       case (nearNodes, nodeSet) =>
-        nearNodes ++ nodeSet
+        nearNodes.addAll(nodeSet)
     }.toSet
-  }
-
-  def removeStale(timeHorizon: DateTime): Dht = {
-    copy(
-      nodeSets = nodeSets.mapValues(_.removeStale(timeHorizon))
-    )
   }
 
 }
@@ -127,6 +119,8 @@ object Dht {
   val MaxClosestNodes = 32
 
   /**
+   * Nodes are removed after 122 seconds of no response.
+   *
    * If the ping timeouts and delays between pings were higher it would decrease
    * the bandwidth usage but increase the amount of disconnected nodes that
    * are still being stored in the lists. Decreasing these delays would do the
