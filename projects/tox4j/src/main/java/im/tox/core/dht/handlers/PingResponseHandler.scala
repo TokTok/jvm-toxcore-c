@@ -21,39 +21,31 @@ object PingResponseHandler extends DhtPayloadHandler(PingResponsePacket) {
       )
     } yield {
       for {
-        _ <- installPingTimer(dht, sender, pingRequest)
-        _ <- installPingTimeoutTimer(dht, sender, pingRequest)
+        /**
+         * Install ping timer: after [[Dht.PingInterval]] seconds, ping again.
+         */
+        _ <- IO.timedAction(Dht.PingInterval, Some(1)) { (_, dht) =>
+          for {
+            _ <- IO.sendTo(sender, pingRequest)
+          } yield {
+            dht
+          }
+        }
+
+        /**
+         * Install ping timeout timer: after [[Dht.PingTimeout]] seconds, remove the node from
+         * the DHT node lists.
+         */
+        _ <- IO.timedAction(Dht.PingTimeout, Some(1)) { (_, dht) =>
+          IO(dht.removeNode(sender))
+        }
       } yield {
+        /**
+         * Nodes are only added to the lists after a valid ping response or send node
+         * packet is received from them.
+         */
         dht.addNode(sender)
       }
-    }
-  }
-
-  private def installPingTimer(
-    dht: Dht,
-    sender: NodeInfo,
-    pingRequest: ToxPacket[PacketKind.PingRequest.type]
-  ): IO[Unit] = {
-    IO.startTimer(Dht.PingInterval, Some(1)) { _ =>
-      Some(IO.TimedActionEvent { dht =>
-        for {
-          _ <- IO.sendTo(sender, pingRequest)
-        } yield {
-          dht
-        }
-      })
-    }
-  }
-
-  private def installPingTimeoutTimer(
-    dht: Dht,
-    sender: NodeInfo,
-    pingRequest: ToxPacket[PacketKind.PingRequest.type]
-  ): IO[Unit] = {
-    IO.startTimer(Dht.PingTimeout, Some(1)) { _ =>
-      Some(IO.TimedActionEvent { dht =>
-        IO(dht.removeNode(sender))
-      })
     }
   }
 

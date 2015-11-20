@@ -8,49 +8,76 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
- * Toxcore stores the 32 nodes closest to its DHT public key and 8 nodes closest
- * to each of the public keys in its DHT friends list (or list of DHT public
- * keys that it actively tries to find and connect to) and pings them every 60
- * seconds to see if they are alive. Nodes can be in more than one list for
- * example if the DHT public key of the peer is very close to the DHT public key
- * of a friend being searched. It also sends get node requests to a random node
- * (random makes it unpredictable, predictability or knowing which node a node
- * will ping next could make some attacks that disrupt the network more easy as
- * it adds a possible attack vector) in each of these lists of nodes every 20
- * seconds, with the search public key being its public key for the closest node
- * and the public key being searched for being the ones in the DHT friends list.
- * Nodes are only added to the lists after a valid ping response of send node
- * packet is received from them.
+ * Nodes can be in more than one list for example if the DHT public key of the
+ * peer is very close to the DHT public key of a friend being searched.
  */
 final case class Dht private (
     keyPair: KeyPair,
-    nodeSets: Map[PublicKey, NodeSet]
+    searchLists: Map[PublicKey, NodeSet]
 ) {
 
-  def size: Int = nodeSets.values.map(_.size).sum
-
-  def canAddFriend(publicKey: PublicKey): Boolean = {
-    !nodeSets.contains(publicKey)
+  /**
+   * Class invariant: Nodes that appear in multiple search lists are physically equal.
+   */
+  assert {
+    searchLists.values.foldLeft((true, Map.empty[PublicKey, NodeInfo])) { (validation, nodeSet) =>
+      nodeSet.values.foldLeft(validation) {
+        case ((valid, nodes), nodeInfo) =>
+          nodes.get(nodeInfo.publicKey) match {
+            case None =>
+              (valid, nodes.updated(nodeInfo.publicKey, nodeInfo))
+            case Some(existing) =>
+              (valid && (existing eq nodeInfo), nodes)
+          }
+      }
+    }._1
   }
 
-  def addFriend(publicKey: PublicKey): Dht = {
-    assert(canAddFriend(publicKey), s"Public key $publicKey is already a friend")
-    copy(
-      nodeSets = nodeSets + (publicKey -> NodeSet(Dht.MaxFriendNodes, publicKey))
-    )
+  /**
+   * Class invariant: The [[Dht]] always contains a [[NodeSet]] searching for our
+   * own [[PublicKey]].
+   */
+  assert(searchLists.contains(keyPair.publicKey))
+
+  /**
+   * Class invariant: The [[NodeSet]] searching our own DHT [[PublicKey]] does not
+   * contain a [[NodeInfo]] with that [[PublicKey]].
+   */
+  assert(!searchLists(keyPair.publicKey).contains(keyPair.publicKey))
+
+  /**
+   * The total number of known nodes in all the node search lists.
+   */
+  def size: Int = {
+    searchLists.values.map(_.size).sum
   }
 
-  def tryAddFriend(publicKey: PublicKey): Dht = {
-    if (canAddFriend(publicKey)) {
-      addFriend(publicKey)
-    } else {
+  /**
+   * Instruct the DHT to start searching for a node with a given [[PublicKey]].
+   */
+  def addSearchKey(publicKey: PublicKey): Dht = {
+    if (searchLists.contains(publicKey)) {
       this
+    } else {
+      copy(
+        searchLists = searchLists.updated(publicKey, NodeSet(Dht.MaxFriendNodes, publicKey))
+      )
     }
+  }
+
+  /**
+   * Stop searching for the node with the given [[PublicKey]] and remove the associated
+   * search list. Note that since [[NodeInfo]]s may appear on multiple lists, this does
+   * not necessarily mean that we completely forgot about the node with that [[PublicKey]].
+   * It may still be on another list, if it happened to be close to that list's search key.
+   */
+  def removeSearchKey(publicKey: PublicKey): Dht = {
+    copy(searchLists = searchLists - publicKey)
   }
 
   def canAddNode(nodeInfo: NodeInfo): Boolean = {
     nodeInfo.publicKey != keyPair.publicKey &&
-      nodeSets.exists(_._2.canAdd(nodeInfo))
+      searchLists.exists(_._2.canAdd(nodeInfo))
   }
 
   def addNode(nodeInfo: NodeInfo): Dht = {
@@ -59,7 +86,7 @@ final case class Dht private (
       s"Node with key ${nodeInfo.publicKey} can not be added to any node list of node ${keyPair.publicKey}"
     )
     copy(
-      nodeSets = nodeSets.mapValues(_.add(nodeInfo))
+      searchLists = searchLists.mapValues(_.add(nodeInfo))
     )
   }
 
@@ -72,26 +99,26 @@ final case class Dht private (
   }
 
   def removeNode(nodeInfo: NodeInfo): Dht = {
-    copy(nodeSets = nodeSets.mapValues(_.remove(nodeInfo)))
+    copy(searchLists = searchLists.mapValues(_.remove(nodeInfo)))
   }
 
   def getNode(nodeId: PublicKey): Option[NodeInfo] = {
     for {
-      nodeSet <- nodeSets.values.find(_.contains(nodeId))
+      nodeSet <- searchLists.values.find(_.contains(nodeId))
       nodeInfo <- nodeSet.get(nodeId)
     } yield {
       nodeInfo
     }
   }
 
-  def getNearNodes(count: Int, publicKey: PublicKey): Set[NodeInfo] = {
+  def getNearNodes(count: Int, publicKey: PublicKey): Iterable[NodeInfo] = {
     // A NodeSet keeps a list of nodes closest to its base public key, so we
     // simply try to add every node we know, and at the end we'll have the
     // closest nodes in that NodeSet.
-    nodeSets.values.foldLeft(NodeSet(count, publicKey)) {
+    searchLists.values.foldLeft(NodeSet(count, publicKey)) {
       case (nearNodes, nodeSet) =>
         nearNodes.addAll(nodeSet)
-    }.toSet
+    }.values
   }
 
 }
@@ -107,6 +134,10 @@ object Dht {
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   /**
+   * Toxcore stores the 32 nodes closest to its DHT public key and 8 nodes closest
+   * to each of the public keys in its DHT friends list (or list of DHT public
+   * keys that it actively tries to find and connect to).
+   *
    * If the 32 nodes number where increased, it would increase the amount of
    * packets needed to check if each of them are still alive which would increase
    * the bandwidth usage but reliability would go up. If the number of nodes were
@@ -123,6 +154,30 @@ object Dht {
   val MaxClosestNodes = 32
 
   /**
+   * If the 8 nodes closest to each public key were increased to 16 it would
+   * increase the bandwidth usage, might increase hole punching efficiency on
+   * symmetric NATs (more ports to guess from, see Hole punching) and might
+   * increase the reliability. Lowering this number would have the opposite
+   * effect.
+   */
+  val MaxFriendNodes = 8
+
+  /**
+   * It also sends get node requests to a random node
+   * (random makes it unpredictable, predictability or knowing which node a node
+   * will ping next could make some attacks that disrupt the network more easy as
+   * it adds a possible attack vector) in each of these lists of nodes every 20
+   * seconds, with the search public key being its public key for the closest node
+   * and the public key being searched for being the ones in the DHT friends list.
+   */
+  val NodesRequestInterval = 20 seconds
+
+  /**
+   * The DHT pings them every 60 seconds to see if they are alive.
+   */
+  val PingInterval = 60 seconds
+
+  /**
    * Nodes are removed after 122 seconds of no response.
    *
    * If the ping timeouts and delays between pings were higher it would decrease
@@ -131,16 +186,6 @@ object Dht {
    * opposite.
    */
   val PingTimeout = 122 seconds
-  val PingInterval = 20 seconds
-
-  /**
-   * If the 8 nodes closest to each public key were increased to 16 it would
-   * increase the bandwidth usage, might increase hole punching efficiency on
-   * symmetric NATs (more ports to guess from, see Hole punching) and might
-   * increase the reliability. Lowering this number would have the opposite
-   * effect.
-   */
-  val MaxFriendNodes = 8
 
   /**
    * Every peer in the Tox DHT has an address which is a public key called the

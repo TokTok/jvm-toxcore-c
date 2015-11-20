@@ -3,7 +3,7 @@ package im.tox.core.dht
 import im.tox.core.crypto.PublicKey
 
 import scala.annotation.tailrec
-import scala.collection.immutable.SortedSet
+import scala.collection.immutable.{SortedMap, SortedSet}
 
 /**
  * Ordered set of [[NodeInfo]] objects. Always keeps the list of nodes closest
@@ -17,11 +17,12 @@ import scala.collection.immutable.SortedSet
  */
 final case class NodeSet private (
     capacity: Int,
-    private val nodes: SortedSet[NodeInfo]
-)(implicit val ord: Ordering[NodeInfo]) {
+    private val nodes: SortedMap[PublicKey, NodeInfo]
+)(implicit val ord: Ordering[PublicKey]) {
 
   require(capacity >= 0)
   require(capacity >= nodes.size)
+  assert(nodes eq NodeSet.truncate(nodes, capacity)) // This follows from the requirement above.
 
   /**
    * A node will be accepted by a node set if it is already in the set
@@ -29,11 +30,11 @@ final case class NodeSet private (
    * largest node in the set (= add).
    */
   def canAdd(nodeInfo: NodeInfo): Boolean = {
-    add(nodeInfo).nodes.contains(nodeInfo)
+    add(nodeInfo).nodes.contains(nodeInfo.publicKey)
   }
 
   def add(nodeInfo: NodeInfo): NodeSet = {
-    copy(nodes = NodeSet.truncate(nodes + nodeInfo, capacity))
+    copy(nodes = NodeSet.truncate(nodes.updated(nodeInfo.publicKey, nodeInfo), capacity))
   }
 
   def addAll(nodeSet: NodeSet): NodeSet = {
@@ -41,15 +42,11 @@ final case class NodeSet private (
   }
 
   def remove(nodeInfo: NodeInfo): NodeSet = {
-    copy(nodes = nodes - nodeInfo)
-  }
-
-  def contains(nodeInfo: NodeInfo): Boolean = {
-    nodes.contains(nodeInfo)
+    copy(nodes = nodes - nodeInfo.publicKey)
   }
 
   def contains(nodeId: PublicKey): Boolean = {
-    nodes.exists(_.publicKey == nodeId)
+    nodes.contains(nodeId)
   }
 
   /**
@@ -60,17 +57,17 @@ final case class NodeSet private (
     if (isEmpty) {
       None
     } else {
-      val iterator = nodes.iterator.drop(Math.abs(index % size))
+      val iterator = nodes.valuesIterator.drop(Math.abs(index % size))
       assert(iterator.hasNext)
       Some(iterator.next)
     }
   }
 
   def get(nodeId: PublicKey): Option[NodeInfo] = {
-    nodes.find(_.publicKey == nodeId)
+    nodes.get(nodeId)
   }
 
-  def toSet: Set[NodeInfo] = nodes.keySet
+  def values: Iterable[NodeInfo] = nodes.values
   def size: Int = nodes.size
   def nonEmpty: Boolean = nodes.nonEmpty
   def isEmpty: Boolean = nodes.isEmpty
@@ -80,24 +77,24 @@ final case class NodeSet private (
 object NodeSet {
 
   def apply(capacity: Int, publicKey: PublicKey): NodeSet = {
-    implicit val ord = NodeInfo.distanceOrdering(publicKey)
-    NodeSet(capacity, SortedSet.empty(ord))
+    val ord = NodeInfo.distanceOrdering(publicKey)
+    NodeSet(capacity, SortedMap.empty(ord))(ord)
   }
 
   /**
-   * Remove the largest elements from the set until the size is less than or
+   * Remove the largest elements from the map until the size is less than or
    * equal to capacity.
    *
-   * @param capacity Maximum size of the set.
+   * @param capacity Maximum size of the map.
    */
   @tailrec
-  private def truncate[A](nodes: SortedSet[A], capacity: Int)(implicit ord: Ordering[A]): SortedSet[A] = {
-    assert(capacity >= 0)
+  private def truncate[A, B](nodes: SortedMap[A, B], capacity: Int)(implicit ord: Ordering[A]): SortedMap[A, B] = {
+    require(capacity >= 0)
 
-    if (capacity >= nodes.size) {
+    if (nodes.size <= capacity) {
       nodes
     } else {
-      truncate(nodes - nodes.max, capacity)
+      truncate(nodes - nodes.keys.max, capacity)
     }
   }
 

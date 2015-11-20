@@ -6,7 +6,6 @@ import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
 import im.tox.tox4j.core.{ToxCoreConstants, ToxPublicKey}
 
 final class Friend(val publicKey: ToxPublicKey) extends Serializable {
-  require(publicKey.value.length == ToxCoreConstants.PublicKeySize)
 
   var name: String = "<No name>"
   @transient
@@ -20,4 +19,5 @@ final class Friend(val publicKey: ToxPublicKey) extends Serializable {
   override def toString: String = {
     s"Friend ($name, $connectionStatus, $status, $statusMessage)${if (typing) " [typing]" else ""}"
   }
+
 }

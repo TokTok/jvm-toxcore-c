@@ -8,20 +8,7 @@ import scodec.bits.{BitVector, ByteVector}
 
 import scalaz.\/
 
-object ModuleCompanion {
-  private val noneValue = None
-  private val someValue = Some(())
-}
-
 abstract class ModuleCompanion[T, +S <: Security] {
-
-  protected final def require(condition: Boolean): Option[Unit] = {
-    if (!condition) {
-      ModuleCompanion.noneValue
-    } else {
-      ModuleCompanion.someValue
-    }
-  }
 
   def codec: Codec[T]
 

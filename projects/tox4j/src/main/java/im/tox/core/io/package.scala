@@ -37,6 +37,17 @@ package object io {
       addAction(Action.StartTimer(delay, repeat)(event))
     }
 
+    /**
+     * Shortcut for [[startTimer]] with a [[TimedActionEvent]].
+     */
+    def timedAction(delay: Duration, repeat: Option[Int] = None)(action: (Duration, Dht) => IO[Dht]): IO[Unit] = {
+      startTimer(delay, repeat) { duration =>
+        Some(TimedActionEvent { dht =>
+          action(duration, dht)
+        })
+      }
+    }
+
     private def addAction(action: Action): IO[Unit] = {
       State.modify(actions => action +: actions)
     }

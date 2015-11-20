@@ -122,12 +122,14 @@ final class NodeSetTest extends FunSuite with PropertyChecks {
       whenever(nodeSet.nonEmpty) {
         val nodeInfo = nodeSet.get(index).get
         assert(
-          nodeSet.remove(nodeInfo)
-            !=
+          {
+            nodeSet.remove(nodeInfo)
+          } != {
             nodeSet
+          }
         )
-        assert(nodeSet.contains(nodeInfo))
-        assert(!nodeSet.remove(nodeInfo).contains(nodeInfo))
+        assert(nodeSet.contains(nodeInfo.publicKey))
+        assert(!nodeSet.remove(nodeInfo).contains(nodeInfo.publicKey))
       }
     }
   }

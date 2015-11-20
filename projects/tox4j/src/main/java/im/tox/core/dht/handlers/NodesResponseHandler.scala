@@ -1,12 +1,12 @@
 package im.tox.core.dht.handlers
 
+import im.tox.core.Functional.foldDisjunctionList
 import im.tox.core.dht.packets.dht.{NodesResponsePacket, PingPacket, PingRequestPacket}
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
-import im.tox.core.network.packets.ToxPacket
 
-import scalaz.{\/, \/-}
+import scalaz.\/
 
 /**
  * When receiving a send node packet, toxcore will check if each of the received
@@ -16,25 +16,25 @@ import scalaz.{\/, \/-}
 object NodesResponseHandler extends DhtPayloadHandler(NodesResponsePacket) {
 
   override def apply(dht: Dht, sender: NodeInfo, packet: NodesResponsePacket): CoreError \/ IO[Dht] = {
-    val nodes = packet.nodes.filter(dht.canAddNode)
+    // The nodes we could add to the DHT node lists if they reply to our ping.
+    val potentialNodes = packet.nodes.filter(dht.canAddNode)
 
-    val packets =
-      nodes.foldLeft(\/-(Nil): CoreError \/ List[(NodeInfo, ToxPacket[PingRequestPacket.PacketKind])]) {
-        (packets, node) =>
-          for {
-            packets <- packets
-            response <- makeResponse(dht.keyPair, node.publicKey, PingRequestPacket, PingPacket(0))
-          } yield {
-            (node, response) +: packets
-          }
+    // Create ping packets for each of them.
+    val pingPackets =
+      potentialNodes.map { node =>
+        makeResponse(dht.keyPair, node.publicKey, PingRequestPacket, PingPacket(0))
+          // Pair up the response with the node it should be sent to.
+          .map((node, _))
       }
 
     for {
-      packets <- packets
+      // Get the list of packets or fail if any of them failed to construct.
+      pingPackets <- foldDisjunctionList(pingPackets)
     } yield {
-      packets.foldLeft(IO(dht)) {
-        case (dht: IO[Dht], (node, packet)) =>
-          IO.sendTo(node, packet).flatMap { case () => dht }
+      // Send all the ping packets.
+      pingPackets.foldLeft(IO(dht)) {
+        case (dht, (node, pingPacket)) =>
+          IO.sendTo(node, pingPacket).flatMap { case () => dht }
       }
     }
   }

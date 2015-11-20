@@ -20,14 +20,15 @@ object NodesRequestHandler extends DhtPayloadHandler(NodesRequestPacket) {
    * response.
    */
   override def apply(dht: Dht, sender: NodeInfo, packet: NodesRequestPacket): CoreError \/ IO[Dht] = {
-    val nearNodes = dht.getNearNodes(NodesResponsePacket.MaxNodes, packet.requestedNode).toList
+    val nearNodes = dht.getNearNodes(NodesResponsePacket.MaxNodes, packet.requestedNode)
 
     for {
+      response <- NodesResponsePacket(nearNodes, packet.pingId)
       response <- makeResponse(
         dht.keyPair,
         sender.publicKey,
         NodesResponsePacket,
-        NodesResponsePacket(nearNodes, packet.pingId)
+        response
       )
     } yield {
       for {

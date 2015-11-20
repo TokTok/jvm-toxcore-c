@@ -11,9 +11,9 @@ object NodesResponsePacketTest {
   private val _ = arbNodeInfo // XXX(iphydf): Hack because IDEA doesn't recognise the need for it.
 
   implicit val arbNodesResponse: Arbitrary[NodesResponsePacket] = {
-    Arbitrary(Gen.resultOf[(List[NodeInfo], Long), NodesResponsePacket] {
+    Arbitrary(Gen.resultOf[(Seq[NodeInfo], Long), NodesResponsePacket] {
       case (nodes, pingId) =>
-        NodesResponsePacket(nodes.take(4), pingId)
+        NodesResponsePacket(nodes.take(4), pingId).toOption.get
     })
   }
 

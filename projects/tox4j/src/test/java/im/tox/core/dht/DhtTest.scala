@@ -82,8 +82,8 @@ final class DhtTest extends FunSuite with PropertyChecks {
         val edges =
           for {
             dht <- dhts
-            nodeSet <- dht.nodeSets.values
-            knownNode <- nodeSet.toSet
+            nodeSet <- dht.searchLists.values
+            knownNode <- nodeSet.values
           } yield {
             assert(dht.keyPair.publicKey != knownNode.publicKey)
             DiEdge(dht.keyPair.publicKey, knownNode.publicKey)

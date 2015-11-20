@@ -12,9 +12,17 @@ sealed abstract class CoreError {
 object CoreError {
 
   final case class Unimplemented(message: String) extends CoreError
+  final case class ValidationError(message: String) extends CoreError
   final case class InvalidFormat(message: String) extends CoreError
   final case class CodecError(cause: Err) extends CoreError
   final case class DecryptionError() extends CoreError
+
+  def apply[A](option: Option[A], message: String): CoreError \/ A = {
+    option match {
+      case None        => -\/(ValidationError(message))
+      case Some(value) => \/-(value)
+    }
+  }
 
   def apply[A](attempt: Attempt[A]): CoreError \/ A = {
     attempt match {
@@ -28,6 +36,14 @@ object CoreError {
       case CodecError(cause) => cause
       case error             => new General(error.toString)
     }.toEither)
+  }
+
+  def require(condition: Boolean, message: => String): CoreError \/ Unit = {
+    if (condition) {
+      \/-(())
+    } else {
+      -\/(ValidationError(message))
+    }
   }
 
 }

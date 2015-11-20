@@ -1,10 +1,14 @@
 package im.tox.core.dht.packets.dht
 
 import im.tox.core.dht.NodeInfo
+import im.tox.core.error.CoreError
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
 import im.tox.core.typesafe.Security
+import scodec.Attempt
 import scodec.codecs._
-import scodec.{Attempt, Err}
+
+import scala.collection.GenTraversableOnce
+import scalaz.\/
 
 /**
  * Send_nodes (response):
@@ -24,7 +28,7 @@ import scodec.{Attempt, Err}
  * in the packet, up to 4 nodes in packed node format and the 8 byte ping id
  * that was sent in the request.
  */
-final case class NodesResponsePacket(
+final case class NodesResponsePacket private (
     nodes: List[NodeInfo],
     pingId: Long
 ) {
@@ -43,18 +47,16 @@ object NodesResponsePacket
      * [ping_id, length=8 bytes]
      */
     (listOfN(uint8, NodeInfo.codec) ~ int64).exmap[NodesResponsePacket](
-      {
-        case (nodes, pingId) =>
-          Attempt.fromOption(
-            for {
-              () <- require(nodes.size <= MaxNodes)
-            } yield {
-              NodesResponsePacket(nodes, pingId)
-            },
-            new Err.General(s"Too many nodes in $this: ${nodes.size} > $MaxNodes")
-          )
-      },
+      { case (nodes, pingId) => CoreError.toAttempt(NodesResponsePacket(nodes, pingId)) },
       { case NodesResponsePacket(nodes, pingId) => Attempt.successful((nodes, pingId)) }
     )
+
+  def apply(nodes: GenTraversableOnce[NodeInfo], pingId: Long): CoreError \/ NodesResponsePacket = {
+    for {
+      _ <- CoreError.require(nodes.size <= MaxNodes, s"Too many nodes in $this: ${nodes.size} > $MaxNodes")
+    } yield {
+      NodesResponsePacket(nodes.toList, pingId)
+    }
+  }
 
 }
