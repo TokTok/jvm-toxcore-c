@@ -4,8 +4,9 @@ use strict;
 use utf8;
 use lib 'buildscripts';
 
+use Cwd 'abs_path';
 use Data::Dumper;
-use File::Path 'remove_tree';
+use File::Path 'make_path', 'remove_tree';
 
 use BuildScript;
 my $C = require C;
@@ -23,15 +24,6 @@ my $REPODIR = 'repositories/snapshots/im';
 my $GITHUB_KEY = $C->GITHUB_KEY;
 
 
-for (<projects/tox4j/target/cpp/bin/*>) {
-   print "Uploading $_ to uguu.se...\n";
-   my @lines = must_popen (
-      "curl", "-s", "-i", "-F", "file=\@$_", "https://uguu.se/api.php?d=upload-tool"
-   );
-   print "File uploaded to ", (pop @lines), "\n";
-}
-
-
 #if ($GITHUB_KEY and -d $M2DIR and $C->GOAL eq 'coverage') {
 if ($GITHUB_KEY and -d $M2DIR) {
    my $repo = "tox4j.github.io";
@@ -47,7 +39,15 @@ if ($GITHUB_KEY and -d $M2DIR) {
          == 0 or die "Could not clone snapshots repository";
    }
 
+   my @libraries = map { abs_path $_ } <projects/tox4j/target/cpp/bin/*>;
+
    pushd {
+      if (@libraries) {
+         my $LIBDIR = 'native/' . $C->TARGET;
+         make_path $LIBDIR;
+         must_system "cp", @libraries, $LIBDIR;
+      }
+
       remove_tree $REPODIR;
       must_system "cp", "-a", $M2DIR, $REPODIR;
       must_system "git", "add", "-A", ".";

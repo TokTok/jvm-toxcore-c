@@ -12,16 +12,13 @@ cache:
 
 env:
   matrix:
-    - TARGET=linux
-    #- TARGET=arm-linux-androideabi
-    #- TARGET=i686-linux-android
-    #- TEST_GOAL=coverage
-    #- TEST_GOAL=performance
+    - TARGET=arm-linux-androideabi
+    - TARGET=i686-linux-android
+    - TEST_GOAL=coverage
+    - TEST_GOAL=performance
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - env: TEST_GOAL=performance
 
 install:
   # Move files from cache directory.
