@@ -49,10 +49,10 @@ object ToxHandler extends ToxPacketHandler(PlainText) {
 
   val handlers = Map[PacketKind, ToxPacketHandler[ToxPacket[PacketKind], Security]](
     PacketKind.DhtRequest -> ToxHandler(DhtRequestHandler(ToxHandler)),
-    PacketKind.PingRequest -> ToxHandler(DhtEncryptedHandler(PingRequestHandler)),
-    PacketKind.PingResponse -> ToxHandler(DhtEncryptedHandler(PingResponseHandler)),
-    PacketKind.NodesRequest -> ToxHandler(DhtEncryptedHandler(NodesRequestHandler)),
-    PacketKind.NodesResponse -> ToxHandler(DhtEncryptedHandler(NodesResponseHandler))
+    PacketKind.PingRequest -> ToxHandler(DhtEncryptedHandler(DhtUnencryptedHandler(PingRequestHandler))),
+    PacketKind.PingResponse -> ToxHandler(DhtEncryptedHandler(DhtUnencryptedHandler(PingResponseHandler))),
+    PacketKind.NodesRequest -> ToxHandler(DhtEncryptedHandler(DhtUnencryptedHandler(NodesRequestHandler))),
+    PacketKind.NodesResponse -> ToxHandler(DhtEncryptedHandler(DhtUnencryptedHandler(NodesResponseHandler)))
   )
 
   override def apply(dht: Dht, origin: InetSocketAddress, packetData: PlainText[NonSensitive]): CoreError \/ IO[Dht] = {

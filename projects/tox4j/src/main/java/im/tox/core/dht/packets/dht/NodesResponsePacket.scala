@@ -29,11 +29,8 @@ import scalaz.\/
  * that was sent in the request.
  */
 final case class NodesResponsePacket private (
-    nodes: List[NodeInfo],
-    pingId: Long
-) {
-  require(nodes.size <= NodesResponsePacket.MaxNodes)
-}
+  nodes: List[NodeInfo]
+) extends AnyVal
 
 object NodesResponsePacket
     extends PacketModuleCompanion[NodesResponsePacket, PacketKind.NodesResponse.type, Security.Sensitive](PacketKind.NodesResponse) {
@@ -44,18 +41,17 @@ object NodesResponsePacket
     /**
      * [uint8_t number of nodes in this packet] (maximum of 4 nodes)
      * [Nodes in packed node format, length = (39 bytes for ipv4, 41 bytes for ipv6) * (number of nodes (maximum of 4 nodes)) bytes]
-     * [ping_id, length=8 bytes]
      */
-    (listOfN(uint8, NodeInfo.codec) ~ int64).exmap[NodesResponsePacket](
-      { case (nodes, pingId) => CoreError.toAttempt(NodesResponsePacket(nodes, pingId)) },
-      { case NodesResponsePacket(nodes, pingId) => Attempt.successful((nodes, pingId)) }
+    listOfN(uint8, NodeInfo.codec).exmap[NodesResponsePacket](
+      { case nodes => CoreError.toAttempt(NodesResponsePacket(nodes)) },
+      { case NodesResponsePacket(nodes) => Attempt.successful(nodes) }
     )
 
-  def apply(nodes: GenTraversableOnce[NodeInfo], pingId: Long): CoreError \/ NodesResponsePacket = {
+  def apply(nodes: GenTraversableOnce[NodeInfo]): CoreError \/ NodesResponsePacket = {
     for {
       _ <- CoreError.require(nodes.size <= MaxNodes, s"Too many nodes in $this: ${nodes.size} > $MaxNodes")
     } yield {
-      NodesResponsePacket(nodes.toList, pingId)
+      NodesResponsePacket(nodes.toList)
     }
   }
 

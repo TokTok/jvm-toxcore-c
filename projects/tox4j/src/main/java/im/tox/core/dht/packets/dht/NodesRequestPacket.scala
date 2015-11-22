@@ -26,17 +26,16 @@ import scodec.codecs._
  * is there for the same reason as the one for the ping request.
  */
 final case class NodesRequestPacket(
-  requestedNode: PublicKey,
-  pingId: Long
+  requestedNode: PublicKey
 )
 
 object NodesRequestPacket
     extends PacketModuleCompanion[NodesRequestPacket, PacketKind.NodesRequest.type, Security.Sensitive](PacketKind.NodesRequest) {
 
   override val codec =
-    (PublicKey.codec ~ int64).xmap[NodesRequestPacket](
-      { case (publicKey, pingId) => NodesRequestPacket(publicKey, pingId) },
-      { case NodesRequestPacket(publicKey, pingId) => (publicKey, pingId) }
+    PublicKey.codec.xmap[NodesRequestPacket](
+      { case (publicKey) => NodesRequestPacket(publicKey) },
+      { case NodesRequestPacket(publicKey) => publicKey }
     )
 
 }

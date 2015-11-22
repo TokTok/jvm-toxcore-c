@@ -1,23 +1,23 @@
 package im.tox.core.dht.handlers
 
-import im.tox.core.dht.packets.dht.{PingRequestPacket, NodesRequestPacket, PingPacket, PingResponsePacket}
+import im.tox.core.dht.packets.dht.{PingPacket, PingRequestPacket, PingResponsePacket}
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.PacketKind
-import im.tox.core.network.packets.ToxPacket
 
 import scalaz.\/
 
-object PingResponseHandler extends DhtPayloadHandler(PingResponsePacket) {
+object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingResponsePacket) {
 
-  override def apply(dht: Dht, sender: NodeInfo, packet: PingPacket): CoreError \/ IO[Dht] = {
+  override def apply(dht: Dht, sender: NodeInfo, packet: PingPacket[PacketKind.PingResponse.type], pingId: Long): CoreError \/ IO[Dht] = {
     for {
       pingRequest <- makeResponse(
         dht.keyPair,
         sender.publicKey,
         PingRequestPacket,
-        PingPacket(0)
+        PingRequestPacket,
+        0
       )
     } yield {
       for {

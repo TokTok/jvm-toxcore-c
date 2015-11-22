@@ -4,8 +4,8 @@ import java.net.InetSocketAddress
 
 import im.tox.core.crypto.{KeyPair, Nonce, PublicKey}
 import im.tox.core.dht.Dht
-import im.tox.core.dht.packets.DhtEncryptedPacket
-import im.tox.core.dht.packets.dht.{PingPacket, PingRequestPacket}
+import im.tox.core.dht.packets.dht.PingRequestPacket
+import im.tox.core.dht.packets.{DhtEncryptedPacket, DhtUnencryptedPacket}
 import im.tox.core.error.CoreError
 import im.tox.core.network.PacketKind.PingRequest
 import im.tox.core.network.packets.ToxPacket
@@ -25,23 +25,21 @@ object NetworkCoreTest {
     ("localhost", "9570FFA4644F8B6AF6DEBDCF3BE2E50553182C8D148F5AB1B4D292F293E5413D") // TestClient
   )
 
-  val EncryptedPingRequestPacket = DhtEncryptedPacket.Make(PingRequestPacket)
+  val EncryptedPingRequestPacket = DhtEncryptedPacket.Make(DhtUnencryptedPacket.Make(PingRequestPacket))
 
   def makePingRequest(
     senderKeyPair: KeyPair,
     receiverPublicKey: PublicKey,
     pingId: Long
   ): \/[CoreError, ToxPacket[PingRequest.type]] = {
-    val pingRequestPacket = PingPacket(pingId)
-
     for {
-      request <- NetworkCoreTest.EncryptedPingRequestPacket.encrypt(
+      request <- EncryptedPingRequestPacket.encrypt(
         receiverPublicKey,
         senderKeyPair,
         Nonce.random(),
-        pingRequestPacket
+        DhtUnencryptedPacket(PingRequestPacket, pingId)
       )
-      request <- NetworkCoreTest.EncryptedPingRequestPacket.toBytes(request)
+      request <- EncryptedPingRequestPacket.toBytes(request)
     } yield {
       ToxPacket(
         PingRequestPacket.packetKind,

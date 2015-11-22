@@ -12,23 +12,24 @@ import scalaz.\/
  * responses should contain the 4 closest good (not timed out) nodes that the
  * node receiving the get node has in their list of known nodes.
  */
-object NodesRequestHandler extends DhtPayloadHandler(NodesRequestPacket) {
+object NodesRequestHandler extends DhtUnencryptedPayloadHandler(NodesRequestPacket) {
 
   /**
    * When receiving a get node packet, toxcore will find the 4 nodes, in its nodes
    * lists, closest to the public key in the packet and send them in the send node
    * response.
    */
-  override def apply(dht: Dht, sender: NodeInfo, packet: NodesRequestPacket): CoreError \/ IO[Dht] = {
+  override def apply(dht: Dht, sender: NodeInfo, packet: NodesRequestPacket, pingId: Long): CoreError \/ IO[Dht] = {
     val nearNodes = dht.getNearNodes(NodesResponsePacket.MaxNodes, packet.requestedNode)
 
     for {
-      response <- NodesResponsePacket(nearNodes, packet.pingId)
+      response <- NodesResponsePacket(nearNodes)
       response <- makeResponse(
         dht.keyPair,
         sender.publicKey,
         NodesResponsePacket,
-        response
+        response,
+        pingId
       )
     } yield {
       for {

@@ -37,4 +37,11 @@ final class XorDistanceTest extends FunSuite with PropertyChecks {
     }
   }
 
+  test("triange inequality for corner cases") {
+    val x = PublicKey.fromString("A6F238ABCF165A8210CA216D09D8C168739738E10A77DF7F3C67E0BAB9C500E6").get
+    val y = PublicKey.fromString("A66C067F091AEDD155FE09F644BC9BBECE5192CE6F4598C379B7CC6D9903BB69").get
+    val z = PublicKey.fromString("D002A6CD3E05DAEA573AE6FEA326F84FFF55FA5640E2F1C91C86681A22CD5777").get
+    assert(XorDistance(x, z) <= XorDistance(x, y) + XorDistance(y, z))
+  }
+
 }

@@ -12,7 +12,7 @@ import im.tox.core.typesafe.Security
 
 import scalaz.{\/-, -\/, \/}
 
-final case class DhtEncryptedHandler[T, S <: Security](handler: DhtPayloadHandler[T, S])
+final case class DhtEncryptedHandler[T, S <: Security](handler: DhtEncryptedPayloadHandler[T, S])
     extends ToxPacketHandler(DhtEncryptedPacket.Make(handler.module)) {
 
   override val module = DhtEncryptedPacket.Make(handler.module)

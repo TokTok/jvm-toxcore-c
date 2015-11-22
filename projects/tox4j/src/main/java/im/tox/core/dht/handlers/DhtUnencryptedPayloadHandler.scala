@@ -3,6 +3,7 @@ package im.tox.core.dht.handlers
 import im.tox.core.ModuleCompanion
 import im.tox.core.crypto.{KeyPair, Nonce, PublicKey}
 import im.tox.core.dht.packets.DhtEncryptedPacket
+import im.tox.core.dht.packets.DhtUnencryptedPacket
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
@@ -13,46 +14,34 @@ import im.tox.core.typesafe.Security
 import scalaz.\/
 
 /**
- * Base class for handlers that receive a [[DhtEncryptedPacket]]'s payload.
+ * Base class for handlers that receive a [[DhtUnencryptedPacket]]'s payload.
  */
-abstract class DhtPayloadHandler[T, S <: Security](val module: ModuleCompanion[T, S]) {
+abstract class DhtUnencryptedPayloadHandler[T, S <: Security](val module: ModuleCompanion[T, S]) {
 
-  def apply(dht: Dht, sender: NodeInfo, packet: T): CoreError \/ IO[Dht]
-
-  private def makeResponse[Response, Kind <: PacketKind](
-    packetModule: PacketModuleCompanion[Response, Kind, Security.Sensitive],
-    dhtPacket: DhtEncryptedPacket[Response]
-  ): CoreError \/ ToxPacket[Kind] = {
-    val encryptedPacketModule = DhtEncryptedPacket.Make(packetModule)
-
-    for {
-      bytes <- encryptedPacketModule.toBytes(dhtPacket)
-    } yield {
-      ToxPacket(
-        packetModule.packetKind,
-        bytes
-      )
-    }
-  }
+  def apply(dht: Dht, sender: NodeInfo, packet: T, pingId: Long): CoreError \/ IO[Dht]
 
   def makeResponse[Response, Kind <: PacketKind](
     senderKeyPair: KeyPair,
     receiverPublicKey: PublicKey,
     packetModule: PacketModuleCompanion[Response, Kind, Security.Sensitive],
-    packet: Response
+    packet: Response,
+    pingId: Long
   ): CoreError \/ ToxPacket[Kind] = {
-    val encryptedPacketModule = DhtEncryptedPacket.Make(packetModule)
+    val encryptedPacketModule = DhtEncryptedPacket.Make(DhtUnencryptedPacket.Make(packetModule))
 
     for {
       dhtPacket <- encryptedPacketModule.encrypt(
         receiverPublicKey,
         senderKeyPair,
         Nonce.random(),
-        packet
+        DhtUnencryptedPacket(packet, pingId)
       )
-      response <- makeResponse(packetModule, dhtPacket)
+      bytes <- encryptedPacketModule.toBytes(dhtPacket)
     } yield {
-      response
+      ToxPacket(
+        packetModule.packetKind,
+        bytes
+      )
     }
   }
 

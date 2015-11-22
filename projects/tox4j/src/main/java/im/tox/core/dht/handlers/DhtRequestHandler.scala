@@ -17,7 +17,7 @@ import scalaz.{\/, \/-}
 final case class DhtRequestHandler[T, S <: Security](handler: ToxPacketHandler[T, S])
     extends ToxPacketHandler(DhtRequestPacket.Make(handler.module)) {
 
-  private val adapter = DhtEncryptedHandler(new DhtPayloadHandler(handler.module) {
+  private val adapter = DhtEncryptedHandler(new DhtEncryptedPayloadHandler(handler.module) {
     override def apply(dht: Dht, sender: NodeInfo, packet: T): CoreError \/ IO[Dht] = {
       handler(dht, sender.address, packet)
     }

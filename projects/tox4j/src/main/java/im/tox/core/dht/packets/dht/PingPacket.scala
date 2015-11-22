@@ -37,12 +37,8 @@ import scodec.codecs._
  * part contains a byte with the value 1 followed by a 8 byte ping id that was
  * sent in the ping response.
  */
-final case class PingPacket(
-  pingId: Long
-) extends AnyVal
-
-abstract class PingPacketCompanion[Kind <: PacketKind](packetKind: Kind)
-    extends PacketModuleCompanion[PingPacket, Kind, Security.Sensitive](packetKind) {
+abstract class PingPacket[Kind <: PacketKind](packetKind: Kind)
+    extends PacketModuleCompanion[PingPacket[Kind], Kind, Security.Sensitive](packetKind) {
 
   override val codec = {
     /**
@@ -53,16 +49,14 @@ abstract class PingPacketCompanion[Kind <: PacketKind](packetKind: Kind)
      * the encryption works it prevents a possible attacked from being able to
      * create a ping response without needing to decrypt the ping request.
      */
-    val echoType = constant(ByteVector(if (isResponse) 1 else 0))
+    val echoType = constant(ByteVector(packetKind.id))
     /**
      * [8 byte (ping_id)]
      */
-    (echoType ~> int64).xmap[PingPacket](
-      { case pingId => PingPacket(pingId) },
-      { case PingPacket(pingId) => pingId }
+    echoType.xmap[PingPacket[Kind]](
+      { case () => this },
+      { case _ => () }
     )
   }
-
-  def isResponse: Boolean
 
 }
