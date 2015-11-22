@@ -3,6 +3,7 @@ package C;
 use strict;
 use utf8;
 
+use Config;
 use Data::Dumper;
 use File::Path 'make_path';
 use Storable;
@@ -22,7 +23,7 @@ sub CACHEDIR { $ENV{CACHEDIR} || "$ENV{HOME}/cache" }
 sub ALWAYS_BUILD { $ENV{ALWAYS_BUILD} eq $_[1] }
 sub TEST_GOAL { $ENV{TEST_GOAL} }
 
-sub HOST { $^O }
+sub HOST { $Config{myarchname} }
 sub TARGET { $ENV{TARGET} || HOST }
 
 sub NDK_HOME {

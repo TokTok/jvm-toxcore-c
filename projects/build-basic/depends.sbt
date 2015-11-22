@@ -18,7 +18,7 @@ addSbtPlugin("de.johoop" % "findbugs4sbt" % "1.4.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
 
 // Scala protobuf support.
-addSbtPlugin("com.trueaccord.scalapb" % "sbt-scalapb" % "0.5.9")
+addSbtPlugin("com.trueaccord.scalapb" % "sbt-scalapb" % "0.5.15")
 
 // Build dependencies.
 libraryDependencies ++= Seq(

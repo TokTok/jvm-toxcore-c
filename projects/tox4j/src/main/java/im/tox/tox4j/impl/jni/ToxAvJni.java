@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ToxAvJni {
 
   static {
-    System.loadLibrary("tox4j");
+    ToxLoadJniLibrary.load("tox4j");
   }
 
   static native int toxavNew(int toxInstanceNumber) throws ToxavNewException;

@@ -13,6 +13,7 @@ object ProtobufJni extends OptionalPlugin {
   val Protobuf = config("protoc")
 
   object Keys {
+    val protocVersion = settingKey[String]("Version of the protoc binary to get from protocjar")
     val generate = taskKey[Seq[File]]("Compile the protobuf sources.")
   }
 
@@ -24,11 +25,13 @@ object ProtobufJni extends OptionalPlugin {
     generate <<= (
       streams,
       managedNativeSource in Compile,
-      sourceDirectory
+      sourceDirectory,
+      protocVersion
     ) map sourceGeneratorTask
 
   )) ++ protobufSettings ++ Seq(
-    version in protobufConfig := "3.0.0-alpha-3",
+    version in protobufConfig := "3.0.0-beta-1",
+    protocVersion := "3.0.0",
     javaConversions in protobufConfig := false, // TODO(iphydf): Set this to true.
     flatPackage in protobufConfig := true,
 
@@ -39,13 +42,14 @@ object ProtobufJni extends OptionalPlugin {
   private def sourceGeneratorTask(
     streams: TaskStreams,
     managedNativeSource: File,
-    sourceDirectory: File
+    sourceDirectory: File,
+    protocVersion: String
   ) = {
     val compile = { (in: Set[File]) =>
       in.foreach(schema => streams.log.debug(s"Compiling schema $schema"))
 
       // Compile to C++ sources.
-      compileProtoc(in, managedNativeSource, sourceDirectory, streams.log)
+      compileProtoc(in, managedNativeSource, sourceDirectory, protocVersion, streams.log)
 
       Set.empty[File]
     }
@@ -63,6 +67,7 @@ object ProtobufJni extends OptionalPlugin {
     schemas: Set[File],
     managedNativeSource: File,
     sourceDirectory: File,
+    protocVersion: String,
     log: Logger
   ): Unit = {
     val cppOut = managedNativeSource
@@ -76,7 +81,7 @@ object ProtobufJni extends OptionalPlugin {
     val exitCode =
       try {
         com.github.os72.protocjar.Protoc.runProtoc(
-          (Seq("-v3.0.0", "-I" + sourceDirectory.absolutePath) ++ protocOptions ++ schemas.map(_.absolutePath)).toArray
+          (Seq(s"-v$protocVersion", "-I" + sourceDirectory.absolutePath) ++ protocOptions ++ schemas.map(_.absolutePath)).toArray
         )
       } catch {
         case e: Exception =>

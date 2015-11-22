@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ToxCoreJni {
 
   static {
-    System.loadLibrary("tox4j");
+    ToxLoadJniLibrary.load("tox4j");
   }
 
   static native int toxNew(
