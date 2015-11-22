@@ -29,10 +29,6 @@ if ($GITHUB_KEY and -d $M2DIR) {
    my $repo = "tox4j.github.io";
    print "Publishing artifacts to $repo...\n";
 
-   must_system "git", "config", "--global", "push.default", "simple";
-   must_system "git", "config", "--global", "user.email", 'tox4j@travis-ci.org';
-   must_system "git", "config", "--global", "user.name", 'Travis CI Snapshot Uploader';
-
    # Don't use must_system, because that prints its arguments.
    if (not -d $repo) {
       (system "git", "clone", "https://$GITHUB_KEY\@github.com/tox4j/$repo")
@@ -50,6 +46,11 @@ if ($GITHUB_KEY and -d $M2DIR) {
 
       remove_tree $REPODIR;
       must_system "cp", "-a", $M2DIR, $REPODIR;
+
+      must_system "git", "config", "push.default", "simple";
+      must_system "git", "config", "user.email", 'tox4j@travis-ci.org';
+      must_system "git", "config", "user.name", 'Travis CI Snapshot Uploader';
+
       must_system "git", "add", "-A", ".";
       must_system "git", "commit", "-a", "--amend", "-mPublished snapshot at " . gmtime;
       must_system "git", "push", "--force", "-q";
