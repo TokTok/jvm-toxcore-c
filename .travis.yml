@@ -12,10 +12,11 @@ cache:
 
 env:
   matrix:
+    - TARGET=x86_64-linux
     - TARGET=arm-linux-androideabi
     - TARGET=i686-linux-android
-    - TEST_GOAL=coverage
-    - TEST_GOAL=performance
+    #- TEST_GOAL=coverage
+    #- TEST_GOAL=performance
 
 matrix:
   fast_finish: true
@@ -36,14 +37,14 @@ install:
 
 script:
   # Build/install step.
-  - buildscripts/04_build
+  - buildscripts/04_build || (cat projects/tox4j/config.log && false)
   - buildscripts/05_upload
 
 before_cache:
   # Hack to make sbt-coveralls work with our non-standard directory layout.
   - ln -s $PWD/.git projects/tox4j/
   - ln -s $PWD/projects/tox4j/src/main/java/* $PWD/projects/tox4j/
-  - if [ "$TEST_GOAL" = "coverage" ]; then cd projects/tox4j && sbt coveralls; fi
+  - if [ "$TEST_GOAL" = "coverage" -a -f "projects/tox4j/target/cobertura.xml" ]; then cd projects/tox4j && sbt coveralls; fi
   # Clean up cache.
   - find $HOME/cache/ivy2 -type f -name "ivydata-*.properties" -delete
   - find $HOME/cache/sbt/boot -name "sbt.*.lock" -delete

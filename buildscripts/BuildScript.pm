@@ -104,6 +104,8 @@ sub git_install {
 
    $patch = abs_path $patch;
 
+   local $ENV{CPPFLAGS} = "$ENV{CPPFLAGS} -fPIC";
+
    tempd {
       must_system "git", "clone", "--depth=1", "--branch=$branch", "$baseurl/$repo.git";
       chdir $repo;
@@ -129,6 +131,12 @@ sub git_install {
          mkdir '_build'
             or die "Could not create build directory";
          chdir '_build';
+
+         print "CFLAGS   = $ENV{CFLAGS}\n";
+         print "CPPFLAGS = $ENV{CPPFLAGS}\n";
+         print "CXXFLAGS = $ENV{CXXFLAGS}\n";
+         print "LDFLAGS  = $ENV{LDFLAGS}\n";
+
          # Run configure in the vpath build directory.
          must_system "../configure", @flags;
 

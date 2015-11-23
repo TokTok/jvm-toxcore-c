@@ -21,7 +21,7 @@ extern "C" void __gcov_flush ();
 #endif
 
 void
-JNI_OnUnload (JavaVM, void *)
+JNI_OnUnload (JavaVM *, void *)
 {
 #ifdef HAVE_COVERAGE
   __gcov_flush ();

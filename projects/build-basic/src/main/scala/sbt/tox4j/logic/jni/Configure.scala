@@ -1,9 +1,8 @@
 package sbt.tox4j.logic.jni
 
-import java.io.{IOException, File, PrintWriter}
+import java.io.{File, IOException, PrintWriter}
 
 import org.apache.commons.io.{FilenameUtils, IOUtils}
-import sbt.tox4j.logic.jni.Configure.NativeCompiler.C
 
 import scala.collection.JavaConverters._
 
@@ -229,14 +228,21 @@ object Configure {
           compilerResult.compiler,
           compilerResult.code,
           flagsCandidate,
-          cxxFlags.getOrElse(Nil),
+          cxxFlags.getOrElse(Nil) ++ compilerResult.flags,
           compilerResult.sysroot
         )
       } yield {
         result
       }
 
-    results.find(_.success).toSeq.flatMap(_.flags)
+    val result = results.find(_.success).toSeq.flatMap(_.flags)
+    if (result.isEmpty) {
+      configLog.info("checkCcOptions was unable to find valid options: " + results)
+    } else {
+      configLog.info("checkCcOptions found valid options: " + result)
+    }
+
+    result
   }
 
   def ccFeatureTest[T <: NativeCompiler](

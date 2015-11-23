@@ -35,6 +35,7 @@ object Jni extends OptionalPlugin {
     val toolchainPath = settingKey[Option[File]]("Optional toolchain location; must contain sysroot/ and bin/")
     val pkgConfigPath = settingKey[Seq[File]]("Directories to look in for pkg-config's .pc files")
 
+    val cppFlags = settingKey[Seq[String]]("Flags to be passed to the native C and C++ compilers when compiling")
     val cFlags = settingKey[Seq[String]]("Flags to be passed to the native C compiler when compiling")
     val cxxFlags = settingKey[Seq[String]]("Flags to be passed to the native C++ compiler when compiling")
     val ldFlags = settingKey[Seq[String]]("Flags to be passed to the native compiler when linking")
@@ -179,6 +180,7 @@ object Jni extends OptionalPlugin {
       nativeCXX := Configure.findCxx(toolchainPath.value, toolchainPrefix.value),
 
       // Defaults from the environment.
+      cppFlags := Configure.checkCcOptions(nativeCC.value, None, getEnvFlags("CPPFLAGS")),
       cFlags := Configure.checkCcOptions(nativeCC.value, None, getEnvFlags("CFLAGS")),
       cxxFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("CXXFLAGS")),
       ldFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("LDFLAGS")),
@@ -186,13 +188,6 @@ object Jni extends OptionalPlugin {
       // Build with parallel tasks by default.
       buildTool := BuildTool.tool,
       buildFlags := Seq("-j" + java.lang.Runtime.getRuntime.availableProcessors),
-
-      // C++14 flags.
-      cxxFlags ++= Configure.checkCcOptions(
-        nativeCXX.value, None,
-        Seq("-std=c++14"),
-        Seq("-std=c++1y")
-      ),
 
       // Debug flags.
       cxxFlags ++= Configure.checkCcOptions(
@@ -219,6 +214,15 @@ object Jni extends OptionalPlugin {
 
       // Error on undefined references in shared object.
       ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wl,-z,defs")),
+
+      // Link librt if possible (because then it is required).
+      ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-lrt")),
+
+      // Link with version script to avoid exporting unnecessary symbols.
+      ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, {
+        val versionScript = ((nativeSource in Compile).value / ("lib" + libraryName.value)).getPath + ".ver"
+        Seq(s"-Wl,--version-script,$versionScript")
+      }),
 
       // Enable test coverage collection.
       coverageEnabled := true,
@@ -292,8 +296,8 @@ object Jni extends OptionalPlugin {
       cmakeCommonFile := {
         CMakeGenerator.commonFile(streams.value.log)(
           nativeTarget.value,
-          cFlags.value ++ nativeCC.value.sysrootFlag,
-          cxxFlags.value ++ nativeCXX.value.sysrootFlag,
+          cppFlags.value ++ cFlags.value ++ nativeCC.value.flags ++ nativeCC.value.sysrootFlag,
+          cppFlags.value ++ cxxFlags.value ++ nativeCXX.value.flags ++ nativeCXX.value.sysrootFlag,
           ldFlags.value,
           featureTestFlags.value,
           coverageEnabled.value,

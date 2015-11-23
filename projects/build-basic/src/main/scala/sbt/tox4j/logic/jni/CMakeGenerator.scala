@@ -96,6 +96,10 @@ object CMakeGenerator {
     val cxxflags = (featureTestFlags ++ cxxFlags ++ coverageflags).mkString("\"", " ", "\"")
     val ldflags = (ldFlags ++ coverageflags).mkString("\"", " ", "\"")
 
+    log.info("CFLAGS = " + cflags)
+    log.info("CXXFLAGS = " + cxxflags)
+    log.info("LDFLAGS = " + ldflags)
+
     val targetFile = nativeTarget / "Common.cmake"
     val lines = new ArrayBuffer[String]
 

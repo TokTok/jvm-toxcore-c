@@ -20,7 +20,7 @@ $Data::Dumper::Indent = 1;
 
 sub CACHEDIR { $ENV{CACHEDIR} || "$ENV{HOME}/cache" }
 
-sub ALWAYS_BUILD { $ENV{ALWAYS_BUILD} eq $_[1] }
+sub ALWAYS_BUILD { grep { $_ eq $_[1] } (split /,/, $ENV{ALWAYS_BUILD}) }
 sub TEST_GOAL { $ENV{TEST_GOAL} }
 
 sub HOST { $Config{myarchname} }

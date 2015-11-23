@@ -6,7 +6,6 @@ import java.util.Properties
 
 import sbt.Keys._
 import sbt._
-import wartremover.Wart
 import wartremover.WartRemover.autoImport._
 
 import scala.collection.JavaConverters._
