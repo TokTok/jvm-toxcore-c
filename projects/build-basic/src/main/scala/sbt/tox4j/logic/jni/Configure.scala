@@ -179,9 +179,9 @@ object Configure {
       toolchainPath,
       toolchainPrefix,
       sys.env.get("CC").toSeq ++ Seq("clang-3.6", "clang-3.5", "clang35", "gcc-4.9", "clang", "gcc", "cc"),
-      "",
+      "typeof(0) i = 0;",
       Seq(
-        Seq("-std=c89")
+        Seq("-std=gnu89")
       )
     )
   }
