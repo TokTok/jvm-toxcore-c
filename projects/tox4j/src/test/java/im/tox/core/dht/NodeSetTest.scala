@@ -1,6 +1,5 @@
 package im.tox.core.dht
 
-import com.github.nscala_time.time.Imports._
 import im.tox.core.crypto.PublicKey
 import im.tox.core.crypto.PublicKeyTest._
 import im.tox.core.dht.NodeInfoTest._

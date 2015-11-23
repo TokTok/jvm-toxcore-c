@@ -1,6 +1,6 @@
 package im.tox.tox4j.core
 
-import im.tox.core.typesafe.{Security, FixedSizeByteArrayCompanion}
+import im.tox.core.typesafe.{FixedSizeByteArrayCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final class ToxPublicKey private (val value: Array[Byte]) extends AnyVal {

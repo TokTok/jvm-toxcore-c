@@ -1,7 +1,7 @@
 package im.tox.core.crypto
 
 import im.tox.core.random.RandomCore
-import org.scalacheck.{Gen, Arbitrary}
+import org.scalacheck.{Arbitrary, Gen}
 
 object SecretKeyTest {
 

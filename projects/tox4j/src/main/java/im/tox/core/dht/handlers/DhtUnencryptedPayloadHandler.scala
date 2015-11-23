@@ -2,8 +2,7 @@ package im.tox.core.dht.handlers
 
 import im.tox.core.ModuleCompanion
 import im.tox.core.crypto.{KeyPair, Nonce, PublicKey}
-import im.tox.core.dht.packets.DhtEncryptedPacket
-import im.tox.core.dht.packets.DhtUnencryptedPacket
+import im.tox.core.dht.packets.{DhtEncryptedPacket, DhtUnencryptedPacket}
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO

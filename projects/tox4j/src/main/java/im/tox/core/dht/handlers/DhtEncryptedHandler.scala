@@ -10,7 +10,7 @@ import im.tox.core.io.IO
 import im.tox.core.network.handlers.ToxPacketHandler
 import im.tox.core.typesafe.Security
 
-import scalaz.{\/-, -\/, \/}
+import scalaz.{-\/, \/, \/-}
 
 final case class DhtEncryptedHandler[T, S <: Security](handler: DhtEncryptedPayloadHandler[T, S])
     extends ToxPacketHandler(DhtEncryptedPacket.Make(handler.module)) {

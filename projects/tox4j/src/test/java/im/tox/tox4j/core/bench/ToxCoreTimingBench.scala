@@ -1,8 +1,8 @@
 package im.tox.tox4j.core.bench
 
 import im.tox.core.network.Port
-import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.TimingReport
+import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.core.callbacks.ToxEventAdapter
 import im.tox.tox4j.core.{ToxCore, ToxCoreConstants, ToxPublicKey}
 import org.scalameter.api._

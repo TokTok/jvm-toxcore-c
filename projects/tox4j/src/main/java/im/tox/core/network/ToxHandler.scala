@@ -3,8 +3,8 @@ package im.tox.core.network
 import java.net.InetSocketAddress
 
 import com.typesafe.scalalogging.Logger
-import im.tox.core.crypto.{KeyPair, PlainText}
 import im.tox.core.crypto.PlainText.Conversions._
+import im.tox.core.crypto.{KeyPair, PlainText}
 import im.tox.core.dht.Dht
 import im.tox.core.dht.handlers._
 import im.tox.core.error.CoreError
@@ -15,7 +15,7 @@ import im.tox.core.typesafe.Security
 import im.tox.core.typesafe.Security.NonSensitive
 import org.slf4j.LoggerFactory
 
-import scalaz.{\/-, -\/, \/}
+import scalaz.{-\/, \/, \/-}
 
 /**
  * The top-level protocol handler.

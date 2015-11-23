@@ -1,11 +1,10 @@
 package im.tox.core.dht.packets.dht
 
 import im.tox.core.ModuleCompanionTest
-import im.tox.core.crypto.PublicKey
 import im.tox.core.dht.NodeInfo
 import im.tox.core.dht.NodeInfoTest._
+import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary._
-import org.scalacheck.{Arbitrary, Gen}
 
 object NodesResponsePacketTest {
 

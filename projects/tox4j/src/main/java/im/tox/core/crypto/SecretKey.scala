@@ -1,6 +1,6 @@
 package im.tox.core.crypto
 
-import im.tox.core.typesafe.{Security, FixedSizeByteArrayCompanion}
+import im.tox.core.typesafe.{FixedSizeByteArrayCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final case class SecretKey private[crypto] (value: Seq[Byte]) extends AnyVal {

@@ -3,7 +3,7 @@ package im.tox.core.dht
 import im.tox.core.crypto.PublicKey
 
 import scala.annotation.tailrec
-import scala.collection.immutable.{SortedMap, SortedSet}
+import scala.collection.immutable.SortedMap
 
 /**
  * Ordered set of [[NodeInfo]] objects. Always keeps the list of nodes closest

@@ -1,6 +1,6 @@
 package im.tox.tox4j.core
 
-import im.tox.core.typesafe.{Security, FixedSizeByteArrayCompanion}
+import im.tox.core.typesafe.{FixedSizeByteArrayCompanion, Security}
 
 final class ToxFileId private (val value: Array[Byte]) extends AnyVal {
   override def toString: String = {

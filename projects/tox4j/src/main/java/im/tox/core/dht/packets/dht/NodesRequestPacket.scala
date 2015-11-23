@@ -3,7 +3,6 @@ package im.tox.core.dht.packets.dht
 import im.tox.core.crypto.PublicKey
 import im.tox.core.network.{PacketKind, PacketModuleCompanion}
 import im.tox.core.typesafe.Security
-import scodec.codecs._
 
 /**
  * Get nodes (Request):

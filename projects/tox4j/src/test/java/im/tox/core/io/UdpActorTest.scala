@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scalaz.concurrent.Task
-import scalaz.stream.{udp, Process, Sink, async}
+import scalaz.stream.{Process, Sink, async, udp}
 
 final class UdpActorTest extends FunSuite {
 
