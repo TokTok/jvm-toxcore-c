@@ -197,7 +197,7 @@ final class CryptoCoreTest extends WordSpec with PropertyChecks {
 
     "have high entropy" in {
       forAll { (nonce: Nonce) =>
-        assert(RandomCore.entropy(nonce.data) > 0.5)
+        assert(RandomCore.entropy(nonce.value) > 0.5)
       }
     }
   }

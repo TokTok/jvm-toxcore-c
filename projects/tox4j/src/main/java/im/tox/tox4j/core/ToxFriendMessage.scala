@@ -2,7 +2,9 @@ package im.tox.tox4j.core
 
 import im.tox.core.typesafe.VariableSizeByteArrayCompanion
 
-final class ToxFriendMessage private (val value: Array[Byte]) extends AnyVal
+final class ToxFriendMessage private (val value: Array[Byte]) extends AnyVal {
+  override def toString: String = new String(value)
+}
 
 object ToxFriendMessage extends VariableSizeByteArrayCompanion[ToxFriendMessage](ToxCoreConstants.MaxMessageLength) {
 

@@ -1,14 +1,15 @@
 package im.tox.tox4j.core
 
-import im.tox.core.typesafe.{FixedSizeByteArrayCompanion, Security}
+import im.tox.core.typesafe.{KeyCompanion, Security}
 
-final class ToxFileId private (val value: Array[Byte]) extends AnyVal {
+final case class ToxFileId private (value: Array[Byte]) extends AnyVal {
+  def readable: String = ToxFileId.toString(value)
   override def toString: String = {
-    "ToxFileId(" + value.map(c => f"$c%02X").mkString + ")"
+    s"${getClass.getSimpleName}($readable)"
   }
 }
 
-object ToxFileId extends FixedSizeByteArrayCompanion[ToxFileId, Security.Sensitive](ToxCoreConstants.FileIdLength) {
+object ToxFileId extends KeyCompanion[ToxFileId, Security.Sensitive](ToxCoreConstants.FileIdLength) {
 
   val empty = new ToxFileId(Array.empty)
 

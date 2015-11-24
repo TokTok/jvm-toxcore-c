@@ -47,7 +47,7 @@ object CryptoCore {
       case None =>
         val sharedKey = SharedKey(Array.ofDim[Byte](SharedKey.Size))
         ToxCryptoJni.cryptoBoxBeforenm(
-          sharedKey.data,
+          sharedKey.value,
           publicKey.value.toArray,
           secretKey.value.toArray
         )
@@ -70,14 +70,14 @@ object CryptoCore {
       ToxCryptoJni.cryptoBoxAfternm(
         cipherTextData,
         plainTextData,
-        nonce.data.toArray,
-        sharedKey.data
+        nonce.value.toArray,
+        sharedKey.value
       )
     } else {
       ToxCryptoJni.cryptoBox(
         cipherTextData,
         plainTextData,
-        nonce.data.toArray,
+        nonce.value.toArray,
         publicKey.value.toArray,
         secretKey.value.toArray
       )
@@ -101,14 +101,14 @@ object CryptoCore {
         ToxCryptoJni.cryptoBoxOpenAfternm(
           plainTextData,
           cipherTextData,
-          nonce.data.toArray,
-          sharedKey.data
+          nonce.value.toArray,
+          sharedKey.value
         )
       } else {
         ToxCryptoJni.cryptoBoxOpen(
           plainTextData,
           cipherTextData,
-          nonce.data.toArray,
+          nonce.value.toArray,
           publicKey.value.toArray,
           secretKey.value.toArray
         )

@@ -30,6 +30,9 @@ object ToxLoadJniLibrary {
       ),
       "Linux" -> Map(
         "amd64" -> "x86_64-linux"
+      ),
+      "Mac OS X" -> Map(
+        "x86_64" -> "x86_64-darwin"
       )
     )(osName)(sys.props("os.arch"))
   }

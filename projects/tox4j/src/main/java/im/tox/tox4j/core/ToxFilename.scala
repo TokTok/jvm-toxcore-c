@@ -2,7 +2,9 @@ package im.tox.tox4j.core
 
 import im.tox.core.typesafe.VariableSizeByteArrayCompanion
 
-final class ToxFilename private (val value: Array[Byte]) extends AnyVal
+final class ToxFilename private (val value: Array[Byte]) extends AnyVal {
+  override def toString: String = new String(value)
+}
 
 object ToxFilename extends VariableSizeByteArrayCompanion[ToxFilename](ToxCoreConstants.MaxFilenameLength) {
 
