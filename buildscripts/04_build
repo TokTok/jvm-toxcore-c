@@ -103,8 +103,8 @@ sub plan_build {
 
       my $state =
          $platform_dependent
-            ? \%{ $C->STATE->{$C->TARGET} }
-            : \%{ $C->STATE->{$C->HOST} }
+            ? \%{ $C->STATE->{$C->TARGET}{$C->TEST_GOAL} }
+            : \%{ $C->STATE->{$C->HOST}{$C->TEST_GOAL} }
             ;
 
       $todo{$module} = {
