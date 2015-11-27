@@ -3,9 +3,11 @@ package im.tox.tox4j.core.callbacks
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.CoreInvokeTest._
 import im.tox.tox4j.core.callbacks.InvokeTest.ByteArray
+import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite

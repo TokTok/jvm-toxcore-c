@@ -1,13 +1,13 @@
-package im.tox.tox4j.core
+package im.tox.tox4j.core.data
 
 final class ToxLossyPacket private (val value: Array[Byte]) extends AnyVal
 
-object ToxLossyPacket extends ToxCustomPacketCompanion[ToxLossyPacket](
+case object ToxLossyPacket extends ToxCustomPacketCompanion[ToxLossyPacket](
   MinPacketId = 200, // scalastyle:ignore magic.number
-  MaxPacketId = 254 // scalastyle:ignore magic.number
+  MaxPacketId = 254, // scalastyle:ignore magic.number
+  _.value
 ) {
 
   override def unsafeFromValue(value: Array[Byte]): ToxLossyPacket = new ToxLossyPacket(value)
-  override def toValue(self: ToxLossyPacket): Array[Byte] = self.value
 
 }

@@ -1,7 +1,8 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.data.{ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileKind}
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants, ToxFileId, ToxFilename}
+import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 final class FileRecvCallbackTest extends AliceBobTest {

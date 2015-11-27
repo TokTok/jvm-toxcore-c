@@ -6,7 +6,9 @@ import javax.swing._
 import im.tox.gui.MainView
 import im.tox.tox4j.ToxCoreTestBase.parsePublicKey
 import im.tox.tox4j.core._
+import im.tox.tox4j.core.data.{ToxFriendAddress, ToxFriendRequestMessage, ToxPublicKey}
 import im.tox.tox4j.core.exceptions.ToxFriendAddException
+import im.tox.tox4j.testing.GetDisjunction._
 
 final class AddFriendButtonOnAction(toxGui: MainView) extends ActionListener {
 

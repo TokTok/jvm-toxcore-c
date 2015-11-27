@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxFilename
+import im.tox.tox4j.core.data.ToxFilename
 import im.tox.tox4j.core.enums.ToxFileControl
 import org.jetbrains.annotations.NotNull
 

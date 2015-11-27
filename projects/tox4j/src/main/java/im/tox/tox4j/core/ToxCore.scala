@@ -4,6 +4,7 @@ import java.io.Closeable
 
 import im.tox.core.network.Port
 import im.tox.tox4j.core.callbacks._
+import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.exceptions._
 import im.tox.tox4j.core.options.ToxOptions

@@ -5,9 +5,10 @@ import java.io.File
 import javax.swing._
 
 import im.tox.gui.MainView
+import im.tox.tox4j.core.data.{ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.ToxFileKind
 import im.tox.tox4j.core.exceptions.ToxFileSendException
-import im.tox.tox4j.core.{ToxFileId, ToxFilename}
+import im.tox.tox4j.testing.GetDisjunction._
 
 final class SendFileButtonOnAction(toxGui: MainView) extends ActionListener {
 

@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendMessage
 import im.tox.tox4j.core.enums.ToxMessageType
 import org.jetbrains.annotations.NotNull
 

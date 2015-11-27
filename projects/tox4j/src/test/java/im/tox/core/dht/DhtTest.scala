@@ -55,7 +55,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
             DotEdgeStmt(
               NodeId(from.toString),
               NodeId(to.toString),
-              List(DotAttr(Id("label"), Id('"' + XorDistance(from.value, to.value).mkString + '"')))
+              List(DotAttr(Id("label"), Id('"' + XorDistance(from.value, to.value).toHexString + '"')))
             )
           ))
       }

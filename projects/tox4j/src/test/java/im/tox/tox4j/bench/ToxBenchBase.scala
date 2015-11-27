@@ -4,9 +4,11 @@ import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.picklers.Implicits._
 import im.tox.tox4j.core._
+import im.tox.tox4j.core.data.{ToxFriendAddress, ToxNickname, ToxPublicKey, ToxStatusMessage}
 import im.tox.tox4j.core.exceptions.ToxNewException
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
 import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl}
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalameter.api._
 
 import scala.collection.immutable

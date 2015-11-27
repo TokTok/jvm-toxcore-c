@@ -4,9 +4,10 @@ import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing._
 
 import im.tox.gui.MainView
-import im.tox.tox4j.core.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendMessage
 import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.core.exceptions.ToxFriendSendMessageException
+import im.tox.tox4j.testing.GetDisjunction._
 
 final class SendButtonOnAction(toxGui: MainView) extends ActionListener {
 

@@ -5,16 +5,18 @@ import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final case class Nonce private[crypto] (value: Seq[Byte]) extends AnyVal {
-  def readable: String = Nonce.toString(value)
+  def readable: String = Nonce.toHexString(this)
   override def toString: String = {
     s"${getClass.getSimpleName}($readable)"
   }
 }
 
-object Nonce extends KeyCompanion[Nonce, Security.NonSensitive](ToxCryptoConstants.NonceLength) {
+case object Nonce extends KeyCompanion[Nonce, Security.NonSensitive](
+  ToxCryptoConstants.NonceLength,
+  _.value.toArray
+) {
 
   override protected def unsafeFromValue(value: Array[Byte]): Nonce = new Nonce(value)
-  override def toValue(self: Nonce): Array[Byte] = self.value.toArray
 
   /**
    * The random nonce generation function is used everywhere in toxcore to

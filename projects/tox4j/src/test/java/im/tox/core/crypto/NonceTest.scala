@@ -1,6 +1,6 @@
 package im.tox.core.crypto
 
-import im.tox.core.ModuleCompanionTest
+import im.tox.core.typesafe.KeyCompanionTest
 import org.scalacheck.{Arbitrary, Gen}
 
 object NonceTest {
@@ -10,8 +10,4 @@ object NonceTest {
 
 }
 
-final class NonceTest extends ModuleCompanionTest(Nonce) {
-
-  override val arbT = NonceTest.arbNonce
-
-}
+final class NonceTest extends KeyCompanionTest(Nonce)(NonceTest.arbNonce)

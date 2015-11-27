@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.exceptions
 
-import im.tox.tox4j.core.ToxPublicKey
+import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 

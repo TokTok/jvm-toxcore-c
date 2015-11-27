@@ -12,6 +12,10 @@ abstract class ModuleCompanion[T, +S <: Security] {
 
   def codec: Codec[T]
 
+  final def equals(a: T, b: T): Boolean = {
+    toBytes(a) == toBytes(b)
+  }
+
   final def toBytes(self: T): CoreError \/ PlainText[S] = {
     CoreError(codec.encode(self).map { bits =>
       assert(bits.size % java.lang.Byte.SIZE == 0)

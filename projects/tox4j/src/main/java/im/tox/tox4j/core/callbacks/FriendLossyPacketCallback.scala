@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxLossyPacket
+import im.tox.tox4j.core.data.ToxLossyPacket
 import org.jetbrains.annotations.NotNull
 
 /**

@@ -3,8 +3,10 @@ package im.tox.tox4j.testing.autotest
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.ToxEventAdapter
+import im.tox.tox4j.core.data.{ToxFriendAddress, ToxPublicKey}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.exceptions.ToxException
+import im.tox.tox4j.testing.GetDisjunction._
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec

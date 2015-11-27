@@ -35,7 +35,7 @@ final class TimeActorTest extends FunSuite {
         }
         .flatMap { count =>
           if (count == repeats * timers) {
-            actionActor.kill ++ timeActor.kill ++ Process.halt
+            actionActor.kill
           } else {
             Process.empty[Task, Unit]
           }
@@ -49,6 +49,39 @@ final class TimeActorTest extends FunSuite {
     val end = System.currentTimeMillis()
 
     assert(end - start < (delay.toMillis * repeats * timers))
+  }
+
+  test("conditionally expiring timers") {
+    val delay = 100 milliseconds
+    val repeats = 4
+
+    val actionQueue = async.boundedQueue[IO.Action](10)
+    val eventQueue = async.boundedQueue[IO.Event](10)
+
+    val actionActor = Process(
+      IO.Action.StartTimer(delay, Some(repeats))(_ => Some(IO.ShutdownEvent))
+    ).toSource.to(actionQueue.enqueue)
+
+    val timeActor = TimeActor.make(actionQueue.dequeue, eventQueue.enqueue)
+
+    val testActor =
+      eventQueue.dequeue
+        .scan(0) { (count, event) =>
+          logger.debug(s"Event $count: $event")
+          count + 1
+        }
+        .flatMap { count =>
+          if (count == repeats) {
+            actionActor.kill
+          } else {
+            Process.empty[Task, Unit]
+          }
+        }
+
+    actionActor
+      .merge(timeActor)
+      .merge(testActor)
+      .run.run
   }
 
 }

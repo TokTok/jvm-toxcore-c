@@ -5,6 +5,7 @@ import im.tox.core.random.RandomCore
 import im.tox.tox4j.TestConstants.Iterations
 import im.tox.tox4j.core.ToxCoreFactory.withTox
 import im.tox.tox4j.core._
+import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxNickname, ToxPublicKey, ToxStatusMessage}
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{ProxyOptions, ToxOptions}
 import im.tox.tox4j.testing.ToxTestMixin

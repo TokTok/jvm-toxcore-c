@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxStatusMessage
+import im.tox.tox4j.core.data.ToxStatusMessage
 import org.jetbrains.annotations.NotNull
 
 /**

@@ -12,48 +12,52 @@ import im.tox.core.crypto.PublicKey
  * 1 is smaller it means 1 is closer to 0 than to 5.
  */
 // scalastyle:off method.name
-final case class XorDistance private (private val value: BigInt) extends AnyVal {
+final class XorDistance private (private val value: BigInt) extends AnyVal {
 
   def <(rhs: XorDistance): Boolean = value < rhs.value
 
   def <=(rhs: XorDistance): Boolean = value <= rhs.value
 
-  def +(rhs: XorDistance): XorDistance = XorDistance(value + rhs.value)
+  def +(rhs: XorDistance): XorDistance = new XorDistance(value + rhs.value)
 
-  def mkString: String = {
+  def toHexString: String = {
     value.toByteArray.map(c => f"$c%02X").mkString
   }
 
   override def toString: String = {
-    s"${getClass.getSimpleName}($mkString=$value)"
+    s"${getClass.getSimpleName}($toHexString=$value)"
   }
 
 }
 
 object XorDistance {
 
-  val Zero = XorDistance(0)
+  private val Int256Max = BigInt(Byte.MaxValue +: Array.fill[Byte](PublicKey.Size - 1)(-1))
 
   private def toBigInt(bytes: Seq[Byte]): BigInt = {
     // Prepend zero-byte to avoid negative numbers.
     BigInt((0.toByte +: bytes).toArray)
   }
 
-  private def signed(x: BigInt): BigInt = {
-    x.toByteArray.toSeq match {
-      case 0 +: tail if tail.nonEmpty => -BigInt(tail.toArray)
-      case _                          => x
+  /**
+   * Interpret a [[BigInt]] as signed integer modulo the given number of bytes.
+   */
+  private def signed(bytes: Int, x: BigInt): BigInt = {
+    if (x > Int256Max) {
+      -BigInt(x.toByteArray.tail)
+    } else {
+      x
     }
   }
 
-  private def apply(x: BigInt, y: BigInt): XorDistance = {
+  private def apply(bytes: Int, x: BigInt, y: BigInt): XorDistance = {
     assert(x >= 0)
     assert(y >= 0)
-    XorDistance(signed(x ^ y).abs)
+    new XorDistance(signed(bytes, x ^ y).abs)
   }
 
   def apply(x: PublicKey, y: PublicKey): XorDistance = {
-    XorDistance(toBigInt(x.value), toBigInt(y.value))
+    XorDistance(PublicKey.Size, toBigInt(x.value), toBigInt(y.value))
   }
 
 }

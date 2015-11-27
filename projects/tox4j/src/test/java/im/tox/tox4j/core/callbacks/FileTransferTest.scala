@@ -2,8 +2,8 @@ package im.tox.tox4j.core.callbacks
 
 import java.util.Random
 
+import im.tox.tox4j.core.data.{ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind}
-import im.tox.tox4j.core.{ToxFileId, ToxFilename}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 final class FileTransferTest extends AliceBobTest {

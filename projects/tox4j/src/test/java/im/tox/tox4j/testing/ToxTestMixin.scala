@@ -1,11 +1,15 @@
 package im.tox.tox4j.testing
 
+import im.tox.core.error.CoreError
 import im.tox.tox4j.DhtNodeSelector._
 import im.tox.tox4j.core.exceptions.{ToxBootstrapException, ToxFriendAddException, ToxNewException}
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import im.tox.tox4j.exceptions.ToxException
 import org.jetbrains.annotations.NotNull
 import org.scalatest.Assertions
+
+import scala.language.implicitConversions
+import scalaz.\/
 
 trait ToxTestMixin extends Assertions {
 
@@ -52,6 +56,10 @@ trait ToxTestMixin extends Assertions {
       node.dhtId
     )
     tox
+  }
+
+  implicit final def toGetDisjunction[T](disjunction: CoreError \/ T): GetDisjunction[T] = {
+    GetDisjunction.toGetDisjunction(disjunction)
   }
 
 }

@@ -2,8 +2,10 @@ package im.tox.tox4j.core
 
 import im.tox.tox4j.ToxCoreTestBase
 import im.tox.tox4j.core.ToxCoreFactory.withTox
+import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxNickname, ToxStatusMessage}
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FunSuite
 
 import scala.annotation.tailrec

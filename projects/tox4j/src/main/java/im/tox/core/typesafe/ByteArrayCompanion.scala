@@ -2,20 +2,25 @@ package im.tox.core.typesafe
 
 import java.nio.charset.Charset
 
+import im.tox.core.error.CoreError
 import scodec.bits.ByteVector
-import scodec.{Attempt, Codec, Err}
+import scodec.{Attempt, Codec}
 
-abstract class ByteArrayCompanion[T <: AnyVal, S <: Security](byteVectorCodec: Codec[ByteVector])
-    extends WrappedValueCompanion[Array[Byte], T, S] {
+import scalaz.\/
+
+abstract class ByteArrayCompanion[T <: AnyVal, S <: Security](
+    byteVectorCodec: Codec[ByteVector],
+    toValue: T => Array[Byte]
+) extends WrappedValueCompanion[Array[Byte], T, S](toValue) {
 
   private final val UTF_8 = Charset.forName("UTF-8")
 
   final override val codec = byteVectorCodec.exmap[T](
-    { bytes => Attempt.fromOption(fromValue(bytes.toArray), new Err.General(s"Validation failed for $this")) },
+    { bytes => CoreError.toAttempt(fromValue(bytes.toArray)) },
     { self => Attempt.successful(ByteVector.view(toValue(self))) }
   )
 
-  def fromString(value: String): Option[T] = {
+  final def fromString(value: String): CoreError \/ T = {
     fromValue(value.getBytes(UTF_8))
   }
 

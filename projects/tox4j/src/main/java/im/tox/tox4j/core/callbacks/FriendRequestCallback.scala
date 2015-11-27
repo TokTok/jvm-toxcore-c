@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.{ToxFriendRequestMessage, ToxPublicKey}
+import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxPublicKey}
 import org.jetbrains.annotations.NotNull
 
 /**

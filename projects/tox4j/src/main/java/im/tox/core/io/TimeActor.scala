@@ -23,7 +23,10 @@ object TimeActor {
     }
   }
 
-  private def installTimer(eventSink: Sink[Task, IO.Event], action: IO.Action): Process[Task, Unit] = {
+  private def installTimer(
+    eventSink: Sink[Task, IO.Event],
+    action: IO.Action
+  ): Process[Task, Unit] = {
     action match {
       case startTimer @ Action.StartTimer(delay, repeat) =>
         val timer = time.awakeEvery(delay)

@@ -1,6 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.core._
+import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxPublicKey}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 

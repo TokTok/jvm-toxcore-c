@@ -3,6 +3,7 @@ package im.tox.tox4j.core.callbacks
 import im.tox.core.random.RandomCore
 import im.tox.tox4j.TestConstants
 import im.tox.tox4j.core._
+import im.tox.tox4j.core.data.{ToxFileId, ToxFilename, ToxFriendMessage}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind, ToxMessageType}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 

@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.TestConstants.Iterations
-import im.tox.tox4j.core.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendMessage
 import im.tox.tox4j.core.enums.{ToxConnection, ToxMessageType}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 

@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxNickname
+import im.tox.tox4j.core.data.ToxNickname
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 final class NameEmptyTest extends AliceBobTest {

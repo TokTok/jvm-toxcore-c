@@ -3,8 +3,10 @@ package im.tox.tox4j.core
 import im.tox.tox4j.core.SmallNat._
 import im.tox.tox4j.core.ToxCoreFactory.withTox
 import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.tox4j.core.data.ToxFriendRequestMessage
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.impl.jni.ToxCoreImpl
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FlatSpec
 import org.scalatest.prop.PropertyChecks
 

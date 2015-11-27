@@ -2,7 +2,7 @@ package im.tox.gui.domain
 
 import java.io.Serializable
 
-import im.tox.tox4j.core.ToxPublicKey
+import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
 
 final class Friend(val publicKey: ToxPublicKey) extends Serializable {

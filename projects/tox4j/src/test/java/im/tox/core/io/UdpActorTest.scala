@@ -7,6 +7,7 @@ import im.tox.core.crypto.{CryptoCore, PlainText, PublicKey}
 import im.tox.core.dht.{NodeInfo, Protocol}
 import im.tox.core.network.{NetworkCoreTest, ToxHandler}
 import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FunSuite
 import org.slf4j.LoggerFactory
 
@@ -24,7 +25,7 @@ final class UdpActorTest extends FunSuite {
   def sendPingAction(pingId: Int): IO.Action.SendTo = {
     val node = NetworkCoreTest.nodes.head
     val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
-    val receiverPublicKey = PublicKey.fromString(node._2).get
+    val receiverPublicKey = PublicKey.fromHexString(node._2).get
 
     val pingRequestPacket = NetworkCoreTest.makePingRequest(keyPair, receiverPublicKey, pingId)
       .getOrElse(fail("Unable to construct ping request packet"))

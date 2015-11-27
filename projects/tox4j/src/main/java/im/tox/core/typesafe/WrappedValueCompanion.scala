@@ -1,33 +1,44 @@
 package im.tox.core.typesafe
 
 import im.tox.core.ModuleCompanion
+import im.tox.core.error.CoreError
 
-abstract class WrappedValueCompanion[Repr, T <: AnyVal, S <: Security] extends ModuleCompanion[T, S] {
+import scalaz.\/
 
-  sealed trait Validator extends (Repr => Boolean) { self =>
-    def apply(f: Repr => Boolean): Validator = {
+abstract class WrappedValueCompanion[Repr, T <: AnyVal, S <: Security](
+    toValue: T => Repr
+) extends ModuleCompanion[T, S] {
+
+  sealed trait Validator { self =>
+
+    protected[typesafe] def apply(repr: Repr): Option[CoreError]
+
+    def apply(f: Repr => Option[CoreError]): Validator = {
       new Validator {
-        override def apply(value: Repr): Boolean = self.apply(value) && f(value)
+        override def apply(value: Repr): Option[CoreError] = {
+          self.apply(value).orElse(f(value))
+        }
       }
     }
+
   }
 
-  private object Validator extends Validator {
-    def apply(array: Repr): Boolean = true
+  protected object Validator extends Validator {
+
+    protected[typesafe] override def apply(array: Repr): Option[CoreError] = None
+
+    def require(condition: Boolean, message: => String): Option[CoreError] = {
+      CoreError.require(condition, message).swap.toOption
+    }
+
   }
 
   protected def validate: Validator = Validator
 
   protected def unsafeFromValue(value: Repr): T
 
-  final def fromValue(value: Repr): Option[T] = {
-    if (validate(value)) {
-      Some(unsafeFromValue(value))
-    } else {
-      None
-    }
+  final def fromValue(value: Repr): CoreError \/ T = {
+    \/.fromEither(validate(value).toLeft(unsafeFromValue(value)))
   }
-
-  protected def toValue(self: T): Repr
 
 }

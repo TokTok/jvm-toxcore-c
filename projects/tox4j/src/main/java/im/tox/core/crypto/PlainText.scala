@@ -13,7 +13,7 @@ final case class PlainText[+S <: Security](private val value: ByteVector) extend
 
 }
 
-object PlainText extends ModuleCompanion[PlainText[Security.NonSensitive], Security.NonSensitive] {
+case object PlainText extends ModuleCompanion[PlainText[Security.NonSensitive], Security.NonSensitive] {
 
   override val codec = bytes.xmap[PlainText[Security.NonSensitive]](PlainText.apply, _.value)
 

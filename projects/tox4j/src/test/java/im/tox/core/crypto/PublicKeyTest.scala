@@ -1,7 +1,7 @@
 package im.tox.core.crypto
 
-import im.tox.core.ModuleCompanionTest
 import im.tox.core.random.RandomCore
+import im.tox.core.typesafe.KeyCompanionTest
 import org.scalacheck.{Arbitrary, Gen}
 
 object PublicKeyTest {
@@ -15,8 +15,4 @@ object PublicKeyTest {
 
 }
 
-final class PublicKeyTest extends ModuleCompanionTest(PublicKey) {
-
-  override val arbT = PublicKeyTest.arbPublicKey
-
-}
+final class PublicKeyTest extends KeyCompanionTest(PublicKey)(PublicKeyTest.arbPublicKey)

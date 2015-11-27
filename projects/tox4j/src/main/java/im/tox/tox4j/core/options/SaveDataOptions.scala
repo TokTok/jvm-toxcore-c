@@ -1,7 +1,8 @@
 package im.tox.tox4j.core.options
 
+import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxSecretKey
 import im.tox.tox4j.core.enums.ToxSavedataType
-import im.tox.tox4j.core.{ToxCore, ToxSecretKey}
 
 /**
  * Base type for all save data kinds.

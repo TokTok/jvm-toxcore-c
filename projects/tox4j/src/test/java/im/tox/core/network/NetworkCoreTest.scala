@@ -57,10 +57,7 @@ final class NetworkCoreTest extends FunSuite {
     val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
 
     for {
-      receiverPublicKey <- \/.fromEither(
-        PublicKey.fromString(node._2)
-          .toRight(CoreError.InvalidFormat("Public key: " + node._2))
-      )
+      receiverPublicKey <- PublicKey.fromHexString(node._2)
       result <- {
         val dht = Dht()
 

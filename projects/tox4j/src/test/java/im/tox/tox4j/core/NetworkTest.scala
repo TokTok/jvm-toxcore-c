@@ -6,6 +6,7 @@ import im.tox.tox4j.TestConstants.Timeout
 import im.tox.tox4j._
 import im.tox.tox4j.core.NetworkTest.logger
 import im.tox.tox4j.core.ToxCoreFactory.{withTox, withToxes}
+import im.tox.tox4j.core.data.ToxPublicKey
 import org.scalatest.FlatSpec
 import org.scalatest.concurrent.Timeouts
 import org.scalatest.time.SpanSugar._

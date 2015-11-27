@@ -2,9 +2,11 @@ package im.tox.tox4j.core.bench
 
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
+import im.tox.tox4j.core.data.{ToxNickname, ToxPublicKey}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants, ToxNickname, ToxPublicKey}
+import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
 import im.tox.tox4j.impl.jni.ToxCoreImpl
+import im.tox.tox4j.testing.GetDisjunction._
 
 final class CoreCallbackTimingBench extends TimingReport {
 

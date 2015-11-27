@@ -2,7 +2,7 @@ package im.tox.gui.domain
 
 import javax.swing._
 
-import im.tox.tox4j.core.ToxPublicKey
+import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
 
 import scala.collection.mutable.ArrayBuffer

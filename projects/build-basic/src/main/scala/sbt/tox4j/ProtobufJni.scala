@@ -2,6 +2,7 @@ package sbt.tox4j
 
 import java.io.File
 
+import com.github.os72.protocjar.Protoc
 import com.trueaccord.scalapb.ScalaPbPlugin._
 import sbt.Keys._
 import sbt._
@@ -13,7 +14,6 @@ object ProtobufJni extends OptionalPlugin {
   val Protobuf = config("protoc")
 
   object Keys {
-    val protocVersion = settingKey[String]("Version of the protoc binary to get from protocjar")
     val generate = taskKey[Seq[File]]("Compile the protobuf sources.")
   }
 
@@ -24,14 +24,17 @@ object ProtobufJni extends OptionalPlugin {
 
     generate <<= (
       streams,
+      runProtoc in protobufConfig,
       managedNativeSource in Compile,
-      sourceDirectory,
-      protocVersion
+      sourceDirectory
     ) map sourceGeneratorTask
 
   )) ++ protobufSettings ++ Seq(
+    runProtoc in protobufConfig := Def.task { (args: Seq[String]) =>
+      Protoc.runProtoc(args.toArray)
+    }.value,
+
     version in protobufConfig := "3.0.0-beta-1",
-    protocVersion := "3.0.0",
     javaConversions in protobufConfig := false, // TODO(iphydf): Set this to true.
     flatPackage in protobufConfig := true,
 
@@ -41,15 +44,15 @@ object ProtobufJni extends OptionalPlugin {
 
   private def sourceGeneratorTask(
     streams: TaskStreams,
+    runProtoc: Seq[String] => Int,
     managedNativeSource: File,
-    sourceDirectory: File,
-    protocVersion: String
+    sourceDirectory: File
   ) = {
     val compile = { (in: Set[File]) =>
       in.foreach(schema => streams.log.debug(s"Compiling schema $schema"))
 
       // Compile to C++ sources.
-      compileProtoc(in, managedNativeSource, sourceDirectory, protocVersion, streams.log)
+      compileProtoc(runProtoc, in, managedNativeSource, sourceDirectory, streams.log)
 
       Set.empty[File]
     }
@@ -64,10 +67,10 @@ object ProtobufJni extends OptionalPlugin {
   }
 
   private def compileProtoc(
+    runProtoc: Seq[String] => Int,
     schemas: Set[File],
     managedNativeSource: File,
     sourceDirectory: File,
-    protocVersion: String,
     log: Logger
   ): Unit = {
     val cppOut = managedNativeSource
@@ -80,8 +83,8 @@ object ProtobufJni extends OptionalPlugin {
 
     val exitCode =
       try {
-        com.github.os72.protocjar.Protoc.runProtoc(
-          (Seq(s"-v$protocVersion", "-I" + sourceDirectory.absolutePath) ++ protocOptions ++ schemas.map(_.absolutePath)).toArray
+        runProtoc(
+          Seq("-I" + sourceDirectory.absolutePath) ++ protocOptions ++ schemas.map(_.absolutePath)
         )
       } catch {
         case e: Exception =>

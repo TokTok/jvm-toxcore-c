@@ -17,7 +17,7 @@ abstract class ModuleCompanionTest[T, S <: Security](module: ModuleCompanion[T, 
           module.toBytes(value).map(_.unsafeIgnoreSecurity.toBitVector)
             .getOrElse(fail("Encoding failed"))
         ).getOrElse(fail("Decoding failed"))
-      assert(decoded == value)
+      assert(module.equals(decoded, value))
     }
   }
 

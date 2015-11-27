@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.exceptions
 
-import im.tox.tox4j.core.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendMessage
 import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite

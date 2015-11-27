@@ -2,7 +2,9 @@ package im.tox.tox4j.core.bench
 
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.{Confidence, TimingReport}
-import im.tox.tox4j.core.{ToxCore, ToxFriendRequestMessage}
+import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendRequestMessage
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalameter.Gen
 import org.scalameter.picklers.Implicits._
 

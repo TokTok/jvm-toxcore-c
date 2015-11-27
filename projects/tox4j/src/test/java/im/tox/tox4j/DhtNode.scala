@@ -1,7 +1,8 @@
 package im.tox.tox4j
 
 import im.tox.core.network.Port
-import im.tox.tox4j.core.ToxPublicKey
+import im.tox.tox4j.core.data.ToxPublicKey
+import im.tox.tox4j.testing.GetDisjunction._
 
 final case class DhtNode(ipv4: String, ipv6: String, udpPort: Port, tcpPort: Port, dhtId: ToxPublicKey) {
 
