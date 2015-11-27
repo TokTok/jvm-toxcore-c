@@ -29,8 +29,8 @@ object Jni extends OptionalPlugin {
 
     val binPath = settingKey[File]("Shared libraries produced by JNI")
 
-    val nativeCC = settingKey[CompilerResult[NativeCompiler.C]]("Compiler to use")
-    val nativeCXX = settingKey[CompilerResult[NativeCompiler.Cxx]]("Compiler to use")
+    val nativeCC = settingKey[CompilerResult[NativeCompiler.C]]("C compiler to use")
+    val nativePrimaryCXX = settingKey[CompilerResult[NativeCompiler.Cxx]]("Primary C++ compiler to use")
     val toolchainPrefix = settingKey[Option[String]]("Optional toolchain prefix for the compiler")
     val toolchainPath = settingKey[Option[File]]("Optional toolchain location; must contain sysroot/ and bin/")
     val pkgConfigPath = settingKey[Seq[File]]("Directories to look in for pkg-config's .pc files")
@@ -61,6 +61,7 @@ object Jni extends OptionalPlugin {
 
     val javah = taskKey[Seq[String]]("Generates JNI header files")
     val gtestPath = taskKey[Option[File]]("Finds the Google Test source path or downloads gtest from the internet")
+    val tryBothCXX = taskKey[File]("Script to try two separate C++ compilers in case one crashes")
     val cmakeDependenciesFile = taskKey[File]("Generates Dependencies.cmake containing C++ dependency information")
     val cmakeCommonFile = taskKey[File]("Generates Common.cmake containing common flags and settings")
     val cmakeMainFile = taskKey[File]("Generates Main.cmake containing instructions for the main module")
@@ -177,13 +178,13 @@ object Jni extends OptionalPlugin {
 
       // Default native C++ compiler to Clang.
       nativeCC := Configure.findCc(toolchainPath.value, toolchainPrefix.value),
-      nativeCXX := Configure.findCxx(toolchainPath.value, toolchainPrefix.value),
+      nativePrimaryCXX := Configure.findPrimaryCxx(toolchainPath.value, toolchainPrefix.value),
 
       // Defaults from the environment.
       cppFlags := Configure.checkCcOptions(nativeCC.value, None, getEnvFlags("CPPFLAGS")),
       cFlags := Configure.checkCcOptions(nativeCC.value, None, getEnvFlags("CFLAGS")),
-      cxxFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("CXXFLAGS")),
-      ldFlags := Configure.checkCcOptions(nativeCXX.value, None, getEnvFlags("LDFLAGS")),
+      cxxFlags := Configure.checkCcOptions(nativePrimaryCXX.value, None, getEnvFlags("CXXFLAGS")),
+      ldFlags := Configure.checkCcOptions(nativePrimaryCXX.value, None, getEnvFlags("LDFLAGS")),
 
       // Build with parallel tasks by default.
       buildTool := BuildTool.tool,
@@ -191,35 +192,36 @@ object Jni extends OptionalPlugin {
 
       // Debug flags.
       cxxFlags ++= Configure.checkCcOptions(
-        nativeCXX.value, None,
+        nativePrimaryCXX.value, None,
         Seq("-ggdb3"),
         Seq("-g3"),
         Seq("-g")
       ),
 
       // Warning flags.
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wall")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wextra")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-pedantic")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-fcolor-diagnostics")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-Wall")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-Wextra")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-pedantic")),
+      // TODO(iphydf): This doesn't work with g++, but try to make it work with the primary compiler anyway.
+      // cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-fcolor-diagnostics")),
 
       // Use libc++ if available.
       //ccOptions ++= Configure.checkCcOptions(nativeCXX.value)(Seq("-stdlib=libc++")),
 
       // No RTTI and no exceptions.
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-fno-exceptions")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-fno-rtti")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-DGOOGLE_PROTOBUF_NO_RTTI")),
-      cxxFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-DGTEST_HAS_RTTI=0")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-fno-exceptions")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-fno-rtti")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-DGOOGLE_PROTOBUF_NO_RTTI")),
+      cxxFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-DGTEST_HAS_RTTI=0")),
 
       // Error on undefined references in shared object.
-      ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-Wl,-z,defs")),
+      ldFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-Wl,-z,defs")),
 
       // Link librt if possible (because then it is required).
-      ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, Seq("-lrt")),
+      ldFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, Seq("-lrt")),
 
       // Link with version script to avoid exporting unnecessary symbols.
-      ldFlags ++= Configure.checkCcOptions(nativeCXX.value, None, {
+      ldFlags ++= Configure.checkCcOptions(nativePrimaryCXX.value, None, {
         val versionScript = ((nativeSource in Compile).value / ("lib" + libraryName.value)).getPath + ".ver"
         Seq(s"-Wl,--version-script,$versionScript")
       }),
@@ -227,15 +229,15 @@ object Jni extends OptionalPlugin {
       // Enable test coverage collection.
       coverageEnabled := true,
       coverageFlags := Configure.checkCcOptions(
-        nativeCXX.value, Some(cxxFlags.value),
+        nativePrimaryCXX.value, Some(cxxFlags.value),
         Seq("--coverage", "-DHAVE_COVERAGE"),
         Seq("-fprofile-arcs", "-ftest-coverage", "-DHAVE_COVERAGE")
       ),
 
       // Feature tests.
       featureTestFlags := Nil,
-      featureTestFlags ++= Configure.ccFeatureTest(nativeCXX.value, cxxFlags.value, "TO_STRING", "std::to_string(3)", "iostream"),
-      featureTestFlags ++= Configure.ccFeatureTest(nativeCXX.value, cxxFlags.value, "MAKE_UNIQUE", "std::make_unique<int>(3)", "memory"),
+      featureTestFlags ++= Configure.ccFeatureTest(nativePrimaryCXX.value, cxxFlags.value, "TO_STRING", "std::to_string(3)", "iostream"),
+      featureTestFlags ++= Configure.ccFeatureTest(nativePrimaryCXX.value, cxxFlags.value, "MAKE_UNIQUE", "[] { std::make_unique<int>(3); }", "memory"),
 
       jniSourceFiles in Compile := ((nativeSource in Compile).value ** "*").filter(Configure.isNativeSource).get,
       jniSourceFiles in Test := ((nativeSource in Test).value ** "*").filter(Configure.isNativeSource).get,
@@ -297,7 +299,7 @@ object Jni extends OptionalPlugin {
         CMakeGenerator.commonFile(streams.value.log)(
           nativeTarget.value,
           cppFlags.value ++ cFlags.value ++ nativeCC.value.flags ++ nativeCC.value.sysrootFlag,
-          cppFlags.value ++ cxxFlags.value ++ nativeCXX.value.flags ++ nativeCXX.value.sysrootFlag,
+          cppFlags.value ++ cxxFlags.value ++ nativePrimaryCXX.value.flags ++ nativePrimaryCXX.value.sysrootFlag,
           ldFlags.value,
           featureTestFlags.value,
           coverageEnabled.value,
@@ -360,7 +362,19 @@ object Jni extends OptionalPlugin {
         toolchainPath.value.map(CMakeGenerator.toolchainFile).map(_(
           nativeTarget.value,
           nativeCC.value,
-          nativeCXX.value
+          Configure.findSecondaryCxx(toolchainPath.value, toolchainPrefix.value).headOption match {
+            case None => nativePrimaryCXX.value
+            case Some(secondaryCxx) =>
+              nativePrimaryCXX.value.copy(
+                compiler = NativeCompiler.Cxx {
+                  CMakeGenerator.tryBothCxxScript(
+                    nativeTarget.value,
+                    nativePrimaryCXX.value,
+                    secondaryCxx
+                  ).getPath
+                }
+              )
+          }
         ))
       },
 
@@ -407,7 +421,7 @@ object Jni extends OptionalPlugin {
           case None =>
             Seq(
               ("CC", nativeCC.value.compiler.program),
-              ("CXX", nativeCXX.value.compiler.program)
+              ("CXX", nativePrimaryCXX.value.compiler.program)
             )
 
           case Some(toolchainPath) =>
@@ -419,7 +433,7 @@ object Jni extends OptionalPlugin {
             )
         }) ++ Seq(
           ("CFLAGS", nativeCC.value.sysrootFlag.getOrElse("")),
-          ("CXXFLAGS", nativeCXX.value.sysrootFlag.getOrElse("")),
+          ("CXXFLAGS", nativePrimaryCXX.value.sysrootFlag.getOrElse("")),
           ("PKG_CONFIG_PATH", pkgConfigDirs)
         ) ++ javaHome.value.map(path => ("JAVA_HOME", path.getPath))
 

@@ -13,6 +13,7 @@ cache:
 env:
   matrix:
     - TARGET=x86_64-linux
+    - TARGET=aarch64-linux-android
     - TARGET=arm-linux-androideabi
     - TARGET=i686-linux-android
     #- TEST_GOAL=coverage

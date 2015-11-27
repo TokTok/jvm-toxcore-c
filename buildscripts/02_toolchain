@@ -17,9 +17,16 @@ my $C = require C;
 ##############################################################################
 
 
-my %PLATFORM = (
+my %TOOLCHAIN = (
    'arm-linux-androideabi' => 'arm-linux-androideabi',
+   'aarch64-linux-android' => 'aarch64-linux-android',
    'i686-linux-android'    => 'x86',
+);
+
+my %PLATFORM = (
+   'arm-linux-androideabi' => 'android-9',
+   'aarch64-linux-android' => 'android-21',
+   'i686-linux-android'    => 'android-9',
 );
 
 
@@ -35,9 +42,9 @@ if ($C->HOST ne $C->TARGET) {
    must_system (
       $C->NDK_HOME . "/build/tools/make-standalone-toolchain.sh",
       "--ndk-dir=" . $C->NDK_HOME,
-      "--toolchain=$PLATFORM{$C->TARGET}-clang3.6",
+      "--toolchain=$TOOLCHAIN{$C->TARGET}-clang3.6",
       "--install-dir=$toolchain",
-      "--platform=android-9",
+      "--platform=$PLATFORM{$C->TARGET}",
    );
 
    my $cached_sysroot = $C->CACHEDIR . "/" . $C->TARGET;

@@ -54,7 +54,7 @@ object Configure {
     flags: Seq[String],
     sysroot: Option[File],
     sysrootFlag: Option[String],
-    output: Seq[String],
+    output: String,
     success: Boolean
   )
 
@@ -95,12 +95,14 @@ object Configure {
         flags,
         sysroot,
         sysrootFlag,
-        IOUtils.readLines(process.getInputStream).asScala,
+        IOUtils.readLines(process.getInputStream).asScala.mkString("\n"),
         process.waitFor() == 0
       )
 
       if (result.success) {
         configLog.info("Success: " + result.toString)
+      } else {
+        configLog.info("Failure: " + result.toString)
       }
       Some(result)
     } catch {
@@ -133,13 +135,14 @@ object Configure {
   }
 
   def findTool[T <: NativeCompiler](
+    required: Boolean,
     makeTool: String => T,
     toolchainPath: Option[File],
     toolchainPrefix: Option[String],
     tools: Seq[String],
     code: String,
     flagsCandidates: Seq[Seq[String]]
-  ): CompilerResult[T] = {
+  ): Seq[CompilerResult[T]] = {
     import sbt._
 
     val toolchainCandidates = makeToolchainCandidates(
@@ -150,6 +153,7 @@ object Configure {
 
     val sysroot = toolchainPath.map(_ / "sysroot")
 
+    configLog.info("Trying to find compiler; candidates are: " + toolchainCandidates)
     val results =
       for {
         candidate <- toolchainCandidates
@@ -165,16 +169,19 @@ object Configure {
         result
       }
 
-    val result = results.find(_.success).getOrElse {
-      sys.error("Could not find a viable compiler; attempts: " + results)
-    }
+    if (required) {
+      val result = results.find(_.success).getOrElse {
+        sys.error("Could not find a viable compiler; attempts: " + results)
+      }
 
-    configLog.info("Selected tool: " + result)
-    result
+      configLog.info("Selected tool: " + result)
+    }
+    results.filter(_.success)
   }
 
   def findCc(toolchainPath: Option[File], toolchainPrefix: Option[String]): CompilerResult[NativeCompiler.C] = {
     findTool(
+      required = true,
       NativeCompiler.C,
       toolchainPath,
       toolchainPrefix,
@@ -183,32 +190,63 @@ object Configure {
       Seq(
         Seq("-std=gnu89")
       )
-    )
+    ).head
   }
 
-  def findCxx(toolchainPath: Option[File], toolchainPrefix: Option[String]): CompilerResult[NativeCompiler.Cxx] = {
+  def findPrimaryCxx(toolchainPath: Option[File], toolchainPrefix: Option[String]): CompilerResult[NativeCompiler.Cxx] = {
     findTool(
+      required = true,
       NativeCompiler.Cxx,
       toolchainPath,
       toolchainPrefix,
       sys.env.get("CXX").toSeq ++ Seq("clang++-3.6", "clang++-3.5", "clang35++", "g++-4.9", "clang++", "g++", "c++"),
       """
-      |auto f = [](auto i) mutable { return i; };
-      |
-      |template<typename... Args>
-      |int bar (Args ...args) { return sizeof... (Args); }
-      |
-      |template<typename T>
-      |extern char const *x;
-      |
-      |template<>
-      |char const *x<int> = "int";
-      |
-      |template<typename... Args>
-      |auto foo (Args ...args) {
-      |  return [&] { return bar (args...); };
-      |}
-      |""".stripMargin,
+        |auto f = [](auto i) mutable { return i; };
+        |
+        |template<typename... Args>
+        |int bar (Args ...args) { return sizeof... (Args); }
+        |
+        |template<typename T>
+        |extern char const *x;
+        |
+        |template<>
+        |char const *x<int> = "int";
+        |
+        |template<typename... Args>
+        |auto foo (Args ...args) {
+        |  return [&] { return bar (args...); };
+        |}
+        |""".stripMargin,
+      Seq(
+        Seq("-std=c++14"),
+        Seq("-std=c++1y")
+      )
+    ).head
+  }
+
+  /**
+   * Find another C++ compiler that can compile most of the code and can be used as a fallback in case the
+   * primary one crashes.
+   */
+  def findSecondaryCxx(
+    toolchainPath: Option[File],
+    toolchainPrefix: Option[String]
+  ): Seq[CompilerResult[NativeCompiler.Cxx]] = {
+    findTool(
+      required = false,
+      NativeCompiler.Cxx,
+      toolchainPath,
+      toolchainPrefix,
+      sys.env.get("CXX").toSeq ++ Seq("clang++-3.6", "clang++-3.5", "clang35++", "g++-4.9", "clang++", "g++", "c++"),
+      """
+        |auto f = [](auto i) mutable { return i; };
+        |
+        |template<typename... Args>
+        |int bar (Args ...args) { return sizeof... (Args); }
+        |
+        |#include <memory>
+        |void foo() { std::make_unique<int>(3); }
+        |""".stripMargin,
       Seq(
         Seq("-std=c++14"),
         Seq("-std=c++1y")
@@ -217,7 +255,7 @@ object Configure {
   }
 
   def checkCcOptions[T <: NativeCompiler](
-    compilerResult: CompilerResult[T],
+    primaryCompiler: CompilerResult[T],
     cxxFlags: Option[Seq[String]],
     flagsCandidates: Seq[String]*
   ): Seq[String] = {
@@ -225,11 +263,11 @@ object Configure {
       for {
         flagsCandidate <- flagsCandidates
         result <- checkCompilerResult(
-          compilerResult.compiler,
-          compilerResult.code,
+          primaryCompiler.compiler,
+          primaryCompiler.code,
           flagsCandidate,
-          cxxFlags.getOrElse(Nil) ++ compilerResult.flags,
-          compilerResult.sysroot
+          cxxFlags.getOrElse(Nil) ++ primaryCompiler.flags,
+          primaryCompiler.sysroot
         )
       } yield {
         result

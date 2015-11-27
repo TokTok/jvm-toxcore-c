@@ -125,6 +125,27 @@ object CMakeGenerator {
     generateFile(targetFile, lines)
   }
 
+  def tryBothCxxScript(
+    nativeTarget: File,
+    primaryCxx: CompilerResult[NativeCompiler.Cxx],
+    secondaryCxx: CompilerResult[NativeCompiler.Cxx]
+  ): File = {
+    val targetFile = nativeTarget / "runcxx"
+    val lines = new ArrayBuffer[String]
+
+    lines += "#!/usr/bin/env perl"
+    lines += "use strict;"
+    lines += "my $prog1 = \"" + primaryCxx.compiler.program + "\";"
+    lines += "my $prog2 = \"" + secondaryCxx.compiler.program + "\";"
+    lines += "if ((system $prog1, @ARGV) != 0) {"
+    lines += "   exec $prog2, @ARGV;"
+    lines += "}"
+
+    val runcxx = generateFile(targetFile, lines)
+    runcxx.setExecutable(true)
+    runcxx
+  }
+
   def testFile(
     gtestPath: File
   )(

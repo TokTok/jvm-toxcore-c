@@ -27,10 +27,13 @@ my @common = (
       '--disable-unit-tests',
       (not_on qr/^arm/, "--enable-pic"),
       (only_on qr/android/,
-         '--disable-vp9',
          '--sdk-path=$NDK_HOME'
       ),
+      (only_on qr/aarch64-linux-android/,
+         '--libc=$SYSROOT'
+      ),
       (only_on qr/arm-linux-androideabi/, '--target=armv7-android-gcc'),
+      (only_on qr/aarch64-linux-android/, '--target=arm64-android-gcc'),
       (only_on qr/i686-linux-android/   , '--target=x86-android-gcc'  ),
    ],
    ["git://git.xiph.org", "opus", "master", @common],

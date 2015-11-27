@@ -4,6 +4,7 @@ use strict;
 use utf8;
 use lib 'buildscripts';
 
+use Cwd 'abs_path';
 use File::Path 'remove_tree';
 
 use BuildScript;
@@ -17,33 +18,32 @@ my $C = require C;
 ##############################################################################
 
 
-my @NDK_EXCLUDES = qw(
-   arch-mips
-   */platforms/android-12
-   */platforms/android-13
-   */platforms/android-14
-   */platforms/android-15
-   */platforms/android-16
-   */platforms/android-17
-   */platforms/android-18
-   */platforms/android-19
-   */platforms/android-20
-   */platforms/android-21
-   */platforms/android-3
-   */platforms/android-4
-   */platforms/android-5
-   */platforms/android-8
-   */prebuilt/android-arm64
-   */prebuilt/android-mips*
-   */prebuilt/android-x86_64
-   */sources/cxx-stl/llvm-libc++*
-   */sources/cxx-stl/gnu-libstdc++/4.9
-   */tests
-   */toolchains/*-4.9
-   */toolchains/*-clang3.5
-   */toolchains/aarch64*
-   */toolchains/llvm-3.5
-   */toolchains/mips*
+my @common = qw(
+   */build
+   */sources/android/cpufeatures
+   */prebuilt/linux-x86_64
+);
+
+my %NDK_FILES = (
+   'aarch64-linux-android' => [@common, qw(
+      */platforms/android-21
+      */prebuilt/android-arm64
+      */sources/cxx-stl/gnu-libstdc++/4.9/include
+      */sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a
+      */toolchains/aarch64-linux-android-4.9
+   )],
+   'arm-linux-androideabi' => [@common, qw(
+      */platforms/android-9
+      */sources/cxx-stl/gnu-libstdc++/4.8/include
+      */sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi*
+      */toolchains/arm-linux-androideabi-clang3.6
+   )],
+   'i686-linux-android' => [@common, qw(
+      */platforms/android-9
+      */sources/cxx-stl/gnu-libstdc++/4.8/include
+      */sources/cxx-stl/gnu-libstdc++/4.8/libs/x86
+      */toolchains/x86-clang3.6
+   )],
 );
 
 
@@ -69,7 +69,7 @@ if ($C->HOST ne $C->TARGET) {
 
    print "Extracting $NDK_PACKAGE...\n";
    my @lines = eval {
-      my @lines = must_popen "7z", "x", $NDK_PACKAGE, map { "-xr!$_" } @NDK_EXCLUDES;
+      my @lines = must_popen "7z", "x", $NDK_PACKAGE, map { "-ir!$_" } @{ $NDK_FILES{$C->TARGET} };
    };
 
    if ($@ =~ /No such file or directory/) {
@@ -85,5 +85,5 @@ if ($C->HOST ne $C->TARGET) {
    print "Skipped: $skipped\n";
    print "$_\n" for @rest;
 
-   must_system "mv", $NDK_DIR, $C->NDK_HOME;
+   must_system "mv", (abs_path $NDK_DIR), $C->NDK_HOME;
 }

@@ -132,6 +132,7 @@ sub git_install {
             or die "Could not create build directory";
          chdir '_build';
 
+         print "PATH     = $ENV{PATH}\n";
          print "CFLAGS   = $ENV{CFLAGS}\n";
          print "CPPFLAGS = $ENV{CPPFLAGS}\n";
          print "CXXFLAGS = $ENV{CXXFLAGS}\n";

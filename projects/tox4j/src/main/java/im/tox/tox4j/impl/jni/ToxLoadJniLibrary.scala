@@ -35,8 +35,7 @@ object ToxLoadJniLibrary {
 
     Map(
       "Android" -> Map(
-        // TODO(iphydf): Change this to aarch64-linux-android when libvpx supports it.
-        "aarch64" -> "arm-linux-androideabi",
+        "aarch64" -> "aarch64-linux-android",
         "armv7l" -> "arm-linux-androideabi",
         "i686" -> "i686-linux-android"
       ),
