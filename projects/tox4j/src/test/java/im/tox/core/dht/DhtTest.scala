@@ -41,33 +41,33 @@ final class DhtTest extends FunSuite with PropertyChecks {
 
   val localhost = new InetSocketAddress("127.0.0.1", 33445)
 
-  def edgeTransformer(rootGraph: DotRootGraph): EdgeTransformer[PublicKey, DiEdge] = { edge =>
-    edge.edge match {
-      case DiEdge(from, to) =>
-        Some((
-          rootGraph,
-          DotEdgeStmt(
-            NodeId(from.toString),
-            NodeId(to.toString),
-            List(DotAttr(Id("label"), Id('"' + XorDistance(from.value, to.value).mkString + '"')))
-          )
-        ))
-    }
-  }
-
-  def graphToDot(graph: Graph[PublicKey, DiEdge]): Unit = {
-    val root = DotRootGraph(directed = true, id = Some(Id("G")))
-    val dot = graph.toDot(root, edgeTransformer(root))
-    Files.write(dot, new File("graph.dot"), Charset.forName("UTF-8"))
-    new ProcessBuilder("dot", "-Tpng", "graph.dot", "-o", "graph.png").inheritIO().start().waitFor()
-  }
-
   test("get 4 closest nodes") {
     forAll(genDht()) { dht =>
     }
   }
 
   test("prevent partitioning") {
+    def edgeTransformer(rootGraph: DotRootGraph): EdgeTransformer[PublicKey, DiEdge] = { edge =>
+      edge.edge match {
+        case DiEdge(from, to) =>
+          Some((
+            rootGraph,
+            DotEdgeStmt(
+              NodeId(from.toString),
+              NodeId(to.toString),
+              List(DotAttr(Id("label"), Id('"' + XorDistance(from.value, to.value).mkString + '"')))
+            )
+          ))
+      }
+    }
+
+    def graphToDot(graph: Graph[PublicKey, DiEdge]): Unit = {
+      val root = DotRootGraph(directed = true, id = Some(Id("G")))
+      val dot = graph.toDot(root, edgeTransformer(root))
+      Files.write(dot, new File("graph.dot"), Charset.forName("UTF-8"))
+      new ProcessBuilder("dot", "-Tpng", "graph.dot", "-o", "graph.png").inheritIO().start().waitFor()
+    }
+
     forAll { (emptyDhts: Set[Dht]) =>
       val dhts =
         for {
@@ -75,7 +75,14 @@ final class DhtTest extends FunSuite with PropertyChecks {
         } yield {
           emptyDhts
             .map(dht => NodeInfo(Protocol.Udp, localhost, dht.keyPair.publicKey))
-            .foldLeft(dht)((dht, node) => dht.tryAddNode(node))
+            .foldLeft(dht) { (dht, node) =>
+              if (dht.keyPair.publicKey == node.publicKey) {
+                // The node may know itself, but that is not interesting for this test.
+                dht
+              } else {
+                dht.addNode(node)
+              }
+            }
         }
 
       if (dhts.size >= 2) {
@@ -85,6 +92,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
             nodeSet <- dht.searchLists.values
             knownNode <- nodeSet.values
           } yield {
+            // The DHT node may know itself, but we don't want to graph that here.
             assert(dht.keyPair.publicKey != knownNode.publicKey)
             DiEdge(dht.keyPair.publicKey, knownNode.publicKey)
           }

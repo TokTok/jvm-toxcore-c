@@ -40,12 +40,6 @@ final case class Dht private (
   assert(searchLists.contains(keyPair.publicKey))
 
   /**
-   * Class invariant: The [[NodeSet]] searching our own DHT [[PublicKey]] does not
-   * contain a [[NodeInfo]] with that [[PublicKey]].
-   */
-  assert(!searchLists(keyPair.publicKey).contains(keyPair.publicKey))
-
-  /**
    * The total number of known nodes in all the node search lists.
    */
   def size: Int = {
@@ -54,6 +48,8 @@ final case class Dht private (
 
   /**
    * Instruct the DHT to start searching for a node with a given [[PublicKey]].
+   *
+   * If there is already a search list for the given key, no change occurs.
    */
   def addSearchKey(publicKey: PublicKey): Dht = {
     if (searchLists.contains(publicKey)) {
@@ -75,33 +71,38 @@ final case class Dht private (
     copy(searchLists = searchLists - publicKey)
   }
 
+  /**
+   * Determine whether any of the node lists will accept the node.
+   *
+   * This will return true as soon as a node list is found that would accept the node,
+   * so it is faster than adding it and checking for modification.
+   */
   def canAddNode(nodeInfo: NodeInfo): Boolean = {
-    nodeInfo.publicKey != keyPair.publicKey &&
-      searchLists.exists(_._2.canAdd(nodeInfo))
+    searchLists.exists(_._2.canAdd(nodeInfo))
   }
 
+  /**
+   * Add the given node to all node lists that accept it. If no node list
+   * accepts the node, no modification occurs.
+   */
   def addNode(nodeInfo: NodeInfo): Dht = {
-    assert(
-      canAddNode(nodeInfo),
-      s"Node with key ${nodeInfo.publicKey} can not be added to any node list of node ${keyPair.publicKey}"
-    )
-    copy(
-      searchLists = searchLists.mapValues(_.add(nodeInfo))
-    )
+    copy(searchLists = searchLists.mapValues(_.add(nodeInfo)))
   }
 
-  def tryAddNode(nodeInfo: NodeInfo): Dht = {
-    if (canAddNode(nodeInfo)) {
-      addNode(nodeInfo)
-    } else {
-      this
-    }
-  }
-
+  /**
+   * Remove a node from all node lists that contain it. If no node list
+   * contains the node, no modification occurs.
+   */
   def removeNode(nodeInfo: NodeInfo): Dht = {
     copy(searchLists = searchLists.mapValues(_.remove(nodeInfo)))
   }
 
+  /**
+   * Find a [[NodeInfo]] by [[PublicKey]].
+   *
+   * The first match is returned, as the class invariant guarantees that all
+   * other matches are exactly equal to the first.
+   */
   def getNode(nodeId: PublicKey): Option[NodeInfo] = {
     for {
       nodeSet <- searchLists.values.find(_.contains(nodeId))
@@ -111,6 +112,11 @@ final case class Dht private (
     }
   }
 
+  /**
+   * Get the set of nodes out of all the nodes this [[Dht]] knows that are
+   * closest to the given [[PublicKey]]. The count parameter limits the number
+   * of nodes returned.
+   */
   def getNearNodes(count: Int, publicKey: PublicKey): Iterable[NodeInfo] = {
     // A NodeSet keeps a list of nodes closest to its base public key, so we
     // simply try to add every node we know, and at the end we'll have the
