@@ -11,7 +11,7 @@ export TOOLCHAIN=$(pwd)/toolchains/$TARGET
   --ndk-dir="$ANDROID_NDK_HOME" \
   --toolchain=$NDK_TOOLCHAIN-clang3.6 \
   --install-dir=$TOOLCHAIN \
-  --platform=android-9
+  --platform=$PLATFORM
 
 # add toolchain to path (along with protobuf)
 export PATH="$TOOLCHAIN/bin:$WORKSPACE/protobuf_native/bin:$PATH"
