@@ -421,7 +421,7 @@ object Jni extends OptionalPlugin {
           ("CFLAGS", nativeCC.value.sysrootFlag.getOrElse("")),
           ("CXXFLAGS", nativeCXX.value.sysrootFlag.getOrElse("")),
           ("PKG_CONFIG_PATH", pkgConfigDirs)
-        )
+        ) ++ javaHome.value.map(path => ("JAVA_HOME", path.getPath))
 
         val flags = cmakeToolchainFlags.value
 
@@ -433,7 +433,7 @@ object Jni extends OptionalPlugin {
               "-DCOMMON_FILE=" + cmakeCommonFile.value,
               "-DMAIN_FILE=" + cmakeMainFile.value,
               baseDirectory.value.getPath
-            ) ++ flags ++ cmakeTestFile.value.map("-DTEST_FILE=" + _).toSeq,
+            ) ++ flags ++ cmakeTestFile.value.map("-DTEST_FILE=" + _),
             buildPath,
             env: _*
           )

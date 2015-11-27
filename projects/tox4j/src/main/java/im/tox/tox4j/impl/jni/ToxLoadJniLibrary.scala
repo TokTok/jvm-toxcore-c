@@ -11,6 +11,16 @@ import scala.sys.process._
 
 object ToxLoadJniLibrary {
 
+  /**
+   * Set this to false to disable downloading native libraries from the web.
+   *
+   * On mobile devices, for example, we may not want to download large
+   * amounts of data and instead prefer to fail. The libraries on github are
+   * non-stripped (debug) versions, so for mobile devices, they are a
+   * bad fallback.
+   */
+  var webFallbackEnabled = true // scalastyle:ignore var.field
+
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private val repoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
@@ -25,6 +35,8 @@ object ToxLoadJniLibrary {
 
     Map(
       "Android" -> Map(
+        // TODO(iphydf): Change this to aarch64-linux-android when libvpx supports it.
+        "aarch64" -> "arm-linux-androideabi",
         "armv7l" -> "arm-linux-androideabi",
         "i686" -> "i686-linux-android"
       ),
@@ -57,8 +69,12 @@ object ToxLoadJniLibrary {
       System.loadLibrary(name)
     } catch {
       case exn: UnsatisfiedLinkError =>
-        logger.warn(s"Library '$name' not found (${exn.getMessage}); attempting to load from web")
-        loadFromWeb(name)
+        logger.warn(s"Library '$name' not found: ${exn.getMessage}")
+        if (webFallbackEnabled) {
+          loadFromWeb(name)
+        } else {
+          logger.error(s"Could not load native library '$name' and web download disabled")
+        }
     }
   }
 
