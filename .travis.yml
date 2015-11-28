@@ -16,8 +16,8 @@ env:
     - TARGET=aarch64-linux-android
     - TARGET=arm-linux-androideabi
     - TARGET=i686-linux-android
-    #- TEST_GOAL=coverage
-    #- TEST_GOAL=performance
+    - TEST_GOAL=coverage
+    - TEST_GOAL=performance
 
 matrix:
   fast_finish: true
