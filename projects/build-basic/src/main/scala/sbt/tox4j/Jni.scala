@@ -227,9 +227,12 @@ object Jni extends OptionalPlugin {
       }),
 
       // Enable test coverage collection.
-      coverageEnabled := true,
+      coverageEnabled := sys.env.get("TEST_GOAL").exists(_ == "coverage"),
       coverageFlags := Configure.checkCcOptions(
         nativePrimaryCXX.value, Some(cxxFlags.value),
+        // TODO(iphydf): Look into making this work. It is required for "llvm-cov show".
+        // Error from linker when this is enabled: multiple definition of `__llvm_profile_name__ZSt15make_error_codeSt4errc2'
+        // Seq("-fprofile-instr-generate", "-fcoverage-mapping"),
         Seq("--coverage", "-DHAVE_COVERAGE"),
         Seq("-fprofile-arcs", "-ftest-coverage", "-DHAVE_COVERAGE")
       ),

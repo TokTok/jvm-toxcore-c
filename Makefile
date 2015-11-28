@@ -1,7 +1,10 @@
 CACHEDIR ?= $(HOME)/cache
 
 install:
-	buildscripts/04_build
+	TEST_GOAL= buildscripts/04_build
+
+check:
+	TEST_GOAL=coverage buildscripts/04_build
 
 setup:
 	buildscripts/00_dependencies_host

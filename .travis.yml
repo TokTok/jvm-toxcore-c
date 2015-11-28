@@ -12,12 +12,14 @@ cache:
 
 env:
   matrix:
+    # Test builds first, since they don't upload things.
+    - TEST_GOAL=coverage
+    - TEST_GOAL=performance
+    # Production builds after test builds so only tested artifacts are uploaded.
     - TARGET=x86_64-linux
     - TARGET=aarch64-linux-android
     - TARGET=arm-linux-androideabi
     - TARGET=i686-linux-android
-    - TEST_GOAL=coverage
-    - TEST_GOAL=performance
 
 matrix:
   fast_finish: true
@@ -39,7 +41,10 @@ install:
 script:
   # Build/install step.
   - buildscripts/04_build || (cat projects/tox4j/config.log && false)
-  - buildscripts/05_upload
+  # Upload artifacts if the build was not a test build. Test builds instrument
+  # the code to gather coverage information. We don't want that instrumentation
+  # to end up in production builds.
+  - if [ -z "$TEST_GOAL" ]; then buildscripts/05_upload; fi
 
 before_cache:
   # Hack to make sbt-coveralls work with our non-standard directory layout.
