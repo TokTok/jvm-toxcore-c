@@ -3,6 +3,7 @@ package im.tox.tox4j.impl.jni
 import java.io.File
 import java.net.URL
 
+import com.google.common.io.Files
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
@@ -23,7 +24,8 @@ object ToxLoadJniLibrary {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private val repoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
+  private val RepoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
+  private val ErrorRegex = "Native Library (.+) already loaded in another classloader".r
 
   private val target = {
     val osName =
@@ -48,19 +50,50 @@ object ToxLoadJniLibrary {
     )(osName)(sys.props("os.arch"))
   }
 
+  private def withTempFile(prefix: String, suffix: String)(block: File => Unit): Unit = {
+    val file = File.createTempFile(prefix, suffix)
+    file.deleteOnExit()
+    try {
+      block(file)
+    } finally {
+      // This may fail if the OS doesn't support deleting files that are in use, but deleteOnExit
+      // will ensure that it is cleaned up on normal JVM termination.
+      file.delete()
+    }
+  }
+
+  /**
+   * Downloads a native library from [[RepoUrl]]/[[target]] and loads it into the current [[ClassLoader]].
+   *
+   * @param name Base name of the library. E.g. for libtox4j.so, this is "tox4j".
+   */
   def loadFromWeb(name: String): Unit = {
     val libraryName = System.mapLibraryName(name)
-    val libraryFile = File.createTempFile(name, libraryName)
-    libraryFile.deleteOnExit()
+    withTempFile(name, libraryName) { libraryFile =>
+      val url = new URL(s"$RepoUrl/$target/$libraryName")
+      logger.info(s"Downloading $url to $libraryFile")
+      val start = System.currentTimeMillis()
+      url #> libraryFile !!
+      val end = System.currentTimeMillis()
+      logger.info(s"Downloading $libraryName took ${end - start}ms")
 
-    val url = new URL(s"$repoUrl/$target/$libraryName")
-    logger.info(s"Downloading $url to $libraryFile")
-    val start = System.currentTimeMillis()
-    url #> libraryFile !!
-    val end = System.currentTimeMillis()
-    logger.info(s"Downloading $libraryName took ${end - start}ms")
+      System.load(libraryFile.getPath)
+    }
+  }
 
-    System.load(libraryFile.getPath)
+  /**
+   * Load a native library from an existing location by copying it to a new, temporary location and loading
+   * that new library.
+   *
+   * @param location A [[File]] pointing to the existing library.
+   */
+  def loadFromSystem(location: File): Unit = {
+    withTempFile(location.getName, location.getName) { libraryFile =>
+      logger.info(s"Copying $location to $libraryFile")
+      Files.copy(location, libraryFile)
+
+      System.load(libraryFile.getPath)
+    }
   }
 
   def load(name: String): Unit = {
@@ -68,11 +101,17 @@ object ToxLoadJniLibrary {
       System.loadLibrary(name)
     } catch {
       case exn: UnsatisfiedLinkError =>
-        logger.warn(s"Library '$name' not found: ${exn.getMessage}")
-        if (webFallbackEnabled) {
-          loadFromWeb(name)
-        } else {
-          logger.error(s"Could not load native library '$name' and web download disabled")
+        exn.getMessage match {
+          case ErrorRegex(location) =>
+            logger.warn(s"${exn.getMessage} copying file and loading again")
+            loadFromSystem(new File(location))
+          case _ =>
+            logger.warn(s"Library '$name' not found: ${exn.getMessage}")
+            if (webFallbackEnabled) {
+              loadFromWeb(name)
+            } else {
+              logger.error(s"Could not load native library '$name' and web download disabled")
+            }
         }
     }
   }
