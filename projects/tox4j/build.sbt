@@ -27,12 +27,11 @@ resolvers += "Tox4j snapshots" at "https://tox4j.github.io/repositories/snapshot
 
 // Build dependencies.
 libraryDependencies ++= Seq(
-  "com.github.nscala-time" %% "nscala-time" % "2.4.0",
+  "codes.reactive" %% "scala-time-threeten" % "0.3.0-SNAPSHOT",
   "com.google.guava" % "guava" % "18.0",
   "com.intellij" % "annotations" % "12.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "im.tox" %% "macros" % version.value,
-  "org.json" % "json" % "20131018",
   "org.scalaz" %% "scalaz-core" % "7.2.0-M1",
   "org.scalaz.stream" %% "scalaz-stream" % "0.8",
   "org.scodec" %% "scodec-core" % "1.8.2"
@@ -42,7 +41,6 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   "com.assembla.scala-incubator" %% "graph-core" % "1.9.4",
   "com.assembla.scala-incubator" %% "graph-dot" % "1.10.0",
-  "com.google.guava" % "guava" % "18.0",
   "com.intellij" % "forms_rt" % "7.0.3",
   "com.storm-enroute" %% "scalameter" % "0.8-SNAPSHOT",
   "junit" % "junit" % "4.12",

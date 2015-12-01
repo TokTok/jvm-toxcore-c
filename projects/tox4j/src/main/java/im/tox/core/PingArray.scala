@@ -1,6 +1,6 @@
 package im.tox.core
 
-import com.github.nscala_time.time.Imports._
+import codes.reactive.scalatime._
 import im.tox.core.PingArray.{Entry, EntryId, ErrorCode}
 import im.tox.core.random.RandomCore
 
@@ -21,7 +21,7 @@ object PingArray {
 
   private final case class Entry[T](
     id: EntryId,
-    time: DateTime,
+    time: Instant,
     data: T
   )
 
@@ -42,13 +42,13 @@ object PingArray {
  * parameter denotes the maximum number of entries in the array and the timeout
  * denotes the number of seconds to keep an entry in the array.
  */
-final class PingArray[T](size: Int, expiryDelay: Period)(implicit classTag: ClassTag[T]) {
+final class PingArray[T](size: Int, expiryDelay: Duration)(implicit classTag: ClassTag[T]) {
 
   /**
    * Timeout and size must be greater than 0.
    */
   require(size > 0)
-  require((0 until expiryDelay.size()).map(expiryDelay.getValue).sum > 0)
+  require(!expiryDelay.isZero)
 
   private val array = {
     val result = Array.ofDim[Option[Entry[T]]](size)
@@ -91,7 +91,7 @@ final class PingArray[T](size: Int, expiryDelay: Period)(implicit classTag: Clas
      */
     val entry = Entry(
       entryId,
-      DateTime.now(),
+      Instant(),
       data
     )
 
@@ -123,7 +123,7 @@ final class PingArray[T](size: Int, expiryDelay: Period)(implicit classTag: Clas
          * If the array element has timed out, the
          * function returns an error.
          */
-        if (time + expiryDelay < DateTime.now()) {
+        if (time plus expiryDelay isBefore Instant()) {
           -\/(ErrorCode.Timeout)
         } else if (id != entryId) {
           /**
