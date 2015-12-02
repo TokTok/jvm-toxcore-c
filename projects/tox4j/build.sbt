@@ -20,7 +20,7 @@ ProtobufJni.moduleSettings
  ******************************************************************************/
 
 // Snapshot and linter repository.
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers += Resolver.sonatypeRepo("snapshots")
 
 // Tox4j support libraries.
 resolvers += "Tox4j snapshots" at "https://tox4j.github.io/repositories/snapshots/"
