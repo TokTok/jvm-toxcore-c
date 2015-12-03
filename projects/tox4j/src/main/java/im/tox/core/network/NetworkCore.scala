@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto.PublicKey
 import im.tox.core.dht.packets.dht.{NodesRequestPacket, PingRequestPacket}
 import im.tox.core.dht.{Dht, NodeInfo, Protocol}
+import im.tox.core.io.IO.TimerId
 import im.tox.core.io.{EventActor, IO, TimeActor, UdpActor}
 import im.tox.core.network.packets.ToxPacket
 import org.slf4j.LoggerFactory
@@ -79,7 +80,7 @@ object NetworkCore {
         NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
         bootstrapRequest
       ),
-      IO.Action.StartTimer(60 seconds) { duration => Some(IO.ShutdownEvent) }
+      IO.Action.StartTimer(TimerId("Shutdown"), 60 seconds, None, duration => Some(IO.ShutdownEvent))
     ).toSource.to(actionTopic.publish)
 
     val startLoop = bootstrapAction.merge(udpLoop).merge(timeLoop).merge(actionLoop)
