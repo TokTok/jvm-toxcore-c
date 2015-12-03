@@ -4,8 +4,7 @@ scalaVersion  := "2.11.7"
 
 // Build dependencies.
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-  "org.scalaz" %% "scalaz-core" % "7.2.0-M1"
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value
 )
 
 // Test dependencies.
