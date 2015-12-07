@@ -80,21 +80,23 @@ object NetworkCore {
         NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
         bootstrapRequest
       ),
-      IO.Action.StartTimer(TimerId("Shutdown"), 60 seconds, None, duration => Some(IO.ShutdownEvent))
+      IO.Action.StartTimer(TimerId("Shutdown"), 5 seconds, None, duration => Some(IO.ShutdownEvent))
     ).toSource.to(actionTopic.publish)
-
-    val startLoop = bootstrapAction.merge(udpLoop).merge(timeLoop).merge(actionLoop)
 
     val shutdownLoop =
       actionTopic.subscribe.flatMap {
         case IO.Action.Shutdown =>
           println("SHUTDOWN")
-          startLoop.kill ++ Process.halt
+          actionLoop.kill
         case _ =>
           Process.empty[Task, Unit]
       }
 
-    startLoop.merge(shutdownLoop.drain)
+    bootstrapAction
+      .merge(udpLoop)
+      .merge(timeLoop)
+      .merge(actionLoop)
+      .merge(shutdownLoop)
   }
 
 }

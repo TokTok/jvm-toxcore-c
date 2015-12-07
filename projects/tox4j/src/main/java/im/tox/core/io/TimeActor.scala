@@ -9,7 +9,7 @@ import scalaz.stream._
 import scalaz.stream.async.mutable.Signal
 
 @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Any"))
-object TimeActor {
+case object TimeActor {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
@@ -31,11 +31,18 @@ object TimeActor {
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
-    actionSource.once.flatMap { action =>
-      val (newTimers, startedTimer) = processTimerAction(removeOldTimers(timers), eventSink, action)
+    actionSource.take(1).flatMap {
+      case IO.Action.Shutdown =>
+        logger.debug(s"Shutting down $this")
+        timers.values.foreach(_.set(true).run)
+        Process.empty[Task, Unit]
 
-      // Listen for next action and start timer.
-      processTimerActions(newTimers, actionSource, eventSink).merge(startedTimer)
+      case action =>
+        logger.debug("NEXT: " + action)
+        val (newTimers, startedTimer) = processTimerAction(removeOldTimers(timers), eventSink, action)
+
+        // Listen for next action and start timer.
+        processTimerActions(newTimers, actionSource, eventSink).merge(startedTimer)
     }
   }
 
@@ -46,6 +53,8 @@ object TimeActor {
   ): (Map[TimerId, Signal[Boolean]], Process[Task, Unit]) = {
     action match {
       case Action.StartTimer(id, delay, repeat, event) =>
+        logger.debug(s"Starting timer $id with delay $delay and repeat $repeat")
+
         // Stop old timer.
         timers.get(id).foreach(_.set(true).run)
 
@@ -70,6 +79,7 @@ object TimeActor {
         (timers + (id -> stopTimer), stoppableTimer)
 
       case Action.CancelTimer(id) =>
+        logger.debug(s"Cancelling timer $id")
         // Stop old timer.
         timers.get(id).foreach(_.set(true).run)
         (timers - id, Process.empty)
@@ -84,7 +94,12 @@ object TimeActor {
    * Remove timers that have been cancelled.
    */
   private def removeOldTimers(timers: Map[TimerId, Signal[Boolean]]): Map[TimerId, Signal[Boolean]] = {
-    timers.filterNot(_._2.get.run)
+    val result = timers.filterNot(_._2.get.run)
+    val removedCount = timers.size - result.size
+    if (removedCount != 0) {
+      logger.debug(s"Cleaned up $removedCount old timers")
+    }
+    result
   }
 
 }

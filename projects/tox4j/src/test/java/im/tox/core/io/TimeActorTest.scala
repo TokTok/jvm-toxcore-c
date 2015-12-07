@@ -2,17 +2,68 @@ package im.tox.core.io
 
 import com.typesafe.scalalogging.Logger
 import im.tox.core.io.IO.{TimerId, NetworkEvent}
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
+import org.scalatest.prop.PropertyChecks
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scalaz.concurrent.Task
-import scalaz.stream.{Process, async}
+import scalaz.stream.{Sink, Process, async}
 
-final class TimeActorTest extends FunSuite {
+final class TimeActorTest extends FunSuite with PropertyChecks {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
+
+  private def performanceTest(
+    useTimeActor: Boolean,
+    count: Int,
+    enqueue: Sink[Task, IO.Action],
+    dequeue: Process[Task, IO.Action],
+    close: Task[Unit]
+  ): Unit = {
+    val startTimer = IO.Action.StartTimer(TimerId("Start"), 100 millis, None, _ => None)
+    val shutdown = IO.Action.Shutdown
+
+    val enqueueLoop = (Process(startTimer).repeat.take(count) ++ Process.emit(shutdown)).toSource.to(enqueue)
+    val dequeueLoop =
+      if (useTimeActor) {
+        val eventQueue = async.boundedQueue[IO.Event](10)
+        TimeActor.make(dequeue, eventQueue.enqueue)
+      } else {
+        dequeue.flatMap { i =>
+          if (i == IO.Action.Shutdown) {
+            Process.eval(close)
+          } else {
+            Process.empty
+          }
+        }
+      }
+
+    val start = System.currentTimeMillis().millis
+    enqueueLoop.merge(dequeueLoop).run.run
+    val end = System.currentTimeMillis().millis
+
+    val duration = end - start
+    println(s"Test with count=$count took $duration (${(duration / count).toMicros} µs/element)")
+  }
+
+  test("performance of async.boundedQueue") {
+    forAll(Gen.choose(100, 200)) { count =>
+      val queue = async.boundedQueue[IO.Action](10)
+
+      performanceTest(true, count, queue.enqueue, queue.dequeue, queue.close)
+    }
+  }
+
+  test("performance of async.topic") {
+    forAll(Gen.choose(100, 200)) { count =>
+      val queue = async.topic[IO.Action]()
+
+      performanceTest(false, count, queue.publish, queue.subscribe, queue.close)
+    }
+  }
 
   test("resetting a timer") {
     val shutdownAfter = 300 millis
@@ -66,6 +117,7 @@ final class TimeActorTest extends FunSuite {
 
     // 5. Assert that the whole thing took at least 1500ms.
     val duration = end - start
+    logger.debug(s"Test took $duration")
     assert(duration >= shutdownAfter + resetAfter)
     assert(duration < shutdownAfter * 2)
   }

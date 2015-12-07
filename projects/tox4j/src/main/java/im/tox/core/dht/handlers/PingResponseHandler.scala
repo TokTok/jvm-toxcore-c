@@ -8,7 +8,7 @@ import im.tox.core.network.PacketKind
 
 import scalaz.\/
 
-object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingResponsePacket) {
+case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingResponsePacket) {
 
   private val pingTimer = IO.TimerIdFactory("Ping")
   private val pingTimeoutTimer = IO.TimerIdFactory("PingTimeout")

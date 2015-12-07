@@ -13,7 +13,7 @@ import scalaz.\/
  * nodes could be added to any one of the lists. If the node can, toxcore will
  * send a ping packet to it, if it cannot it will be ignored.
  */
-object NodesResponseHandler extends DhtUnencryptedPayloadHandler(NodesResponsePacket) {
+case object NodesResponseHandler extends DhtUnencryptedPayloadHandler(NodesResponsePacket) {
 
   override def apply(dht: Dht, sender: NodeInfo, packet: NodesResponsePacket, pingId: Long): CoreError \/ IO[Dht] = {
     // The nodes we could add to the DHT node lists if they reply to our ping.

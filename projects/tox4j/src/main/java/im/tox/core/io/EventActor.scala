@@ -22,17 +22,17 @@ object EventActor {
   ): Process[Task, Unit] = {
     for {
       action <- eventSource.stateScan(dht)(EventProcessor.processEvent)
-      () <- {
-        val actionSource =
+      _ <- {
+        val actionSource: Process0[IO.Action] =
           action match {
             case -\/(error) =>
               logger.debug("Error: " + error)
               Process.fail(error.exception)
             case \/-(actions) =>
               logger.debug("Actions: " + actions)
-              Process.emitAll(actions)
+              Process.emitAll(actions).repeat.take(2)
           }
-        actionSource.to(actionSink)
+        actionSource.toSource.to(actionSink)
       }
     } yield {
       logger.debug("Processed event")

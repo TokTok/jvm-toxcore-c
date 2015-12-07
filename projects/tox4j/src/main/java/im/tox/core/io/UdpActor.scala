@@ -13,7 +13,7 @@ import scalaz.stream._
 import scalaz.{-\/, \/-}
 
 @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Any")) // scalastyle:off magic.number
-object UdpActor {
+case object UdpActor {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
@@ -24,7 +24,7 @@ object UdpActor {
    */
   private val MaxUdpPacketSize = 2048
 
-  private val timeout = Some(30 seconds)
+  private val timeout = Some(10 seconds)
 
   def make(
     actionSource: Process[Task, IO.Action],
@@ -38,6 +38,10 @@ object UdpActor {
         .to(eventSink)
 
       val sender = udp.lift(actionSource).flatMap {
+        case IO.Action.Shutdown =>
+          logger.debug(s"Shutting down $this")
+          receiver.kill
+
         case IO.Action.SendTo(node, outPacket) =>
           logger.debug(s"Sending ${outPacket.kind} to ${node.address}")
           ToxPacket.toBytes(outPacket) match {
@@ -47,8 +51,7 @@ object UdpActor {
               udp.send(node.address, packetData.toByteVector)
           }
 
-        case IO.Action.Shutdown => receiver.kill ++ Process.halt
-        case action             => Process.empty
+        case action => Process.empty
       }
 
       for {

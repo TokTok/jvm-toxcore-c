@@ -12,7 +12,7 @@ import scalaz.\/
  * responses should contain the 4 closest good (not timed out) nodes that the
  * node receiving the get node has in their list of known nodes.
  */
-object NodesRequestHandler extends DhtUnencryptedPayloadHandler(NodesRequestPacket) {
+case object NodesRequestHandler extends DhtUnencryptedPayloadHandler(NodesRequestPacket) {
 
   /**
    * When receiving a get node packet, toxcore will find the 4 nodes, in its nodes

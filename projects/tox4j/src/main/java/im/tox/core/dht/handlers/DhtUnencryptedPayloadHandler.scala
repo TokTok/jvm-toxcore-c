@@ -44,8 +44,4 @@ abstract class DhtUnencryptedPayloadHandler[T, S <: Security](val module: Module
     }
   }
 
-  override def toString: String = {
-    getClass.getSimpleName
-  }
-
 }

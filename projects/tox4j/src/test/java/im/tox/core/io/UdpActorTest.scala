@@ -60,7 +60,7 @@ final class UdpActorTest extends FunSuite {
         .flatMap { count =>
           if (count == minResponses) {
             logger.debug("Test finished successfully")
-            actionActor.kill ++ udpActor.kill
+            Process.emit(IO.Action.Shutdown).toSource.to(actionSink) ++ actionActor.kill
           } else {
             Process.empty[Task, Unit]
           }

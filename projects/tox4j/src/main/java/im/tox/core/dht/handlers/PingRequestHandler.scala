@@ -8,7 +8,7 @@ import im.tox.core.network.PacketKind
 
 import scalaz.\/
 
-object PingRequestHandler extends DhtUnencryptedPayloadHandler(PingRequestPacket) {
+case object PingRequestHandler extends DhtUnencryptedPayloadHandler(PingRequestPacket) {
 
   /**
    * All ping requests received will be decrypted. If successfully decrypted a
