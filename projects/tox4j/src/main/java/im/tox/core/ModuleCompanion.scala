@@ -31,8 +31,4 @@ abstract class ModuleCompanion[T, +S <: Security] {
     fromBits(bytes.toBitVector)
   }
 
-  final override def toString: String = {
-    getClass.getSimpleName
-  }
-
 }

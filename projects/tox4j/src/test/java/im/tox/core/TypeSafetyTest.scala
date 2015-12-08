@@ -6,15 +6,15 @@ import scodec.bits.ByteVector
 
 final class TypeSafetyTest extends WordSpec {
 
-  s"no classes except ${PlainText.getClass}" should {
+  s"no classes except $PlainText" should {
     "be instantiated outside the crypto module" in {
       val byteVector = ByteVector.empty
       val byteArray = Array.empty[Byte]
       assertCompiles("""new PlainText(byteVector)""")
-      assertDoesNotCompile("""new CipherText(byteVector)""")
-      assertDoesNotCompile("""new PublicKey(byteArray)""")
-      assertDoesNotCompile("""new SecretKey(byteArray)""")
-      assertDoesNotCompile("""new Nonce(byteArray)""")
+      assertTypeError("""new CipherText(byteVector)""")
+      assertTypeError("""new PublicKey(byteArray)""")
+      assertTypeError("""new SecretKey(byteArray)""")
+      assertTypeError("""new Nonce(byteArray)""")
     }
   }
 

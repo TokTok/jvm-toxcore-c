@@ -30,33 +30,39 @@ object OptimisedIdOps {
     throw new RuntimeException(s"$OptimisedIdOps was not optimised away")
   }
 
-  def reverseApplyImpl[A, B](c: whitebox.Context)(f: c.Expr[A => B]): c.Expr[B] = {
+  private final case class MakeTree[C <: whitebox.Context](c: C) {
+
     import c.universe._
 
-    // Unwrap the "a" argument from the toOptimisedIdOps call.
-    val unwrappedSelf = c.prefix match {
-      case Expr(Apply(TypeApply(conversion, _), List(self))) => self
-    }
+    def apply(f: Tree): Tree = {
+      // Unwrap the "a" argument from the toOptimisedIdOps call.
+      val unwrappedSelf = c.prefix.tree match {
+        case Apply(TypeApply(conversion, _), List(self)) => self
+      }
 
-    // Unwrap the function from the generated lambda.
-    val unwrappedFunction = f match {
-      // Only if it's of the form ((x: T) => f(x)).
-      // For example, ((x: Int) => x + 1) can not be optimised.
-      case Expr(
-        Block(_,
+      // Unwrap the function from the generated lambda.
+      val unwrappedFunction = f match {
+        // Only if it's of the form ((x: T) => f(x)).
+        // For example, ((x: Int) => x + 1) can not be optimised.
+        case Block(_,
           Function(
             List(ValDef(_, TermName(argDecl), _, _)),
             Apply(wrappedFunction, List(Ident(TermName(argUse))))
             )
-          )
-        ) if argDecl == argUse =>
-        wrappedFunction
+          ) if argDecl == argUse =>
+          wrappedFunction
 
-      case Expr(wrappedFunction) =>
-        wrappedFunction
+        case wrappedFunction =>
+          wrappedFunction
+      }
+
+      q"$unwrappedFunction($unwrappedSelf)"
     }
 
-    c.Expr[B](q"$unwrappedFunction($unwrappedSelf)")
+  }
+
+  def reverseApplyImpl[A, B](c: whitebox.Context)(f: c.Expr[A => B]): c.Expr[B] = {
+    c.Expr[B](MakeTree[c.type](c)(f.tree))
   }
 
 }
