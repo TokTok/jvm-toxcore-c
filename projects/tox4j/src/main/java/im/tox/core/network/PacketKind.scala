@@ -16,7 +16,7 @@ sealed abstract class PacketKind(val id: Int)
  * sorted to the right module that can handle it.
  */
 // scalastyle:off magic.number
-object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive] {
+case object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive] {
 
   /**
    * Ping(Request and response):

@@ -46,7 +46,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     val end = System.currentTimeMillis().millis
 
     val duration = end - start
-    println(s"Test with count=$count took $duration (${(duration / count).toMicros} µs/element)")
+    logger.debug(s"Test with count=$count took $duration (${(duration / count).toMicros} µs/element)")
   }
 
   test("performance of async.boundedQueue") {

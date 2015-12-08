@@ -38,7 +38,7 @@ object EnumerationMacros {
               reify(TreeSet).tree,
               TermName("apply")
             ),
-            children.map(sourceModuleRef)
+            children.map(sourceModuleRef).sortBy(_.toString)
           )
         }
       }
