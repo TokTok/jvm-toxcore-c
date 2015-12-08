@@ -4,7 +4,7 @@ import im.tox.core.typesafe.BoundedIntCompanion
 
 final class BitRate private (val value: Int) extends AnyVal
 
-object BitRate extends BoundedIntCompanion[BitRate](-1, Int.MaxValue) {
+case object BitRate extends BoundedIntCompanion[BitRate](-1, Int.MaxValue) {
 
   val Unchanged = new BitRate(-1)
   val Disabled = new BitRate(0)

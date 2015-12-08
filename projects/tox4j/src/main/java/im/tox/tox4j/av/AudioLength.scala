@@ -11,7 +11,7 @@ import scala.language.postfixOps
 final class AudioLength private (val value: Duration) extends AnyVal
 
 // scalastyle:off magic.number
-object AudioLength extends DiscreteValueCompanion[Duration, AudioLength](
+case object AudioLength extends DiscreteValueCompanion[Duration, AudioLength](
   _.value,
   2500 microseconds,
   5000 microseconds,

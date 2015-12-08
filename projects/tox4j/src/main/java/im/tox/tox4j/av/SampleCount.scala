@@ -2,7 +2,7 @@ package im.tox.tox4j.av
 
 final class SampleCount private (val value: Int) extends AnyVal
 
-object SampleCount extends ((AudioLength, SamplingRate) => SampleCount) {
+case object SampleCount extends ((AudioLength, SamplingRate) => SampleCount) {
 
   def unsafeFromInt(value: Int): SampleCount = new SampleCount(value)
 

@@ -5,7 +5,7 @@ import im.tox.core.typesafe.DiscreteIntCompanion
 final class SamplingRate private (val value: Int) extends AnyVal
 
 // scalastyle:off magic.number
-object SamplingRate extends DiscreteIntCompanion[SamplingRate](
+case object SamplingRate extends DiscreteIntCompanion[SamplingRate](
   8000,
   12000,
   16000,
