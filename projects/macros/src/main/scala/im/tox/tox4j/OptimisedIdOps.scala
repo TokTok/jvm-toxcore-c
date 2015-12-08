@@ -27,7 +27,9 @@ object OptimisedIdOps {
 
   @compileTimeOnly("OptimisedIdOps was not optimised away")
   implicit def toOptimisedIdOps[A](a: A): OptimisedIdOps[A] = {
+    // $COVERAGE-OFF$
     throw new RuntimeException(s"$OptimisedIdOps was not optimised away")
+    // $COVERAGE-ON$
   }
 
   private final case class MakeTree[C <: whitebox.Context](c: C) {
