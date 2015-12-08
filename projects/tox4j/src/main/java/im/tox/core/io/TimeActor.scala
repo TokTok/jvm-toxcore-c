@@ -1,7 +1,9 @@
 package im.tox.core.io
 
+import java.util.concurrent.ScheduledExecutorService
+
 import com.typesafe.scalalogging.Logger
-import im.tox.core.io.IO.{TimerId, Event, Action}
+import im.tox.core.io.IO.{Action, Event, TimerId}
 import org.slf4j.LoggerFactory
 
 import scalaz.concurrent.Task
@@ -13,7 +15,7 @@ case object TimeActor {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private implicit val scheduler = scalaz.stream.DefaultScheduler
+  private implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
 
   def make(
     actionSource: Process[Task, IO.Action],
@@ -39,7 +41,6 @@ case object TimeActor {
 
       case action =>
         logger.debug("NEXT: " + action)
-        new Enumeration() {}
         val (newTimers, startedTimer) = processTimerAction(removeOldTimers(timers), eventSink, action)
 
         // Listen for next action and start timer.
@@ -62,7 +63,7 @@ case object TimeActor {
         val stopTimer = async.signalOf(false)
 
         val timer =
-          repeat
+          repeat.toIterable
             .foldLeft(time.awakeEvery(delay))(_.take(_))
             .flatMap { duration =>
               event(duration)

@@ -3,7 +3,7 @@ package sbt.tox4j.lint
 import com.etsy.sbt.Checkstyle.CheckstyleTasks._
 import com.etsy.sbt.Checkstyle.checkstyleSettings
 import com.etsy.sbt.{NoExitException, NoExitSecurityManager}
-import com.puppycrawl.tools.checkstyle.Main.{main => CheckstyleMain}
+import com.puppycrawl.tools.checkstyle.Main
 import sbt.Def.Initialize
 import sbt.Keys._
 import sbt._
@@ -59,7 +59,7 @@ object Checkstyle extends OptionalPlugin {
   }
 
   def runCheckstyle(log: Logger, outputFile: String, outputDir: File, javaSources: File, fatalErrors: Boolean): Unit = {
-    val checkstyleArgs = Array(
+    val checkstyleArgs = Seq(
       "-c", getClass.getResource("checkstyle-config.xml").toString, // checkstyle configuration file
       javaSources.getAbsolutePath, // location of Java source file
       "-f", "xml", // output format
@@ -73,7 +73,7 @@ object Checkstyle extends OptionalPlugin {
     // Thus we wrap the call to it with a special security policy
     // that forbids exiting the JVM
     noExit {
-      CheckstyleMain(checkstyleArgs)
+      Main.main(checkstyleArgs: _*)
     }
 
     val errors = {

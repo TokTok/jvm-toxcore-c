@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
   "im.tox" %% "macros" % version.value,
   "org.scalaz" %% "scalaz-core" % "7.2.0-M1",
   "org.scalaz.stream" %% "scalaz-stream" % "0.8",
-  "org.scodec" %% "scodec-core" % "1.8.2"
+  "org.scodec" %% "scodec-core" % "1.8.3"
 )
 
 // Test dependencies.
@@ -44,13 +44,10 @@ libraryDependencies ++= Seq(
   "com.intellij" % "forms_rt" % "7.0.3",
   "com.storm-enroute" %% "scalameter" % "0.8-SNAPSHOT",
   "junit" % "junit" % "4.12",
-  "org.scalacheck" %% "scalacheck" % "1.12.2",
-  "org.scalatest" %% "scalatest" % "2.2.4",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.12"
+  "org.scalacheck" %% "scalacheck" % "1.12.5",
+  "org.scalatest" %% "scalatest" % "3.0.0-M14",
+  "org.slf4j" % "slf4j-log4j12" % "1.7.13"
 ) map (_ % Test)
-
-// Scala macros.
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 
 // Add ScalaMeter as test framework.
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")

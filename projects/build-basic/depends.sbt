@@ -9,7 +9,7 @@ resolvers += Classpaths.sbtPluginReleases
 resolvers += "Tox4j snapshots" at "https://tox4j.github.io/repositories/snapshots/"
 
 // Code style.
-addSbtPlugin("com.etsy" % "sbt-checkstyle-plugin" % "0.5.1")
+addSbtPlugin("com.etsy" % "sbt-checkstyle-plugin" % "0.5.3")
 addSbtPlugin("org.scalastyle" % "scalastyle-sbt-plugin" % "0.8.0")
 addSbtPlugin("de.johoop" % "findbugs4sbt" % "1.4.0")
 
@@ -29,5 +29,5 @@ libraryDependencies ++= Seq(
 
 // Test dependencies.
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.4"
+  "org.scalatest" %% "scalatest" % "3.0.0-M14"
 ) map (_ % Test)

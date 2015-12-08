@@ -364,7 +364,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
   override def iterate(state: ToxCoreState): ToxCoreState = {
     Option(ToxCoreJni.toxIterate(instanceNumber))
       .map(CoreEvents.parseFrom)
-      .foldLeft(state)(dispatchEvents)
+      .toIterable.foldLeft(state)(dispatchEvents)
   }
 
   override def getPublicKey: ToxPublicKey =

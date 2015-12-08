@@ -15,7 +15,10 @@ import scala.annotation.tailrec
  * interface method used to exist, was implemented, and then removed from the
  * interface, leaving the implementation lingering.
  */
-@SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Any"))
+@SuppressWarnings(Array(
+  "org.brianmckenna.wartremover.warts.Any",
+  "org.brianmckenna.wartremover.warts.ToString"
+))
 object Override extends WartTraverser {
 
   def errorMessage(name: String): String = "Implementations of abstract methods must have the 'override' modifier: " + name

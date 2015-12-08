@@ -2,6 +2,7 @@ package im.tox.tox4j.impl.jni
 
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.exceptions.ToxKilledException
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
 
@@ -36,22 +37,18 @@ final class BadInstanceNumberTest extends FunSuite with PropertyChecks {
     }
   }
 
-  test("negative instance numbers") {
-    forAll { (instanceNumber: Int) =>
-      whenever(instanceNumber <= 0) {
-        intercept[IllegalStateException] {
-          callWithInstanceNumber(instanceNumber)
-        }
+  test("negative or zero instance numbers") {
+    forAll(Gen.choose(Int.MinValue, 0)) { instanceNumber =>
+      intercept[IllegalStateException] {
+        callWithInstanceNumber(instanceNumber)
       }
     }
   }
 
   test("very large instance numbers") {
-    forAll { (instanceNumber: Int) =>
-      whenever(instanceNumber >= 0xffff) {
-        intercept[IllegalStateException] {
-          callWithInstanceNumber(instanceNumber)
-        }
+    forAll(Gen.choose(0xffff, Int.MaxValue)) { instanceNumber =>
+      intercept[IllegalStateException] {
+        callWithInstanceNumber(instanceNumber)
       }
     }
   }

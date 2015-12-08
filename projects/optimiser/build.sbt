@@ -1,6 +1,7 @@
 organization  := "im.tox"
 name          := "optimiser"
-scalaVersion  := "2.11.7"
+
+sbtPlugin := true
 
 // Build dependencies.
 libraryDependencies ++= Seq(
@@ -9,7 +10,7 @@ libraryDependencies ++= Seq(
 
 // Test dependencies.
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.4"
+  "org.scalatest" %% "scalatest" % "3.0.0-M14"
 ) map (_ % Test)
 
 // Enable the plugins we want.

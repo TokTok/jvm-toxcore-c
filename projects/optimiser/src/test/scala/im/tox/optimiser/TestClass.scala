@@ -2,16 +2,13 @@ package im.tox.optimiser
 
 object TestClass {
 
-  def add(int: Int): Seq[Int] = {
-    var x = List(1, 2, 3)
-
+  def add(int: Int): Int = {
     var y = int
     y += 1
-    y += 1
-    y += 1
-    x ::= y
+    y += 2
+    y += 3
 
-    x
+    y
   }
 
   def main(args: Array[String]): Unit = {
