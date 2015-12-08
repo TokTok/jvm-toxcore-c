@@ -1,14 +1,18 @@
 package im.tox.core
 
+import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto.PlainText
 import im.tox.core.error.CoreError
 import im.tox.core.typesafe.Security
+import org.slf4j.LoggerFactory
 import scodec.Codec
 import scodec.bits.{BitVector, ByteVector}
 
 import scalaz.\/
 
 abstract class ModuleCompanion[T, +S <: Security] {
+
+  protected final val logger = Logger(LoggerFactory.getLogger(getClass))
 
   def codec: Codec[T]
 
@@ -18,7 +22,9 @@ abstract class ModuleCompanion[T, +S <: Security] {
 
   final def toBytes(self: T): CoreError \/ PlainText[S] = {
     CoreError(codec.encode(self).map { bits =>
-      assert(bits.size % java.lang.Byte.SIZE == 0)
+      if (bits.size % java.lang.Byte.SIZE != 0) {
+        logger.warn(s"Codec for $this does not produce byte-aligned output")
+      }
       PlainText(bits.toByteVector)
     })
   }

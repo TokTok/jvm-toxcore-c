@@ -10,14 +10,18 @@ abstract class ModuleCompanionTest[T, S <: Security](module: ModuleCompanion[T, 
 
   implicit def arbT: Arbitrary[T]
 
+  protected def testSerialisation(value: T): Unit = {
+    val decoded = module
+      .fromBits(
+        module.toBytes(value).map(_.unsafeIgnoreSecurity.toBitVector)
+          .getOrElse(fail("Encoding failed"))
+      ).getOrElse(fail("Decoding failed"))
+    assert(module.equals(decoded, value))
+  }
+
   test("serialisation and deserialisation") {
     forAll { (value: T) =>
-      val decoded = module
-        .fromBits(
-          module.toBytes(value).map(_.unsafeIgnoreSecurity.toBitVector)
-            .getOrElse(fail("Encoding failed"))
-        ).getOrElse(fail("Decoding failed"))
-      assert(module.equals(decoded, value))
+      testSerialisation(value)
     }
   }
 

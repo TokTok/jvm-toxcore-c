@@ -1,6 +1,9 @@
 package im.tox.core.dht
 
 import im.tox.core.crypto.PublicKey
+import im.tox.core.dht.XorDistance.{lessThan, signedXor, toBigInt}
+
+import scala.annotation.tailrec
 
 /**
  * The distance between 2 peers can be defined as the XOR between the
@@ -12,13 +15,44 @@ import im.tox.core.crypto.PublicKey
  * 1 is smaller it means 1 is closer to 0 than to 5.
  */
 // scalastyle:off method.name
-final class XorDistance private (private val value: BigInt) extends AnyVal {
+final case class XorDistance(x: PublicKey, y: PublicKey) {
 
-  def <(rhs: XorDistance): Boolean = value < rhs.value
+  private[dht] def value: BigInt = signedXor(toBigInt(x.value), toBigInt(y.value))
 
-  def <=(rhs: XorDistance): Boolean = value <= rhs.value
+  def <(rhs: XorDistance): Boolean = {
+    val (origin, target1, target2) =
+      if (rhs.x == x) {
+        (x.value, y.value, rhs.y.value)
+      } else {
+        assert(rhs.y == y)
+        (y.value, x.value, rhs.x.value)
+      }
 
-  def +(rhs: XorDistance): XorDistance = new XorDistance(value + rhs.value)
+    assert(origin.length == target1.length)
+    assert(origin.length == target2.length)
+
+    if (origin.isEmpty) {
+      // Empty keys are all equal.
+      false
+    } else {
+      // Signed xor for the first byte.
+      val distance1 = Math.abs(origin.head ^ target1.head)
+      val distance2 = Math.abs(origin.head ^ target2.head)
+
+      if (distance1 < distance2) {
+        true
+      } else if (distance1 > distance2) {
+        false
+      } else {
+        // Unsigned xor for the remaining bytes.
+        lessThan(1, origin, target1, target2)
+      }
+    }
+  }
+
+  def <=(rhs: BigInt): Boolean = value <= rhs
+
+  def +(rhs: XorDistance): BigInt = value + rhs.value
 
   def toHexString: String = {
     value.toByteArray.map(c => f"$c%02X").mkString
@@ -26,6 +60,14 @@ final class XorDistance private (private val value: BigInt) extends AnyVal {
 
   override def toString: String = {
     s"${getClass.getSimpleName}($toHexString=$value)"
+  }
+
+  @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Any"))
+  override def equals(rhs: Any): Boolean = {
+    rhs match {
+      case dist: XorDistance => value == dist.value
+      case _                 => false
+    }
   }
 
 }
@@ -39,10 +81,14 @@ object XorDistance {
     BigInt((0.toByte +: bytes).toArray)
   }
 
+  private def unsigned(byte: Byte): Int = {
+    byte & 0xff
+  }
+
   /**
    * Interpret a [[BigInt]] as signed integer modulo the given number of bytes.
    */
-  private def signed(bytes: Int, x: BigInt): BigInt = {
+  private def signed(x: BigInt): BigInt = {
     if (x > Int256Max) {
       -BigInt(x.toByteArray.tail)
     } else {
@@ -50,14 +96,27 @@ object XorDistance {
     }
   }
 
-  private def apply(bytes: Int, x: BigInt, y: BigInt): XorDistance = {
+  private def signedXor(x: BigInt, y: BigInt): BigInt = {
     assert(x >= 0)
     assert(y >= 0)
-    new XorDistance(signed(bytes, x ^ y).abs)
+    signed(x ^ y).abs
   }
 
-  def apply(x: PublicKey, y: PublicKey): XorDistance = {
-    XorDistance(PublicKey.Size, toBigInt(x.value), toBigInt(y.value))
+  @tailrec
+  private def lessThan(index: Int, origin: Seq[Byte], target1: Seq[Byte], target2: Seq[Byte]): Boolean = {
+    if (index == origin.length) {
+      false
+    } else {
+      val distance1 = unsigned(origin(index)) ^ unsigned(target1(index))
+      val distance2 = unsigned(origin(index)) ^ unsigned(target2(index))
+      if (distance1 < distance2) {
+        true
+      } else if (distance1 > distance2) {
+        false
+      } else {
+        lessThan(index + 1, origin, target1, target2)
+      }
+    }
   }
 
 }

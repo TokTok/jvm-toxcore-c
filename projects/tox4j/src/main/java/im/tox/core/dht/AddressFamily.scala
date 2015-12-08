@@ -2,9 +2,14 @@ package im.tox.core.dht
 
 import java.net.InetAddress
 
+import im.tox.core.ModuleCompanion
+import im.tox.core.typesafe.Security
+import im.tox.tox4j.EnumerationMacros.sealedInstancesOf
 import scodec.bits.ByteVector
 import scodec.codecs._
 import scodec.{Attempt, Err}
+
+import scala.collection.immutable.TreeSet
 
 sealed abstract class AddressFamily(addressLength: Int) {
 
@@ -20,7 +25,7 @@ sealed abstract class AddressFamily(addressLength: Int) {
 
 }
 
-object AddressFamily {
+case object AddressFamily extends ModuleCompanion[AddressFamily, Security.Sensitive] {
 
   /**
    * The reason for these numbers is because the numbers on my Linux machine
@@ -34,6 +39,13 @@ object AddressFamily {
 
   case object Inet4 extends AddressFamily(Inet4AddressLength)
   case object Inet6 extends AddressFamily(Inet6AddressLength)
+
+  implicit val ordAddressFamily: Ordering[AddressFamily] = Ordering.by {
+    case Inet4 => Inet4Value
+    case Inet6 => Inet6Value
+  }
+
+  lazy val values: TreeSet[AddressFamily] = sealedInstancesOf[AddressFamily]
 
   val codec = uint4.exmap[AddressFamily](
     {
