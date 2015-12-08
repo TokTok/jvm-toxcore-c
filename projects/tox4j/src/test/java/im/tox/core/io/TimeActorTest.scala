@@ -1,7 +1,7 @@
 package im.tox.core.io
 
 import com.typesafe.scalalogging.Logger
-import im.tox.core.io.IO.{TimerId, NetworkEvent}
+import im.tox.core.io.IO.{Action, Event, TimerId, TimerIdFactory}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scalaz.concurrent.Task
-import scalaz.stream.{Sink, Process, async}
+import scalaz.stream._
 
 final class TimeActorTest extends FunSuite with PropertyChecks {
 
@@ -49,19 +49,19 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     logger.debug(s"Test with count=$count took $duration (${(duration / count).toMicros} microseconds/element)")
   }
 
-  test("performance of async.boundedQueue") {
+  ignore("performance of async.boundedQueue") {
     forAll(Gen.choose(100, 200)) { count =>
       val queue = async.boundedQueue[IO.Action](10)
 
-      performanceTest(true, count, queue.enqueue, queue.dequeue, queue.close)
+      performanceTest(useTimeActor = true, count, queue.enqueue, queue.dequeue, queue.close)
     }
   }
 
-  test("performance of async.topic") {
+  ignore("performance of async.topic") {
     forAll(Gen.choose(100, 200)) { count =>
       val queue = async.topic[IO.Action]()
 
-      performanceTest(false, count, queue.publish, queue.subscribe, queue.close)
+      performanceTest(useTimeActor = false, count, queue.publish, queue.subscribe, queue.close)
     }
   }
 
@@ -83,22 +83,22 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
       // 2. Enqueue Action: timer of 500ms with some NetworkEvent.
       IO.Action.StartTimer(TimerId("Reset"), resetAfter, Some(1), { _ =>
         logger.debug("Reset timer fired")
-        Some(NetworkEvent(null))
+        Some(IO.Event.Network(null))
       })
     ).toSource.to(actionQueue.enqueue)
 
     // 3. On receiving the event, reset the first timer, so it's 1 second again.
     val eventActor = eventQueue.dequeue.flatMap {
-      case IO.NetworkEvent(_) =>
+      case IO.Event.Network(_) =>
         logger.debug("Received NetworkEvent")
         Process(
           IO.Action.StartTimer(TimerId("Shutdown"), shutdownAfter, Some(1), { _ =>
             logger.debug("Shutdown timer #2 fired")
-            Some(IO.ShutdownEvent)
+            Some(IO.Event.Shutdown)
           })
         ).toSource.to(actionQueue.enqueue)
 
-      case IO.ShutdownEvent =>
+      case IO.Event.Shutdown =>
         logger.debug("Received NetworkEvent")
         Process.empty
 
@@ -111,7 +111,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     timeActor
       .merge(eventActor)
       .merge(actionActor)
-      .take(5)
+      .take(8)
       .run.run
     val end = System.currentTimeMillis().millis
 
@@ -138,16 +138,16 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
       }),
       IO.Action.StartTimer(TimerId("Cancel"), cancelAfter, Some(1), { _ =>
         logger.debug("Cancel timer fired")
-        Some(IO.ShutdownEvent)
+        Some(IO.Event.Shutdown)
       }),
       IO.Action.StartTimer(TimerId("Real shutdown"), shutdownAfter * 2, Some(1), { _ =>
         logger.debug("Actually shutting down now")
-        Some(IO.ShutdownEvent)
+        Some(IO.Event.Shutdown)
       })
     ).toSource.to(actionQueue.enqueue)
 
     val eventActor = eventQueue.dequeue.flatMap {
-      case IO.ShutdownEvent =>
+      case IO.Event.Shutdown =>
         logger.debug("Received ShutdownEvent")
         Process(
           IO.Action.CancelTimer(TimerId("Shutdown"))
@@ -174,7 +174,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
 
     val shutdownTimer = IO.TimerIdFactory("Shutdown")
     val actionActor = Process.range(0, timers).map { id =>
-      IO.Action.StartTimer(shutdownTimer(id.toString), delay, Some(repeats), _ => Some(IO.ShutdownEvent))
+      IO.Action.StartTimer(shutdownTimer(id.toString), delay, Some(repeats), _ => Some(IO.Event.Shutdown))
     }.toSource.to(actionQueue.enqueue)
 
     val timeActor = TimeActor.make(actionQueue.dequeue, eventQueue.enqueue)
@@ -201,6 +201,84 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     val end = System.currentTimeMillis()
 
     assert(end - start < (delay.toMillis * repeats * timers))
+  }
+
+  test("async.topic with two subscribers") {
+    val actionQueue = async.topic[Int]()
+
+    val testActor1 = actionQueue.subscribe.map { action =>
+      logger.info("Actor 1 received action: " + action)
+    }
+    val testActor2 = actionQueue.subscribe.map { action =>
+      logger.info("Actor 2 received action: " + action)
+      if (action == 3) {
+        actionQueue.close.run
+      }
+    }
+
+    def manualObserve(actions: Process[Task, Int]): Process[Task, Unit] = {
+      actions.once.flatMap { action =>
+        logger.info("Manual actor received action: " + action)
+        manualObserve(actions)
+      }
+    }
+
+    val actionActor = Process.range(0, 4).toSource.to(actionQueue.publish)
+
+    actionActor
+      .merge(testActor1)
+      .merge(testActor2)
+      .merge(manualObserve(actionQueue.subscribe))
+      .run.run
+  }
+
+  test(s"$TimeActor listening to an async.boundedQueue") {
+    val actionQueue = async.boundedQueue[Action](10)
+
+    val enqueue = actionQueue.enqueue
+    val dequeue = actionQueue.dequeue
+    val closeActionQueue = actionQueue.close
+
+    testTimers(enqueue, dequeue, closeActionQueue)
+  }
+
+  test(s"$TimeActor listening to an async.topic") {
+    val actionQueue = async.topic[Action]()
+
+    val enqueue = actionQueue.publish
+    val dequeue = actionQueue.subscribe
+    val closeActionQueue = actionQueue.close
+
+    testTimers(enqueue, dequeue, closeActionQueue)
+  }
+
+  private def testTimers(enqueue: Sink[Task, Action], dequeue: Process[Task, Action], closeActionQueue: Task[Unit]): Unit = {
+    val eventQueue = async.boundedQueue[Event](10)
+
+    val actionActor = {
+      Process(
+        IO.Action.StartTimer(TimerId("Shutdown"), 2 seconds, Some(1), _ => Some(IO.Event.Shutdown)),
+        IO.Action.StartTimer(TimerId("Shutdown"), 2 seconds, Some(1), _ => Some(IO.Event.Shutdown))
+      ) ++ Process.range(0, 8).map { id =>
+          IO.Action.StartTimer(TimerIdFactory("Timer")(id.toString), 1 second, Some(1), _ => None)
+        }
+    }.toSource.to(enqueue)
+
+    val timeActor = TimeActor.make(dequeue, eventQueue.enqueue)
+
+    val testActor = eventQueue.dequeue.map {
+      case IO.Event.Shutdown =>
+        logger.info("Closing all queues")
+        closeActionQueue.run
+        eventQueue.close.run
+      case event =>
+        logger.info("Received event: " + event)
+    }
+
+    actionActor
+      .merge(timeActor)
+      .merge(testActor)
+      .run.run
   }
 
 }

@@ -65,7 +65,7 @@ object NetworkCore {
     val eventQueue = async.boundedQueue[IO.Event](10)
     val actionTopic = async.topic[IO.Action]()
 
-    val actionLoop = EventActor.make(dht)(eventQueue.dequeue, actionTopic.publish)
+    val actionLoop = EventActor.make(dht, EventProcessor.processEvent)(eventQueue.dequeue, actionTopic.publish)
 
     val udpLoop = UdpActor.make(actionTopic.subscribe, eventQueue.enqueue)
     val timeLoop = TimeActor.make(actionTopic.subscribe, eventQueue.enqueue)
@@ -80,7 +80,12 @@ object NetworkCore {
         NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
         bootstrapRequest
       ),
-      IO.Action.StartTimer(TimerId("Shutdown"), 5 seconds, None, duration => Some(IO.ShutdownEvent))
+      IO.Action.StartTimer(TimerId("Shutdown"), 5 seconds, None, duration => Some(IO.Event.Shutdown)),
+      IO.Action.CancelTimer(TimerId("Shutdown")),
+      IO.Action.CancelTimer(TimerId("Shutdown")),
+      IO.Action.CancelTimer(TimerId("Shutdown")),
+      IO.Action.CancelTimer(TimerId("Shutdown")),
+      IO.Action.StartTimer(TimerId("Shutdown"), 5 seconds, None, duration => Some(IO.Event.Shutdown))
     ).toSource.to(actionTopic.publish)
 
     val shutdownLoop =

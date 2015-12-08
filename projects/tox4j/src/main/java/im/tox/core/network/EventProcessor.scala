@@ -64,11 +64,11 @@ object EventProcessor {
 
   def processEvent(event: IO.Event): State[Dht, CoreError \/ Seq[IO.Action]] = {
     event match {
-      case IO.NetworkEvent(packet) =>
+      case IO.Event.Network(packet) =>
         processNetworkEvent(packet)
-      case IO.TimedActionEvent(action) =>
+      case IO.Event.TimedAction(action) =>
         processTimedActionEvent(action)
-      case IO.ShutdownEvent =>
+      case IO.Event.Shutdown =>
         processShutdownEvent
     }
   }

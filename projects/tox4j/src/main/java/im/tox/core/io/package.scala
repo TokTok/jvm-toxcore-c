@@ -1,10 +1,11 @@
 package im.tox.core
 
 import im.tox.core.dht.{Dht, NodeInfo}
+import im.tox.core.io.IO.Event.TimedAction
 import im.tox.core.network.PacketKind
 import im.tox.core.network.packets.ToxPacket
 
-import scala.concurrent.duration.{FiniteDuration, Duration}
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scalaz.State
 import scalaz.stream.udp.Packet
 
@@ -30,9 +31,11 @@ package object io {
     }
 
     sealed trait Event
-    case object ShutdownEvent extends Event
-    final case class TimedActionEvent(action: Dht => IO[Dht]) extends Event
-    final case class NetworkEvent(packet: Packet) extends Event
+    object Event {
+      case object Shutdown extends Event
+      final case class TimedAction(action: Dht => IO[Dht]) extends Event
+      final case class Network(packet: Packet) extends Event
+    }
 
     def apply[A](a: A): IO[A] = State.state(a)
 
@@ -45,11 +48,11 @@ package object io {
     }
 
     /**
-     * Shortcut for [[startTimer]] with a [[TimedActionEvent]].
+     * Shortcut for [[startTimer]] with a [[TimedAction]].
      */
     def timedAction(id: TimerId, delay: FiniteDuration, repeat: Option[Int] = None)(action: (Duration, Dht) => IO[Dht]): IO[Unit] = {
       startTimer(id, delay, repeat) { duration =>
-        Some(TimedActionEvent { dht =>
+        Some(TimedAction { dht =>
           action(duration, dht)
         })
       }

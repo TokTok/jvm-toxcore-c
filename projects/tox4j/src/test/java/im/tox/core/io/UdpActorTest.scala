@@ -49,7 +49,7 @@ final class UdpActorTest extends FunSuite {
       eventQueue.dequeue
         .scan(0) { (count, event) =>
           event match {
-            case IO.NetworkEvent(packet) =>
+            case IO.Event.Network(packet) =>
               val string = ToxHandler.toString(keyPair, PlainText(packet.bytes))
               logger.debug(s"Packet from ${packet.origin}: $string")
             case _ =>

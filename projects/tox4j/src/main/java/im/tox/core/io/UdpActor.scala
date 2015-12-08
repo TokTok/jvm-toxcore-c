@@ -34,7 +34,7 @@ case object UdpActor {
       import udp.syntax._
 
       val receiver = udp.receives(MaxUdpPacketSize, timeout)
-        .map(IO.NetworkEvent)
+        .map(IO.Event.Network)
         .to(eventSink)
 
       val sender = udp.lift(actionSource).flatMap {

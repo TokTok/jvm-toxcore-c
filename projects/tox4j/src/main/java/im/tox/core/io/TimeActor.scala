@@ -21,26 +21,33 @@ case object TimeActor {
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
-    processTimerActions(Map.empty, actionSource, eventSink)
+    val actionQueue = async.boundedQueue[IO.Action](10)
+
+    val producer = actionSource.to(actionQueue.enqueue)
+    val consumer = processTimerActions(Map.empty, actionQueue.dequeue, eventSink)
+
+    producer.wye(consumer)(wye.mergeHaltBoth)
   }
 
   /**
    * Process a single action at a time, so we can merge the timer resulting
-   * from it with the recursive call to [[processTimerActions]].
+   * from it with the recursive call to [[processTimerActions]]. This allows
+   * multiple timers to run in parallel. If we do a simple flatMap over the
+   * entire input stream, we have to wait for a timer to expire before the
+   * next is started.
    */
   private def processTimerActions(
     timers: Map[TimerId, Signal[Boolean]],
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
-    actionSource.take(1).flatMap {
+    actionSource.once.flatMap {
       case IO.Action.Shutdown =>
         logger.debug(s"Shutting down $this")
         timers.values.foreach(_.set(true).run)
         Process.empty[Task, Unit]
 
       case action =>
-        logger.debug("NEXT: " + action)
         val (newTimers, startedTimer) = processTimerAction(removeOldTimers(timers), eventSink, action)
 
         // Listen for next action and start timer.
@@ -55,7 +62,10 @@ case object TimeActor {
   ): (Map[TimerId, Signal[Boolean]], Process[Task, Unit]) = {
     action match {
       case Action.StartTimer(id, delay, repeat, event) =>
-        logger.debug(s"Starting timer $id with delay $delay and repeat $repeat")
+        logger.debug(
+          s"Starting timer $id with delay $delay " +
+            repeat.fold("indefinitely")("and repeat " + _)
+        )
 
         // Stop old timer.
         timers.get(id).foreach(_.set(true).run)
@@ -63,7 +73,7 @@ case object TimeActor {
         val stopTimer = async.signalOf(false)
 
         val timer =
-          repeat.toIterable
+          repeat.toList
             .foldLeft(time.awakeEvery(delay))(_.take(_))
             .flatMap { duration =>
               event(duration)
