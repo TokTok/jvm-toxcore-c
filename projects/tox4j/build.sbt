@@ -15,9 +15,11 @@ CodeFormat.projectSettings
 Jni.moduleSettings
 ProtobufJni.moduleSettings
 
+
 /******************************************************************************
  * Dependencies
  ******************************************************************************/
+
 
 // Snapshot and linter repository.
 resolvers += Resolver.sonatypeRepo("snapshots")
@@ -71,9 +73,11 @@ jniSourceFiles in Compile ++= Seq(
   managedNativeSource.value / "ProtoLog.pb.cc"
 )
 
+
 /******************************************************************************
  * Other settings and plugin configuration.
  ******************************************************************************/
+
 
 // Mixed project.
 compileOrder := CompileOrder.Mixed
@@ -101,3 +105,22 @@ scalastyleConfigUrl in Test := None
 scalastyleConfig in Test := (scalaSource in Test).value / "scalastyle-config.xml"
 
 scalacOptions ++= Seq("-optimise", "-Yinline-warnings")
+
+
+/******************************************************************************
+ * Proguard configuration.
+ ******************************************************************************/
+
+
+/*
+proguardSettings
+
+ProguardKeys.proguardVersion in Proguard := "5.0"
+ProguardKeys.inputs in Proguard := Seq((classDirectory in Compile).value)
+ProguardKeys.options in Proguard ++= Seq(
+  "-verbose",
+  "-optimizationpasses 5",
+  "-allowaccessmodification",
+  "@" + (baseDirectory.value / "tools" / "proguard.txt").getPath
+)
+*/
