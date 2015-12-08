@@ -1,7 +1,7 @@
-package im.tox.core.dht
+package im.tox.core.dht.distance
 
 import im.tox.core.crypto.PublicKey
-import im.tox.core.dht.XorDistance.{lessThan, signedXor, toBigInt}
+import im.tox.core.dht.distance.XorDistance.{lessThan, signedXor, toBigInt}
 
 import scala.annotation.tailrec
 
@@ -15,11 +15,11 @@ import scala.annotation.tailrec
  * 1 is smaller it means 1 is closer to 0 than to 5.
  */
 // scalastyle:off method.name
-final case class XorDistance(x: PublicKey, y: PublicKey) {
+final case class XorDistance(x: PublicKey, y: PublicKey) extends DistanceMetric[XorDistance] {
 
-  private[dht] def value: BigInt = signedXor(toBigInt(x.value), toBigInt(y.value))
+  protected[distance] override def value: BigInt = signedXor(toBigInt(x.value), toBigInt(y.value))
 
-  def <(rhs: XorDistance): Boolean = {
+  override def <(rhs: XorDistance): Boolean = {
     val (origin, target1, target2) =
       if (rhs.x == x) {
         (x.value, y.value, rhs.y.value)
@@ -50,39 +50,15 @@ final case class XorDistance(x: PublicKey, y: PublicKey) {
     }
   }
 
-  def <=(rhs: BigInt): Boolean = value <= rhs
-
-  def +(rhs: XorDistance): BigInt = value + rhs.value
-
-  def toHexString: String = {
-    value.toByteArray.map(c => f"$c%02X").mkString
-  }
-
-  override def toString: String = {
-    s"${getClass.getSimpleName}($toHexString=$value)"
-  }
-
-  @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Any"))
-  override def equals(rhs: Any): Boolean = {
-    rhs match {
-      case dist: XorDistance => value == dist.value
-      case _                 => false
-    }
-  }
-
 }
 
-object XorDistance {
+object XorDistance extends DistanceMetricCompanion[XorDistance] {
 
   private val Int256Max = BigInt(Byte.MaxValue +: Array.fill[Byte](PublicKey.Size - 1)(-1))
 
   private def toBigInt(bytes: Seq[Byte]): BigInt = {
     // Prepend zero-byte to avoid negative numbers.
     BigInt((0.toByte +: bytes).toArray)
-  }
-
-  private def unsigned(byte: Byte): Int = {
-    byte & 0xff
   }
 
   /**
@@ -102,6 +78,10 @@ object XorDistance {
     signed(x ^ y).abs
   }
 
+  private def unsigned(byte: Byte): Int = {
+    byte & 0xff
+  }
+
   @tailrec
   private def lessThan(index: Int, origin: Seq[Byte], target1: Seq[Byte], target2: Seq[Byte]): Boolean = {
     if (index == origin.length) {
@@ -109,6 +89,7 @@ object XorDistance {
     } else {
       val distance1 = unsigned(origin(index)) ^ unsigned(target1(index))
       val distance2 = unsigned(origin(index)) ^ unsigned(target2(index))
+
       if (distance1 < distance2) {
         true
       } else if (distance1 > distance2) {

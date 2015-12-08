@@ -4,6 +4,7 @@ import java.net.{Inet4Address, Inet6Address, InetSocketAddress}
 
 import im.tox.core.ModuleCompanion
 import im.tox.core.crypto.PublicKey
+import im.tox.core.dht.distance.XorDistance
 import im.tox.core.network.Port
 import im.tox.core.typesafe.Security
 

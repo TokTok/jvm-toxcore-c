@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto.KeyPairTest._
 import im.tox.core.crypto._
 import im.tox.core.dht.DhtTest._
+import im.tox.core.dht.distance.XorDistance
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
