@@ -15,13 +15,13 @@ case object TimeActor {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
+  private val QueueSize = 10
 
   def make(
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
-    val actionQueue = async.boundedQueue[IO.Action](10)
+    val actionQueue = async.boundedQueue[IO.Action](QueueSize)
 
     val producer = actionSource.to(actionQueue.enqueue)
     val consumer = processTimerActions(Map.empty, actionQueue.dequeue, eventSink)
@@ -66,6 +66,8 @@ case object TimeActor {
           s"Starting timer $id with delay $delay " +
             repeat.fold("indefinitely")("and repeat " + _)
         )
+
+        implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
 
         // Stop old timer.
         timers.get(id).foreach(_.set(true).run)

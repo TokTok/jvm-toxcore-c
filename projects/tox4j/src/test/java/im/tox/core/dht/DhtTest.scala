@@ -10,6 +10,7 @@ import im.tox.core.crypto.KeyPairTest._
 import im.tox.core.crypto._
 import im.tox.core.dht.DhtTest._
 import im.tox.core.dht.distance.XorDistance
+import im.tox.core.settings.Settings
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -26,9 +27,12 @@ object DhtTest {
   val MaxClosestNodes = 2
   val ExtraNodeCount = 4
 
-  def genDht(maxKeyLength: Int = PublicKey.Size, maxClosestNodes: Int = Dht.MaxClosestNodes): Gen[Dht] = {
+  def genDht(maxKeyLength: Int = PublicKey.Size, maxClosestNodes: Int = Dht.MaxClosestNodes.default): Gen[Dht] = {
     Arbitrary.arbitrary[KeyPair].map { keyPair =>
-      Dht(KeyPairTest.take(keyPair, maxKeyLength), maxClosestNodes)
+      val settings = Settings(
+        Dht.MaxClosestNodes := maxClosestNodes
+      )
+      Dht(settings, KeyPairTest.take(keyPair, maxKeyLength))
     }
   }
 
@@ -40,7 +44,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  val localhost = new InetSocketAddress("127.0.0.1", 33445)
+  private val localhost = new InetSocketAddress("127.0.0.1", 33445)
 
   test("get 4 closest nodes") {
     forAll(genDht()) { dht =>

@@ -13,7 +13,12 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
   private val pingTimer = IO.TimerIdFactory("Ping")
   private val pingTimeoutTimer = IO.TimerIdFactory("PingTimeout")
 
-  override def apply(dht: Dht, sender: NodeInfo, packet: PingPacket[PacketKind.PingResponse.type], pingId: Long): CoreError \/ IO[Dht] = {
+  override def apply(
+    dht: Dht,
+    sender: NodeInfo,
+    packet: PingPacket[PacketKind.PingResponse.type],
+    pingId: Long
+  ): CoreError \/ IO[Dht] = {
     for {
       pingRequest <- makeResponse(
         dht.keyPair,
@@ -27,7 +32,7 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
         /**
          * Install ping timer: after [[Dht.PingInterval]] seconds, ping again.
          */
-        _ <- IO.timedAction(pingTimer(sender.publicKey.readable), Dht.PingInterval) { (_, dht) =>
+        _ <- IO.timedAction(pingTimer(sender.publicKey.readable), dht.settings(Dht.PingInterval)) { (_, dht) =>
           for {
             _ <- IO.sendTo(sender, pingRequest)
           } yield {
@@ -39,7 +44,7 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
          * Install ping timeout timer: after [[Dht.PingTimeout]] seconds, remove the node from
          * the DHT node lists and cancel the ping timer.
          */
-        _ <- IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), Dht.PingTimeout, Some(1)) { (_, dht) =>
+        _ <- IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), dht.settings(Dht.PingTimeout), Some(1)) { (_, dht) =>
           for {
             _ <- IO.cancelTimer(pingTimer(sender.publicKey.readable))
           } yield {

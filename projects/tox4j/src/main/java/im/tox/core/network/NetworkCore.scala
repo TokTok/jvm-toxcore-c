@@ -70,23 +70,21 @@ object NetworkCore {
     val udpLoop = UdpActor.make(actionTopic.subscribe, eventQueue.enqueue)
     val timeLoop = TimeActor.make(actionTopic.subscribe, eventQueue.enqueue)
 
-    val bootstrapAction = Process(
-      // TODO(iphydf): Remove first one when https://github.com/scalaz/scalaz-stream/issues/488 is fixed.
-      IO.Action.SendTo(
-        NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
-        bootstrapRequest
-      ),
-      IO.Action.SendTo(
-        NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
-        bootstrapRequest
-      ),
-      IO.Action.StartTimer(TimerId("Shutdown"), 5 seconds, None, duration => Some(IO.Event.Shutdown)),
-      IO.Action.CancelTimer(TimerId("Shutdown")),
-      IO.Action.CancelTimer(TimerId("Shutdown")),
-      IO.Action.CancelTimer(TimerId("Shutdown")),
-      IO.Action.CancelTimer(TimerId("Shutdown")),
-      IO.Action.StartTimer(TimerId("Shutdown"), 5 seconds, None, duration => Some(IO.Event.Shutdown))
-    ).toSource.to(actionTopic.publish)
+    val bootstrapAction = for {
+      // TODO(iphydf): Remove sleep when https://github.com/scalaz/scalaz-stream/issues/488 is fixed.
+      _ <- Process.eval(Task {
+        Thread.sleep(100)
+      })
+      action <- Process(
+        IO.Action.SendTo(
+          NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
+          bootstrapRequest
+        ),
+        IO.Action.StartTimer(TimerId("Shutdown"), 60 seconds, None, duration => Some(IO.Event.Shutdown))
+      ).toSource.to(actionTopic.publish)
+    } yield {
+      action
+    }
 
     val shutdownLoop =
       actionTopic.subscribe.flatMap {

@@ -24,7 +24,7 @@ case object UdpActor {
    */
   private val MaxUdpPacketSize = 2048
 
-  private val timeout = Some(10 seconds)
+  private val timeout = Some(20 seconds)
 
   def make(
     actionSource: Process[Task, IO.Action],

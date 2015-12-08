@@ -16,7 +16,7 @@ object EventProcessor {
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   def processNetworkEvent(packet: Packet): State[Dht, CoreError \/ Seq[IO.Action]] = {
-    logger.debug("Network event: " + packet)
+    logger.debug("Processing network event: " + packet)
 
     for {
       result <- {
@@ -28,6 +28,7 @@ object EventProcessor {
               (error, dht)
             case \/-(ioDht) =>
               val (actions, dht) = ioDht.run(Nil)
+              logger.debug("New DHT state: " + dht)
               (\/-(actions), dht)
           }
         }
@@ -39,12 +40,13 @@ object EventProcessor {
   }
 
   def processTimedActionEvent(action: Dht => IO[Dht]): State[Dht, CoreError \/ Seq[IO.Action]] = {
-    logger.debug("Processing time event")
+    logger.debug("Processing timed action event")
 
     for {
       dht <- State.get[Dht]
       actions <- {
         val (actions, newDht) = action(dht).run(Nil)
+        logger.debug("New DHT state: " + newDht)
         for {
           _ <- State.put(newDht)
         } yield {
