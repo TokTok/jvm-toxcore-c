@@ -1,14 +1,13 @@
 import sbt.Keys._
 import sbt._
 import sbt.tox4j.OptionalPlugin
-import wartremover.Wart
 import wartremover.WartRemover.autoImport._
 
 object WartRemoverOverrides extends OptionalPlugin {
 
   object Keys
 
-  private def custom(checker: String): Wart = {
+  private def custom(checker: String): wartremover.Wart = {
     Wart.custom(s"im.tox.tox4j.lint.$checker")
   }
 

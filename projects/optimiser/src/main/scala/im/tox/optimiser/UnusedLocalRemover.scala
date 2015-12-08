@@ -16,7 +16,7 @@ final class UnusedLocalRemover extends BodyTransformer {
     phaseName: String,
     options: java.util.Map[String, String]
   ): scala.Unit = {
-    G.v.out.println(s"[${body.getMethod.getName}] Eliminating unused locals...")
+    // G.v.out.println(s"[${body.getMethod.getName}] Eliminating unused locals...")
 
     var i = 0
     val n = body.getLocals.size
@@ -29,29 +29,32 @@ final class UnusedLocalRemover extends BodyTransformer {
       i += 1
     }
 
-    val usedLocals = for {
-      s <- body.getUnits.asScala
-      vb <- s.getUseBoxes.asScala ++ s.getDefBoxes.asScala
-      number <- vb.getValue match {
-        case l: Local => Some(l.getNumber)
-        case _        => None
+    val usedLocals =
+      for {
+        s <- body.getUnits.asScala
+        vb <- s.getUseBoxes.asScala ++ s.getDefBoxes.asScala
+        number <- vb.getValue match {
+          case l: Local => Some(l.getNumber)
+          case _        => None
+        }
+      } yield {
+        number
       }
-    } yield {
-      number
-    }
 
-    var keep: Seq[Local] = Nil
-    for (local <- locals) {
-      val lno = local.getNumber
-      local.setNumber(oldNumbers(lno))
-      if (usedLocals.exists(_ == lno)) {
-        keep :+= local
+    val keep =
+      for (local <- locals) yield {
+        val lno = local.getNumber
+        local.setNumber(oldNumbers(lno))
+        if (usedLocals.exists(_ == lno)) {
+          Some(local)
+        } else {
+          None
+        }
       }
-    }
 
-    G.v.out.println(s"[${body.getMethod.getName}] Removed locals: ${locals.toSet -- keep.toSet}")
+    // G.v.out.println(s"[${body.getMethod.getName}] Removed locals: ${locals.toSet -- keep.toSet}")
     body.getLocals.clear()
-    body.getLocals.addAll(keep.asJava)
+    body.getLocals.addAll(keep.flatten.asJavaCollection)
   }
 
 }
