@@ -39,6 +39,7 @@ case object TimeActor {
 
       case action =>
         logger.debug("NEXT: " + action)
+        new Enumeration() {}
         val (newTimers, startedTimer) = processTimerAction(removeOldTimers(timers), eventSink, action)
 
         // Listen for next action and start timer.

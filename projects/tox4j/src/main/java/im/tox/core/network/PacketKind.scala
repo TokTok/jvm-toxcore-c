@@ -2,8 +2,11 @@ package im.tox.core.network
 
 import im.tox.core.ModuleCompanion
 import im.tox.core.typesafe.Security
+import im.tox.tox4j.EnumerationMacros.sealedInstancesOf
 import scodec.codecs._
 import scodec.{Attempt, Err}
+
+import scala.collection.immutable.TreeSet
 
 sealed abstract class PacketKind(val id: Int)
 
@@ -14,6 +17,7 @@ sealed abstract class PacketKind(val id: Int)
  */
 // scalastyle:off magic.number
 object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive] {
+
   /**
    * Ping(Request and response):
    *
@@ -62,31 +66,12 @@ object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive] {
   case object OnionReceive2 extends PacketKind(141)
   case object OnionReceive1 extends PacketKind(142)
 
-  override val codec = uint8.exmap[PacketKind](
-    {
-      case PingRequest.id       => Attempt.successful(PingRequest)
-      case PingResponse.id      => Attempt.successful(PingResponse)
-      case NodesRequest.id      => Attempt.successful(NodesRequest)
-      case NodesResponse.id     => Attempt.successful(NodesResponse)
-      case CookieRequest.id     => Attempt.successful(CookieRequest)
-      case CookieResponse.id    => Attempt.successful(CookieResponse)
-      case CryptoHandshake.id   => Attempt.successful(CryptoHandshake)
-      case CryptoData.id        => Attempt.successful(CryptoData)
-      case DhtRequest.id        => Attempt.successful(DhtRequest)
-      case LanDiscovery.id      => Attempt.successful(CryptoData)
-      case OnionSend1.id        => Attempt.successful(OnionSend1)
-      case OnionSend2.id        => Attempt.successful(OnionSend2)
-      case OnionSend3.id        => Attempt.successful(OnionSend3)
-      case AnnounceRequest.id   => Attempt.successful(AnnounceRequest)
-      case AnnounceResponse.id  => Attempt.successful(AnnounceResponse)
-      case OnionDataRequest.id  => Attempt.successful(OnionDataRequest)
-      case OnionDataResponse.id => Attempt.successful(OnionDataResponse)
-      case OnionReceive3.id     => Attempt.successful(OnionReceive3)
-      case OnionReceive2.id     => Attempt.successful(OnionReceive2)
-      case OnionReceive1.id     => Attempt.successful(OnionReceive1)
+  implicit val ordPacketKind: Ordering[PacketKind] = Ordering.by(_.id)
 
-      case invalidId            => Attempt.failure(new Err.General("Invalid packed id: " + invalidId))
-    },
+  val values: TreeSet[PacketKind] = sealedInstancesOf[PacketKind]
+
+  override val codec = uint8.exmap[PacketKind](
+    { id => Attempt.fromOption(values.find(_.id == id), new Err.General("Invalid packed id: " + id)) },
     { self => Attempt.successful(self.id) }
   )
 
