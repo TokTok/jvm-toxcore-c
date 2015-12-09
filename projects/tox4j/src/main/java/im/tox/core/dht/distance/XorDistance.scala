@@ -1,7 +1,7 @@
 package im.tox.core.dht.distance
 
 import im.tox.core.crypto.PublicKey
-import im.tox.core.dht.distance.XorDistance.{lessThan, signedXor, toBigInt}
+import im.tox.core.dht.distance.XorDistance._
 
 import scala.annotation.tailrec
 
@@ -16,9 +16,15 @@ import scala.annotation.tailrec
  */
 final case class XorDistance(x: PublicKey, y: PublicKey) extends DistanceMetric[XorDistance] {
 
-  protected[distance] override def value: BigInt = signedXor(toBigInt(x.value), toBigInt(y.value))
+  protected[distance] override def value: BigInt = {
+    signedXor(toBigInt(x.value), toBigInt(y.value))
+  }
 
   override def <(rhs: XorDistance): Boolean = { // scalastyle:ignore method.name
+    isLessThan(rhs)
+  }
+
+  def isLessThan(rhs: XorDistance): Boolean = {
     val (origin, target1, target2) =
       if (rhs.x == x) {
         (x.value, y.value, rhs.y.value)
@@ -107,8 +113,8 @@ object XorDistance extends DistanceMetricCompanion[XorDistance] {
     }
   }
 
-  private def isXorNegative(origin: IndexedSeq[Byte], target: IndexedSeq[Byte]): Boolean = {
-    // TODO(iphydf): Find out why this doesn't work.
+  private def isXorNegative(origin: Seq[Byte], target: Seq[Byte]): Boolean = {
+    // TODO(iphydf): Scalac breaks this (compiles to false) with -optimise.
     // (origin.head < 0) != (target.head < 0)
     (origin.head < 0) ^ (target.head < 0)
   }

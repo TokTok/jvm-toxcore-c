@@ -53,7 +53,11 @@ abstract class DistanceMetricTest[Metric <: DistanceMetric[Metric]](
 
       val ox = metric(o, x)
       val oy = metric(o, y)
-      assert((ox < oy) == (ox.value < oy.value))
+      if (ox.value < oy.value) {
+        assert(ox < oy)
+      } else {
+        assert(!(ox < oy))
+      }
     }
   }
 
@@ -61,7 +65,11 @@ abstract class DistanceMetricTest[Metric <: DistanceMetric[Metric]](
     forAll { (origin: PublicKey, x: PublicKey, y: PublicKey) =>
       val distance1 = metric(origin, x)
       val distance2 = metric(origin, y)
-      assert((distance1 < distance2) == (distance1.value < distance2.value))
+      if (distance1.value < distance2.value) {
+        assert(distance1 < distance2)
+      } else {
+        assert(!(distance1 < distance2))
+      }
     }
   }
 

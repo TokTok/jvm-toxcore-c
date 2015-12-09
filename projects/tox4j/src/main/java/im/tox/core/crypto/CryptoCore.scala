@@ -131,8 +131,8 @@ object CryptoCore {
     val secretKey = Array.ofDim[Byte](SecretKey.Size)
     ToxCryptoJni.cryptoBoxKeypair(publicKey, secretKey)
     KeyPair(
-      new PublicKey(publicKey.take(PublicKey.Size)),
-      new SecretKey(secretKey.take(SecretKey.Size))
+      new PublicKey(publicKey),
+      new SecretKey(secretKey)
     )
   }
 

@@ -22,20 +22,19 @@ import scalax.collection.io.dot._
 object DhtTest {
 
   val AllowPartitions = true
-  val MaxKeyLength = 1
   val MaxClosestNodes = 2
   val ExtraNodeCount = 4
 
-  def genDht(maxKeyLength: Int = PublicKey.Size, maxClosestNodes: Int = Dht.Settings().maxClosestNodes): Gen[Dht] = {
+  def genDht(maxClosestNodes: Int = Dht.Settings().maxClosestNodes): Gen[Dht] = {
     Arbitrary.arbitrary[KeyPair].map { keyPair =>
       val settings = Dht.Settings(
         maxClosestNodes = maxClosestNodes
       )
-      Dht(settings, KeyPairTest.take(keyPair, maxKeyLength))
+      Dht(settings, keyPair)
     }
   }
 
-  implicit val arbDht: Arbitrary[Dht] = Arbitrary(genDht(MaxKeyLength, MaxClosestNodes))
+  implicit val arbDht: Arbitrary[Dht] = Arbitrary(genDht(MaxClosestNodes))
 
 }
 

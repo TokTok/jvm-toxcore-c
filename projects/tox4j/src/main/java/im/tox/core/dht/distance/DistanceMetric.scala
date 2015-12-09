@@ -31,7 +31,7 @@ abstract class DistanceMetric[This <: DistanceMetric[This]] {
     rhs match {
       case rhs: DistanceMetric[_] =>
         assert(getClass == rhs.getClass)
-        value == rhs.value
+        (this eq rhs) || value == rhs.value
       case _ =>
         false
     }
