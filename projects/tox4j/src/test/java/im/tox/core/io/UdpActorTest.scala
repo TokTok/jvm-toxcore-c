@@ -20,6 +20,11 @@ final class UdpActorTest extends FunSuite {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
+  // TODO(iphydf): https://github.com/scalaz/scalaz-stream/issues/488
+  def delayed(process: Process[Task, Unit]): Process[Task, Unit] = {
+    Process.eval(Task { Thread.sleep(100) }).flatMap(_ => process)
+  }
+
   val keyPair = CryptoCore.keyPair()
 
   def sendPingAction(pingId: Int): IO.Action.SendTo = {
@@ -41,7 +46,7 @@ final class UdpActorTest extends FunSuite {
   def runTest(actionSink: Sink[Task, IO.Action], actionSource: Process[Task, IO.Action]): Unit = {
     val eventQueue = async.boundedQueue[IO.Event](10)
 
-    val actionActor = Process.range(0, packetCount).map(sendPingAction).toSource.to(actionSink)
+    val actionActor = delayed(Process.range(0, packetCount).map(sendPingAction).toSource.to(actionSink))
 
     val udpActor = UdpActor.make(actionSource, eventQueue.enqueue)
 
@@ -89,12 +94,11 @@ final class UdpActorTest extends FunSuite {
     assert(received.toSeq == numbers)
   }
 
-  // TODO(iphydf): https://github.com/scalaz/scalaz-stream/issues/488
-  ignore("process ints with pubsub in udp.Connection context") {
+  test("process ints with pubsub in udp.Connection context") {
     val actionQueue = async.topic[Int]()
 
     val numbers = Seq(1, 2, 3)
-    val publisher = Process.emitAll(numbers).toSource.to(actionQueue.publish)
+    val publisher = delayed(Process.emitAll(numbers).toSource.to(actionQueue.publish))
 
     val received = new ArrayBuffer[Int]
     val subscriber = udp.listen(12345) {
@@ -120,8 +124,7 @@ final class UdpActorTest extends FunSuite {
     runTest(actionQueue.enqueue, actionQueue.dequeue)
   }
 
-  // TODO(iphydf): https://github.com/scalaz/scalaz-stream/issues/488
-  ignore("process actions with pubsub") {
+  test("process actions with pubsub") {
     val actionQueue = async.topic[IO.Action]()
 
     runTest(actionQueue.publish, actionQueue.subscribe)

@@ -78,7 +78,7 @@ final class NetworkCoreTest extends FunSuite {
     }
   }
 
-  test("bootstrapping and communicating with the DHT") {
+  ignore("bootstrapping and communicating with the DHT") {
     System.out.println(Try(start()))
   }
 
