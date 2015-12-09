@@ -2,12 +2,8 @@ package im.tox.core.dht
 
 import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto._
-import im.tox.core.settings.Settings
-import im.tox.tox4j.EnumerationMacros
-import im.tox.tox4j.EnumerationMacros.sealedInstancesOf
 import org.slf4j.LoggerFactory
 
-import scala.collection.immutable.TreeSet
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -16,7 +12,7 @@ import scala.language.postfixOps
  * peer is very close to the DHT public key of a friend being searched.
  */
 final case class Dht private (
-    settings: Settings,
+    settings: Dht.Settings,
     keyPair: KeyPair,
     searchLists: Map[PublicKey, NodeSet]
 ) {
@@ -61,7 +57,7 @@ final case class Dht private (
       this
     } else {
       copy(
-        searchLists = searchLists.updated(publicKey, NodeSet(settings(Dht.MaxFriendNodes), publicKey))
+        searchLists = searchLists.updated(publicKey, NodeSet(settings.maxFriendNodes, publicKey))
       )
     }
   }
@@ -144,9 +140,8 @@ case object Dht {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  sealed abstract class SettingKey[A](default: A) extends Settings.Key(this, default)
-
   /**
+   * @param maxClosestNodes
    * Toxcore stores the 32 nodes closest to its DHT public key and 8 nodes closest
    * to each of the public keys in its DHT friends list (or list of DHT public
    * keys that it actively tries to find and connect to).
@@ -163,34 +158,26 @@ case object Dht {
    * restrictive NATs, using 8 nodes would not be enough because the chances of
    * some of these nodes being impossible to find in the network would be too
    * high.
-   */
-  case object MaxClosestNodes extends SettingKey(32) // scalastyle:ignore magic.number
-
-  /**
+   *
+   * @param maxFriendNodes
    * If the 8 nodes closest to each public key were increased to 16 it would
    * increase the bandwidth usage, might increase hole punching efficiency on
    * symmetric NATs (more ports to guess from, see Hole punching) and might
    * increase the reliability. Lowering this number would have the opposite
    * effect.
-   */
-  case object MaxFriendNodes extends SettingKey(8) // scalastyle:ignore magic.number
-
-  /**
+   *
+   * @param nodesRequestInterval
    * It also sends get node requests to a random node
    * (random makes it unpredictable, predictability or knowing which node a node
    * will ping next could make some attacks that disrupt the network more easy as
    * it adds a possible attack vector) in each of these lists of nodes every 20
    * seconds, with the search public key being its public key for the closest node
    * and the public key being searched for being the ones in the DHT friends list.
-   */
-  case object NodesRequestInterval extends SettingKey(20 seconds)
-
-  /**
+   *
+   * @param pingInterval
    * The DHT pings them every 60 seconds to see if they are alive.
-   */
-  case object PingInterval extends SettingKey(60 seconds)
-
-  /**
+   *
+   * @param pingTimeout
    * Nodes are removed after 122 seconds of no response.
    *
    * If the ping timeouts and delays between pings were higher it would decrease
@@ -198,7 +185,13 @@ case object Dht {
    * are still being stored in the lists. Decreasing these delays would do the
    * opposite.
    */
-  case object PingTimeout extends SettingKey(122 seconds)
+  final case class Settings(
+    maxClosestNodes: Int = 32, // scalastyle:ignore magic.number
+    maxFriendNodes: Int = 8, // scalastyle:ignore magic.number
+    nodesRequestInterval: FiniteDuration = 20 seconds,
+    pingInterval: FiniteDuration = 60 seconds,
+    pingTimeout: FiniteDuration = 122 seconds
+  )
 
   /**
    * Every peer in the Tox DHT has an address which is a public key called the
@@ -212,7 +205,7 @@ case object Dht {
     Dht(
       settings,
       keyPair,
-      Map(keyPair.publicKey -> NodeSet(settings(MaxClosestNodes), keyPair.publicKey))
+      Map(keyPair.publicKey -> NodeSet(settings.maxClosestNodes, keyPair.publicKey))
     )
   }
 

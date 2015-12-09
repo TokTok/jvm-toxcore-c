@@ -10,7 +10,6 @@ import im.tox.core.crypto.KeyPairTest._
 import im.tox.core.crypto._
 import im.tox.core.dht.DhtTest._
 import im.tox.core.dht.distance.XorDistance
-import im.tox.core.settings.Settings
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -27,10 +26,10 @@ object DhtTest {
   val MaxClosestNodes = 2
   val ExtraNodeCount = 4
 
-  def genDht(maxKeyLength: Int = PublicKey.Size, maxClosestNodes: Int = Dht.MaxClosestNodes.default): Gen[Dht] = {
+  def genDht(maxKeyLength: Int = PublicKey.Size, maxClosestNodes: Int = Dht.Settings().maxClosestNodes): Gen[Dht] = {
     Arbitrary.arbitrary[KeyPair].map { keyPair =>
-      val settings = Settings(
-        Dht.MaxClosestNodes := maxClosestNodes
+      val settings = Dht.Settings(
+        maxClosestNodes = maxClosestNodes
       )
       Dht(settings, KeyPairTest.take(keyPair, maxKeyLength))
     }

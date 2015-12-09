@@ -9,7 +9,6 @@ import im.tox.core.dht.packets.{DhtEncryptedPacket, DhtUnencryptedPacket}
 import im.tox.core.error.CoreError
 import im.tox.core.network.PacketKind.PingRequest
 import im.tox.core.network.packets.ToxPacket
-import im.tox.core.settings.Settings
 import im.tox.tox4j.core.ToxCoreConstants
 import org.scalatest.FunSuite
 
@@ -62,10 +61,10 @@ final class NetworkCoreTest extends FunSuite {
     for {
       receiverPublicKey <- PublicKey.fromHexString(node._2)
       result <- {
-        val dht = Dht(Settings(
-          Dht.NodesRequestInterval := (5 seconds),
-          Dht.PingInterval := (5 seconds),
-          Dht.PingTimeout := (12 seconds)
+        val dht = Dht(Dht.Settings(
+          nodesRequestInterval = 5 seconds,
+          pingInterval = 5 seconds,
+          pingTimeout = 12 seconds
         ))
 
         for {
