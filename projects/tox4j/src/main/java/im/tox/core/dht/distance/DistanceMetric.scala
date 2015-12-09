@@ -2,16 +2,17 @@ package im.tox.core.dht.distance
 
 import im.tox.core.crypto.PublicKey
 
-// scalastyle:off method.name
 abstract class DistanceMetric[This <: DistanceMetric[This]] {
 
   protected[distance] def value: BigInt
 
+  // scalastyle:off method.name
   def <(rhs: This): Boolean = value < rhs.value
 
   final def <=(rhs: BigInt): Boolean = value <= rhs
 
   final def +(rhs: This): BigInt = value + rhs.value
+  // scalastyle:on method.name
 
   final def toHexString: String = {
     value.toByteArray.map(c => f"$c%02X").mkString

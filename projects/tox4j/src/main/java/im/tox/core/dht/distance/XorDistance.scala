@@ -14,12 +14,11 @@ import scala.annotation.tailrec
  * one with public key 5 for example because: 1 XOR 0 = 1 and 1 XOR 5 = 4. Since
  * 1 is smaller it means 1 is closer to 0 than to 5.
  */
-// scalastyle:off method.name
 final case class XorDistance(x: PublicKey, y: PublicKey) extends DistanceMetric[XorDistance] {
 
   protected[distance] override def value: BigInt = signedXor(toBigInt(x.value), toBigInt(y.value))
 
-  override def <(rhs: XorDistance): Boolean = {
+  override def <(rhs: XorDistance): Boolean = { // scalastyle:ignore method.name
     val (origin, target1, target2) =
       if (rhs.x == x) {
         (x.value, y.value, rhs.y.value)
