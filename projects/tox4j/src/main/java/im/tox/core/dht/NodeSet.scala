@@ -1,6 +1,7 @@
 package im.tox.core.dht
 
 import im.tox.core.crypto.PublicKey
+import im.tox.core.dht.distance.XorDistance
 
 import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap

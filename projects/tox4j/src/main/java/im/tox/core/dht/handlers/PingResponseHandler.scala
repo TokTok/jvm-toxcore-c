@@ -30,9 +30,9 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
     } yield {
       for {
         /**
-         * Install ping timer: after [[Dht.Settings.pingInterval]] seconds, ping again.
+         * Install ping timer: after [[Dht.Options.pingInterval]] seconds, ping again.
          */
-        _ <- IO.timedAction(pingTimer(sender.publicKey.readable), dht.settings.pingInterval) { (_, dht) =>
+        _ <- IO.timedAction(pingTimer(sender.publicKey.readable), dht.options.pingInterval) { (_, dht) =>
           for {
             _ <- IO.sendTo(sender, pingRequest)
           } yield {
@@ -41,10 +41,10 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
         }
 
         /**
-         * Install ping timeout timer: after [[Dht.Settings.pingTimeout]] seconds, remove the node from
+         * Install ping timeout timer: after [[Dht.Options.pingTimeout]] seconds, remove the node from
          * the DHT node lists and cancel the ping timer.
          */
-        _ <- IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), dht.settings.pingTimeout, Some(1)) { (_, dht) =>
+        _ <- IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), dht.options.pingTimeout, Some(1)) { (_, dht) =>
           for {
             _ <- IO.cancelTimer(pingTimer(sender.publicKey.readable))
           } yield {

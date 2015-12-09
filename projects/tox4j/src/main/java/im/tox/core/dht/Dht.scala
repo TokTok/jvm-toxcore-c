@@ -12,7 +12,7 @@ import scala.language.postfixOps
  * peer is very close to the DHT public key of a friend being searched.
  */
 final case class Dht private (
-    settings: Dht.Settings,
+    options: Dht.Options,
     keyPair: KeyPair,
     searchLists: Map[PublicKey, NodeSet]
 ) {
@@ -41,6 +41,22 @@ final case class Dht private (
   assert(searchLists.contains(keyPair.publicKey))
 
   /**
+   * Class invariant: All search lists that are not searching for our own
+   * [[PublicKey]] have capacity [[options.maxFriendNodes]]. The one searching for
+   * our own key has capacity [[options.maxClosestNodes]].
+   */
+  assert {
+    searchLists.forall {
+      case (key, nodeSet) =>
+        if (key == keyPair.publicKey) {
+          nodeSet.capacity == options.maxClosestNodes
+        } else {
+          nodeSet.capacity == options.maxFriendNodes
+        }
+    }
+  }
+
+  /**
    * The total number of known nodes in all the node search lists.
    */
   def size: Int = {
@@ -57,7 +73,7 @@ final case class Dht private (
       this
     } else {
       copy(
-        searchLists = searchLists.updated(publicKey, NodeSet(settings.maxFriendNodes, publicKey))
+        searchLists = searchLists.updated(publicKey, NodeSet(options.maxFriendNodes, publicKey))
       )
     }
   }
@@ -185,7 +201,7 @@ case object Dht {
    * are still being stored in the lists. Decreasing these delays would do the
    * opposite.
    */
-  final case class Settings(
+  final case class Options(
     maxClosestNodes: Int = 32, // scalastyle:ignore magic.number
     maxFriendNodes: Int = 8, // scalastyle:ignore magic.number
     nodesRequestInterval: FiniteDuration = 20 seconds,
@@ -199,13 +215,13 @@ case object Dht {
    * the tox instance is closed/restarted.
    */
   def apply(
-    settings: Settings = Settings(),
+    options: Options = Options(),
     keyPair: KeyPair = CryptoCore.keyPair()
   ): Dht = {
     Dht(
-      settings,
+      options,
       keyPair,
-      Map(keyPair.publicKey -> NodeSet(settings.maxClosestNodes, keyPair.publicKey))
+      Map(keyPair.publicKey -> NodeSet(options.maxClosestNodes, keyPair.publicKey))
     )
   }
 

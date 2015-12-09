@@ -44,8 +44,8 @@ object NodeInfo extends ModuleCompanion[NodeInfo, Security.Sensitive] {
      * [ip (in network byte order), length=4 bytes if ipv4, 16 bytes if ipv6]
      */
     val inetAddress = AddressFamily.codec.consume(_.codec) {
-      case address: Inet4Address => AddressFamily.Inet4
-      case address: Inet6Address => AddressFamily.Inet6
+      case _: Inet4Address => AddressFamily.Inet4
+      case _: Inet6Address => AddressFamily.Inet6
     }
 
     /**
@@ -67,6 +67,7 @@ object NodeInfo extends ModuleCompanion[NodeInfo, Security.Sensitive] {
 
   /**
    * Create an ordering for [[NodeInfo]] where smaller means closer to the given public key.
+   *
    * @param publicKey The key to compute the distance from.
    */
   def distanceOrdering(publicKey: PublicKey): Ordering[PublicKey] = {

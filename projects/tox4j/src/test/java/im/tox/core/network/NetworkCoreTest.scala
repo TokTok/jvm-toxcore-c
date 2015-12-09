@@ -61,7 +61,7 @@ final class NetworkCoreTest extends FunSuite {
     for {
       receiverPublicKey <- PublicKey.fromHexString(node._2)
       result <- {
-        val dht = Dht(Dht.Settings(
+        val dht = Dht(Dht.Options(
           nodesRequestInterval = 5 seconds,
           pingInterval = 5 seconds,
           pingTimeout = 12 seconds

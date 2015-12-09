@@ -25,12 +25,12 @@ object DhtTest {
   val MaxClosestNodes = 2
   val ExtraNodeCount = 4
 
-  def genDht(maxClosestNodes: Int = Dht.Settings().maxClosestNodes): Gen[Dht] = {
+  def genDht(maxClosestNodes: Int = Dht.Options().maxClosestNodes): Gen[Dht] = {
     Arbitrary.arbitrary[KeyPair].map { keyPair =>
-      val settings = Dht.Settings(
+      val options = Dht.Options(
         maxClosestNodes = maxClosestNodes
       )
-      Dht(settings, keyPair)
+      Dht(options, keyPair)
     }
   }
 
