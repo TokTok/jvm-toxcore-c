@@ -1,6 +1,6 @@
 package im.tox.core.dht
 
-import im.tox.core.ModuleCompanionTest
+import im.tox.core.typesafe.EnumModuleCompanionTest
 import org.scalacheck.{Arbitrary, Gen}
 
 object AddressFamilyTest {
@@ -11,12 +11,14 @@ object AddressFamilyTest {
 
 }
 
-final class AddressFamilyTest extends ModuleCompanionTest(AddressFamily) {
+final class AddressFamilyTest extends EnumModuleCompanionTest(AddressFamily) {
 
   override implicit def arbT: Arbitrary[AddressFamily] = AddressFamilyTest.arbAddressFamily
 
-  test("other") {
+  test("serialisation of some manually specified values") {
+    // Because I don't trust sealedInstancesOf.
     testSerialisation(AddressFamily.Inet4)
+    testSerialisation(AddressFamily.Inet6)
   }
 
 }

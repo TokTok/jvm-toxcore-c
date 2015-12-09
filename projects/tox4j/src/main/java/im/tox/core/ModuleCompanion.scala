@@ -14,6 +14,7 @@ abstract class ModuleCompanion[T, +S <: Security] {
 
   protected final val logger = Logger(LoggerFactory.getLogger(getClass))
 
+  def nullable: Boolean = false
   def codec: Codec[T]
 
   final def equals(a: T, b: T): Boolean = {

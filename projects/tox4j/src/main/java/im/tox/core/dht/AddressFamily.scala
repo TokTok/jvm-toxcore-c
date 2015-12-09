@@ -3,7 +3,7 @@ package im.tox.core.dht
 import java.net.InetAddress
 
 import im.tox.core.ModuleCompanion
-import im.tox.core.typesafe.Security
+import im.tox.core.typesafe.{EnumModuleCompanion, Security}
 import im.tox.tox4j.EnumerationMacros.sealedInstancesOf
 import scodec.bits.ByteVector
 import scodec.codecs._
@@ -25,7 +25,7 @@ sealed abstract class AddressFamily(addressLength: Int) {
 
 }
 
-case object AddressFamily extends ModuleCompanion[AddressFamily, Security.Sensitive] {
+case object AddressFamily extends EnumModuleCompanion[AddressFamily, Security.Sensitive](uint4) {
 
   /**
    * The reason for these numbers is because the numbers on my Linux machine
@@ -40,22 +40,13 @@ case object AddressFamily extends ModuleCompanion[AddressFamily, Security.Sensit
   case object Inet4 extends AddressFamily(Inet4AddressLength)
   case object Inet6 extends AddressFamily(Inet6AddressLength)
 
-  implicit val ordAddressFamily: Ordering[AddressFamily] = Ordering.by {
-    case Inet4 => Inet4Value
-    case Inet6 => Inet6Value
+  override def ordinal(addressFamily: AddressFamily): Int = {
+    addressFamily match {
+      case Inet4 => Inet4Value
+      case Inet6 => Inet6Value
+    }
   }
 
-  lazy val values: TreeSet[AddressFamily] = sealedInstancesOf[AddressFamily]
-
-  val codec = uint4.exmap[AddressFamily](
-    {
-      case Inet4Value => Attempt.successful(Inet4)
-      case Inet6Value => Attempt.successful(Inet6)
-      case invalid    => Attempt.failure(new Err.General("Invalid address family: " + invalid))
-    }, {
-      case Inet4 => Attempt.successful(Inet4Value)
-      case Inet6 => Attempt.successful(Inet6Value)
-    }
-  )
+  override val values: TreeSet[AddressFamily] = sealedInstancesOf[AddressFamily]
 
 }

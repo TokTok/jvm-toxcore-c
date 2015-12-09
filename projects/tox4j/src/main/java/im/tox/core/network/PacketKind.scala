@@ -1,7 +1,7 @@
 package im.tox.core.network
 
 import im.tox.core.ModuleCompanion
-import im.tox.core.typesafe.Security
+import im.tox.core.typesafe.{EnumModuleCompanion, Security}
 import im.tox.tox4j.EnumerationMacros.sealedInstancesOf
 import scodec.codecs._
 import scodec.{Attempt, Err}
@@ -16,7 +16,7 @@ sealed abstract class PacketKind(val id: Int)
  * sorted to the right module that can handle it.
  */
 // scalastyle:off magic.number
-case object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive] {
+case object PacketKind extends EnumModuleCompanion[PacketKind, Security.NonSensitive](uint8) {
 
   /**
    * Ping(Request and response):
@@ -66,13 +66,8 @@ case object PacketKind extends ModuleCompanion[PacketKind, Security.NonSensitive
   case object OnionReceive2 extends PacketKind(141)
   case object OnionReceive1 extends PacketKind(142)
 
-  implicit val ordPacketKind: Ordering[PacketKind] = Ordering.by(_.id)
+  override def ordinal(packetKind: PacketKind): Int = packetKind.id
 
-  val values: TreeSet[PacketKind] = sealedInstancesOf[PacketKind]
-
-  override val codec = uint8.exmap[PacketKind](
-    { id => Attempt.fromOption(values.find(_.id == id), new Err.General("Invalid packed id: " + id)) },
-    { self => Attempt.successful(self.id) }
-  )
+  override val values: TreeSet[PacketKind] = sealedInstancesOf[PacketKind]
 
 }

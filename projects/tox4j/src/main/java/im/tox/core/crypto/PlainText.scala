@@ -16,10 +16,11 @@ final case class PlainText[+S <: Security](private val value: ByteVector) extend
 case object PlainText extends ModuleCompanion[PlainText[Security.NonSensitive], Security.NonSensitive] {
 
   override val codec = bytes.xmap[PlainText[Security.NonSensitive]](PlainText.apply, _.value)
+  override def nullable: Boolean = true
 
   object Conversions {
 
-    final case class NonSensitiveConversions(private val value: ByteVector) extends AnyVal {
+    final class NonSensitiveConversions private[Conversions] (private val value: ByteVector) extends AnyVal {
       def toByteVector: ByteVector = value
       def toBitVector: BitVector = toByteVector.toBitVector
       def toByteArray: Array[Byte] = toByteVector.toArray
@@ -28,15 +29,15 @@ case object PlainText extends ModuleCompanion[PlainText[Security.NonSensitive], 
     }
 
     implicit def plainTextNonSensitiveConversions(plainText: PlainText[Security.NonSensitive]): NonSensitiveConversions = {
-      NonSensitiveConversions(plainText.value)
+      new NonSensitiveConversions(plainText.value)
     }
 
-    final case class SensitiveConversions(private val value: ByteVector) extends AnyVal {
+    final class SensitiveConversions private[Conversions] (private val value: ByteVector) extends AnyVal {
       def size: Int = value.size
     }
 
     implicit def plainTextSensitiveConversions(plainText: PlainText[Security.Sensitive]): SensitiveConversions = {
-      SensitiveConversions(plainText.value)
+      new SensitiveConversions(plainText.value)
     }
 
   }
