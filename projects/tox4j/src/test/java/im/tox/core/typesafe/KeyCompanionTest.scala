@@ -8,7 +8,7 @@ abstract class KeyCompanionTest[T <: AnyVal, S <: Security](
     companion: KeyCompanion[T, S]
 )(implicit final val arbT: Arbitrary[T]) extends ModuleCompanionTest[T, S](companion) {
 
-  test("testFromString") {
+  test("testFromHexString") {
     forAll(Gen.containerOfN[Array, Char](
       companion.Size * 2,
       Gen.oneOf(

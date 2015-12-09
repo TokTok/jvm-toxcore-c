@@ -40,7 +40,6 @@ abstract class ModuleCompanionTest[T, S <: Security](module: ModuleCompanion[T, 
     } else {
       module.fromBits(BitVector.empty) match {
         case -\/(CoreError.CodecError(Err.InsufficientBits(needed, have, context))) =>
-          assert(needed == module.codec.sizeBound.lowerBound)
           assert(have == 0)
         case unexpected =>
           fail(s"Expected ${Err.InsufficientBits} but got $unexpected")

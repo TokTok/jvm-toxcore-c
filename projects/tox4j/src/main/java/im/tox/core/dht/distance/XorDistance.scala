@@ -31,22 +31,17 @@ final case class XorDistance(x: PublicKey, y: PublicKey) extends DistanceMetric[
     assert(origin.length == target1.length)
     assert(origin.length == target2.length)
 
-    if (origin.isEmpty) {
-      // Empty keys are all equal.
+    // Signed xor for the first byte.
+    val distance1 = Math.abs(origin.head ^ target1.head)
+    val distance2 = Math.abs(origin.head ^ target2.head)
+
+    if (distance1 < distance2) {
+      true
+    } else if (distance1 > distance2) {
       false
     } else {
-      // Signed xor for the first byte.
-      val distance1 = Math.abs(origin.head ^ target1.head)
-      val distance2 = Math.abs(origin.head ^ target2.head)
-
-      if (distance1 < distance2) {
-        true
-      } else if (distance1 > distance2) {
-        false
-      } else {
-        // Unsigned xor for the remaining bytes.
-        lessThan(1, origin, target1, target2)
-      }
+      // Unsigned xor for the remaining bytes.
+      lessThan(1, origin, target1, target2)
     }
   }
 
