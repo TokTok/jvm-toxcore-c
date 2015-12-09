@@ -30,24 +30,16 @@ final case class XorDistance(x: PublicKey, y: PublicKey) extends DistanceMetric[
     assert(origin.length == target1.length)
     assert(origin.length == target2.length)
 
-    // Signed xor for the first byte.
-    val distance1 = Math.abs(origin.head ^ target1.head)
-    val distance2 = Math.abs(origin.head ^ target2.head)
-
-    if (distance1 < distance2) {
-      true
-    } else if (distance1 > distance2) {
-      false
-    } else {
-      // Unsigned xor for the remaining bytes.
-      lessThan(1, origin, target1, target2)
-    }
+    lessThan(origin, target1, target2)
   }
 
 }
 
 object XorDistance extends DistanceMetricCompanion[XorDistance] {
 
+  /**
+   * The maximum value of a 256 bit signed int. This value is 0x7fff...ff.
+   */
   private val Int256Max = BigInt(Byte.MaxValue +: Array.fill[Byte](PublicKey.Size - 1)(-1))
 
   private def toBigInt(bytes: Seq[Byte]): BigInt = {
@@ -56,7 +48,7 @@ object XorDistance extends DistanceMetricCompanion[XorDistance] {
   }
 
   /**
-   * Interpret a [[BigInt]] as signed integer modulo the given number of bytes.
+   * Interpret a [[BigInt]] as signed integer modulo 256 bits.
    */
   private def signed(x: BigInt): BigInt = {
     if (x > Int256Max) {
@@ -72,26 +64,64 @@ object XorDistance extends DistanceMetricCompanion[XorDistance] {
     signed(x ^ y).abs
   }
 
-  private def unsigned(byte: Byte): Int = {
+  private def uint8(byte: Int): Int = {
     byte & 0xff
   }
 
   @tailrec
-  private def lessThan(index: Int, origin: Seq[Byte], target1: Seq[Byte], target2: Seq[Byte]): Boolean = {
-    if (index == origin.length) {
+  private def lessThan(
+    i: Int,
+    signed1: Boolean,
+    signed2: Boolean,
+    origin: IndexedSeq[Byte],
+    target1: IndexedSeq[Byte],
+    target2: IndexedSeq[Byte]
+  ): Boolean = {
+    if (i == origin.length) {
       false
     } else {
-      val distance1 = unsigned(origin(index)) ^ unsigned(target1(index))
-      val distance2 = unsigned(origin(index)) ^ unsigned(target2(index))
+      var distance1 = uint8(origin(i) ^ target1(i)) // scalastyle:ignore var.local
+      var distance2 = uint8(origin(i) ^ target2(i)) // scalastyle:ignore var.local
+
+      if (signed1) {
+        distance1 = uint8(~distance1)
+        if (i == origin.length - 1) {
+          distance1 += 1
+        }
+      }
+
+      if (signed2) {
+        distance2 = uint8(~distance2)
+        if (i == origin.length - 1) {
+          distance2 += 1
+        }
+      }
 
       if (distance1 < distance2) {
         true
       } else if (distance1 > distance2) {
         false
       } else {
-        lessThan(index + 1, origin, target1, target2)
+        lessThan(i + 1, signed1, signed2, origin, target1, target2)
       }
     }
+  }
+
+  private def isXorNegative(origin: IndexedSeq[Byte], target: IndexedSeq[Byte]): Boolean = {
+    // TODO(iphydf): Find out why this doesn't work.
+    // (origin.head < 0) != (target.head < 0)
+    (origin.head < 0) ^ (target.head < 0)
+  }
+
+  private def lessThan(
+    origin: IndexedSeq[Byte],
+    target1: IndexedSeq[Byte],
+    target2: IndexedSeq[Byte]
+  ): Boolean = {
+    val signed1 = isXorNegative(origin, target1)
+    val signed2 = isXorNegative(origin, target2)
+
+    lessThan(0, signed1, signed2, origin, target1, target2)
   }
 
 }

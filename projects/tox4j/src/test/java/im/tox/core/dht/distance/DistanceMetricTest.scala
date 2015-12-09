@@ -3,28 +3,58 @@ package im.tox.core.dht.distance
 import im.tox.core.crypto.PublicKey
 import im.tox.core.crypto.PublicKeyTest._
 import im.tox.tox4j.testing.GetDisjunction._
-import org.scalacheck.Arbitrary
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
 import scodec.bits.ByteVector
 
+import scala.annotation.tailrec
+
 abstract class DistanceMetricTest[Metric <: DistanceMetric[Metric]](
-    metric: DistanceMetricCompanion[Metric]
+    final val metric: DistanceMetricCompanion[Metric]
 ) extends FunSuite with PropertyChecks {
 
+  val ZeroKey = PublicKey.fromBytes(ByteVector.fill(PublicKey.Size)(0)).get
+
   val Zero = {
-    val zeroKey = PublicKey.fromBytes(ByteVector.fill(PublicKey.Size)(0)).get
-    metric(zeroKey, zeroKey)
+    metric(ZeroKey, ZeroKey)
   }
 
-  test("no network split at 0x7f/0x80") {
-    val x = PublicKey.fromHexString("8000000000000000000000000000000000000000000000000000000000000000").get
-    val y = PublicKey.fromHexString("7f00000000000000000000000000000000000000000000000000000000000000").get
-    val z = PublicKey.fromHexString("0000000000000000000000000000000000000000000000000000000000000000").get
+  @tailrec
+  final def fillSuffix(prefix: String, suffix: String): String = {
+    if (prefix.length >= PublicKey.Size * 2) {
+      prefix
+    } else {
+      fillSuffix(prefix + suffix, suffix)
+    }
+  }
 
-    val xz = metric(z, x)
-    val yz = metric(z, y)
-    assert((xz < yz) == (xz.value < yz.value))
+  @tailrec
+  final def fillPrefix(prefix: String, suffix: String): String = {
+    if (suffix.length >= PublicKey.Size * 2) {
+      suffix
+    } else {
+      fillPrefix(prefix, prefix + suffix)
+    }
+  }
+
+  test("signed distances full range last byte") {
+    val prefixes = Seq(
+      "FF",
+      "00"
+    )
+    for {
+      oPrefix <- prefixes
+      yPrefix <- prefixes
+      oLastByte <- 0 to 0xff
+    } {
+      val o = PublicKey.fromHexString(fillPrefix(oPrefix, f"$oLastByte%02X")).get
+      val x = ZeroKey
+      val y = PublicKey.fromHexString(fillPrefix(yPrefix, "00")).get
+
+      val ox = metric(o, x)
+      val oy = metric(o, y)
+      assert((ox < oy) == (ox.value < oy.value))
+    }
   }
 
   test("less-than optimisation correctness") {
@@ -69,10 +99,10 @@ abstract class DistanceMetricTest[Metric <: DistanceMetric[Metric]](
     }
   }
 
-  test("triange inequality for negative numbers") {
-    val x = PublicKey.fromHexString("0000000000000000000000000000000000000000000000000000000000000181").get
-    val y = PublicKey.fromHexString("0000000000000000000000000000000000000000000000000000000000000100").get
-    val z = PublicKey.fromHexString("0000000000000000000000000000000000000000000000000000000000000000").get
+  test("triange inequality corner case") {
+    val x = PublicKey.fromHexString(fillPrefix("00", "0181")).get
+    val y = PublicKey.fromHexString(fillPrefix("00", "0100")).get
+    val z = ZeroKey
 
     assert(metric(x, z) <= metric(x, y) + metric(y, z))
   }

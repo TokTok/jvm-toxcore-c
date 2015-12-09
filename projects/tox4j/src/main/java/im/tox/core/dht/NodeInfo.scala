@@ -70,11 +70,7 @@ object NodeInfo extends ModuleCompanion[NodeInfo, Security.Sensitive] {
    * @param publicKey The key to compute the distance from.
    */
   def distanceOrdering(publicKey: PublicKey): Ordering[PublicKey] = {
-    Ordering.fromLessThan[PublicKey] { (a, b) =>
-      val aDist = XorDistance(publicKey, a)
-      val bDist = XorDistance(publicKey, b)
-      aDist < bDist
-    }
+    Ordering.by(XorDistance(publicKey, _))
   }
 
 }

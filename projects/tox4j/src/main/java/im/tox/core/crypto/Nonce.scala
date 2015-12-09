@@ -4,7 +4,7 @@ import im.tox.core.random.RandomCore
 import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
-final case class Nonce private[crypto] (value: Seq[Byte]) extends AnyVal {
+final case class Nonce private[crypto] (value: IndexedSeq[Byte]) extends AnyVal {
   def readable: String = Nonce.toHexString(this)
   override def toString: String = {
     s"${getClass.getSimpleName}($readable)"

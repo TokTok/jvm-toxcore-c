@@ -3,7 +3,7 @@ package im.tox.core.crypto
 import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
-final case class SecretKey private[crypto] (value: Seq[Byte]) extends AnyVal {
+final case class SecretKey private[crypto] (value: IndexedSeq[Byte]) extends AnyVal {
   def readable: String = SecretKey.toHexString(this)
   override def toString: String = {
     s"${getClass.getSimpleName}($readable)"
