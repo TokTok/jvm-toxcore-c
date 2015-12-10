@@ -27,13 +27,11 @@ object NativeFinder extends (Set[File] => Map[String, Seq[String]]) {
             if (args.length > 2) {
               val className = args(2).asInstanceOf[String].replaceAll("/", ".")
               currentClassName = Some(className)
-              Configure.configLog.info("Looking at class: " + className)
             }
           case "visitMethod" =>
             val access = args(0).asInstanceOf[Int]
             val name = args(1).asInstanceOf[String]
             if ((access & Opcodes.ACC_NATIVE) != 0) {
-              Configure.configLog.info("Found a native method: " + name)
               currentClassName match {
                 case None =>
                   sys.error("Found method outside class")
