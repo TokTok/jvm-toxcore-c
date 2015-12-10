@@ -1,11 +1,18 @@
 package im.tox.core.dht
 
 import com.typesafe.scalalogging.Logger
+import im.tox.core.Functional
+import im.tox.core.Functional.foldDisjunctionList
 import im.tox.core.crypto._
+import im.tox.core.dht.packets.dht.NodesRequestPacket
+import im.tox.core.error.CoreError
+import im.tox.core.io.IO
+import im.tox.core.io.IO.TimerIdFactory
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.Random
 
 /**
  * Nodes can be in more than one list for example if the DHT public key of the
@@ -129,6 +136,15 @@ final case class Dht private (
     }
   }
 
+  def getRandomNodes: Map[PublicKey, NodeInfo] = {
+    for {
+      (publicKey, nodeSet) <- searchLists
+      node <- nodeSet.get(new Random().nextInt()) // TODO(iphydf): Move randomness out of pure code.
+    } yield {
+      (publicKey, node)
+    }
+  }
+
   /**
    * Get the set of nodes out of all the nodes this [[Dht]] knows that are
    * closest to the given [[PublicKey]]. The count parameter limits the number
@@ -142,6 +158,29 @@ final case class Dht private (
       case (nearNodes, nodeSet) =>
         nearNodes.addAll(nodeSet)
     }.values
+  }
+
+  override def toString: String = {
+    val s = new StringBuilder
+    s ++= "Dht:\n"
+    // Don't print the secret key.
+    s ++= s"  self = ${keyPair.publicKey}\n"
+    s ++= "  searchLists =\n"
+    for ((searchKey, nodeSet) <- searchLists) {
+      val isSelf =
+        if (searchKey == keyPair.publicKey) {
+          " (self)"
+        } else if (nodeSet.contains(searchKey)) {
+          " (online)"
+        } else {
+          ""
+        }
+      s ++= s"    - $searchKey [${nodeSet.size}/${nodeSet.capacity}]$isSelf\n"
+      for (node <- nodeSet.values) {
+        s ++= s"      - $node\n"
+      }
+    }
+    s.toString
   }
 
 }
@@ -182,13 +221,8 @@ case object Dht {
    * increase the reliability. Lowering this number would have the opposite
    * effect.
    *
-   * @param nodesRequestInterval
-   * It also sends get node requests to a random node
-   * (random makes it unpredictable, predictability or knowing which node a node
-   * will ping next could make some attacks that disrupt the network more easy as
-   * it adds a possible attack vector) in each of these lists of nodes every 20
-   * seconds, with the search public key being its public key for the closest node
-   * and the public key being searched for being the ones in the DHT friends list.
+   * @param nodesRequestInterval The amount of time between each [[NodesRequestPacket]]
+   *                             sent to a random node.
    *
    * @param pingInterval
    * The DHT pings them every 60 seconds to see if they are alive.
@@ -209,6 +243,47 @@ case object Dht {
     pingTimeout: FiniteDuration = 122 seconds
   )
 
+  val nodesRequestTimer = TimerIdFactory("NodesRequest")
+
+  /**
+   * It also sends get node requests to a random node
+   * (random makes it unpredictable, predictability or knowing which node a node
+   * will ping next could make some attacks that disrupt the network more easy as
+   * it adds a possible attack vector) in each of these lists of nodes every 20
+   * seconds, with the search public key being its public key for the closest node
+   * and the public key being searched for being the ones in the DHT friends list.
+   */
+  def startNodesRequestTimer(options: Options, keyPair: KeyPair): IO[Unit] = {
+    IO.timedAction(nodesRequestTimer(keyPair.publicKey.readable), options.nodesRequestInterval) { (_, dht) =>
+      for {
+        nodesRequestPackets <- {
+          val packets =
+            for ((searchKey, node) <- dht.getRandomNodes) yield {
+              for {
+                packet <- PacketBuilder.makeResponse(
+                  keyPair,
+                  node.publicKey,
+                  NodesRequestPacket,
+                  NodesRequestPacket(searchKey),
+                  0
+                )
+              } yield {
+                IO.sendTo(node, packet)
+              }
+            }
+          foldDisjunctionList(packets)
+        }
+      } yield {
+        for {
+          _ <- IO.flatten(nodesRequestPackets)
+        } yield {
+          dht
+        }
+      }
+
+    }
+  }
+
   /**
    * Every peer in the Tox DHT has an address which is a public key called the
    * temporary DHT public key. This address is temporary and is wiped every time
@@ -217,12 +292,16 @@ case object Dht {
   def apply(
     options: Options = Options(),
     keyPair: KeyPair = CryptoCore.keyPair()
-  ): Dht = {
-    Dht(
-      options,
-      keyPair,
-      Map(keyPair.publicKey -> NodeSet(options.maxClosestNodes, keyPair.publicKey))
-    )
+  ): IO[Dht] = {
+    for {
+      _ <- startNodesRequestTimer(options, keyPair)
+    } yield {
+      Dht(
+        options,
+        keyPair,
+        Map(keyPair.publicKey -> NodeSet(options.maxClosestNodes, keyPair.publicKey))
+      )
+    }
   }
 
 }

@@ -194,7 +194,7 @@ object CryptoCore {
       cipherText.data.toSeq,
       useKeyCache
     ) match {
-      case None            => -\/(CoreError.DecryptionError())
+      case None            => -\/(CoreError.DecryptionError)
       case Some(plainText) => module.fromBits(BitVector.view(plainText))
     }
   }

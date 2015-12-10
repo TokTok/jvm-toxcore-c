@@ -2,7 +2,7 @@ package im.tox.core.dht.handlers
 
 import im.tox.core.Functional.foldDisjunctionList
 import im.tox.core.dht.packets.dht.{NodesResponsePacket, PingRequestPacket}
-import im.tox.core.dht.{Dht, NodeInfo}
+import im.tox.core.dht.{PacketBuilder, Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 
@@ -21,16 +21,19 @@ case object NodesResponseHandler extends DhtUnencryptedPayloadHandler(NodesRespo
 
     // Create ping packets for each of them.
     val pingPackets =
-      potentialNodes.map { node =>
-        makeResponse(
-          dht.keyPair,
-          node.publicKey,
-          PingRequestPacket,
-          PingRequestPacket,
-          0
-        )
+      for (node <- potentialNodes if node.address.getAddress.getAddress.length == 4) yield {
+        for {
+          packet <- PacketBuilder.makeResponse(
+            dht.keyPair,
+            node.publicKey,
+            PingRequestPacket,
+            PingRequestPacket,
+            0
+          )
+        } yield {
           // Pair up the response with the node it should be sent to.
-          .map((node, _))
+          IO.sendTo(node, packet)
+        }
       }
 
     for {
@@ -38,9 +41,10 @@ case object NodesResponseHandler extends DhtUnencryptedPayloadHandler(NodesRespo
       pingPackets <- foldDisjunctionList(pingPackets)
     } yield {
       // Send all the ping packets.
-      pingPackets.foldLeft(IO(dht)) {
-        case (dht, (node, pingPacket)) =>
-          IO.sendTo(node, pingPacket).flatMap { case () => dht }
+      for {
+        _ <- IO.flatten(pingPackets)
+      } yield {
+        dht
       }
     }
   }

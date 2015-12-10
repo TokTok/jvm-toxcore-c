@@ -1,5 +1,6 @@
 package im.tox.core
 
+import scala.collection.GenTraversableOnce
 import scalaz.{-\/, \/, \/-}
 
 /**
@@ -14,14 +15,14 @@ object Functional {
    * This can be used to process a list of elements from an error disjunction
    * where any failed element should fail the entire list.
    */
-  def foldDisjunctionList[A, B](list: Seq[A \/ B]): A \/ Seq[B] = {
-    list.foldLeft(\/-(Nil): A \/ Seq[B]) {
+  def foldDisjunctionList[A, B](list: GenTraversableOnce[A \/ B]): A \/ List[B] = {
+    list.foldLeft(\/-(Nil): A \/ List[B]) {
       (list, element) =>
         for {
           list <- list
           element <- element
         } yield {
-          element +: list
+          element :: list
         }
     }
   }

@@ -2,17 +2,16 @@ package im.tox.core
 
 import im.tox.core.dht.{Dht, NodeInfo}
 import im.tox.core.error.CoreError
-import im.tox.core.io.IO.Event.TimedAction
 import im.tox.core.network.PacketKind
 import im.tox.core.network.packets.ToxPacket
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scalaz.{\/-, \/, State}
 import scalaz.stream.udp.Packet
+import scalaz._
 
 package object io {
 
-  private type S = Seq[IO.Action]
+  private type S = List[IO.Action]
   type IO[A] = State[S, A]
 
   object IO {
@@ -49,12 +48,18 @@ package object io {
     }
 
     /**
-     * Shortcut for [[startTimer]] with a [[TimedAction]].
+     * Shortcut for [[startTimer]] with an [[Event.TimedAction]].
      */
-    def timedAction(id: TimerId, delay: FiniteDuration, repeat: Option[Int] = None)(action: (Duration, Dht) => IO[Dht]): IO[Unit] = {
+    def timedAction(
+      id: TimerId,
+      delay: FiniteDuration,
+      repeat: Option[Int] = None
+    )(
+      action: (Duration, Dht) => CoreError \/ IO[Dht]
+    ): IO[Unit] = {
       startTimer(id, delay, repeat) { duration =>
-        Some(TimedAction { dht =>
-          \/-(action(duration, dht))
+        Some(Event.TimedAction { dht =>
+          action(duration, dht)
         })
       }
     }
@@ -63,8 +68,31 @@ package object io {
       addAction(Action.CancelTimer(id))
     }
 
-    private def addAction(action: Action): IO[Unit] = {
+    private def addAction(action: IO.Action): IO[Unit] = {
       State.modify(actions => action +: actions)
+    }
+
+    abstract class Mergeable[A] {
+      def empty: A
+      def merge(a1: A, a2: A): A
+    }
+    implicit val UnitMergeable: Mergeable[Unit] = new Mergeable[Unit] {
+      override def empty: Unit = ()
+      override def merge(a1: Unit, a2: Unit): Unit = ()
+    }
+
+    def flatten[A](ts: List[IO[A]])(implicit merger: Mergeable[A]): IO[A] = {
+      ts.fold(IO(merger.empty)) { (io1, io2) =>
+        for {
+          result1 <- io1
+          actions1 <- State.get
+          result2 <- io2
+          actions2 <- State.get
+          _ <- State.put(actions1 ++ actions2)
+        } yield {
+          merger.merge(result1, result2)
+        }
+      }
     }
 
   }

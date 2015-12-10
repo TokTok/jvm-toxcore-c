@@ -1,62 +1,78 @@
 package im.tox.core.dht.handlers
 
+import com.typesafe.scalalogging.Logger
 import im.tox.core.dht.packets.dht.{PingPacket, PingRequestPacket, PingResponsePacket}
-import im.tox.core.dht.{Dht, NodeInfo}
+import im.tox.core.dht.{Dht, NodeInfo, PacketBuilder}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.PacketKind
+import org.slf4j.LoggerFactory
 
-import scalaz.\/
+import scala.concurrent.duration.FiniteDuration
+import scalaz.{\/, \/-}
 
 case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingResponsePacket) {
 
-  private val pingTimer = IO.TimerIdFactory("Ping")
-  private val pingTimeoutTimer = IO.TimerIdFactory("PingTimeout")
+  private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   override def apply(
     dht: Dht,
     sender: NodeInfo,
     packet: PingPacket[PacketKind.PingResponse.type],
     pingId: Long
-  ): CoreError \/ IO[Dht] = {
+  ): CoreError \/ IO[Dht] = \/- {
     for {
-      pingRequest <- makeResponse(
-        dht.keyPair,
-        sender.publicKey,
-        PingRequestPacket,
-        PingRequestPacket,
-        0
-      )
+      _ <- installPingTimer(dht.options.pingInterval, sender)
+      _ <- installPingTimeoutTimer(dht.options.pingTimeout, sender)
     } yield {
-      for {
-        /**
-         * Install ping timer: after [[Dht.Options.pingInterval]] seconds, ping again.
-         */
-        _ <- IO.timedAction(pingTimer(sender.publicKey.readable), dht.options.pingInterval) { (_, dht) =>
-          for {
-            _ <- IO.sendTo(sender, pingRequest)
-          } yield {
-            dht
-          }
-        }
+      /**
+       * Nodes are only added to the lists after a valid ping response or send node
+       * packet is received from them.
+       */
+      dht.addNode(sender)
+    }
+  }
 
-        /**
-         * Install ping timeout timer: after [[Dht.Options.pingTimeout]] seconds, remove the node from
-         * the DHT node lists and cancel the ping timer.
-         */
-        _ <- IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), dht.options.pingTimeout, Some(1)) { (_, dht) =>
-          for {
-            _ <- IO.cancelTimer(pingTimer(sender.publicKey.readable))
-          } yield {
-            dht.removeNode(sender)
-          }
-        }
+  private val pingTimer = IO.TimerIdFactory("Ping")
+  private val pingTimeoutTimer = IO.TimerIdFactory("PingTimeout")
+
+  /**
+   * Install ping timer: after [[Dht.Options.pingInterval]] seconds, ping again.
+   */
+  private def installPingTimer(pingInterval: FiniteDuration, sender: NodeInfo): IO[Unit] = {
+    IO.timedAction(pingTimer(sender.publicKey.readable), pingInterval) { (duration, dht) =>
+      for {
+        pingRequest <- PacketBuilder.makeResponse(
+          dht.keyPair,
+          sender.publicKey,
+          PingRequestPacket,
+          PingRequestPacket,
+          0
+        )
       } yield {
-        /**
-         * Nodes are only added to the lists after a valid ping response or send node
-         * packet is received from them.
-         */
-        dht.addNode(sender)
+        logger.debug(s"Sending ping to $sender after ping interval: ${duration.toSeconds} seconds")
+        for {
+          _ <- IO.sendTo(sender, pingRequest)
+        } yield {
+          dht
+        }
+      }
+    }
+  }
+
+  /**
+   * Install ping timeout timer: after [[Dht.Options.pingTimeout]] seconds, remove the node from
+   * the DHT node lists and cancel the ping timer.
+   */
+  private def installPingTimeoutTimer(pingTimeout: FiniteDuration, sender: NodeInfo): IO[Unit] = {
+    IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), pingTimeout, Some(1)) { (duration, dht) =>
+      \/- {
+        logger.debug(s"Removing node $sender after ping timeout: ${duration.toSeconds} seconds")
+        for {
+          _ <- IO.cancelTimer(pingTimer(sender.publicKey.readable))
+        } yield {
+          dht.removeNode(sender)
+        }
       }
     }
   }

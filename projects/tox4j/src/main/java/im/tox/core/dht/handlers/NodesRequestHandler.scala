@@ -1,7 +1,7 @@
 package im.tox.core.dht.handlers
 
 import im.tox.core.dht.packets.dht.{NodesRequestPacket, NodesResponsePacket}
-import im.tox.core.dht.{Dht, NodeInfo}
+import im.tox.core.dht.{PacketBuilder, Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 
@@ -24,7 +24,7 @@ case object NodesRequestHandler extends DhtUnencryptedPayloadHandler(NodesReques
 
     for {
       response <- NodesResponsePacket(nearNodes)
-      response <- makeResponse(
+      response <- PacketBuilder.makeResponse(
         dht.keyPair,
         sender.publicKey,
         NodesResponsePacket,

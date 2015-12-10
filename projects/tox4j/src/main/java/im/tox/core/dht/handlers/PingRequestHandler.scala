@@ -1,7 +1,7 @@
 package im.tox.core.dht.handlers
 
 import im.tox.core.dht.packets.dht.{PingPacket, PingRequestPacket, PingResponsePacket}
-import im.tox.core.dht.{Dht, NodeInfo}
+import im.tox.core.dht.{PacketBuilder, Dht, NodeInfo}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.PacketKind
@@ -16,7 +16,7 @@ case object PingRequestHandler extends DhtUnencryptedPayloadHandler(PingRequestP
    */
   override def apply(dht: Dht, sender: NodeInfo, packet: PingPacket[PacketKind.PingRequest.type], pingId: Long): CoreError \/ IO[Dht] = {
     for {
-      response <- makeResponse(
+      response <- PacketBuilder.makeResponse(
         dht.keyPair,
         sender.publicKey,
         PingResponsePacket,

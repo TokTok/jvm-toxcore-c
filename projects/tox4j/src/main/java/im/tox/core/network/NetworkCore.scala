@@ -52,16 +52,8 @@ object NetworkCore {
    * The initial packet should be a [[PingRequestPacket]] or [[NodesRequestPacket]].
    *
    * @param dht The initial DHT state.
-   * @param bootstrapAddress Network address of the first node we send the initial packet to.
-   * @param bootstrapPublicKey DHT public key of the node we're sending the packet to.
-   * @param bootstrapRequest The initial packet data.
    */
-  def client(
-    dht: Dht,
-    bootstrapAddress: InetSocketAddress,
-    bootstrapPublicKey: PublicKey,
-    bootstrapRequest: ToxPacket[PacketKind]
-  ): Process[Task, Unit] = {
+  def client(dht: IO[Dht]): Process[Task, Unit] = {
     val eventQueue = async.boundedQueue[IO.Event](10)
     val actionTopic = async.topic[IO.Action]()
 
@@ -69,22 +61,6 @@ object NetworkCore {
 
     val udpLoop = UdpActor.make(actionTopic.subscribe, eventQueue.enqueue)
     val timeLoop = TimeActor.make(actionTopic.subscribe, eventQueue.enqueue)
-
-    val bootstrapAction = for {
-      // TODO(iphydf): Remove sleep when https://github.com/scalaz/scalaz-stream/issues/488 is fixed.
-      _ <- Process.eval(Task {
-        Thread.sleep(100)
-      })
-      action <- Process(
-        IO.Action.SendTo(
-          NodeInfo(Protocol.Udp, bootstrapAddress, bootstrapPublicKey),
-          bootstrapRequest
-        ),
-        IO.Action.StartTimer(TimerId("Shutdown"), 60 seconds, None, duration => Some(IO.Event.Shutdown))
-      ).toSource.to(actionTopic.publish)
-    } yield {
-      action
-    }
 
     val shutdownLoop =
       actionTopic.subscribe.flatMap {
@@ -95,11 +71,10 @@ object NetworkCore {
           Process.empty[Task, Unit]
       }
 
-    bootstrapAction
+    shutdownLoop
       .merge(udpLoop)
       .merge(timeLoop)
       .merge(actionLoop)
-      .merge(shutdownLoop)
   }
 
 }

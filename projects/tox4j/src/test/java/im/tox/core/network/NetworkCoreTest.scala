@@ -2,20 +2,25 @@ package im.tox.core.network
 
 import java.net.InetSocketAddress
 
+import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto.{KeyPair, Nonce, PublicKey}
-import im.tox.core.dht.Dht
 import im.tox.core.dht.packets.dht.PingRequestPacket
 import im.tox.core.dht.packets.{DhtEncryptedPacket, DhtUnencryptedPacket}
+import im.tox.core.dht.{Dht, NodeInfo, Protocol}
 import im.tox.core.error.CoreError
+import im.tox.core.io.IO
+import im.tox.core.io.IO.TimerId
 import im.tox.core.network.PacketKind.PingRequest
 import im.tox.core.network.packets.ToxPacket
 import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FunSuite
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
-import scalaz.\/
+import scalaz.{-\/, \/, \/-}
 
 object NetworkCoreTest {
 
@@ -54,27 +59,40 @@ object NetworkCoreTest {
 
 final class NetworkCoreTest extends FunSuite {
 
+  private val logger = Logger(LoggerFactory.getLogger(getClass))
+
   def start(): CoreError \/ Unit = {
     val node = NetworkCoreTest.nodes.head
     val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
 
     for {
       receiverPublicKey <- PublicKey.fromHexString(node._2)
-      result <- {
-        val dht = Dht(Dht.Options(
-          nodesRequestInterval = 5 seconds,
-          pingInterval = 5 seconds,
-          pingTimeout = 12 seconds
-        ))
-
-        for {
-          packet <- NetworkCoreTest.makePingRequest(dht.keyPair, receiverPublicKey, 0)
-        } yield {
-          NetworkCore.client(dht, address, receiverPublicKey, packet).run.run
-        }
-      }
     } yield {
-      result
+      val dht = for {
+        dht <- Dht(Dht.Options(
+          nodesRequestInterval = 1 seconds,
+          maxClosestNodes = 256
+        ))
+        _ <- IO.startTimer(TimerId("Shutdown"), 60 seconds, Some(1))(_ => Some(IO.Event.Shutdown))
+        _ <- {
+          NetworkCoreTest.makePingRequest(dht.keyPair, receiverPublicKey, 0) match {
+            case -\/(failure) =>
+              logger.error(s"Error trying to create initial ping request: $failure")
+              IO(())
+            case \/-(packet) =>
+              IO.sendTo(NodeInfo(Protocol.Udp, address, receiverPublicKey), packet)
+          }
+        }
+      } yield {
+        // Add a random other node to search for as initial DHT friend.
+        dht
+          // .addSearchKey(PublicKey.random())
+          // .addSearchKey(PublicKey.random())
+          // .addSearchKey(PublicKey.random())
+          .addSearchKey(PublicKey.fromHexString("0764FBE9440078718A24D9E4111B480BE8981170ACF30E669C96EDD076AD6752").get)
+      }
+
+      NetworkCore.client(dht).run.run
     }
   }
 

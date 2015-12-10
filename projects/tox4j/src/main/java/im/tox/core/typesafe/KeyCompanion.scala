@@ -1,6 +1,7 @@
 package im.tox.core.typesafe
 
 import im.tox.core.Functional
+import im.tox.core.Functional.foldDisjunctionList
 import im.tox.core.error.CoreError
 
 import scalaz.{-\/, \/, \/-}
@@ -36,7 +37,7 @@ abstract class KeyCompanion[T <: AnyVal, S <: Security](
   }
 
   private def parseHexEncodedString(id: String): CoreError \/ Array[Byte] = {
-    Functional.foldDisjunctionList((0 until id.length / 2).reverseMap { i =>
+    foldDisjunctionList((0 until id.length / 2).reverseMap { i =>
       for {
         hiNibble <- fromHexDigit(id, i * 2)
         loNibble <- fromHexDigit(id, i * 2 + 1)

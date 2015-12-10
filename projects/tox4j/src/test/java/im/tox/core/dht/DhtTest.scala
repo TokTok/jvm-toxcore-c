@@ -30,7 +30,7 @@ object DhtTest {
       val options = Dht.Options(
         maxClosestNodes = maxClosestNodes
       )
-      Dht(options, keyPair)
+      Dht(options, keyPair).run(Nil)._2
     }
   }
 
