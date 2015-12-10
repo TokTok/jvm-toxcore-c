@@ -46,7 +46,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
           debug(s"is now connected to friend $friendNumber")
           debug(s"initiate file sending to friend $friendNumber")
           assert(friendNumber == AliceBobTestBase.FriendNumber)
-          state.addTask { (tox, state) =>
+          state.addTask { (tox, av, state) =>
             val aliceSentFileNumber = tox.fileSend(
               friendNumber,
               ToxFileKind.DATA,
@@ -78,7 +78,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       assert(kind == ToxFileKind.DATA)
       assert(new String(filename.value) == s"file for $name.png")
 
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         assert(state.get.bobSentFileNumber == fileNumber)
         state.map(addFileRecvTask(friendNumber, state.get.bobSentFileNumber, state.get.bobOffset, tox))
       }.map(_.copy(bobSentFileNumber = fileNumber))
@@ -92,7 +92,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
         debug("finish transmission")
         state.map(_.copy(aliceSentFileNumber = -1)).finish
       } else {
-        val nextState = state.addTask { (tox, state) =>
+        val nextState = state.addTask { (tox, av, state) =>
           debug(s"sending ${length}B to $friendNumber from position $position")
           tox.fileSendChunk(friendNumber, fileNumber, position,
             fileData.slice(position.toInt, Math.min(position.toInt + length, fileData.length)).toArray)
@@ -101,7 +101,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
         if (state.get.aliceOffset >= fileData.length / 4 && state.get.aliceShouldPause == -1) {
           nextState
             .map(_.copy(aliceShouldPause = 0))
-            .addTask { (tox, state) =>
+            .addTask { (tox, av, state) =>
               tox.fileControl(friendNumber, fileNumber, ToxFileControl.PAUSE)
               debug("pause file transmission")
               state
@@ -124,7 +124,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
             state.map(_.copy(aliceShouldPause = 1))
           }
         } else if (control == ToxFileControl.PAUSE) {
-          state.addTask { (tox, state) =>
+          state.addTask { (tox, av, state) =>
             tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
               ToxFriendMessage.fromValue("Please resume the file transfer".getBytes).get)
             state.map(_.copy(aliceShouldPause = 0))
@@ -135,7 +135,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       } else {
         if (control == ToxFileControl.PAUSE) {
           debug("see alice pause file transmission")
-          state.addTask { (tox, state) =>
+          state.addTask { (tox, av, state) =>
             debug("request to resume file transmission")
             tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
               ToxFriendMessage.fromValue("Please resume the file transfer".getBytes).get)
@@ -160,7 +160,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
         if (nextState.get.bobOffset >= fileData.length * 2 / 4 && nextState.get.bobShouldPause == -1) {
           nextState
             .map(_.copy(bobShouldPause = 0))
-            .addTask { (tox, state) =>
+            .addTask { (tox, av, state) =>
               debug("send file control to pause")
               tox.fileControl(friendNumber, state.get.bobSentFileNumber, ToxFileControl.PAUSE)
               state
@@ -174,7 +174,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
     override def friendMessage(friendNumber: Int, newType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: ChatState): ChatState = {
       debug(s"received a message: ${new String(message.value)}")
       assert(new String(message.value) == "Please resume the file transfer")
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         state.map(addFriendMessageTask(friendNumber, state.get.bobSentFileNumber, state.get.fileId, tox))
       }
     }

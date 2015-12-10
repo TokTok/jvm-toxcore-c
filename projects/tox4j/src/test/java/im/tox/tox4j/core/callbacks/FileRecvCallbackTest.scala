@@ -24,7 +24,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         assert(friendNumber == AliceBobTestBase.FriendNumber)
-        state.addTask { (tox, state) =>
+        state.addTask { (tox, av, state) =>
           tox.fileSend(
             friendNumber,
             ToxFileKind.DATA,
@@ -50,7 +50,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
         assert(fileSize == "This is a file for Bob".length)
       }
       assert(new String(filename.value) == s"file for $selfName.png")
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         val fileId = tox.getFileFileId(friendNumber, fileNumber)
         assert(fileId.value != null)
         assert(fileId.value.length == ToxCoreConstants.FileIdLength)

@@ -11,7 +11,7 @@ final class FriendTypingCallbackTest extends AliceBobTest {
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
     private def setTyping(state: ChatState)(friendNumber: Int, isTyping: Boolean): ChatState = {
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         tox.setTyping(friendNumber, isTyping)
         state
       }

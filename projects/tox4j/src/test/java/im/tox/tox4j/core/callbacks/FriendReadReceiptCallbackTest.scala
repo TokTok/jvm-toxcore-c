@@ -17,7 +17,7 @@ final class FriendReadReceiptCallbackTest extends AliceBobTest {
     override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
-        state.addTask { (tox, state) =>
+        state.addTask { (tox, av, state) =>
           debug(s"Sending $Iterations messages")
           assert(state.get.isEmpty)
           val pendingIds = (0 until Iterations).foldLeft(state.get) {

@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.testing.ToxTestMixin
 import im.tox.tox4j.testing.autotest.AliceBobTestBase.Chatter
@@ -15,6 +16,7 @@ object AliceBobTestBase {
 
   final case class Chatter[T](
     tox: ToxCore[ChatStateT[T]],
+    av: ToxAv[ChatStateT[T]],
     client: ChatClientT[T],
     state: ChatStateT[T]
   )
@@ -42,11 +44,11 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
   @tailrec
   private def mainLoop(clients: Seq[Chatter[State]]): Unit = {
     val nextState = clients.map {
-      case Chatter(tox, client, state) =>
-        Chatter[State](tox, client, state |> tox.iterate |> (_.runTasks(tox)))
+      case Chatter(tox, av, client, state) =>
+        Chatter[State](tox, av, client, state |> tox.iterate |> (_.runTasks(tox, av)))
     }
 
-    val interval = nextState.map(_.tox.iterationInterval).max
+    val interval = (nextState.map(_.tox.iterationInterval) ++ nextState.map(_.av.iterationInterval)).min
     Thread.sleep(interval)
 
     if (nextState.exists(_.state.chatting)) {
@@ -54,7 +56,10 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
     }
   }
 
-  protected def runAliceBobTest(withTox: (ToxCore[ChatState] => Unit) => Unit): Unit = {
+  protected def runAliceBobTest(
+    withTox: (ToxCore[ChatState] => Unit) => Unit,
+    withToxAv: ToxCore[ChatState] => (ToxAv[ChatState] => Unit) => Unit
+  ): Unit = {
     val method = getTopLevelMethod(Thread.currentThread.getStackTrace)
     logger.info(s"[${Thread.currentThread.getId}] --- ${getClass.getSimpleName}.$method")
 
@@ -63,27 +68,31 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
 
     withTox { alice =>
       withTox { bob =>
-        assert(alice ne bob)
+        withToxAv(alice) { aliceAv =>
+          withToxAv(bob) { bobAv =>
+            assert(alice ne bob)
 
-        addFriends(alice, AliceBobTestBase.FriendNumber)
-        addFriends(bob, AliceBobTestBase.FriendNumber)
+            addFriends(alice, AliceBobTestBase.FriendNumber)
+            addFriends(bob, AliceBobTestBase.FriendNumber)
 
-        alice.addFriendNorequest(bob.getPublicKey)
-        bob.addFriendNorequest(alice.getPublicKey)
+            alice.addFriendNorequest(bob.getPublicKey)
+            bob.addFriendNorequest(alice.getPublicKey)
 
-        aliceChat.expectedFriendAddress = bob.getAddress
-        bobChat.expectedFriendAddress = alice.getAddress
+            aliceChat.expectedFriendAddress = bob.getAddress
+            bobChat.expectedFriendAddress = alice.getAddress
 
-        alice.callback(aliceChat)
-        bob.callback(bobChat)
+            alice.callback(aliceChat)
+            bob.callback(bobChat)
 
-        val aliceState = aliceChat.setup(alice)(ChatStateT[State](initialState))
-        val bobState = bobChat.setup(bob)(ChatStateT[State](initialState))
+            val aliceState = aliceChat.setup(alice)(ChatStateT[State](initialState))
+            val bobState = bobChat.setup(bob)(ChatStateT[State](initialState))
 
-        mainLoop(Seq(
-          Chatter(alice, aliceChat, aliceState),
-          Chatter(bob, bobChat, bobState)
-        ))
+            mainLoop(Seq(
+              Chatter(alice, aliceAv, aliceChat, aliceState),
+              Chatter(bob, bobAv, bobChat, bobState)
+            ))
+          }
+        }
       }
     }
   }

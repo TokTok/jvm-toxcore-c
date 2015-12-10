@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.ToxEventAdapter
 import im.tox.tox4j.core.data.{ToxFriendAddress, ToxPublicKey}
@@ -13,7 +14,7 @@ import scala.annotation.tailrec
 
 final case class ChatStateT[T](
     state: T,
-    tasks: Seq[((ToxCore[ChatStateT[T]], ChatStateT[T]) => ChatStateT[T], Array[StackTraceElement])] = Nil,
+    tasks: Seq[((ToxCore[ChatStateT[T]], ToxAv[ChatStateT[T]], ChatStateT[T]) => ChatStateT[T], Array[StackTraceElement])] = Nil,
     chatting: Boolean = true
 ) {
 
@@ -36,11 +37,11 @@ final case class ChatStateT[T](
     e
   }
 
-  private[autotest] def runTasks(tox: ToxCore[ChatStateT[T]]): ChatStateT[T] = {
+  private[autotest] def runTasks(tox: ToxCore[ChatStateT[T]], av: ToxAv[ChatStateT[T]]): ChatStateT[T] = {
     tasks.reverse.foldLeft(copy[T](tasks = Nil)) {
       case (nextState, (task, stacktrace)) =>
         try {
-          task(tox, nextState)
+          task(tox, av, nextState)
         } catch {
           case e: ToxException[_] =>
             throw assembleStackTrace(e, stacktrace)
@@ -48,7 +49,7 @@ final case class ChatStateT[T](
     }
   }
 
-  def addTask(task: (ToxCore[ChatStateT[T]], ChatStateT[T]) => ChatStateT[T]): ChatStateT[T] = {
+  def addTask(task: (ToxCore[ChatStateT[T]], ToxAv[ChatStateT[T]], ChatStateT[T]) => ChatStateT[T]): ChatStateT[T] = {
     val creationTrace = Thread.currentThread.getStackTrace
     copy[T](tasks = (task, creationTrace.slice(2, creationTrace.length)) +: tasks)
   }

@@ -4,7 +4,6 @@ import java.io.IOException
 import java.net.{InetAddress, Socket}
 
 import com.typesafe.scalalogging.Logger
-import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import org.scalatest.Assertions
 import org.slf4j.LoggerFactory
@@ -14,7 +13,7 @@ object DhtNodeSelector extends Assertions {
   private val logger = Logger(LoggerFactory.getLogger(this.getClass))
   private var selectedNode: Option[DhtNode] = Some(ToxCoreTestBase.nodeCandidates(1))
 
-  private def tryConnect(node: DhtNode) = {
+  private def tryConnect(node: DhtNode): Option[DhtNode] = {
     var socket: Socket = null
     try {
       socket = new Socket(InetAddress.getByName(node.ipv4), node.udpPort.value)
@@ -31,14 +30,16 @@ object DhtNodeSelector extends Assertions {
     }
   }
 
-  private def tryBootstrap(factory: (Boolean, Boolean) => ToxCore[Unit], node: DhtNode, udpEnabled: Boolean) = {
+  private def tryBootstrap(
+    withTox: (Boolean, Boolean) => (ToxCore[Unit] => Option[DhtNode]) => Option[DhtNode],
+    node: DhtNode,
+    udpEnabled: Boolean
+  ): Option[DhtNode] = {
     val protocol = if (udpEnabled) "UDP" else "TCP"
     val port = if (udpEnabled) node.udpPort else node.tcpPort
     logger.info(s"Trying to bootstrap with ${node.ipv4}:$port using $protocol")
 
-    val tox = factory(true, udpEnabled)
-
-    try {
+    withTox(true, udpEnabled) { tox =>
       val status = new ConnectedListener
       tox.callback(status)
       if (!udpEnabled) {
@@ -59,12 +60,10 @@ object DhtNodeSelector extends Assertions {
           logger.info(s"Unable to bootstrap with $protocol")
           None
       }
-    } finally {
-      tox.close()
     }
   }
 
-  private def findNode(factory: (Boolean, Boolean) => ToxCore[Unit]): DhtNode = {
+  private def findNode(withTox: (Boolean, Boolean) => (ToxCore[Unit] => Option[DhtNode]) => Option[DhtNode]): DhtNode = {
     DhtNodeSelector.selectedNode match {
       case Some(node) => node
       case None =>
@@ -75,8 +74,8 @@ object DhtNodeSelector extends Assertions {
 
           (for {
             node <- tryConnect(node)
-            node <- tryBootstrap(factory, node, udpEnabled = true)
-            node <- tryBootstrap(factory, node, udpEnabled = false)
+            node <- tryBootstrap(withTox, node, udpEnabled = true)
+            node <- tryBootstrap(withTox, node, udpEnabled = false)
           } yield node).isDefined
         }
 
@@ -85,9 +84,6 @@ object DhtNodeSelector extends Assertions {
     }
   }
 
-  def node: DhtNode = findNode({
-    (ipv6Enabled: Boolean, udpEnabled: Boolean) =>
-      ToxCoreFactory(new ToxOptions(ipv6Enabled, udpEnabled))
-  })
+  def node: DhtNode = findNode(ToxCoreFactory.withTox[Option[DhtNode]])
 
 }

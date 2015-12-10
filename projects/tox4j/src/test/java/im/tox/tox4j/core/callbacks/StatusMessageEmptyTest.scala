@@ -18,7 +18,7 @@ final class StatusMessageEmptyTest extends AliceBobTest {
           val nextState = state.set(1)
           assert(message.value.isEmpty)
           if (isAlice) {
-            nextState.addTask { (tox, state) =>
+            nextState.addTask { (tox, av, state) =>
               tox.setStatusMessage(ToxStatusMessage.fromString("One").get)
               state
             }
@@ -30,13 +30,13 @@ final class StatusMessageEmptyTest extends AliceBobTest {
           val nextState = state.set(2)
           if (isAlice) {
             assert(new String(message.value) == "Two")
-            nextState.addTask { (tox, state) =>
+            nextState.addTask { (tox, av, state) =>
               tox.setStatusMessage(ToxStatusMessage.fromString("").get)
               state
             }
           } else {
             assert(new String(message.value) == "One")
-            nextState.addTask { (tox, state) =>
+            nextState.addTask { (tox, av, state) =>
               tox.setStatusMessage(ToxStatusMessage.fromString("Two").get)
               state
             }
@@ -46,7 +46,7 @@ final class StatusMessageEmptyTest extends AliceBobTest {
           val nextState = state.finish
           assert(message.value.isEmpty)
           if (isBob) {
-            nextState.addTask { (tox, state) =>
+            nextState.addTask { (tox, av, state) =>
               tox.setStatusMessage(ToxStatusMessage.fromString("").get)
               state
             }

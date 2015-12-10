@@ -14,7 +14,7 @@ final class FriendLossyPacketCallbackTest extends AliceBobTest {
     override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
-        state.addTask { (tox, state) =>
+        state.addTask { (tox, av, state) =>
           val packet = s"_My name is $selfName".getBytes
           packet(0) = 200.toByte
           tox.friendSendLossyPacket(friendNumber, ToxLossyPacket.fromValue(packet).get)

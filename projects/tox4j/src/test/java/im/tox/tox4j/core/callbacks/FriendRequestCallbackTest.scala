@@ -35,7 +35,7 @@ final class FriendRequestCallbackTest extends AliceBobTest {
       assert(publicKey.value sameElements expectedFriendPublicKey.value)
       assert(timeDelta >= 0)
       assert(new String(message.value) == s"Hey this is $expectedFriendName")
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         tox.addFriendNorequest(publicKey)
         state
       }

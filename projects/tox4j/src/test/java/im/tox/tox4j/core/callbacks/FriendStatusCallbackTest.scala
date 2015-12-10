@@ -11,7 +11,7 @@ final class FriendStatusCallbackTest extends AliceBobTest {
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
     private def go(state: ChatState)(status: ToxUserStatus): ChatState = {
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         tox.setStatus(status)
         state.set(status)
       }

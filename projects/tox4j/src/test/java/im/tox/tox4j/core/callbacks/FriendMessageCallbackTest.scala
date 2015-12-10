@@ -14,7 +14,7 @@ final class FriendMessageCallbackTest extends AliceBobTest {
     override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
-        state.addTask { (tox, state) =>
+        state.addTask { (tox, av, state) =>
           tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
             ToxFriendMessage.fromValue(s"My name is $selfName".getBytes).get)
           state

@@ -11,7 +11,7 @@ object ToxCoreFactory {
 
   private final val toxes = new ArrayBuffer[ToxCore[_]]
 
-  def make[ToxCoreState](options: ToxOptions = ToxOptions()): ToxCore[ToxCoreState] = {
+  private def make[ToxCoreState](options: ToxOptions = ToxOptions()): ToxCore[ToxCoreState] = {
     try {
       new ToxCoreImpl[ToxCoreState](options)
     } catch {
@@ -21,7 +21,7 @@ object ToxCoreFactory {
     }
   }
 
-  def makeList(count: Int, options: ToxOptions = ToxOptions()): ToxList[Unit] = {
+  private def makeList(count: Int, options: ToxOptions = ToxOptions()): ToxList[Unit] = {
     new ToxList[Unit](() => { this(options) }, count)
   }
 

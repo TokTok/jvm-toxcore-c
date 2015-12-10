@@ -34,7 +34,7 @@ final class FileTransferTest extends AliceBobTest {
     override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE && isAlice) {
-        state.addTask { (tox, state) =>
+        state.addTask { (tox, av, state) =>
           val sentFileNumber = tox.fileSend(
             friendNumber,
             ToxFileKind.DATA,
@@ -57,7 +57,7 @@ final class FileTransferTest extends AliceBobTest {
       assert(kind == ToxFileKind.DATA)
       assert(fileSize == fileData.length)
       assert(new String(filename.value) == s"file for $name.png")
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         debug("sending control RESUME for " + fileNumber)
         tox.fileControl(friendNumber, fileNumber, ToxFileControl.RESUME)
         state
@@ -80,7 +80,7 @@ final class FileTransferTest extends AliceBobTest {
       if (length == 0) {
         state.set(state.get.copy(sentFileNumber = -1)).finish
       } else {
-        state.addTask { (tox, state) =>
+        state.addTask { (tox, av, state) =>
           debug(s"sending ${length}B to $friendNumber")
           tox.fileSendChunk(
             friendNumber,

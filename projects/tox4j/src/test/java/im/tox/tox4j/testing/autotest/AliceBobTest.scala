@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing.autotest
 
 import im.tox.tox4j.TestConstants._
+import im.tox.tox4j.av.{ToxAvFactory, ToxAv}
 import im.tox.tox4j.core.options.ProxyOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import im.tox.tox4j.{SocksServer, ToxCoreTestBase}
@@ -34,16 +35,26 @@ abstract class AliceBobTest extends AliceBobTestBase with Timeouts {
     }
   }
 
+  private def withToxAv(tox: ToxCore[ChatState])(f: ToxAv[ChatState] => Unit): Unit = {
+    ToxAvFactory.withToxAvS(tox)(f)
+  }
+
   private def runAliceBobTest_Direct(withTox: => (ToxCore[ChatState] => Unit) => Unit): Unit = {
     failAfter(Timeout millis) {
-      runAliceBobTest(withTox)
+      runAliceBobTest(
+        withTox,
+        withToxAv
+      )
     }
   }
 
   private def runAliceBobTest_Socks(ipv6Enabled: Boolean, udpEnabled: Boolean): Unit = {
     val proxy = SocksServer.withServer { proxy =>
       failAfter(Timeout millis) {
-        runAliceBobTest(withBootstrappedTox(ipv6Enabled, udpEnabled, new ProxyOptions.Socks5(proxy.getAddress, proxy.getPort)))
+        runAliceBobTest(
+          withBootstrappedTox(ipv6Enabled, udpEnabled, new ProxyOptions.Socks5(proxy.getAddress, proxy.getPort)),
+          withToxAv
+        )
       }
       proxy
     }

@@ -40,7 +40,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
 
     override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: ChatState): ChatState = {
       assert(isAlice)
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         debug("accept Bob's friend request")
         tox.addFriendNorequest(publicKey)
         aliceShouldPause = 1
@@ -54,7 +54,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           debug(s"is now connected to friend $friendNumber")
           assert(friendNumber == AliceBobTestBase.FriendNumber)
           debug(s"initiate file sending to friend $friendNumber")
-          state.addTask { (tox, state) =>
+          state.addTask { (tox, av, state) =>
             aliceSentFileNumber = tox.fileSend(
               friendNumber,
               ToxFileKind.DATA,
@@ -76,7 +76,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           state
         } else {
           debug("See alice go off-line")
-          state.addTask { (tox, state) =>
+          state.addTask { (tox, av, state) =>
             tox.deleteFriend(friendNumber)
             tox.addFriend(aliceAddress, ToxFriendRequestMessage.fromValue("Please add me back".getBytes).get)
             state
@@ -95,7 +95,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
         state.finish
       } else {
         if (aliceShouldPause != 0) {
-          val nextState = state.addTask { (tox, state) =>
+          val nextState = state.addTask { (tox, av, state) =>
             debug(s"sending $length B to $friendNumber from position $position")
             tox.fileSendChunk(friendNumber, fileNumber, position,
               fileData.slice(position.toInt, Math.min(position.toInt + length, fileData.length)))
@@ -104,7 +104,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           aliceOffset += length
           if (aliceOffset >= fileData.length / 10 && aliceShouldPause == -1) {
             aliceShouldPause = 0
-            nextState.addTask { (tox, state) =>
+            nextState.addTask { (tox, av, state) =>
               debug("pause file transmission")
               tox.fileControl(friendNumber, fileNumber, ToxFileControl.PAUSE)
               tox.deleteFriend(friendNumber)
@@ -126,7 +126,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
       assert(kind == ToxFileKind.DATA)
       assert(new String(filename.value) == s"file for $name.png")
       bobSentFileNumber = fileNumber
-      state.addTask { (tox, state) =>
+      state.addTask { (tox, av, state) =>
         selfPublicKey = tox.getPublicKey
         debug(s"sending control RESUME for $fileNumber")
         debug(s"seek file to $bobOffset")

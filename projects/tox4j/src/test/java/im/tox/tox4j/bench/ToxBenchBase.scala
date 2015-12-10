@@ -123,7 +123,7 @@ object ToxBenchBase {
    * @return A new [[ToxCore]] instance with a name, status message, and friendCount friends.
    */
   def makeToxWithFriends(friendCount: Int): ToxCore[Unit] = {
-    val tox = ToxCoreFactory.make[Unit](toxOptions)
+    val tox = ToxCoreFactory(toxOptions)
     tox.setName(ToxNickname.fromValue(Array.ofDim(ToxCoreConstants.MaxNameLength)).get)
     tox.setStatusMessage(ToxStatusMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxStatusMessageLength)).get)
     friendKeys(friendCount) foreach tox.addFriendNorequest
