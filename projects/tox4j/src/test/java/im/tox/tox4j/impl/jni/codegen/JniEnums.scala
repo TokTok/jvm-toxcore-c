@@ -48,7 +48,7 @@ object JniEnums extends CodeGenerator {
   def debugOut(expr: Expr): Stmt = {
     ExprStmt(
       FunCall(
-        Access(Identifier("value"), "set_string"),
+        Access(Identifier("value"), "set_v_string"),
         Seq(expr)
       )
     )

@@ -1,4 +1,4 @@
-package im.tox.tox4j.av
+package im.tox.tox4j.av.data
 
 import im.tox.core.typesafe.BoundedIntCompanion
 

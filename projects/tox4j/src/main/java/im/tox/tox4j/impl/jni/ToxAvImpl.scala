@@ -7,6 +7,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av._
 import im.tox.tox4j.av.callbacks._
+import im.tox.tox4j.av.data.{AudioChannels, BitRate, SampleCount, SamplingRate}
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.av.exceptions._
 import im.tox.tox4j.av.proto._

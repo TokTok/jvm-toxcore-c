@@ -1,4 +1,4 @@
-package im.tox.tox4j.av
+package im.tox.tox4j.av.data
 
 final class SampleCount private (val value: Int) extends AnyVal
 

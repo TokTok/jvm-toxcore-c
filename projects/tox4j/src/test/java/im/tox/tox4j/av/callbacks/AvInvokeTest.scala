@@ -4,8 +4,8 @@ import java.util
 
 import im.tox.tox4j.ToxAvTestBase
 import im.tox.tox4j.av.callbacks.AvInvokeTest._
+import im.tox.tox4j.av.data.{AudioChannels, BitRate, SamplingRate}
 import im.tox.tox4j.av.enums.ToxavFriendCallState
-import im.tox.tox4j.av.{AudioChannels, BitRate, SamplingRate}
 import im.tox.tox4j.core.SmallNat
 import im.tox.tox4j.core.callbacks.InvokeTest.{ByteArray, ShortArray}
 import im.tox.tox4j.core.options.ToxOptions

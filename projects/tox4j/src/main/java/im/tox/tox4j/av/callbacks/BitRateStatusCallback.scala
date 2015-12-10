@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.callbacks
 
-import im.tox.tox4j.av.BitRate
+import im.tox.tox4j.av.data.BitRate
 
 /**
  * The event is triggered when the network becomes too saturated for current
