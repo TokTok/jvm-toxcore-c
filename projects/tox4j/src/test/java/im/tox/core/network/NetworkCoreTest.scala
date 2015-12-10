@@ -33,7 +33,7 @@ object NetworkCoreTest {
     senderKeyPair: KeyPair,
     receiverPublicKey: PublicKey,
     pingId: Long
-  ): \/[CoreError, ToxPacket[PingRequest.type]] = {
+  ): CoreError \/ ToxPacket[PingRequest.type] = {
     for {
       request <- EncryptedPingRequestPacket.encrypt(
         receiverPublicKey,
@@ -54,7 +54,7 @@ object NetworkCoreTest {
 
 final class NetworkCoreTest extends FunSuite {
 
-  def start(): \/[CoreError, Unit] = {
+  def start(): CoreError \/ Unit = {
     val node = NetworkCoreTest.nodes.head
     val address = new InetSocketAddress(node._1, ToxCoreConstants.DefaultStartPort)
 
