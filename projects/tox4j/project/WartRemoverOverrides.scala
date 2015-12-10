@@ -56,7 +56,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "JniLog",
         "Member",
         "Struct",
-        "TimeVal",
+        "Timestamp",
         "Value",
         "InternalFields_ProtoLogProto"
       ).map(_ + ".scala").map(proto / "impl" / "jni" / "proto" / _)

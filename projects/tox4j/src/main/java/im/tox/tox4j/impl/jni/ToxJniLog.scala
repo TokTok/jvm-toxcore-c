@@ -68,27 +68,31 @@ object ToxJniLog extends (() => JniLog) {
     log.entries.headOption match {
       case None => ""
       case Some(first) =>
-        log.entries.map(toString(first.timestamp.getOrElse(TimeVal.defaultInstance))).mkString("\n")
+        log.entries.map(toString(first.timestamp.getOrElse(Timestamp.defaultInstance))).mkString("\n")
     }
   }
 
-  private def formattedTimeDiff(a: TimeVal, b: TimeVal): String = {
+  private def formattedTimeDiff(a: Timestamp, b: Timestamp): String = {
+    assert(a.nanos < 1000000000)
+    assert(b.nanos < 1000000000)
+
     val timeDiff = {
       val seconds = a.seconds - b.seconds
-      val micros = a.micros - b.micros
-      if (micros < 0) {
-        TimeVal(seconds - 1, micros + (1 second).toMicros.toInt)
+      val nanos = a.nanos - b.nanos
+      if (nanos < 0) {
+        Timestamp(seconds - 1, nanos + (1 second).toNanos.toInt)
       } else {
-        TimeVal(seconds, micros)
+        Timestamp(seconds, nanos)
       }
     }
 
-    f"${timeDiff.seconds}%d.${timeDiff.micros}%06d"
+    f"${timeDiff.seconds}%d.${(timeDiff.nanos nanos).toMicros}%06d"
   }
 
-  def toString(startTime: TimeVal)(entry: JniLogEntry): String = {
-    s"[${formattedTimeDiff(entry.timestamp.getOrElse(TimeVal.defaultInstance), startTime)}] ${entry.name}(${entry.arguments.map(toString).mkString(", ")}) = " +
-      s"${toString(entry.result.getOrElse(Value.defaultInstance))} [${entry.elapsedMicros} µs" + {
+  def toString(startTime: Timestamp)(entry: JniLogEntry): String = {
+    val time = formattedTimeDiff(entry.timestamp.getOrElse(Timestamp.defaultInstance), startTime)
+    s"[$time] ${entry.name}(${entry.arguments.map(toString).mkString(", ")}) = " +
+      s"${toString(entry.result.getOrElse(Value.defaultInstance))} [${(entry.elapsedNanos nanos).toMicros} µs" + {
         entry.instanceNumber match {
           case 0              => ""
           case instanceNumber => s", #$instanceNumber"

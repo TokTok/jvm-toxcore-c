@@ -331,15 +331,15 @@ struct LogEntry
 
         using std::chrono::duration_cast;
         using std::chrono::seconds;
-        using std::chrono::microseconds;
+        using std::chrono::nanoseconds;
 
         auto start_time = start.time_since_epoch ();
 
-        protolog::TimeVal *timestamp = entry->mutable_timestamp ();
+        protolog::Timestamp *timestamp = entry->mutable_timestamp ();
         timestamp->set_seconds (duration_cast<seconds> (start_time).count ());
-        timestamp->set_micros (duration_cast<microseconds> (start_time).count () % 1000000);
+        timestamp->set_nanos (duration_cast<nanoseconds> (start_time).count () % 1000000000);
 
-        entry->set_elapsed_micros (duration_cast<microseconds> (end - start).count ());
+        entry->set_elapsed_nanos (duration_cast<nanoseconds> (end - start).count ());
 
         print_arg (*entry->mutable_result (), result);
 
