@@ -2,10 +2,12 @@ package im.tox.tox4j.impl.jni
 
 import com.google.protobuf.InvalidProtocolBufferException
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.impl.jni.proto.Value.V
 import im.tox.tox4j.impl.jni.proto._
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 /**
  * The JNI bridge logs every call made to toxcore and toxav functions along
@@ -42,7 +44,9 @@ object ToxJniLog extends (() => JniLog) {
   }
 
   /**
-   * Parse a protobuf message from bytes to [[JniLog]].
+   * Parse a protobuf message from bytes to [[JniLog]]. Logs an error and returns
+   * [[JniLog.defaultInstance]] if $bytes is invalid. Returns [[JniLog.defaultInstance]]
+   * if $bytes is null.
    */
   def fromBytes(bytes: Array[Byte]): JniLog = {
     try {
@@ -58,13 +62,13 @@ object ToxJniLog extends (() => JniLog) {
    * Pretty-print the log as function calls with time offset from the first message. E.g.
    * [0.000000] tox_new_unique({udp_enabled=1; ipv6_enabled=0; ...}) [20 µs, #1]
    *
-   * The last part is the time spent in the native function and the instance number.
+   * The last part is the time spent in the native function followed by the instance number.
    */
   def toString(log: JniLog): String = {
     log.entries.headOption match {
       case None => ""
       case Some(first) =>
-        log.entries.map(toString(first.timestamp)).mkString("\n")
+        log.entries.map(toString(first.timestamp.getOrElse(TimeVal.defaultInstance))).mkString("\n")
     }
   }
 
@@ -73,7 +77,7 @@ object ToxJniLog extends (() => JniLog) {
       val seconds = a.seconds - b.seconds
       val micros = a.micros - b.micros
       if (micros < 0) {
-        TimeVal(seconds - 1, micros + Duration(1, SECONDS).toMicros.toInt)
+        TimeVal(seconds - 1, micros + (1 second).toMicros.toInt)
       } else {
         TimeVal(seconds, micros)
       }
@@ -83,29 +87,27 @@ object ToxJniLog extends (() => JniLog) {
   }
 
   def toString(startTime: TimeVal)(entry: JniLogEntry): String = {
-    s"[${formattedTimeDiff(entry.timestamp, startTime)}] ${entry.name}(${entry.arguments.map(toString).mkString(", ")}) = " +
-      s"${toString(entry.result)} [${entry.elapsedMicros} µs" + {
+    s"[${formattedTimeDiff(entry.timestamp.getOrElse(TimeVal.defaultInstance), startTime)}] ${entry.name}(${entry.arguments.map(toString).mkString(", ")}) = " +
+      s"${toString(entry.result.getOrElse(Value.defaultInstance))} [${entry.elapsedMicros} µs" + {
         entry.instanceNumber match {
-          case None                 => ""
-          case Some(instanceNumber) => s", #$instanceNumber"
+          case 0              => ""
+          case instanceNumber => s", #$instanceNumber"
         }
       } + "]"
   }
 
-  @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.IsInstanceOf", "org.brianmckenna.wartremover.warts.AsInstanceOf"))
   def toString(value: Value): String = {
-    value match {
-      case Value(Some(sint64), None, None, Nil) => sint64.toString
-      case Value(None, Some(string), None, Nil) => string
-      case Value(None, None, Some(bytes), Nil)  => s"bytes[${bytes.size}]"
-      case Value(None, None, None, Nil)         => "void"
-      case Value(None, None, None, members)     => s"{${members.map(toString).mkString("; ")}}"
-      case invalid                              => logger.error("Invalid oneof message: " + invalid); "<error>"
+    value.v match {
+      case V.Empty                    => "void"
+      case V.VSint64(sint64)          => sint64.toString
+      case V.VString(string)          => string
+      case V.VBytes(bytes)            => s"bytes[${bytes.size}]"
+      case V.VObject(Struct(members)) => s"{${members.map(toString).mkString("; ")}}"
     }
   }
 
-  def toString(member: Member): String = {
-    s"${member.name}=${toString(member.value)}"
+  def toString(member: (String, Value)): String = {
+    s"${member._1}=${toString(member._2)}"
   }
 
 }

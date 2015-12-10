@@ -42,15 +42,15 @@ print_arg<TOXAV_CALL_CONTROL> (protolog::Value &value, TOXAV_CALL_CONTROL arg)
 {
   switch (arg)
     {
-    case TOXAV_CALL_CONTROL_RESUME: value.set_string ("TOXAV_CALL_CONTROL_RESUME"); return;
-    case TOXAV_CALL_CONTROL_PAUSE: value.set_string ("TOXAV_CALL_CONTROL_PAUSE"); return;
-    case TOXAV_CALL_CONTROL_CANCEL: value.set_string ("TOXAV_CALL_CONTROL_CANCEL"); return;
-    case TOXAV_CALL_CONTROL_MUTE_AUDIO: value.set_string ("TOXAV_CALL_CONTROL_MUTE_AUDIO"); return;
-    case TOXAV_CALL_CONTROL_UNMUTE_AUDIO: value.set_string ("TOXAV_CALL_CONTROL_UNMUTE_AUDIO"); return;
-    case TOXAV_CALL_CONTROL_HIDE_VIDEO: value.set_string ("TOXAV_CALL_CONTROL_HIDE_VIDEO"); return;
-    case TOXAV_CALL_CONTROL_SHOW_VIDEO: value.set_string ("TOXAV_CALL_CONTROL_SHOW_VIDEO"); return;
+    case TOXAV_CALL_CONTROL_RESUME: value.set_v_string ("TOXAV_CALL_CONTROL_RESUME"); return;
+    case TOXAV_CALL_CONTROL_PAUSE: value.set_v_string ("TOXAV_CALL_CONTROL_PAUSE"); return;
+    case TOXAV_CALL_CONTROL_CANCEL: value.set_v_string ("TOXAV_CALL_CONTROL_CANCEL"); return;
+    case TOXAV_CALL_CONTROL_MUTE_AUDIO: value.set_v_string ("TOXAV_CALL_CONTROL_MUTE_AUDIO"); return;
+    case TOXAV_CALL_CONTROL_UNMUTE_AUDIO: value.set_v_string ("TOXAV_CALL_CONTROL_UNMUTE_AUDIO"); return;
+    case TOXAV_CALL_CONTROL_HIDE_VIDEO: value.set_v_string ("TOXAV_CALL_CONTROL_HIDE_VIDEO"); return;
+    case TOXAV_CALL_CONTROL_SHOW_VIDEO: value.set_v_string ("TOXAV_CALL_CONTROL_SHOW_VIDEO"); return;
     }
-  value.set_string ("(TOXAV_CALL_CONTROL)" + std::to_string (arg));
+  value.set_v_string ("(TOXAV_CALL_CONTROL)" + std::to_string (arg));
 }
 
 template<>
@@ -91,14 +91,14 @@ print_arg<TOXAV_FRIEND_CALL_STATE> (protolog::Value &value, TOXAV_FRIEND_CALL_ST
 {
   switch (arg)
     {
-    case TOXAV_FRIEND_CALL_STATE_ERROR: value.set_string ("TOXAV_FRIEND_CALL_STATE_ERROR"); return;
-    case TOXAV_FRIEND_CALL_STATE_FINISHED: value.set_string ("TOXAV_FRIEND_CALL_STATE_FINISHED"); return;
-    case TOXAV_FRIEND_CALL_STATE_SENDING_A: value.set_string ("TOXAV_FRIEND_CALL_STATE_SENDING_A"); return;
-    case TOXAV_FRIEND_CALL_STATE_SENDING_V: value.set_string ("TOXAV_FRIEND_CALL_STATE_SENDING_V"); return;
-    case TOXAV_FRIEND_CALL_STATE_ACCEPTING_A: value.set_string ("TOXAV_FRIEND_CALL_STATE_ACCEPTING_A"); return;
-    case TOXAV_FRIEND_CALL_STATE_ACCEPTING_V: value.set_string ("TOXAV_FRIEND_CALL_STATE_ACCEPTING_V"); return;
+    case TOXAV_FRIEND_CALL_STATE_ERROR: value.set_v_string ("TOXAV_FRIEND_CALL_STATE_ERROR"); return;
+    case TOXAV_FRIEND_CALL_STATE_FINISHED: value.set_v_string ("TOXAV_FRIEND_CALL_STATE_FINISHED"); return;
+    case TOXAV_FRIEND_CALL_STATE_SENDING_A: value.set_v_string ("TOXAV_FRIEND_CALL_STATE_SENDING_A"); return;
+    case TOXAV_FRIEND_CALL_STATE_SENDING_V: value.set_v_string ("TOXAV_FRIEND_CALL_STATE_SENDING_V"); return;
+    case TOXAV_FRIEND_CALL_STATE_ACCEPTING_A: value.set_v_string ("TOXAV_FRIEND_CALL_STATE_ACCEPTING_A"); return;
+    case TOXAV_FRIEND_CALL_STATE_ACCEPTING_V: value.set_v_string ("TOXAV_FRIEND_CALL_STATE_ACCEPTING_V"); return;
     }
-  value.set_string ("(TOXAV_FRIEND_CALL_STATE)" + std::to_string (arg));
+  value.set_v_string ("(TOXAV_FRIEND_CALL_STATE)" + std::to_string (arg));
 }
 
 #endif

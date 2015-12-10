@@ -16,7 +16,7 @@ print_arg<ToxAV *> (protolog::Value &value, ToxAV *tox)
       ids.push_back (tox);
       found = ids.end () - 1;
     }
-  value.set_string ("@" + std::to_string (found - ids.begin () + 1));
+  value.set_v_string ("@" + std::to_string (found - ids.begin () + 1));
 }
 
 template<>
@@ -24,9 +24,9 @@ void
 print_arg<int16_t const *> (protolog::Value &value, int16_t const *data)
 {
   if (data != nullptr)
-    value.set_string ("out audio samples");
+    value.set_v_string ("out audio samples");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 template<>
@@ -34,9 +34,9 @@ void
 print_arg<av::Events *> (protolog::Value &value, av::Events *events)
 {
   if (events != nullptr)
-    value.set_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");
+    value.set_v_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 #endif

@@ -34,11 +34,11 @@ print_arg<TOX_CONNECTION> (protolog::Value &value, TOX_CONNECTION arg)
 {
   switch (arg)
     {
-    case TOX_CONNECTION_NONE: value.set_string ("TOX_CONNECTION_NONE"); return;
-    case TOX_CONNECTION_TCP: value.set_string ("TOX_CONNECTION_TCP"); return;
-    case TOX_CONNECTION_UDP: value.set_string ("TOX_CONNECTION_UDP"); return;
+    case TOX_CONNECTION_NONE: value.set_v_string ("TOX_CONNECTION_NONE"); return;
+    case TOX_CONNECTION_TCP: value.set_v_string ("TOX_CONNECTION_TCP"); return;
+    case TOX_CONNECTION_UDP: value.set_v_string ("TOX_CONNECTION_UDP"); return;
     }
-  value.set_string ("(TOX_CONNECTION)" + std::to_string (arg));
+  value.set_v_string ("(TOX_CONNECTION)" + std::to_string (arg));
 }
 
 template<>
@@ -73,11 +73,11 @@ print_arg<TOX_FILE_CONTROL> (protolog::Value &value, TOX_FILE_CONTROL arg)
 {
   switch (arg)
     {
-    case TOX_FILE_CONTROL_RESUME: value.set_string ("TOX_FILE_CONTROL_RESUME"); return;
-    case TOX_FILE_CONTROL_PAUSE: value.set_string ("TOX_FILE_CONTROL_PAUSE"); return;
-    case TOX_FILE_CONTROL_CANCEL: value.set_string ("TOX_FILE_CONTROL_CANCEL"); return;
+    case TOX_FILE_CONTROL_RESUME: value.set_v_string ("TOX_FILE_CONTROL_RESUME"); return;
+    case TOX_FILE_CONTROL_PAUSE: value.set_v_string ("TOX_FILE_CONTROL_PAUSE"); return;
+    case TOX_FILE_CONTROL_CANCEL: value.set_v_string ("TOX_FILE_CONTROL_CANCEL"); return;
     }
-  value.set_string ("(TOX_FILE_CONTROL)" + std::to_string (arg));
+  value.set_v_string ("(TOX_FILE_CONTROL)" + std::to_string (arg));
 }
 
 template<>
@@ -110,10 +110,10 @@ print_arg<TOX_MESSAGE_TYPE> (protolog::Value &value, TOX_MESSAGE_TYPE arg)
 {
   switch (arg)
     {
-    case TOX_MESSAGE_TYPE_NORMAL: value.set_string ("TOX_MESSAGE_TYPE_NORMAL"); return;
-    case TOX_MESSAGE_TYPE_ACTION: value.set_string ("TOX_MESSAGE_TYPE_ACTION"); return;
+    case TOX_MESSAGE_TYPE_NORMAL: value.set_v_string ("TOX_MESSAGE_TYPE_NORMAL"); return;
+    case TOX_MESSAGE_TYPE_ACTION: value.set_v_string ("TOX_MESSAGE_TYPE_ACTION"); return;
     }
-  value.set_string ("(TOX_MESSAGE_TYPE)" + std::to_string (arg));
+  value.set_v_string ("(TOX_MESSAGE_TYPE)" + std::to_string (arg));
 }
 
 template<>
@@ -148,11 +148,11 @@ print_arg<TOX_PROXY_TYPE> (protolog::Value &value, TOX_PROXY_TYPE arg)
 {
   switch (arg)
     {
-    case TOX_PROXY_TYPE_NONE: value.set_string ("TOX_PROXY_TYPE_NONE"); return;
-    case TOX_PROXY_TYPE_HTTP: value.set_string ("TOX_PROXY_TYPE_HTTP"); return;
-    case TOX_PROXY_TYPE_SOCKS5: value.set_string ("TOX_PROXY_TYPE_SOCKS5"); return;
+    case TOX_PROXY_TYPE_NONE: value.set_v_string ("TOX_PROXY_TYPE_NONE"); return;
+    case TOX_PROXY_TYPE_HTTP: value.set_v_string ("TOX_PROXY_TYPE_HTTP"); return;
+    case TOX_PROXY_TYPE_SOCKS5: value.set_v_string ("TOX_PROXY_TYPE_SOCKS5"); return;
     }
-  value.set_string ("(TOX_PROXY_TYPE)" + std::to_string (arg));
+  value.set_v_string ("(TOX_PROXY_TYPE)" + std::to_string (arg));
 }
 
 template<>
@@ -187,11 +187,11 @@ print_arg<TOX_SAVEDATA_TYPE> (protolog::Value &value, TOX_SAVEDATA_TYPE arg)
 {
   switch (arg)
     {
-    case TOX_SAVEDATA_TYPE_NONE: value.set_string ("TOX_SAVEDATA_TYPE_NONE"); return;
-    case TOX_SAVEDATA_TYPE_TOX_SAVE: value.set_string ("TOX_SAVEDATA_TYPE_TOX_SAVE"); return;
-    case TOX_SAVEDATA_TYPE_SECRET_KEY: value.set_string ("TOX_SAVEDATA_TYPE_SECRET_KEY"); return;
+    case TOX_SAVEDATA_TYPE_NONE: value.set_v_string ("TOX_SAVEDATA_TYPE_NONE"); return;
+    case TOX_SAVEDATA_TYPE_TOX_SAVE: value.set_v_string ("TOX_SAVEDATA_TYPE_TOX_SAVE"); return;
+    case TOX_SAVEDATA_TYPE_SECRET_KEY: value.set_v_string ("TOX_SAVEDATA_TYPE_SECRET_KEY"); return;
     }
-  value.set_string ("(TOX_SAVEDATA_TYPE)" + std::to_string (arg));
+  value.set_v_string ("(TOX_SAVEDATA_TYPE)" + std::to_string (arg));
 }
 
 template<>
@@ -226,11 +226,11 @@ print_arg<TOX_USER_STATUS> (protolog::Value &value, TOX_USER_STATUS arg)
 {
   switch (arg)
     {
-    case TOX_USER_STATUS_NONE: value.set_string ("TOX_USER_STATUS_NONE"); return;
-    case TOX_USER_STATUS_AWAY: value.set_string ("TOX_USER_STATUS_AWAY"); return;
-    case TOX_USER_STATUS_BUSY: value.set_string ("TOX_USER_STATUS_BUSY"); return;
+    case TOX_USER_STATUS_NONE: value.set_v_string ("TOX_USER_STATUS_NONE"); return;
+    case TOX_USER_STATUS_AWAY: value.set_v_string ("TOX_USER_STATUS_AWAY"); return;
+    case TOX_USER_STATUS_BUSY: value.set_v_string ("TOX_USER_STATUS_BUSY"); return;
     }
-  value.set_string ("(TOX_USER_STATUS)" + std::to_string (arg));
+  value.set_v_string ("(TOX_USER_STATUS)" + std::to_string (arg));
 }
 
 #endif

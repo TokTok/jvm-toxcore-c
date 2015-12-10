@@ -150,7 +150,7 @@ template<typename Arg>
 void
 print_arg (protolog::Value &value, Arg arg)
 {
-  value.set_sint64 (arg);
+  value.set_v_sint64 (arg);
 }
 
 template void print_arg<         bool     > (protolog::Value &,          bool     );
@@ -170,9 +170,9 @@ void
 print_arg<char const *> (protolog::Value &value, char const *data)
 {
   if (data != nullptr)
-    value.set_string (data);
+    value.set_v_string (data);
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 template<>
@@ -180,9 +180,9 @@ void
 print_arg<uint8_t *> (protolog::Value &value, uint8_t *data)
 {
   if (data != nullptr)
-    value.set_string ("in data");
+    value.set_v_string ("in data");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 template<>
@@ -190,18 +190,18 @@ void
 print_arg<uint8_t const *> (protolog::Value &value, uint8_t const *data)
 {
   if (data != nullptr)
-    value.set_string ("out data");
+    value.set_v_string ("out data");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 void
 print_arg (protolog::Value &value, uint8_t const *data, std::size_t length)
 {
   if (data != nullptr)
-    value.set_bytes (data, length);
+    value.set_v_bytes (data, length);
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 template<>
@@ -209,9 +209,9 @@ void
 print_arg<JNIEnv *> (protolog::Value &value, JNIEnv *data)
 {
   if (data != nullptr)
-    value.set_string ("<JNIEnv>");
+    value.set_v_string ("<JNIEnv>");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 template<>
@@ -219,9 +219,9 @@ void
 print_arg<jbyteArray> (protolog::Value &value, jbyteArray data)
 {
   if (data != nullptr)
-    value.set_string ("<jbyteArray>");
+    value.set_v_string ("<jbyteArray>");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }
 
 template<>
@@ -229,7 +229,7 @@ void
 print_arg<jintArray> (protolog::Value &value, jintArray data)
 {
   if (data != nullptr)
-    value.set_string ("<jintArray>");
+    value.set_v_string ("<jintArray>");
   else
-    value.set_string ("<null>");
+    value.set_v_string ("<null>");
 }

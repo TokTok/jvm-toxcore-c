@@ -1,55 +1,55 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package im.tox.tox4j.impl.jni.proto;
 
 
 // struct timeval from <sys/time.h> representing a point in time.
 message TimeVal {
-  required uint32 seconds = 1;
-  required uint32 micros = 2;
+  uint32 seconds = 1;
+  uint32 micros = 2;
 }
 
 
-// A member of an aggregate (struct): name/value pair.
-message Member {
-  required string name = 1;
-  required Value value = 2;
+// For aggregates, this contains the members. It can be a tree if the object
+// member itself is also an object.
+message Struct {
+  map<string, Value> members = 1;
 }
 
 
 // A single argument or return value.
 message Value {
-  optional sint64 sint64 = 1;
-  optional string string = 2;
-  optional bytes bytes = 3;
-  // For aggregates, this contains the members. It can be a tree if the object
-  // member itself is also an object.
-  repeated Member object = 4;
+  oneof v {
+    sint64 v_sint64 = 1;
+    string v_string = 2;
+    bytes v_bytes = 3;
+    Struct v_object = 4;
+  }
 }
 
 
 // A single log entry representing one native function call.
 message JniLogEntry {
   // The called function name or address.
-  required string name = 1;
+  string name = 1;
 
   // Instance number for the Tox or ToxAV instance.
-  optional uint32 instance_number = 2;
+  uint32 instance_number = 2;
 
   // All the arguments to the function in order. These may contain out
   // parameters, in which case the result will not be logged.
   // TODO(iphydf): Infer out parameters from constness and log them anyway.
   repeated Value arguments = 3;
 
-  required Value result = 4;
+  Value result = 4;
 
   // Exact point in time (seconds and microseconds)
-  required TimeVal timestamp = 5;
+  TimeVal timestamp = 5;
 
   // Time spent inside the actual native function in microseconds. This does
   // not include JNI overhead and the C++ code around it. It is purely the
   // time spent in the tox function.
-  required uint32 elapsed_micros = 6;
+  uint32 elapsed_micros = 6;
 }
 
 

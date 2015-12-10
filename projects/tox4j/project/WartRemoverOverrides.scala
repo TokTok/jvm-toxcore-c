@@ -55,6 +55,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "JniLogEntry",
         "JniLog",
         "Member",
+        "Struct",
         "TimeVal",
         "Value",
         "InternalFields_ProtoLogProto"

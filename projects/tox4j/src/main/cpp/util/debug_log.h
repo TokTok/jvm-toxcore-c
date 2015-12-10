@@ -78,11 +78,9 @@ print_arg (protolog::Value &value, wrapped_value<void> const &arg)
 
 template<typename ...Args>
 void
-print_member (protolog::Value &value, char const *name, Args ...member_args)
+print_member (protolog::Struct &object, char const *name, Args ...member_args)
 {
-  protolog::Member *member = value.add_object ();
-  member->set_name (name);
-  print_arg (*member->mutable_value (), member_args...);
+  print_arg ((*object.mutable_members ())[name], member_args...);
 }
 
 

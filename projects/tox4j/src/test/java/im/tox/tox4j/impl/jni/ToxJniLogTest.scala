@@ -14,6 +14,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     ToxJniLog() // clear
 
     ToxJniLog.maxSize = TestMaxSize
+    assert(ToxJniLog.maxSize == TestMaxSize)
     assert(ToxJniLog().entries.isEmpty)
     // Construct and destroy a Tox instance to cause something (tox_new) to be logged and the log
     // will be non-empty.
@@ -25,6 +26,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     ToxJniLog() // clear
 
     ToxJniLog.maxSize = 0
+    assert(ToxJniLog.maxSize == 0)
     assert(ToxJniLog().entries.isEmpty)
     ToxCoreFactory.withTox { tox => }
     assert(ToxJniLog().entries.isEmpty)
