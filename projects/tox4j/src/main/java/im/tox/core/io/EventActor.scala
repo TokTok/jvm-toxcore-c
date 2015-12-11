@@ -14,8 +14,6 @@ case object EventActor {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private val WaitingTime = 10000
-
   def make(
     ioDht: IO[Dht],
     processEvent: IO.Event => State[Dht, CoreError \/ Seq[IO.Action]]
@@ -28,7 +26,6 @@ case object EventActor {
     logger.debug(s"Running ${initialActions.size} initial actions")
 
     for {
-      () <- Process.eval(Task(Thread.sleep(WaitingTime)))
       action <- Process.emit(\/-(initialActions)).merge(eventSource.stateScan(dht)(processEvent))
       () <- {
         val actionSource =

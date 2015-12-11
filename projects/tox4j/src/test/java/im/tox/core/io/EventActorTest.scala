@@ -36,8 +36,8 @@ final class EventActorTest extends FunSuite {
   }
 
   test("decision making") {
-    val actionQueue = async.boundedQueue[IO.Action](10)
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val actionQueue = async.boundedQueue[IO.Action](1)
+    val eventQueue = async.boundedQueue[IO.Event](1)
 
     val eventActor = EventActor.make(Dht(), processEvent1)(eventQueue.dequeue, actionQueue.enqueue)
 
@@ -58,8 +58,8 @@ final class EventActorTest extends FunSuite {
   }
 
   test(s"linking $EventActor and $TimeActor together") {
-    val actionQueue = async.boundedQueue[IO.Action](10)
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val actionQueue = async.boundedQueue[IO.Action](1)
+    val eventQueue = async.boundedQueue[IO.Event](1)
 
     val eventActor = EventActor.make(Dht(), processEvent2)(eventQueue.dequeue, actionQueue.enqueue)
     val timeActor = TimeActor.make(actionQueue.dequeue, eventQueue.enqueue) ++ eventActor.kill

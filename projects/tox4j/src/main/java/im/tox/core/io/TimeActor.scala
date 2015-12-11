@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.core.io.IO.{Action, Event, TimerId}
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scalaz.concurrent.Task
 import scalaz.stream._
 import scalaz.stream.async.mutable.Signal
@@ -15,13 +16,43 @@ case object TimeActor {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private val QueueSize = 10
+  /**
+   * A wrapper for a mutable value and a signal containing the same value.
+   *
+   * This optimisation makes any adding/cancelling of timers 20 times faster,
+   * because we avoid many calls to signal.get, which launches new [[Task]]s.
+   * The reason we can safely do this optimisation is that we are sure that
+   * the signal is only modified by this class ([[LocalSignal]]).
+   *
+   * We lose referential transparency, because [[get]] may now return
+   * different values for the same object at different times.
+   */
+  private final class LocalSignal(
+      private var value: Boolean = false, // scalastyle:ignore var.field
+      private val signal: Signal[Boolean] = async.signalOf(false)
+  ) {
+
+    def set(value: Boolean): Task[Unit] = {
+      signal.set(value).map { _ =>
+        this.value = value
+      }
+    }
+
+    def get: Boolean = {
+      this.value
+    }
+
+    def discrete: Process[Task, Boolean] = {
+      signal.discrete
+    }
+
+  }
 
   def make(
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
-    val actionQueue = async.boundedQueue[IO.Action](QueueSize)
+    val actionQueue = async.boundedQueue[IO.Action](1)
 
     val producer = actionSource.to(actionQueue.enqueue)
     val consumer = processTimerActions(Map.empty, actionQueue.dequeue, eventSink)
@@ -37,7 +68,7 @@ case object TimeActor {
    * next is started.
    */
   private def processTimerActions(
-    timers: Map[TimerId, Signal[Boolean]],
+    timers: Map[TimerId, LocalSignal],
     actionSource: Process[Task, IO.Action],
     eventSink: Sink[Task, IO.Event]
   ): Process[Task, Unit] = {
@@ -56,10 +87,10 @@ case object TimeActor {
   }
 
   private def processTimerAction(
-    timers: Map[TimerId, Signal[Boolean]],
+    timers: Map[TimerId, LocalSignal],
     eventSink: Sink[Task, Event],
     action: IO.Action
-  ): (Map[TimerId, Signal[Boolean]], Process[Task, Unit]) = {
+  ): (Map[TimerId, LocalSignal], Process[Task, Unit]) = {
     action match {
       case Action.StartTimer(id, delay, repeat, event) =>
         logger.debug(
@@ -67,30 +98,25 @@ case object TimeActor {
             repeat.fold("indefinitely")("and repeat " + _)
         )
 
-        implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
+        // New stop-timer signal.
+        val stopTimer = new LocalSignal
 
         // Stop old timer.
-        timers.get(id).foreach(_.set(true).run)
+        val newTimers = {
+          timers.get(id).foreach(_.set(true).run)
+          timers + (id -> stopTimer)
+        }
 
-        val stopTimer = async.signalOf(false)
-
-        val timer =
-          repeat.toList
-            .foldLeft(time.awakeEvery(delay))(_.take(_))
-            .flatMap { duration =>
-              event(duration)
-                .fold(Process.empty[Task, Event])(Process.emit)
-                .to(eventSink)
-            }
-            .onComplete {
-              // Set the stopTimer signal to true so it is removed when removeOldTimers is
-              // called next time.
-              Process.eval_(stopTimer.set(true))
-            }
+        val timer = createTimer(eventSink, delay, repeat, event)
+          .onComplete {
+            // Set the stopTimer signal to true so it is removed when removeOldTimers is
+            // called next time.
+            Process.eval_(stopTimer.set(true))
+          }
 
         val stoppableTimer = (stopTimer.discrete wye timer)(wye.interrupt)
 
-        (timers + (id -> stopTimer), stoppableTimer)
+        (newTimers, stoppableTimer)
 
       case Action.CancelTimer(id) =>
         logger.debug(s"Cancelling timer $id")
@@ -104,16 +130,37 @@ case object TimeActor {
     }
   }
 
+  private def createTimer(
+    eventSink: Sink[Task, Event],
+    delay: FiniteDuration,
+    repeat: Option[Int],
+    event: (Duration) => Option[Event]
+  ): Process[Task, Unit] = {
+    implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
+
+    repeat.toList
+      .foldLeft(time.awakeEvery(delay))(_.take(_))
+      .flatMap { duration =>
+        event(duration)
+          .fold(Process.empty[Task, Event])(Process.emit)
+          .to(eventSink)
+      }
+  }
+
   /**
    * Remove timers that have been cancelled.
    */
-  private def removeOldTimers(timers: Map[TimerId, Signal[Boolean]]): Map[TimerId, Signal[Boolean]] = {
-    val result = timers.filterNot(_._2.get.run)
-    val removedCount = timers.size - result.size
-    if (removedCount != 0) {
-      logger.debug(s"Cleaned up $removedCount old timers")
+  private def removeOldTimers(timers: Map[TimerId, LocalSignal]): Map[TimerId, LocalSignal] = {
+    if (!timers.exists(_._2.get)) {
+      timers
+    } else {
+      val result = timers.filterNot(_._2.get)
+      val removedCount = timers.size - result.size
+      if (removedCount != 0) {
+        logger.debug(s"Cleaned up $removedCount old timers")
+      }
+      result
     }
-    result
   }
 
 }

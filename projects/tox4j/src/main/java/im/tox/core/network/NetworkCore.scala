@@ -1,17 +1,11 @@
 package im.tox.core.network
 
-import java.net.InetSocketAddress
-
 import com.typesafe.scalalogging.Logger
-import im.tox.core.crypto.PublicKey
+import im.tox.core.dht.Dht
 import im.tox.core.dht.packets.dht.{NodesRequestPacket, PingRequestPacket}
-import im.tox.core.dht.{Dht, NodeInfo, Protocol}
-import im.tox.core.io.IO.TimerId
 import im.tox.core.io.{EventActor, IO, TimeActor, UdpActor}
-import im.tox.core.network.packets.ToxPacket
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scalaz.concurrent.Task
 import scalaz.stream._
@@ -46,6 +40,8 @@ object NetworkCore {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
+  private val WaitingTime = 10000
+
   /**
    * Create a new DHT node.
    *
@@ -54,7 +50,7 @@ object NetworkCore {
    * @param dht The initial DHT state.
    */
   def client(dht: IO[Dht]): Process[Task, Unit] = {
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val eventQueue = async.boundedQueue[IO.Event](1)
     val actionTopic = async.topic[IO.Action]()
 
     val actionLoop = EventActor.make(dht, EventProcessor.processEvent)(eventQueue.dequeue, actionTopic.publish)
@@ -71,10 +67,15 @@ object NetworkCore {
           Process.empty[Task, Unit]
       }
 
-    shutdownLoop
-      .merge(udpLoop)
-      .merge(timeLoop)
-      .merge(actionLoop)
+    Thread.sleep(WaitingTime)
+    for {
+      () <- shutdownLoop
+        .merge(udpLoop)
+        .merge(timeLoop)
+        .merge(actionLoop)
+    } yield {
+      logger.debug("Boop")
+    }
   }
 
 }

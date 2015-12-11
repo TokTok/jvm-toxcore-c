@@ -44,7 +44,7 @@ final class UdpActorTest extends FunSuite {
   val minResponses = (packetCount * minCompletionRatio).toInt max 1
 
   def runTest(actionSink: Sink[Task, IO.Action], actionSource: Process[Task, IO.Action]): Unit = {
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val eventQueue = async.boundedQueue[IO.Event](1)
 
     val actionActor = delayed(Process.range(0, packetCount).map(sendPingAction).toSource.to(actionSink))
 
@@ -119,7 +119,7 @@ final class UdpActorTest extends FunSuite {
   }
 
   test("process actions with queue") {
-    val actionQueue = async.boundedQueue[IO.Action](10)
+    val actionQueue = async.boundedQueue[IO.Action](1)
 
     runTest(actionQueue.enqueue, actionQueue.dequeue)
   }

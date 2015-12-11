@@ -29,7 +29,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     val enqueueLoop = (Process(startTimer).repeat.take(count) ++ Process.emit(shutdown)).toSource.to(enqueue)
     val dequeueLoop =
       if (useTimeActor) {
-        val eventQueue = async.boundedQueue[IO.Event](10)
+        val eventQueue = async.boundedQueue[IO.Event](1)
         TimeActor.make(dequeue, eventQueue.enqueue)
       } else {
         dequeue.flatMap { i =>
@@ -51,7 +51,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
 
   ignore("performance of async.boundedQueue") {
     forAll(Gen.choose(100, 200)) { count =>
-      val queue = async.boundedQueue[IO.Action](10)
+      val queue = async.boundedQueue[IO.Action](1)
 
       performanceTest(useTimeActor = true, count, queue.enqueue, queue.dequeue, queue.close)
     }
@@ -69,8 +69,8 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     val shutdownAfter = 300 millis
     val resetAfter = 100 millis
 
-    val actionQueue = async.boundedQueue[IO.Action](10)
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val actionQueue = async.boundedQueue[IO.Action](1)
+    val eventQueue = async.boundedQueue[IO.Event](1)
 
     val timeActor = TimeActor.make(actionQueue.dequeue, eventQueue.enqueue)
 
@@ -126,8 +126,8 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     val shutdownAfter = 300 millis
     val cancelAfter = 100 millis
 
-    val actionQueue = async.boundedQueue[IO.Action](10)
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val actionQueue = async.boundedQueue[IO.Action](1)
+    val eventQueue = async.boundedQueue[IO.Event](1)
 
     val timeActor = TimeActor.make(actionQueue.dequeue, eventQueue.enqueue)
 
@@ -169,8 +169,8 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
     val repeats = 1
     val timers = 4
 
-    val actionQueue = async.boundedQueue[IO.Action](10)
-    val eventQueue = async.boundedQueue[IO.Event](10)
+    val actionQueue = async.boundedQueue[IO.Action](1)
+    val eventQueue = async.boundedQueue[IO.Event](1)
 
     val shutdownTimer = IO.TimerIdFactory("Shutdown")
     val actionActor = Process.range(0, timers).map { id =>
@@ -233,7 +233,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
   }
 
   test(s"$TimeActor listening to an async.boundedQueue") {
-    val actionQueue = async.boundedQueue[Action](10)
+    val actionQueue = async.boundedQueue[Action](1)
 
     val enqueue = actionQueue.enqueue
     val dequeue = actionQueue.dequeue
@@ -253,7 +253,7 @@ final class TimeActorTest extends FunSuite with PropertyChecks {
   }
 
   private def testTimers(enqueue: Sink[Task, Action], dequeue: Process[Task, Action], closeActionQueue: Task[Unit]): Unit = {
-    val eventQueue = async.boundedQueue[Event](10)
+    val eventQueue = async.boundedQueue[Event](1)
 
     val actionActor = {
       Process(
