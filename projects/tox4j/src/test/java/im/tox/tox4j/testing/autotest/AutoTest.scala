@@ -6,7 +6,7 @@ import im.tox.tox4j.av.{ToxAv, ToxAvFactory}
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
-import im.tox.tox4j.testing.autotest.AutoTest.{ClientState, EventListener, Participant}
+import im.tox.tox4j.testing.autotest.AutoTest.{ParticipantId, ClientState, EventListener, Participant}
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
@@ -16,9 +16,15 @@ object AutoTest {
 
   type Task[ToxCoreState] = (ToxCore[ToxCoreState], ToxAv[ToxCoreState], ToxCoreState) => ToxCoreState
 
+  final case class ParticipantId(private val value: Int) extends AnyVal {
+    def prev: ParticipantId = copy(value - 1)
+    def next: ParticipantId = copy(value + 1)
+    override def toString: String = s"#$value"
+  }
+
   final case class ClientState[ToxCoreState](
-      id: Int,
-      friendList: Map[Int, Int],
+      id: ParticipantId,
+      friendList: Map[Int, ParticipantId],
       state: ToxCoreState,
       tasks: List[Task[ClientState[ToxCoreState]]] = Nil,
       running: Boolean = true
@@ -39,7 +45,7 @@ object AutoTest {
       copy(state = f(state))
     }
 
-    def id(friendNumber: Int): Int = {
+    def id(friendNumber: Int): ParticipantId = {
       friendList(friendNumber)
     }
 
@@ -108,12 +114,15 @@ final case class AutoTest(
     coreFactory.withToxN[ClientState[ToxCoreState], List[ToxCoreState]](count, options) { toxes =>
       avFactory.withToxAvN[ClientState[ToxCoreState], List[ToxCoreState]](toxes) { avs =>
         val states = {
-          val avsWithIds = avs.zipWithIndex
+          val avsWithIds =
+            for (((tox, av), id) <- avs.zipWithIndex) yield {
+              (tox, av, ParticipantId(id))
+            }
 
-          for (((tox, av), id) <- avsWithIds) yield {
+          for ((tox, av, id) <- avsWithIds) yield {
             // Everybody adds everybody else as friend.
             val friendList =
-              for (((friendTox, friendAv), friendId) <- avsWithIds if friendId != id) yield {
+              for ((friendTox, friendAv, friendId) <- avsWithIds if friendId != id) yield {
                 tox.addFriendNorequest(friendTox.getPublicKey) -> friendId
               }
             (tox, av, id, Map(friendList: _*))

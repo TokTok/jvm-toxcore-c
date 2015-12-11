@@ -4,25 +4,13 @@ import im.tox.core.error.CoreError
 import im.tox.tox4j.DhtNodeSelector._
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.exceptions.{ToxBootstrapException, ToxFriendAddException, ToxNewException}
-import im.tox.tox4j.exceptions.ToxException
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import org.jetbrains.annotations.NotNull
-import org.scalatest.Assertions
 
 import scala.language.implicitConversions
 import scalaz.\/
 
-trait ToxTestMixin extends Assertions {
-
-  protected def intercept[E <: Enum[E]](code: E)(f: => Unit) = {
-    try {
-      f
-      fail(s"Expected exception with code ${code.name}")
-    } catch {
-      case e: ToxException[_] =>
-        assert(e.code eq code)
-    }
-  }
+trait ToxTestMixin extends ToxExceptionChecks {
 
   protected def interceptWithTox[E <: Enum[E]](code: E)(f: ToxCore[Unit] => Unit) = {
     intercept(code) {
