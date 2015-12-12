@@ -20,6 +20,10 @@ object AudioPlayback {
     screen.map(new String(_)).mkString("\n")
   }
 
+  private def valueToRange(value: Double, maxValue: Int, maxRange: Int): Int = {
+    (value / maxValue * maxRange).toInt
+  }
+
   def play(pcm: Array[Short]): Unit = {
     soundLine.foreach { soundLine =>
       val buffer = serialiseAudioFrame(pcm)
@@ -46,15 +50,11 @@ object AudioPlayback {
     soundLine
   }
 
-  private def valueToRange(value: Double, maxValue: Int, maxRange: Int): Int = {
-    (value / maxValue * maxRange).toInt
-  }
-
   def main(args: Array[String]): Unit = {
     soundLine.foreach { soundLine =>
       var t = 0
 
-      while (true) {
+      while (t < AudioGenerator.Selected.length) {
         val frame = AudioGenerator.Selected.nextFrame16(t, 80)
         val buffer = serialiseAudioFrame(frame)
         t += 80

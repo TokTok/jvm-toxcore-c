@@ -78,7 +78,42 @@ object AudioGenerator {
     ((t & 0xF) * ((0 - t) & 0xF) * (((t & 0x10) >> 3) - 1) * 0x80 / 0x41 + 0x80) << 7
   }
 
+  private final class Oscillator(val sampleRate: Int) extends AnyVal {
+    private def position(t: Int, frequency: Double): Double = {
+      val samples = sampleRate / frequency
+      t % samples / samples
+    }
+
+    private def osc(shape: Double => Double)(t: Int, frequency: Double, volume: Double): Double = {
+      val x = position(t, frequency)
+      shape(x) * volume
+    }
+
+    def sine(t: Int, frequency: Double, volume: Double): Double = {
+      osc(x => Math.sin(2.0 * Math.PI * x))(t, frequency, volume)
+    }
+
+    def sawtooth(t: Int, frequency: Double, volume: Double): Double = {
+      osc(x => 2.0 * (x - Math.floor(x + 0.5)))(t, frequency, volume)
+    }
+  }
+
+  private def play(t: Int, tones: String, tempo: Int): Char = {
+    tones.charAt(t % (tones.length * tempo) / tempo)
+  }
+
+  val Experiments = generator { t =>
+    val osc = new Oscillator(8000)
+    val tone1 = play(t, "!acatc,.pxa.,n", 2000)
+    val tone2 = play(t, "!acatc,.pxa.,n", 4000) * 2
+    Seq(
+      osc.sawtooth(t, tone1, 0.1),
+      osc.sawtooth(t, tone1 * 3, if (t > osc.sampleRate * 7) 0.1 else 0),
+      osc.sine(t, tone2, 0.2)
+    ).map(_ * Short.MaxValue).sum.toShort
+  }
+
   // Selected audio generator for tests.
-  val Selected = Sine3
+  val Selected = Experiments
 
 }
