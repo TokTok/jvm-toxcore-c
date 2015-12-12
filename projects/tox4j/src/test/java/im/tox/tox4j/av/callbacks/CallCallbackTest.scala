@@ -35,7 +35,7 @@ final class CallCallbackTest extends AutoTestSuite with ToxExceptionChecks {
       if (state.id(friendNumber) == state.id.prev) {
         state.addTask { (tox, av, state) =>
           // Calling them back while they are ringing is invalid.
-          intercept(ToxavCallException.Code.MALLOC) {
+          intercept(ToxavCallException.Code.FRIEND_ALREADY_IN_CALL) {
             av.call(friendNumber, BitRate.fromInt(10).get, BitRate.Disabled)
           }
           // Say "No thanks" and stop talking.

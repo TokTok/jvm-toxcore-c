@@ -85,22 +85,24 @@ final case class AutoTest(
   }
 
   @tailrec
-  private def mainLoop[ToxCoreState](clients: List[Participant[ToxCoreState]]): List[ToxCoreState] = {
+  private def mainLoop[ToxCoreState](clients: List[Participant[ToxCoreState]], iteration: Int = 0): List[ToxCoreState] = {
     val nextClients = clients.map {
       case Participant(tox, av, state) =>
-        Participant(tox, av,
+        Participant(
+          tox, av,
           state
             |> tox.iterate
             |> av.iterate
-            |> (state => perform(tox, av, state.tasks.reverse)(state))
-            |> (_.copy(tasks = Nil)))
+            |> (state => perform(tox, av, state.tasks.reverse)(state.copy(tasks = Nil)))
+        )
     }
 
     val interval = (nextClients.map(_.tox.iterationInterval) ++ nextClients.map(_.av.iterationInterval)).min
+    logger.trace(s"Iteration $iteration, interval $interval")
     Thread.sleep(interval)
 
     if (nextClients.exists(_.state.running)) {
-      mainLoop(nextClients)
+      mainLoop(nextClients, iteration + 1)
     } else {
       nextClients.map(_.state.state)
     }

@@ -45,6 +45,7 @@ libraryDependencies ++= Seq(
   "com.assembla.scala-incubator" %% "graph-dot" % "1.10.0",
   "com.intellij" % "forms_rt" % "7.0.3",
   "com.storm-enroute" %% "scalameter" % "0.8-SNAPSHOT",
+  "jline" % "jline" % "2.13",
   "junit" % "junit" % "4.12",
   "org.scalacheck" %% "scalacheck" % "1.12.5",
   "org.scalatest" %% "scalatest" % "3.0.0-M14",
