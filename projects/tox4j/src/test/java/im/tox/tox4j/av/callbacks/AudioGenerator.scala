@@ -114,6 +114,6 @@ object AudioGenerator {
   }
 
   // Selected audio generator for tests.
-  val Selected = Experiments
+  val Selected = Sine3
 
 }

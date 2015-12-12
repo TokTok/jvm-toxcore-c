@@ -124,14 +124,12 @@ TOX_METHOD (void, AudioSendFrame,
 TOX_METHOD (void, VideoSendFrame,
   jint instanceNumber, jint friendNumber, jint width, jint height, jbyteArray y, jbyteArray u, jbyteArray v)
 {
-  size_t pixel_count = width * height;
-
   auto yData = fromJavaArray (env, y);
   auto uData = fromJavaArray (env, u);
   auto vData = fromJavaArray (env, v);
-  if (yData.size () != pixel_count ||
-      uData.size () != pixel_count ||
-      vData.size () != pixel_count)
+  if (yData.size () != width * height ||
+      uData.size () != (width / 2) * (height / 2) ||
+      vData.size () != (width / 2) * (height / 2))
     return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
 
   return instances.with_instance_ign (env, instanceNumber,
