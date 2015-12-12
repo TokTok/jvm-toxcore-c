@@ -1,20 +1,34 @@
 package im.tox.tox4j.av.callbacks
 
+import java.io.{DataOutputStream, FileOutputStream}
 import java.util
 
-import im.tox.tox4j.av.ToxAv
-import im.tox.tox4j.av.data._
-import im.tox.tox4j.av.enums.ToxavFriendCallState
-import im.tox.tox4j.core.ToxCore
-import im.tox.tox4j.core.enums.ToxConnection
-import im.tox.tox4j.testing.ToxExceptionChecks
-import im.tox.tox4j.testing.autotest.AutoTestSuite
+import _root_.im.tox.tox4j.av.ToxAv
+import _root_.im.tox.tox4j.av.data._
+import _root_.im.tox.tox4j.av.enums.ToxavFriendCallState
+import _root_.im.tox.tox4j.core.ToxCore
+import _root_.im.tox.tox4j.core.enums.ToxConnection
+import _root_.im.tox.tox4j.testing.ToxExceptionChecks
+import _root_.im.tox.tox4j.testing.autotest.AutoTestSuite
 
 final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
+
+  private def video = VideoGenerator.Selected
 
   type S = Int
 
   object Handler extends EventListener(0) {
+
+    private val displayImage = {
+      if (sys.env.contains("TRAVIS")) {
+        None
+      } else {
+        Some(
+          // VideoDisplay.Gui(video.width, video.height)
+          VideoDisplay.Console(video.width, video.height)
+        )
+      }
+    }
 
     override def friendConnectionStatus(
       friendNumber: Int,
@@ -28,7 +42,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
         // Call id+1.
         state.addTask { (tox, av, state) =>
           debug(state, s"Ringing ${state.id(friendNumber)}")
-          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(320).get)
+          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(18000).get)
           state
         }
       }
@@ -49,16 +63,29 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
     private def sendFrame(friendNumber: Int)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
       val state = state0.modify(_ + 1)
+      debug(state, s"Sending video frame ${state0.get}")
 
-      val y = Array.ofDim[Byte](100 * 100)
-      val u = Array.ofDim[Byte](50 * 50)
-      val v = Array.ofDim[Byte](50 * 50)
-      av.videoSendFrame(friendNumber, 100, 100, y, u, v)
+      val y = video.y(state0.get)
+      val u = video.u(state0.get)
+      val v = video.v(state0.get)
+      assert(y.length == video.width * video.height)
+      assert(u.length == video.width * video.height / 4)
+      assert(v.length == video.width * video.height / 4)
 
-      if (state.get >= 200) {
+      av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
+
+      if (state.get >= video.length) {
         state.finish
       } else {
-        state.addTask(sendFrame(friendNumber))
+        val delay =
+          if (video.width * video.height < 100 * 100) {
+            // Delay the next frame until the iteration after the next if the image is
+            // very small. Otherwise, toxav will reduce the iteration interval to 0.
+            1
+          } else {
+            0
+          }
+        state.addTask(delay)(sendFrame(friendNumber))
       }
     }
 
@@ -74,9 +101,13 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       yStride: Int, uStride: Int, vStride: Int
     )(state0: State): State = {
       val state = state0.modify(_ + 1)
-      debug(state, "Received video frame")
+      debug(state, s"Received video frame ${state0.get}: size = ($width, $height), strides = ($yStride, $uStride, $vStride)")
 
-      if (state.get >= 200) {
+      displayImage.foreach { display =>
+        display.display(y, u, v, yStride, uStride, vStride)
+      }
+
+      if (state.get >= video.length) {
         state.finish
       } else {
         state

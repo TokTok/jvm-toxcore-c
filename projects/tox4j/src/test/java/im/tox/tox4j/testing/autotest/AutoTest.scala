@@ -6,7 +6,7 @@ import im.tox.tox4j.av.{ToxAv, ToxAvFactory}
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
-import im.tox.tox4j.testing.autotest.AutoTest.{ParticipantId, ClientState, EventListener, Participant}
+import im.tox.tox4j.testing.autotest.AutoTest._
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
@@ -14,7 +14,9 @@ import scalaz.Scalaz.ToIdOps
 
 object AutoTest {
 
-  type Task[ToxCoreState] = (ToxCore[ToxCoreState], ToxAv[ToxCoreState], ToxCoreState) => ToxCoreState
+  type Core[S] = ToxCore[ClientState[S]]
+  type Av[S] = ToxAv[ClientState[S]]
+  type Task[S] = (Core[S], Av[S], ClientState[S]) => ClientState[S]
 
   final case class ParticipantId(private val value: Int) extends AnyVal {
     def prev: ParticipantId = copy(value - 1)
@@ -22,26 +24,36 @@ object AutoTest {
     override def toString: String = s"#$value"
   }
 
-  final case class ClientState[ToxCoreState](
+  final case class ClientState[S](
       id: ParticipantId,
       friendList: Map[Int, ParticipantId],
-      state: ToxCoreState,
-      tasks: List[Task[ClientState[ToxCoreState]]] = Nil,
+      state: S,
+      tasks: List[(Int, Task[S])] = Nil,
       running: Boolean = true
   ) {
 
-    def finish: ClientState[ToxCoreState] = {
+    def finish: ClientState[S] = {
       copy(running = false)
     }
 
-    def addTask(task: Task[ClientState[ToxCoreState]]): ClientState[ToxCoreState] = {
-      copy(tasks = task :: tasks)
+    private[AutoTest] def updateTasks(interval: Int, tasks: List[(Int, Task[S])]): ClientState[S] = {
+      copy(tasks = tasks.map {
+        case (delay, task) => (delay - interval, task)
+      })
     }
 
-    def get: ToxCoreState = state
-    def put(state: ToxCoreState): ClientState[ToxCoreState] = copy(state = state)
+    def addTask(task: Task[S]): ClientState[S] = {
+      copy(tasks = (0, task) :: tasks)
+    }
 
-    def modify(f: ToxCoreState => ToxCoreState): ClientState[ToxCoreState] = {
+    def addTask(delay: Int)(task: Task[S]): ClientState[S] = {
+      copy(tasks = (delay, task) :: tasks)
+    }
+
+    def get: S = state
+    def put(state: S): ClientState[S] = copy(state = state)
+
+    def modify(f: S => S): ClientState[S] = {
       copy(state = f(state))
     }
 
@@ -51,17 +63,17 @@ object AutoTest {
 
   }
 
-  final case class Participant[ToxCoreState](
-    tox: ToxCore[ClientState[ToxCoreState]],
-    av: ToxAv[ClientState[ToxCoreState]],
-    state: ClientState[ToxCoreState]
+  final case class Participant[S](
+    tox: Core[S],
+    av: Av[S],
+    state: ClientState[S]
   )
 
-  abstract class EventListener[ToxCoreState]
-      extends ToxEventListener[ClientState[ToxCoreState]]
-      with ToxAvEventListener[ClientState[ToxCoreState]] {
-    type State = ClientState[ToxCoreState]
-    def initial: ToxCoreState
+  abstract class EventListener[S]
+      extends ToxEventListener[ClientState[S]]
+      with ToxAvEventListener[ClientState[S]] {
+    type State = ClientState[S]
+    def initial: S
   }
 
 }
@@ -73,19 +85,27 @@ final case class AutoTest(
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private def perform[ToxCoreState](
-    tox: ToxCore[ToxCoreState],
-    av: ToxAv[ToxCoreState],
-    tasks: List[(ToxCore[ToxCoreState], ToxAv[ToxCoreState], ToxCoreState) => ToxCoreState]
-  )(state: ToxCoreState): ToxCoreState = {
-    tasks match {
-      case Nil          => state
-      case task :: tail => perform(tox, av, tail)(task(tox, av, state))
+  private def performTasks[S](
+    tox: Core[S],
+    av: Av[S],
+    interval: Int
+  )(state: ClientState[S]): ClientState[S] = {
+    val (delayed, runnable) = state.tasks.partition(_._1 >= 0)
+    logger.trace(s"Running tasks: ${runnable.size} runnable, ${delayed.size} delayed")
+
+    runnable.foldRight(state.updateTasks(interval, delayed)) { (task, state) =>
+      assert(task._1 <= 0)
+      task._2(tox, av, state)
     }
   }
 
   @tailrec
-  private def mainLoop[ToxCoreState](clients: List[Participant[ToxCoreState]], iteration: Int = 0): List[ToxCoreState] = {
+  private def mainLoop[S](clients: List[Participant[S]], iteration: Int = 0): List[S] = {
+    val interval = (clients.map(_.tox.iterationInterval) ++ clients.map(_.av.iterationInterval)).min
+    logger.trace(s"Iteration $iteration, interval $interval")
+    assert(interval > 0)
+    Thread.sleep(interval)
+
     val nextClients = clients.map {
       case Participant(tox, av, state) =>
         Participant(
@@ -93,13 +113,9 @@ final case class AutoTest(
           state
             |> tox.iterate
             |> av.iterate
-            |> (state => perform(tox, av, state.tasks.reverse)(state.copy(tasks = Nil)))
+            |> performTasks(tox, av, interval)
         )
     }
-
-    val interval = (nextClients.map(_.tox.iterationInterval) ++ nextClients.map(_.av.iterationInterval)).min
-    logger.trace(s"Iteration $iteration, interval $interval")
-    Thread.sleep(interval)
 
     if (nextClients.exists(_.state.running)) {
       mainLoop(nextClients, iteration + 1)
@@ -108,13 +124,13 @@ final case class AutoTest(
     }
   }
 
-  def run[ToxCoreState](
+  def run[S](
     count: Int,
     options: ToxOptions,
-    handler: EventListener[ToxCoreState]
-  ): List[ToxCoreState] = {
-    coreFactory.withToxN[ClientState[ToxCoreState], List[ToxCoreState]](count, options) { toxes =>
-      avFactory.withToxAvN[ClientState[ToxCoreState], List[ToxCoreState]](toxes) { avs =>
+    handler: EventListener[S]
+  ): List[S] = {
+    coreFactory.withToxN[ClientState[S], List[S]](count, options) { toxes =>
+      avFactory.withToxAvN[ClientState[S], List[S]](toxes) { avs =>
         val states = {
           val avsWithIds =
             for (((tox, av), id) <- avs.zipWithIndex) yield {
