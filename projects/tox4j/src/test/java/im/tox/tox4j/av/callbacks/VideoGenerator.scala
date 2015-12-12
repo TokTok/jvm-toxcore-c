@@ -100,7 +100,7 @@ object VideoGenerator extends Assertions {
     }
   }
 
-  // val Selected = scaleNearestNeighbour(8, 16, Smiley)
-  val Selected = Smiley
+  val Selected = scaleNearestNeighbour(8, 16, Smiley)
+  // val Selected = Smiley
 
 }

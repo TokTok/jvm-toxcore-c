@@ -23,10 +23,11 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       if (sys.env.contains("TRAVIS")) {
         None
       } else {
-        Some(
-          // VideoDisplay.Gui(video.width, video.height)
-          VideoDisplay.Console(video.width, video.height)
-        )
+        if (video.height * video.width < 100 * 100) {
+          Some(VideoDisplay.Console(video.width, video.height))
+        } else {
+          Some(VideoDisplay.Gui(video.width, video.height))
+        }
       }
     }
 

@@ -25,7 +25,6 @@ trait VideoReceiveFrameCallback[ToxCoreState] {
    *                if the image is bottom-up hence why you must abs() it when
    *                calculating plane buffer size.
    */
-  // scalastyle:ignore parameter.number
   def videoReceiveFrame(
     friendNumber: Int,
     width: Int, height: Int,
