@@ -27,13 +27,7 @@ object AudioGenerator {
     AudioGenerator(sample)
   }
 
-  private def int(boolean: Boolean): Int = {
-    if (boolean) {
-      1
-    } else {
-      0
-    }
-  }
+  private def int(boolean: Boolean): Int = if (boolean) 1 else 0
 
   val ItCrowd = generator(96000 + 4000 * 8) { (t0, length) =>
     // Period

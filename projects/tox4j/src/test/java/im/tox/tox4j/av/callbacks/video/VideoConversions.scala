@@ -1,38 +1,37 @@
-package im.tox.tox4j.av.callbacks
+package im.tox.tox4j.av.callbacks.video
 
 // scalastyle:off method.name
 object VideoConversions {
 
-  final case class YuvPixel(y: Byte, u: Byte, v: Byte) {
-    def rgb: RgbPixel = RgbPixel(
-      r = YUVtoR(y, u, v),
-      g = YUVtoG(y, u, v),
-      b = YUVtoB(y, u, v)
-    )
-  }
+  final case class YuvPixel(y: Byte, u: Byte, v: Byte)
 
-  final case class RgbPixel(r: Byte, g: Byte, b: Byte) {
-    def yuv: YuvPixel = {
-      val (rx, gx, bx) = (unsigned(r), unsigned(g), unsigned(b))
+  object YuvPixel {
+    def ofRgb(r: Int, g: Int, b: Int): YuvPixel = {
       YuvPixel(
-        y = clamp(((66 * rx + 129 * gx + 25 * bx + 128) >> 8) + 16),
-        u = clamp(((-38 * rx - 74 * gx + 112 * bx + 128) >> 8) + 128),
-        v = clamp(((112 * rx - 94 * gx - 18 * bx + 128) >> 8) + 128)
+        y = clamp(((66 * r + 129 * g + 25 * b + 128) >> 8) + 16),
+        u = clamp(((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128),
+        v = clamp(((112 * r - 94 * g - 18 * b + 128) >> 8) + 128)
+      )
+    }
+
+    def ofRgb(rgb: Int): YuvPixel = {
+      ofRgb(
+        (rgb >> 16) & 0xff,
+        (rgb >> 8) & 0xff,
+        rgb & 0xff
       )
     }
   }
 
+  final case class RgbPixel(r: Byte, g: Byte, b: Byte)
+
   object RgbPixel {
 
-    def apply(r: Int, g: Int, b: Int): RgbPixel = {
-      RgbPixel(r.toByte, g.toByte, b.toByte)
-    }
-
-    def apply(rgb: Int): RgbPixel = {
-      apply(
-        (rgb >> 16) & 0xff,
-        (rgb >> 8) & 0xff,
-        rgb & 0xff
+    def ofYuv(y: Int, u: Int, v: Int): RgbPixel = {
+      RgbPixel(
+        r = YUVtoR(y, u, v),
+        g = YUVtoG(y, u, v),
+        b = YUVtoB(y, u, v)
       )
     }
 
@@ -62,11 +61,11 @@ object VideoConversions {
     width: Int, height: Int,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int
-  )(
-    r: Array[Byte] = Array.ofDim(width * height),
-    g: Array[Byte] = Array.ofDim(width * height),
-    b: Array[Byte] = Array.ofDim(width * height)
   ): (Array[Byte], Array[Byte], Array[Byte]) = {
+    val r = Array.ofDim[Byte](width * height)
+    val g = Array.ofDim[Byte](width * height)
+    val b = Array.ofDim[Byte](width * height)
+
     assert(r.length >= width * height)
     assert(g.length >= width * height)
     assert(b.length >= width * height)

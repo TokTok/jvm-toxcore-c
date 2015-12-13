@@ -10,6 +10,17 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.Timeouts
 import org.slf4j.LoggerFactory
 
+object AutoTestSuite {
+
+  def timed[A](block: => A): (Int, A) = {
+    val start = System.currentTimeMillis()
+    val result = block
+    val end = System.currentTimeMillis()
+    ((end - start).toInt, result)
+  }
+
+}
+
 abstract class AutoTestSuite extends FunSuite with Timeouts {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))

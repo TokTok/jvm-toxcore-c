@@ -1,19 +1,25 @@
-package im.tox.tox4j.av.callbacks
+package im.tox.tox4j.av.callbacks.video
 
-import java.io.{DataOutputStream, FileOutputStream}
 import java.util
 
-import _root_.im.tox.tox4j.av.ToxAv
-import _root_.im.tox.tox4j.av.data._
-import _root_.im.tox.tox4j.av.enums.ToxavFriendCallState
-import _root_.im.tox.tox4j.core.ToxCore
-import _root_.im.tox.tox4j.core.enums.ToxConnection
-import _root_.im.tox.tox4j.testing.ToxExceptionChecks
-import _root_.im.tox.tox4j.testing.autotest.AutoTestSuite
+import im.tox.tox4j.av.ToxAv
+import im.tox.tox4j.av.data._
+import im.tox.tox4j.av.enums.ToxavFriendCallState
+import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.enums.ToxConnection
+import im.tox.tox4j.testing.ToxExceptionChecks
+import im.tox.tox4j.testing.autotest.AutoTestSuite
+import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 
 final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
 
-  private def video = VideoGenerator.Selected
+  private val video = VideoGenerators.Selected
+
+  /**
+   * The time to wait for the next frame. Increase this if you need more time
+   * to look at the displayed images.
+   */
+  private val frameDelay = 0
 
   type S = Int
 
@@ -23,10 +29,10 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       if (sys.env.contains("TRAVIS")) {
         None
       } else {
-        if (video.height * video.width < 100 * 100) {
-          Some(VideoDisplay.Console(video.width, video.height))
+        if (video.height * video.width <= 100 * 40) {
+          Some(ConsoleVideoDisplay(video.width, video.height))
         } else {
-          Some(VideoDisplay.Gui(video.width, video.height))
+          Some(GuiVideoDisplay(video.width, video.height))
         }
       }
     }
@@ -43,7 +49,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
         // Call id+1.
         state.addTask { (tox, av, state) =>
           debug(state, s"Ringing ${state.id(friendNumber)}")
-          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(18000).get)
+          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(8000).get)
           state
         }
       }
@@ -64,29 +70,32 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
     private def sendFrame(friendNumber: Int)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
       val state = state0.modify(_ + 1)
-      debug(state, s"Sending video frame ${state0.get}")
 
-      val y = video.y(state0.get)
-      val u = video.u(state0.get)
-      val v = video.v(state0.get)
+      val (generationTime, (y, u, v)) = timed {
+        video.yuv(state0.get)
+      }
       assert(y.length == video.width * video.height)
       assert(u.length == video.width * video.height / 4)
       assert(v.length == video.width * video.height / 4)
 
-      av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
+      val (displayTime, ()) = timed {
+        displayImage.foreach { display =>
+          display.displaySent(state0.get, y, u, v)
+        }
+      }
+      val (sendTime, ()) = timed {
+        av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
+      }
+
+      debug(
+        state,
+        s"Sent frame ${state0.get}: generationTime=${generationTime}ms, displayTime=${displayTime}ms, sendTime=${sendTime}ms"
+      )
 
       if (state.get >= video.length) {
         state.finish
       } else {
-        val delay =
-          if (video.width * video.height < 100 * 100) {
-            // Delay the next frame until the iteration after the next if the image is
-            // very small. Otherwise, toxav will reduce the iteration interval to 0.
-            1
-          } else {
-            0
-          }
-        state.addTask(delay)(sendFrame(friendNumber))
+        state.addTask(frameDelay)(sendFrame(friendNumber))
       }
     }
 
@@ -102,11 +111,15 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       yStride: Int, uStride: Int, vStride: Int
     )(state0: State): State = {
       val state = state0.modify(_ + 1)
-      debug(state, s"Received video frame ${state0.get}: size = ($width, $height), strides = ($yStride, $uStride, $vStride)")
 
-      displayImage.foreach { display =>
-        display.display(y, u, v, yStride, uStride, vStride)
-      }
+      val times = displayImage.flatMap { display =>
+        display.displayReceived(state0.get, y, u, v, yStride, uStride, vStride)
+      }.map {
+        case (parseTime, displayTime) =>
+          s", parseTime=${parseTime}ms, displayTime=${displayTime}ms"
+      }.getOrElse("")
+
+      debug(state, s"Received frame ${state0.get}: size=($width, $height), strides=($yStride, $uStride, $vStride)$times")
 
       if (state.get >= video.length) {
         state.finish
