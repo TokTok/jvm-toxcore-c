@@ -1,5 +1,7 @@
 package im.tox.tox4j.av.callbacks
 
+import scala.util.Random
+
 final case class AudioGenerator(
     sample: Int => Int,
     length: Int = 128000
@@ -25,6 +27,14 @@ object AudioGenerator {
     AudioGenerator(sample)
   }
 
+  private def int(boolean: Boolean): Int = {
+    if (boolean) {
+      1
+    } else {
+      0
+    }
+  }
+
   val ItCrowd = generator(96000 + 4000 * 8) { (t0, length) =>
     // Period
     val t = t0 % length
@@ -35,33 +45,32 @@ object AudioGenerator {
     } else {
       {
         t % 2000 * {
-          "$$$&%%%''''%%%'&".charAt(t % 32000 / 2000) - 32 - {
-            if (t > 28000 && t < 32000) 2 else 0
-          }
+          "$$$&%%%''''%%%'&".charAt(t % 32000 / 2000) - 32 -
+            int(t > 28000 && t < 32000) * 2
         }
       } / {
-        if (t % 8000 < 4000) 2 else 1
+        int(t % 8000 < 4000) + 1
       }
     }
-    (a | b) << 8
+    ((a | b) << 8).toShort / 4
   }
 
   val MortalKombat = generator { t =>
     val a = {
       2 * t % 4000 * {
-        "!!#!$!%$".charAt(t % 16000 / 2000) - 32 + (if (t % 64000 > 32000) 7 else 0)
+        "!!#!$!%$".charAt(t % 16000 / 2000) - 32 + int(t % 64000 > 32000) * 7
       }
     } * {
-      if (t % 32000 > 16000) 2 else 1
+      int(t % 32000 > 16000) + 1
     }
-    val b = (if (t % 128000 > 64000) 2 * t else 0) * {
+    val b = int(t % 128000 > 64000) * 2 * t * {
       "%%%'%+''%%%$%+))%%%%'+'%$%%%$%%%$%%".charAt(t % 70000 / 2000) - 36
     }
-    (a | b) << 8
+    ((a | b) << 8).toShort / 4
   }
 
   val Sine = generator { t =>
-    (Math.sin(t / (10000d / t)) * 128).toInt << 8
+    (Math.sin(t / (10000d / t)) * 128).toShort << 6
   }
 
   val Sine2 = generator { t0 =>
@@ -71,7 +80,7 @@ object AudioGenerator {
       } else {
         t0
       }
-    (Math.sin(t / (10000d / t)) * 128).toInt << 8
+    (Math.sin(t / (10000d / t)) * 128).toShort << 6
   }
 
   val Sine3 = generator { t =>
@@ -79,41 +88,95 @@ object AudioGenerator {
   }
 
   private final class Oscillator(val sampleRate: Int) extends AnyVal {
-    private def position(t: Int, frequency: Double): Double = {
-      val samples = sampleRate / frequency
-      t % samples / samples
-    }
-
     private def osc(shape: Double => Double)(t: Int, frequency: Double, volume: Double): Double = {
-      val x = position(t, frequency)
-      shape(x) * volume
+      val samples = sampleRate / frequency
+      shape(t % samples / samples) * volume
     }
 
-    def sine(t: Int, frequency: Double, volume: Double): Double = {
-      osc(x => Math.sin(2.0 * Math.PI * x))(t, frequency, volume)
-    }
+    type Osc = (Int, Double, Double) => Double
 
-    def sawtooth(t: Int, frequency: Double, volume: Double): Double = {
-      osc(x => 2.0 * (x - Math.floor(x + 0.5)))(t, frequency, volume)
-    }
+    def sine: Osc = osc(x => Math.sin(2.0 * Math.PI * x))
+    def sawtooth: Osc = osc(x => 2.0 * (x - Math.floor(x + 0.5)))
   }
 
-  private def play(t: Int, tones: String, tempo: Int): Char = {
-    tones.charAt(t % (tones.length * tempo) / tempo)
+  private def play(t: Int, tones: Seq[Double], tempo: Int): Double = {
+    val index = t % (tones.length * tempo) / tempo
+    val previous =
+      if (index == 0) {
+        tones.length - 1
+      } else {
+        index - 1
+      }
+    tones(index) * int(t % tempo < 300 && tones(previous) != tones(index))
   }
 
-  val Experiments = generator { t =>
+  private def play(t: Int, tones: String, tempo: Int): Double = {
+    play(t, tones.map(_.toDouble), tempo)
+  }
+
+  // https://www.youtube.com/watch?v=S7dg0X1LskI
+  private val SongOfStorms = generator(1800 * 4 * 16) { (t, _) =>
+    val melody = play(t, Seq[Double](
+      146.83, 174.61, 293.66, 293.66,
+      146.83, 174.61, 293.66, 293.66,
+      329.62, 349.22, 329.62, 349.22, 329.62, 261.62, 220, 220,
+
+      220, 220, 146.83, 146.83, 174.61, 195.99, 220, 220,
+      220, 220, 146.83, 146.83, 174.61, 195.99, 164.81, 164.81,
+
+      146.83, 174.61, 293.66, 293.66,
+      146.83, 174.61, 293.66, 293.66,
+      329.62, 349.22, 329.62, 349.22, 329.62, 261.62, 220, 220,
+
+      220, 220, 146.83, 146.83, 174.61, 195.99, 220, 220,
+      220, 220, 146.83, 146.83, 146.83, 146.83, 146.83, 146.83
+    ), 1800)
+    val bass = play(t, Seq[Double](
+      73.41, 82.4, 87.3, 82.4,
+      116.54, 87.3, 116.54, 110,
+
+      73.41, 82.4, 87.3, 82.4,
+      116.54, 110, 73.41, 73.41
+    ), 7200)
+    val organ = play(t, Seq[Double](
+      0, 220, 0, 220,
+      0, 0, 0, 146.83,
+      246.94, 246.94, 246.94, 246.94,
+      0, 0, 0, 0,
+
+      0, 261.62, 0, 261.62,
+      0, 0, 0, 146.83,
+      246.94, 246.94, 246.94, 246.94,
+      0, 0, 0, 0,
+
+      0, 220, 0, 220,
+      0, 0, 0, 220,
+      220, 220, 220, 220,
+      0, 0, 0, 0,
+
+      0, 220, 0, 220,
+      0, 0, 0, 220,
+      220, 220, 220, 220,
+      0, 0, 0, 0
+    ), 900)
+    val percussions = play(t, Seq[Double](
+      0, 1, 0, 1,
+      0, 0, 0, 0,
+      1, 1, 1, 1,
+      0, 0, 0, 0
+    ), 900) * Math.random() * int(t % 900 > 700)
+
     val osc = new Oscillator(8000)
-    val tone1 = play(t, "!acatc,.pxa.,n", 2000)
-    val tone2 = play(t, "!acatc,.pxa.,n", 4000) * 2
     Seq(
-      osc.sawtooth(t, tone1, 0.1),
-      osc.sawtooth(t, tone1 * 3, if (t > osc.sampleRate * 7) 0.1 else 0),
-      osc.sine(t, tone2, 0.2)
+      osc.sine(t, melody, 0.35),
+      osc.sawtooth(t, bass, 0.15),
+      osc.sawtooth(t, organ, 0.15),
+      osc.sawtooth(t, percussions, 0.15),
+      0.0
     ).map(_ * Short.MaxValue).sum.toShort
   }
 
   // Selected audio generator for tests.
-  val Selected = Sine3
+  val Selected = SongOfStorms
 
 }

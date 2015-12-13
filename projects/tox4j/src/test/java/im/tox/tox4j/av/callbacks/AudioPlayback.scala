@@ -1,13 +1,17 @@
 package im.tox.tox4j.av.callbacks
 
-import javax.sound.sampled.{AudioSystem, SourceDataLine, DataLine, AudioFormat}
+import javax.sound.sampled.{AudioFormat, AudioSystem, DataLine, SourceDataLine}
+
+import im.tox.tox4j.av.callbacks.AudioPlayback.{play, showWave, soundLine}
+import jline.TerminalFactory
+import org.scalatest.FunSuite
 
 import scala.util.Try
 
 object AudioPlayback {
 
   def showWave(pcm: Array[Short], width: Int): String = {
-    val height = width / 12
+    val height = width / 10
 
     val screen = (0 until height).map(_ => Array.fill[Char](width)(' '))
 
@@ -41,7 +45,7 @@ object AudioPlayback {
     buffer
   }
 
-  private def soundLine = Try {
+  private val soundLine = Try {
     val format = new AudioFormat(8000f, 16, 1, true, true)
     val info = new DataLine.Info(classOf[SourceDataLine], format)
     val soundLine = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
@@ -50,18 +54,26 @@ object AudioPlayback {
     soundLine
   }
 
-  def main(args: Array[String]): Unit = {
-    soundLine.foreach { soundLine =>
-      var t = 0
+}
 
-      while (t < AudioGenerator.Selected.length) {
-        val frame = AudioGenerator.Selected.nextFrame16(t, 80)
-        val buffer = serialiseAudioFrame(frame)
-        t += 80
-        soundLine.write(buffer, 0, buffer.length)
+final class AudioPlayback extends FunSuite {
+
+  test("main") {
+    soundLine.foreach { soundLine =>
+      val terminalWidth = TerminalFactory.get.getWidth
+      val frameSize = 480
+
+      System.out.print("\u001b[2J")
+
+      for (t <- 0 to (AudioGenerator.Selected.length + frameSize * 2) by frameSize) {
+        val frame = AudioGenerator.Selected.nextFrame16(t, frameSize)
+        System.out.print("\u001b[H")
+        System.out.println(showWave(frame, terminalWidth))
+        System.out.println(s"t=$t")
+        System.out.flush()
+        play(frame)
       }
     }
   }
 
 }
-
