@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.callbacks
 
-import javax.sound.sampled.{AudioFormat, AudioSystem, DataLine, SourceDataLine}
+import javax.sound.sampled._
 
 import im.tox.tox4j.av.callbacks.AudioPlayback.{play, showWave, soundLine}
 import jline.TerminalFactory
@@ -65,13 +65,17 @@ final class AudioPlayback extends FunSuite {
 
       System.out.print("\u001b[2J")
 
-      for (t <- 0 to (AudioGenerator.Selected.length + frameSize * 2) by frameSize) {
+      for (t <- 0 to AudioGenerator.Selected.length by frameSize) {
         val frame = AudioGenerator.Selected.nextFrame16(t, frameSize)
         System.out.print("\u001b[H")
         System.out.println(showWave(frame, terminalWidth))
         System.out.println(s"t=$t")
         System.out.flush()
         play(frame)
+      }
+
+      while (soundLine.getLongFramePosition < AudioGenerator.Selected.length) {
+        Thread.sleep(100)
       }
     }
   }

@@ -1,7 +1,5 @@
 package im.tox.tox4j.av.callbacks
 
-import scala.util.Random
-
 final case class AudioGenerator(
     sample: Int => Int,
     length: Int = 128000
@@ -101,7 +99,7 @@ object AudioGenerator {
       } else {
         index - 1
       }
-    tones(index) * int(t % tempo < 300 && tones(previous) != tones(index))
+    tones(index) * int(t % tempo > 300 || tones(previous) == tones(index))
   }
 
   private def play(t: Int, tones: String, tempo: Int): Double = {
