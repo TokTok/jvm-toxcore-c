@@ -26,6 +26,15 @@ final class OptimisedIdOpsTest extends FunSuite {
     assert(x == 2)
   }
 
+  test("lambdas with same name as outer name") {
+    val x = 1
+    val y = x |> { (x: Int) =>
+      assert(x == 1)
+      x + 1
+    }
+    assert(y == 2)
+  }
+
   test("named lambdas") {
     val lambda = (x: Int) => x + 1
     val x = 1 |> lambda

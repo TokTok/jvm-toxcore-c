@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks.ToxAvEventListener
 import im.tox.tox4j.av.{ToxAv, ToxAvFactory}
 import im.tox.tox4j.core.callbacks.ToxEventListener
@@ -10,7 +11,6 @@ import im.tox.tox4j.testing.autotest.AutoTest._
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
-import scalaz.Scalaz.ToIdOps
 
 object AutoTest {
 
@@ -18,6 +18,11 @@ object AutoTest {
   type Av[S] = ToxAv[ClientState[S]]
   type Task[S] = (Core[S], Av[S], ClientState[S]) => ClientState[S]
 
+  /**
+   * A participant in the test network. These are unique across all instances,
+   * so they are useful for logging and to put oneself into relation with other
+   * instances using the instance map [[ClientState.friendList]].
+   */
   final case class ParticipantId(private val value: Int) extends AnyVal {
     def prev: ParticipantId = copy(value - 1)
     def next: ParticipantId = copy(value + 1)

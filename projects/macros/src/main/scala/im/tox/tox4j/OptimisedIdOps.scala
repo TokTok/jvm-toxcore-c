@@ -4,6 +4,7 @@ import scala.annotation.compileTimeOnly
 import scala.language.experimental.macros
 import scala.language.{existentials, implicitConversions}
 import scala.reflect.macros.whitebox
+import scala.util.Random
 
 /**
  * A wrapper class for simple operations implemented as macros.
@@ -14,6 +15,14 @@ final case class OptimisedIdOps[A](self: A) extends AnyVal {
    * Reverse-apply operator.
    *
    * x |> f == f(x)
+   *
+   * This macro also supports x |> (x => body). This allows for reuse of names in a series of
+   * functional updates. E.g.:
+   *
+   * (state
+   *   |> (state => do something to state)
+   *   |> (state => do something to the last state)
+   *   |> (state => another thing using the most recent state))
    */
   def |>[B](f: A => B): B = macro OptimisedIdOps.reverseApplyImpl[A, B] // scalastyle:ignore method.name
 
@@ -32,6 +41,8 @@ object OptimisedIdOps {
     // $COVERAGE-ON$
   }
 
+  private final val random = new Random()
+
   private final case class MakeTree[C <: whitebox.Context](c: C) {
 
     import c.universe._
@@ -43,22 +54,32 @@ object OptimisedIdOps {
       }
 
       // Unwrap the function from the generated lambda.
-      val unwrappedFunction = f match {
-        // Only if it's of the form ((x: T) => f(x)).
-        // For example, ((x: Int) => x + 1) can not be optimised.
+      f match {
+        // If it's of the form ((x: A) => f(x)), transform it to
+        // f(a).
         case Block(_,
           Function(
             List(ValDef(_, TermName(argDecl), _, _)),
             Apply(wrappedFunction, List(Ident(TermName(argUse))))
             )
           ) if argDecl == argUse =>
-          wrappedFunction
+          q"$wrappedFunction($unwrappedSelf)"
+
+        // This transforms the remainder of the direct lambdas of the form a |> ((a: A) => body)
+        // to { val $tmp = a; { val a = $tmp; body } }.
+        case Function(List(ValDef(_, name, ty, _)), body) =>
+          val tmpName = TermName("$id_ops_tmp_" + random.nextInt())
+
+          val tmpDecl = ValDef(Modifiers(), tmpName, ty, unwrappedSelf)
+          val argDecl = ValDef(Modifiers(), name, ty, Ident(tmpName))
+
+          val reparsedBody = c.parse(showCode(body))
+
+          q"{ $tmpDecl; { $argDecl; $reparsedBody } }"
 
         case wrappedFunction =>
-          wrappedFunction
+          q"$wrappedFunction($unwrappedSelf)"
       }
-
-      q"$unwrappedFunction($unwrappedSelf)"
     }
 
   }
