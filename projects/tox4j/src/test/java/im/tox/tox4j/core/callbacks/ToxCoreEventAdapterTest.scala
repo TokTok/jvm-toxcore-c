@@ -6,9 +6,9 @@ import im.tox.tox4j.core.proto._
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FunSuite
 
-final class ToxEventAdapterTest extends FunSuite {
+final class ToxCoreEventAdapterTest extends FunSuite {
 
-  private val listener = new ToxEventAdapter[Unit]
+  private val listener = new ToxCoreEventAdapter[Unit]
 
   def test[T](f: => Unit)(implicit evidence: Manifest[T]): Unit = {
     test(evidence.runtimeClass.getSimpleName)(f)

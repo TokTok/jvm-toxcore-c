@@ -1,7 +1,7 @@
 package im.tox.tox4j.core;
 
-import im.tox.tox4j.core.callbacks.ToxEventAdapter;
-import im.tox.tox4j.core.callbacks.ToxEventListener;
+import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter;
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener;
 import im.tox.tox4j.core.enums.ToxFileControl;
 import im.tox.tox4j.core.enums.ToxMessageType;
 import im.tox.tox4j.core.enums.ToxUserStatus;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNotNull;
 
 public final class JToxCoreTest extends JUnitSuite {
 
-  private final ToxEventListener<Void> handler = new ToxEventAdapter<>();
+  private final ToxCoreEventListener<Void> handler = new ToxCoreEventAdapter<>();
   private final ToxOptions options = new ToxOptions(
       true, true,
       new ProxyOptions.Http("localhost", 1234),

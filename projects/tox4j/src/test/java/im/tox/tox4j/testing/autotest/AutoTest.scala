@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks.ToxAvEventListener
 import im.tox.tox4j.av.{ToxAv, ToxAvFactory}
-import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import im.tox.tox4j.testing.autotest.AutoTest._
@@ -76,7 +76,7 @@ object AutoTest {
   )
 
   abstract class EventListener[S]
-      extends ToxEventListener[ClientState[S]]
+      extends ToxCoreEventListener[ClientState[S]]
       with ToxAvEventListener[ClientState[S]] {
     type State = ClientState[S]
     def initial: S

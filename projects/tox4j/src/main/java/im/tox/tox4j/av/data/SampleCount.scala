@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.data
 
-final class SampleCount private (val value: Int) extends AnyVal
+final case class SampleCount private (value: Int) extends AnyVal
 
 case object SampleCount extends ((AudioLength, SamplingRate) => SampleCount) {
 

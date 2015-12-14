@@ -30,4 +30,21 @@ abstract class ToxCoreFactory {
     }
   }
 
+  final def withToxN[ToxCoreState, R](
+    options: List[ToxOptions]
+  )(
+    f: List[ToxCore[ToxCoreState]] => R
+  ): R = {
+    def go(options: List[ToxOptions], toxes: List[ToxCore[ToxCoreState]]): R = {
+      options match {
+        case Nil => f(toxes.reverse)
+        case opts :: tail =>
+          withTox[ToxCoreState, R](opts) { tox =>
+            go(tail, tox :: toxes)
+          }
+      }
+    }
+    go(options, Nil)
+  }
+
 }

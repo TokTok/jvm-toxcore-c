@@ -1,6 +1,6 @@
 package im.tox.tox4j.core
 
-import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.core.exceptions.ToxNewException
 
@@ -16,7 +16,7 @@ final class ToxList[ToxCoreState](newTox: () => ToxCore[ToxCoreState], count: In
       (0 until count) map { i =>
         val instance = Instance(newTox(), ToxConnection.NONE)
         temporary += instance.tox
-        instance.tox.callback(new ToxEventListener[ToxCoreState] {
+        instance.tox.callback(new ToxCoreEventListener[ToxCoreState] {
           override def selfConnectionStatus(connectionStatus: ToxConnection)(state: ToxCoreState): ToxCoreState = {
             instance.connected = connectionStatus
             state

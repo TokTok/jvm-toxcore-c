@@ -1,7 +1,7 @@
 package im.tox.tox4j.core
 
 import im.tox.tox4j.core.SmallNat._
-import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.ToxFriendRequestMessage
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.impl.jni.{ToxCoreImpl, ToxCoreImplFactory}
@@ -33,7 +33,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
 
   "iterate" should "not be stopped by exceptions" in {
     withToxUnit(fatalErrors = false) { tox =>
-      tox.callback(new ToxEventListener[Unit] {
+      tox.callback(new ToxCoreEventListener[Unit] {
         override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
           throw new RuntimeException("This exception is expected; ignore it")
         }
@@ -45,7 +45,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
 
   it should "be stopped by fatal VM errors" in {
     withToxUnit(fatalErrors = false) { tox =>
-      tox.callback(new ToxEventListener[Unit] {
+      tox.callback(new ToxCoreEventListener[Unit] {
         override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
           throw new StackOverflowError
         }

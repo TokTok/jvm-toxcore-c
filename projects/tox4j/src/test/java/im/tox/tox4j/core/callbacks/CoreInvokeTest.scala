@@ -18,7 +18,7 @@ import scala.util.Random
 
 final class CoreInvokeTest extends FunSuite with PropertyChecks {
 
-  final class TestEventListener extends ToxEventListener[Event] {
+  final class TestEventListener extends ToxCoreEventListener[Event] {
     private def setEvent(event: Event)(state: Event): Event = {
       assert(state == null)
       event

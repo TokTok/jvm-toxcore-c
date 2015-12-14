@@ -5,6 +5,7 @@ import im.tox.tox4j.core.ToxCoreConstants
 
 final case class ToxFilename private (value: Array[Byte]) extends AnyVal {
   override def toString: String = new String(value)
+  def toHexString: String = ToxFilename.toHexString(this)
 }
 
 case object ToxFilename extends VariableSizeByteArrayCompanion[ToxFilename](

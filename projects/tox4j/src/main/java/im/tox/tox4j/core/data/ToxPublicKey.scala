@@ -4,9 +4,9 @@ import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final case class ToxPublicKey private (value: Array[Byte]) extends AnyVal {
-  def readable: String = ToxPublicKey.toHexString(this)
+  def toHexString: String = ToxPublicKey.toHexString(this)
   override def toString: String = {
-    s"${getClass.getSimpleName}($readable)"
+    s"${getClass.getSimpleName}($toHexString)"
   }
 }
 

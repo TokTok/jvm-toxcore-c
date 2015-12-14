@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 
 // scalastyle:off null
 @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
-private object ToxCoreImpl {
+object ToxCoreImpl {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
@@ -40,7 +40,7 @@ private object ToxCoreImpl {
     }
   }
 
-  private def convert(status: Connection.Type): ToxConnection = {
+  def convert(status: Connection.Type): ToxConnection = {
     status match {
       case Connection.Type.NONE => ToxConnection.NONE
       case Connection.Type.TCP  => ToxConnection.TCP
@@ -48,7 +48,7 @@ private object ToxCoreImpl {
     }
   }
 
-  private def convert(status: UserStatus.Type): ToxUserStatus = {
+  def convert(status: UserStatus.Type): ToxUserStatus = {
     status match {
       case UserStatus.Type.NONE => ToxUserStatus.NONE
       case UserStatus.Type.AWAY => ToxUserStatus.AWAY
@@ -56,7 +56,15 @@ private object ToxCoreImpl {
     }
   }
 
-  private def convert(control: FileControl.Type): ToxFileControl = {
+  def convert(status: ToxUserStatus): UserStatus.Type = {
+    status match {
+      case ToxUserStatus.NONE => UserStatus.Type.NONE
+      case ToxUserStatus.AWAY => UserStatus.Type.AWAY
+      case ToxUserStatus.BUSY => UserStatus.Type.BUSY
+    }
+  }
+
+  def convert(control: FileControl.Type): ToxFileControl = {
     control match {
       case FileControl.Type.RESUME => ToxFileControl.RESUME
       case FileControl.Type.PAUSE  => ToxFileControl.PAUSE
@@ -64,7 +72,7 @@ private object ToxCoreImpl {
     }
   }
 
-  private def convert(messageType: MessageType.Type): ToxMessageType = {
+  def convert(messageType: MessageType.Type): ToxMessageType = {
     messageType match {
       case MessageType.Type.NORMAL => ToxMessageType.NORMAL
       case MessageType.Type.ACTION => ToxMessageType.ACTION
@@ -106,7 +114,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
 
   private val onCloseCallbacks = new Event
 
-  private var eventListener: ToxEventListener[ToxCoreState] = new ToxEventAdapter // scalastyle:ignore var.field
+  private var eventListener: ToxCoreEventListener[ToxCoreState] = new ToxCoreEventAdapter // scalastyle:ignore var.field
 
   /**
    * This field has package visibility for [[ToxAvImpl]].
@@ -473,7 +481,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
   override def friendSendLosslessPacket(friendNumber: Int, data: ToxLosslessPacket): Unit =
     ToxCoreJni.toxFriendSendLosslessPacket(instanceNumber, friendNumber, data.value)
 
-  override def callback(handler: ToxEventListener[ToxCoreState]): Unit = {
+  override def callback(handler: ToxCoreEventListener[ToxCoreState]): Unit = {
     this.eventListener = handler
   }
 

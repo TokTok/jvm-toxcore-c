@@ -8,7 +8,7 @@ import scodec.codecs._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-final class AudioLength private (val value: Duration) extends AnyVal
+final case class AudioLength private (value: Duration) extends AnyVal
 
 // scalastyle:off magic.number
 case object AudioLength extends DiscreteValueCompanion[Duration, AudioLength](

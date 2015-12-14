@@ -2,13 +2,13 @@ package im.tox.gui.util
 
 import javax.swing._
 
-import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import org.jetbrains.annotations.NotNull
 
 // scalastyle:off line.size.limit
-final class InvokeLaterToxEventListener[ToxCoreState](underlying: ToxEventListener[ToxCoreState]) extends ToxEventListener[ToxCoreState] {
+final class InvokeLaterToxEventListener[ToxCoreState](underlying: ToxCoreEventListener[ToxCoreState]) extends ToxCoreEventListener[ToxCoreState] {
 
   private def invokeLater(callback: ToxCoreState => ToxCoreState)(state: ToxCoreState): ToxCoreState = {
     SwingUtilities.invokeLater(new Runnable {

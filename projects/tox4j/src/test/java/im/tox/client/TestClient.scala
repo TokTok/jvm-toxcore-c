@@ -1,0 +1,141 @@
+package im.tox.client
+
+import java.io.{File, FileInputStream, FileOutputStream}
+
+import com.typesafe.scalalogging.Logger
+import im.tox.client.proto.Profile
+import im.tox.tox4j.OptimisedIdOps._
+import im.tox.tox4j.av.ToxAv
+import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.{ToxNickname, ToxPublicKey, ToxStatusMessage}
+import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
+import im.tox.tox4j.impl.jni.{ToxAvImplFactory, ToxCoreImpl, ToxCoreImplFactory}
+import im.tox.tox4j.testing.GetDisjunction._
+import org.slf4j.LoggerFactory
+
+import scala.annotation.tailrec
+import scala.util.Try
+
+final case class TestClient(
+  tox: ToxCore[TestState],
+  av: ToxAv[TestState],
+  state: TestState
+)
+
+case object TestClient extends App {
+
+  private val logger = Logger(LoggerFactory.getLogger(getClass))
+
+  private val savePath = new File("toxsaves")
+  savePath.mkdir()
+
+  def saveProfile(tox: ToxCore[TestState], profile: Profile): Unit = {
+    val output = new FileOutputStream(new File(savePath, tox.getPublicKey.toHexString))
+    try {
+      profile.writeTo(output)
+      logger.info(s"Saved profile for ${tox.getPublicKey}")
+    } finally {
+      output.close()
+    }
+  }
+
+  def saveOnChange(tox: ToxCore[TestState], oldProfile: Profile)(state: TestState): TestState = {
+    if (oldProfile != state.profile) {
+      saveProfile(tox, state.profile)
+    }
+    state
+  }
+
+  def loadProfile(tox: ToxCore[TestState]): Profile = {
+    Try {
+      val input = new FileInputStream(new File(savePath, tox.getPublicKey.toHexString))
+      try {
+        val profile = Profile.parseFrom(input)
+        tox.setName(ToxNickname(profile.name.getBytes))
+        tox.setStatusMessage(ToxStatusMessage(profile.statusMessage.getBytes))
+        tox.setNospam(profile.nospam)
+        tox.setStatus(ToxCoreImpl.convert(profile.status))
+        logger.info(s"Adding ${profile.friendKeys.length} friends from saved friend list")
+        profile.friendKeys.foreach(key => logger.debug(s"- $key"))
+        profile.friendKeys.map(ToxPublicKey.fromHexString(_).get).foreach(tox.addFriendNorequest)
+        logger.info(s"Successfully read profile for ${tox.getPublicKey}")
+        profile
+      } finally {
+        input.close()
+      }
+    } getOrElse {
+      val profile = Profile(
+        secretKey = tox.getSecretKey.toHexString,
+        name = tox.getName.toString,
+        statusMessage = tox.getStatusMessage.toString,
+        nospam = tox.getNospam,
+        status = ToxCoreImpl.convert(tox.getStatus),
+        friendKeys = tox.getFriendList.map(tox.getFriendPublicKey).map(_.toHexString)
+      )
+      saveProfile(tox, profile)
+      logger.info(s"Created new profile for ${tox.getPublicKey}")
+      profile
+    }
+  }
+
+  type Task[S] = (ToxCore[S], ToxAv[S], S) => S
+
+  def runTasks(tox: ToxCore[TestState], av: ToxAv[TestState])(state: TestState): TestState = {
+    state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) => task(tox, av, state) }
+  }
+
+  @tailrec
+  def mainLoop(clients: List[TestClient]): Unit = {
+    mainLoop {
+      val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
+      Thread.sleep(interval)
+
+      for (client <- clients) yield {
+        client.copy(
+          state = client.state
+          |> client.tox.iterate
+          |> client.av.iterate
+          |> runTasks(client.tox, client.av)
+          |> saveOnChange(client.tox, client.state.profile)
+        )
+      }
+    }
+  }
+
+  TestClientOptions(args) { c =>
+    val predefined = c.load.map(key => ToxOptions(saveData = SaveDataOptions.SecretKey(key)))
+    logger.info(s"Creating ${c.count} toxes (${predefined.length} with predefined keys)")
+    val defaults = List.fill(c.count - predefined.length)(ToxOptions())
+    logger.info(s"Additional default toxes: ${defaults.length}")
+
+    ToxCoreImplFactory.withToxN[TestState, Unit](predefined ++ defaults) { toxes =>
+      (c.address, c.key) match {
+        case (Some(address), Some(key)) =>
+          logger.info(s"Bootstrapping all toxes to $address:${c.port.value}")
+          toxes.foreach(_.bootstrap(address.getHostAddress, c.port, key))
+        case _ =>
+      }
+
+      logger.info("Initialising AV sessions")
+      ToxAvImplFactory.withToxAvN[TestState, Unit](toxes) { avs =>
+        logger.info("Initialising event listeners and client states")
+        val clients =
+          for (((tox, av), id) <- avs.zipWithIndex) yield {
+            val handler = new ObservingEventListener(new TestEventListener(id), new LoggingEventListener(id))
+            tox.callback(handler)
+            av.callback(handler)
+
+            val profile = loadProfile(tox)
+            logger.info(s"[$id] Friend address: ${tox.getAddress.toHexString}")
+            logger.info(s"[$id] DHT public key: ${tox.getDhtId.toHexString}")
+            logger.info(s"[$id] UDP port: ${tox.getUdpPort}")
+            TestClient(tox, av, TestState(profile))
+          }
+
+        logger.info("Starting event loop")
+        mainLoop(clients)
+      }
+    }
+  }
+
+}

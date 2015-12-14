@@ -4,9 +4,9 @@ import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.core.ToxCoreConstants
 
 final case class ToxFriendAddress private (value: Array[Byte]) extends AnyVal {
-  def readable: String = ToxFriendAddress.toHexString(this)
+  def toHexString: String = ToxFriendAddress.toHexString(this)
   override def toString: String = {
-    s"${getClass.getSimpleName}($readable)"
+    s"${getClass.getSimpleName}($toHexString)"
   }
 }
 

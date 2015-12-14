@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package im.tox.client.proto;
+
+import "Core.proto";
+
+// A client profile containing all the information needed to reconstruct a
+// complete client state.
+message Profile {
+  string secret_key = 1;
+  string name = 2;
+  string status_message = 3;
+  uint32 nospam = 4;
+  im.tox.tox4j.core.proto.UserStatus.Type status = 5;
+  repeated string friend_keys = 6;
+}

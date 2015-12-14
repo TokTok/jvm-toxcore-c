@@ -3,7 +3,7 @@ package im.tox.tox4j.testing.autotest
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core._
-import im.tox.tox4j.core.callbacks.ToxEventAdapter
+import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter
 import im.tox.tox4j.core.data.{ToxFriendAddress, ToxPublicKey}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.exceptions.ToxException
@@ -74,7 +74,7 @@ final case class ChatStateT[T](
 
 }
 
-class ChatClientT[T](val selfName: String, val expectedFriendName: String) extends ToxEventAdapter[ChatStateT[T]] {
+class ChatClientT[T](val selfName: String, val expectedFriendName: String) extends ToxCoreEventAdapter[ChatStateT[T]] {
 
   private val logger = Logger(LoggerFactory.getLogger(getOuterClass(getClass)))
 

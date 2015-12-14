@@ -1,7 +1,7 @@
 package im.tox.tox4j.impl.jni.codegen
 
 import im.tox.tox4j.av.callbacks.ToxAvEventAdapter
-import im.tox.tox4j.core.callbacks.ToxEventAdapter
+import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter
 import im.tox.tox4j.impl.jni.codegen.NameConversions.{cxxTypeName, cxxVarName, javaVarName}
 import im.tox.tox4j.impl.jni.codegen.cxx.Ast._
 
@@ -48,7 +48,7 @@ object JniCallbacks extends CodeGenerator {
   }
 
   writeCode("tox/generated/core.h", "\n") {
-    generateCallbacks(classOf[ToxEventAdapter[_]])
+    generateCallbacks(classOf[ToxCoreEventAdapter[_]])
   }
 
 }

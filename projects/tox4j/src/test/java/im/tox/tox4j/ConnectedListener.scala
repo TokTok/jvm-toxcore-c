@@ -1,10 +1,10 @@
 package im.tox.tox4j
 
-import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.enums.ToxConnection
 import org.jetbrains.annotations.NotNull
 
-final class ConnectedListener extends ToxEventListener[Unit] {
+final class ConnectedListener extends ToxCoreEventListener[Unit] {
 
   @NotNull private var value = ToxConnection.NONE
 

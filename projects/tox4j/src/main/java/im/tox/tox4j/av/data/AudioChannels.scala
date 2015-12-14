@@ -2,7 +2,7 @@ package im.tox.tox4j.av.data
 
 import im.tox.core.typesafe.DiscreteIntCompanion
 
-final class AudioChannels private (val value: Int) extends AnyVal
+final case class AudioChannels private (value: Int) extends AnyVal
 
 case object AudioChannels extends DiscreteIntCompanion[AudioChannels](1, 2) {
 

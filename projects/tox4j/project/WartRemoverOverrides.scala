@@ -13,7 +13,7 @@ object WartRemoverOverrides extends OptionalPlugin {
 
   override val moduleSettings = Seq(
     wartremoverExcluded := {
-      val proto = (sourceManaged in Compile).value / "compiled_protobuf" / "im" / "tox" / "tox4j"
+      val basePath = (sourceManaged in Compile).value / "compiled_protobuf" / "im" / "tox"
 
       // TODO(iphydf): infer these
       val avProtos = Seq(
@@ -25,7 +25,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "CallState",
         "InternalFields_avProto",
         "VideoReceiveFrame"
-      ).map(_ + ".scala").map(proto / "av" / "proto" / _)
+      ).map(_ + ".scala").map(basePath / "tox4j" / "av" / "proto" / _)
 
       val coreProtos = Seq(
         "Connection",
@@ -49,7 +49,7 @@ object WartRemoverOverrides extends OptionalPlugin {
         "MessageType",
         "SelfConnectionStatus",
         "UserStatus"
-      ).map(_ + ".scala").map(proto / "core" / "proto" / _)
+      ).map(_ + ".scala").map(basePath / "tox4j" / "core" / "proto" / _)
 
       val protoLogProtos = Seq(
         "JniLogEntry",
@@ -59,9 +59,15 @@ object WartRemoverOverrides extends OptionalPlugin {
         "Timestamp",
         "Value",
         "InternalFields_ProtoLogProto"
-      ).map(_ + ".scala").map(proto / "impl" / "jni" / "proto" / _)
+      ).map(_ + ".scala").map(basePath / "tox4j" / "impl" / "jni" / "proto" / _)
 
-      avProtos ++ coreProtos ++ protoLogProtos
+      val clientProtos = Seq(
+        "Profile",
+        "Profiles",
+        "InternalFields_ClientProfileProto"
+      ).map(_ + ".scala").map(basePath / "client" / "proto" / _)
+
+      avProtos ++ coreProtos ++ protoLogProtos ++ clientProtos
     }
   )
 

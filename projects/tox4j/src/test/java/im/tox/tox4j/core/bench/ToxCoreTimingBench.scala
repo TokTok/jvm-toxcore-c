@@ -3,7 +3,7 @@ package im.tox.tox4j.core.bench
 import im.tox.core.network.Port
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
-import im.tox.tox4j.core.callbacks.ToxEventAdapter
+import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter
 import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
 import im.tox.tox4j.testing.GetDisjunction._
@@ -31,7 +31,7 @@ final class ToxCoreTimingBench extends TimingReport {
     }
 
     measure method "callback" in {
-      val ignoreEvents = new ToxEventAdapter[Unit]
+      val ignoreEvents = new ToxCoreEventAdapter[Unit]
       usingTox(iterations1000k) config (exec.benchRuns -> 100) in {
         case (sz, tox) =>
           (0 until sz) foreach (_ => tox.callback(ignoreEvents))

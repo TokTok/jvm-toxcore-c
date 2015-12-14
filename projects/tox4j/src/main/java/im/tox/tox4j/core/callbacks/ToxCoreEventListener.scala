@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-trait ToxEventListener[ToxCoreState]
+trait ToxCoreEventListener[ToxCoreState]
   extends SelfConnectionStatusCallback[ToxCoreState]
   with FileRecvControlCallback[ToxCoreState]
   with FileRecvCallback[ToxCoreState]

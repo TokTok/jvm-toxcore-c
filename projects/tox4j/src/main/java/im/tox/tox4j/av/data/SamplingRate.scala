@@ -2,7 +2,7 @@ package im.tox.tox4j.av.data
 
 import im.tox.core.typesafe.DiscreteIntCompanion
 
-final class SamplingRate private (val value: Int) extends AnyVal
+final case class SamplingRate private (value: Int) extends AnyVal
 
 // scalastyle:off magic.number
 case object SamplingRate extends DiscreteIntCompanion[SamplingRate](

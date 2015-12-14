@@ -513,6 +513,6 @@ trait ToxCore[ToxCoreState] extends Closeable {
    *
    * @param handler An event handler capable of handling all Tox events.
    */
-  def callback(@NotNull handler: ToxEventListener[ToxCoreState]): Unit
+  def callback(@NotNull handler: ToxCoreEventListener[ToxCoreState]): Unit
 
 }

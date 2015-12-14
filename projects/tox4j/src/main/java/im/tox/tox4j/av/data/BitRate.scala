@@ -2,7 +2,7 @@ package im.tox.tox4j.av.data
 
 import im.tox.core.typesafe.BoundedIntCompanion
 
-final class BitRate private (val value: Int) extends AnyVal
+final case class BitRate private (value: Int) extends AnyVal
 
 case object BitRate extends BoundedIntCompanion[BitRate](-1, Int.MaxValue) {
 
