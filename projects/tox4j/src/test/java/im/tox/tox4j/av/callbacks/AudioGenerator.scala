@@ -44,7 +44,7 @@ object AudioGenerator {
         int(t % 8000 < 4000) + 1
       }
     }
-    ((a | b) << 8).toShort / 4
+    ((a | b) << 8).toShort / 5
   }
 
   val MortalKombat = generator { t =>
@@ -58,7 +58,7 @@ object AudioGenerator {
     val b = int(t % 128000 > 64000) * 2 * t * {
       "%%%'%+''%%%$%+))%%%%'+'%$%%%$%%%$%%".charAt(t % 70000 / 2000) - 36
     }
-    ((a | b) << 8).toShort / 4
+    ((a | b) << 8).toShort / 5
   }
 
   val Sine = generator { t =>

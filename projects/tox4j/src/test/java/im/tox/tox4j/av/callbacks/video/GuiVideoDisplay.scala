@@ -14,13 +14,8 @@ import scala.util.Try
 
 object GuiVideoDisplay {
 
-  private val capturePath = {
-    val path = new File("capture")
-    if (path.isDirectory) {
-      path.listFiles.foreach(_.delete())
-    }
-    path
-  }
+  private val capturePath = Some(new File("capture/video")).filter(_.isDirectory)
+  capturePath.foreach(_.listFiles.foreach(_.delete()))
 
   private def newImage(width: Int, height: Int): BufferedImage = {
     new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR)
@@ -31,7 +26,7 @@ object GuiVideoDisplay {
     val senderImageView, receiverImageView = new JLabel(new ImageIcon(newImage(width, height)))
 
     val dialog = new JDialog(new JFrame)
-    dialog.setSize(width * 2 + 10, height + 20)
+    dialog.setSize(width * 2 + 20, height + 40)
     dialog.setLayout(new GridBagLayout)
 
     private val constraints = new GridBagConstraints
@@ -59,7 +54,7 @@ object GuiVideoDisplay {
     dialog.add(receiverImageView, constraints)
 
     def screenshot(frameNumber: Int): Unit = {
-      if (capturePath.isDirectory) {
+      capturePath.foreach { capturePath =>
         val image = new BufferedImage(
           dialog.getWidth,
           dialog.getHeight,

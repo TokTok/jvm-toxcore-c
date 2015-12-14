@@ -1,5 +1,6 @@
 package im.tox.tox4j.av.callbacks.video
 
+import java.io.{FileOutputStream, DataOutputStream, File}
 import java.util
 
 import im.tox.tox4j.av.ToxAv
@@ -20,6 +21,13 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
    * to look at the displayed images.
    */
   private val frameDelay = 0
+
+  /**
+   * Base directory for sent frame capture. The files can be used to replay a
+   * session in case of bugs.
+   */
+  private val capturePath = Some(new File("capture/videoSendFrame")).filter(_.isDirectory)
+  capturePath.foreach(_.listFiles.foreach(_.delete()))
 
   type S = Int
 
@@ -85,6 +93,16 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
       val (sendTime, ()) = timed {
         av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
+      }
+
+      capturePath.foreach { capturePath =>
+        val out = new DataOutputStream(new FileOutputStream(new File(capturePath, f"${state0.get}%03d.dump")))
+        out.writeInt(video.width)
+        out.writeInt(video.height)
+        out.write(y)
+        out.write(u)
+        out.write(v)
+        out.close()
       }
 
       debug(
