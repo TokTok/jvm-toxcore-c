@@ -16,18 +16,19 @@ import scalaz.concurrent.Future
 
 final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
 
-  private val audio = AudioGenerator.Selected
-  private val displayWave = !sys.env.contains("TRAVIS")
-
   type S = Int
 
   object Handler extends EventListener(0) {
 
-    val bitRate = BitRate.fromInt(8).get
-    val audioLength = AudioLength.Length60
+    val bitRate = BitRate.fromInt(320).get
+    val audioLength = AudioLength.Length40
     val samplingRate = SamplingRate.Rate8k
     val frameSize = (audioLength.value.toMillis * samplingRate.value / 1000).toInt
     val framesPerIteration = 2
+
+    val audio = AudioGenerator(samplingRate.value)
+    val playback = new AudioPlayback(samplingRate.value)
+    val displayWave = !sys.env.contains("TRAVIS")
 
     override def friendConnectionStatus(
       friendNumber: Int,
@@ -92,7 +93,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     }
 
     def waitForPlayback(length: Int)(state: State): State = {
-      if (!AudioPlayback.done(audio.length)) {
+      if (!playback.done(audio.length)) {
         state.addTask { (tox, av, state) =>
           waitForPlayback(length)(state)
         }
@@ -127,7 +128,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
       // Start a thread to consume the frames.
       Future {
-        while (!AudioPlayback.done(audio.length)) {
+        while (!playback.done(audio.length)) {
           val (t, receivedPcm) = queue.take()
           val expectedPcm = audio.nextFrame16(t, frameSize)
 
@@ -145,7 +146,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
             System.out.println(AudioPlayback.showWave(expectedPcm, width))
           }
 
-          AudioPlayback.play(receivedPcm)
+          playback.play(receivedPcm)
         }
       }.start
 

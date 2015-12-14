@@ -27,38 +27,40 @@ object AudioGenerator {
 
   private def int(boolean: Boolean): Int = if (boolean) 1 else 0
 
-  val ItCrowd = generator(96000 + 4000 * 8) { (t0, length) =>
+  def itCrowd(samplingRate: Int): AudioGenerator = generator((samplingRate * 12) + (samplingRate / 2) * 8) { (t0, length) =>
     // Period
     val t = t0 % length
 
-    val a = 1 / (128000 - t)
-    val b = if (t > 96000) {
-      t % 4000 * ("'&(&*$,*".charAt(t % 96000 / 4000) - 32)
-    } else {
-      {
-        t % 2000 * {
-          "$$$&%%%''''%%%'&".charAt(t % 32000 / 2000) - 32 -
-            int(t > 28000 && t < 32000) * 2
+    val a = 1 / ((samplingRate * 16) - t)
+    val b =
+      if (t > (samplingRate * 12)) {
+        t % (samplingRate / 2) * ("'&(&*$,*".charAt(t % (samplingRate * 12) / (samplingRate / 2)) - 32)
+      } else {
+        {
+          t % (samplingRate / 4) * {
+            "$$$&%%%''''%%%'&".charAt(t % (samplingRate * 4) / (samplingRate / 4)) - 32 -
+              int(t > (samplingRate * 3 + samplingRate / 2) && t < (samplingRate * 4)) * 2
+          }
+        } / {
+          int(t % samplingRate < (samplingRate / 2)) + 1
         }
-      } / {
-        int(t % 8000 < 4000) + 1
       }
-    }
-    ((a | b) << 8).toShort / 5
+    ((a | b) / (samplingRate / 8000) << 8).toShort / 5
   }
 
-  val MortalKombat = generator { t =>
+  def mortalKombat(samplingRate: Int): AudioGenerator = generator(samplingRate * 16) { (t, _) =>
     val a = {
-      2 * t % 4000 * {
-        "!!#!$!%$".charAt(t % 16000 / 2000) - 32 + int(t % 64000 > 32000) * 7
+      2 * t % (samplingRate / 2) * {
+        "!!#!$!%$".charAt(t % (samplingRate * 2) / (samplingRate / 4)) - 32 +
+          int(t % (samplingRate * 8) > (samplingRate * 4)) * 7
       }
     } * {
-      int(t % 32000 > 16000) + 1
+      int(t % (samplingRate * 4) > (samplingRate * 2)) + 1
     }
-    val b = int(t % 128000 > 64000) * 2 * t * {
-      "%%%'%+''%%%$%+))%%%%'+'%$%%%$%%%$%%".charAt(t % 70000 / 2000) - 36
+    val b = int(t % (samplingRate * 16) > (samplingRate * 8)) * 2 * t * {
+      "%%%'%+''%%%$%+))%%%%'+'%$%%%$%%%$%%".charAt(t % (samplingRate * 8 + (samplingRate - samplingRate / 4)) / (samplingRate / 4)) - 36
     }
-    ((a | b) << 8).toShort / 5
+    ((a | b) / (samplingRate / 8000) << 8).toShort / 5
   }
 
   val Sine = generator { t =>
@@ -91,24 +93,39 @@ object AudioGenerator {
     def sawtooth: Osc = osc(x => 2.0 * (x - Math.floor(x + 0.5)))
   }
 
-  private def play(t: Int, tones: Seq[Double], tempo: Int): Double = {
-    val index = t % (tones.length * tempo) / tempo
+  private def play(t: Int, tones: Seq[Double], samplingRate: Int, tempo: Int): Double = {
+    // The duration of the tone in number of samples.
+    val duration = samplingRate / tempo
+    // A short pause between each tone played.
+    val pause = samplingRate / 40
+
+    val index = t % (tones.length * duration) / duration
     val previous =
       if (index == 0) {
         tones.length - 1
       } else {
         index - 1
       }
-    tones(index) * int(t % tempo > 300 || tones(previous) == tones(index))
+    tones(index) * int(t % duration > pause || tones(previous) == tones(index))
   }
 
-  private def play(t: Int, tones: String, tempo: Int): Double = {
-    play(t, tones.map(_.toDouble), tempo)
+  private def play(t: Int, tones: String, samplingRate: Int, tempo: Int): Double = {
+    play(t, tones.map(_.toDouble), samplingRate, tempo)
   }
 
-  // https://www.youtube.com/watch?v=S7dg0X1LskI
-  private val SongOfStorms = generator(1800 * 4 * 16) { (t, _) =>
-    val melody = play(t, Seq[Double](
+  private def playNoise(t: Int, tones: Seq[Int], samplingRate: Int, tempo: Int, duration: Double): Double = {
+    play(t, tones.map(_.toDouble), samplingRate, tempo) * Math.random() * {
+      if (t % (samplingRate / 8) > (samplingRate / 8 - (samplingRate * duration))) {
+        1.0
+      } else {
+        0.0
+      }
+    }
+  }
+
+  private final case class SongOfStorms(samplingRate: Int) extends AnyVal {
+
+    private def melody(t: Int) = play(t, Seq[Double](
       146.83, 174.61, 293.66, 293.66,
       146.83, 174.61, 293.66, 293.66,
       329.62, 349.22, 329.62, 349.22, 329.62, 261.62, 220, 220,
@@ -122,15 +139,17 @@ object AudioGenerator {
 
       220, 220, 146.83, 146.83, 174.61, 195.99, 220, 220,
       220, 220, 146.83, 146.83, 146.83, 146.83, 146.83, 146.83
-    ), 1800)
-    val bass = play(t, Seq[Double](
+    ), samplingRate, 4)
+
+    private def bass(t: Int) = play(t, Seq[Double](
       73.41, 82.4, 87.3, 82.4,
       116.54, 87.3, 116.54, 110,
 
       73.41, 82.4, 87.3, 82.4,
       116.54, 110, 73.41, 73.41
-    ), 7200)
-    val organ = play(t, Seq[Double](
+    ), samplingRate, 1)
+
+    private def organ(t: Int) = play(t, Seq[Double](
       0, 220, 0, 220,
       0, 0, 0, 146.83,
       246.94, 246.94, 246.94, 246.94,
@@ -150,25 +169,34 @@ object AudioGenerator {
       0, 0, 0, 220,
       220, 220, 220, 220,
       0, 0, 0, 0
-    ), 900)
-    val percussions = play(t, Seq[Double](
+    ), samplingRate, 8)
+
+    private def percussions(t: Int) = playNoise(t, Seq(
       0, 1, 0, 1,
       0, 0, 0, 0,
       1, 1, 1, 1,
       0, 0, 0, 0
-    ), 900) * Math.random() * int(t % 900 > 700)
+    ), samplingRate, 8, 1.0 / 40)
 
-    val osc = new Oscillator(8000)
-    Seq(
-      osc.sine(t, melody, 0.35),
-      osc.sawtooth(t, bass, 0.15),
-      osc.sawtooth(t, organ, 0.15),
-      osc.sawtooth(t, percussions, 0.15),
-      0.0
-    ).map(_ * Short.MaxValue).sum.toShort
+    def sample(t: Int): Short = {
+      val osc = new Oscillator(samplingRate)
+      Seq(
+        osc.sine(t, melody(t), 0.35),
+        osc.sawtooth(t, bass(t), 0.1),
+        osc.sawtooth(t, organ(t), 0.05),
+        osc.sawtooth(t, percussions(t), 0.1),
+        0.0
+      ).map(_ * Short.MaxValue).sum.toShort
+    }
+
+  }
+
+  // https://www.youtube.com/watch?v=S7dg0X1LskI
+  private def songOfStorms(samplingRate: Int) = generator(samplingRate * 16) { (t, _) =>
+    SongOfStorms(samplingRate).sample(t)
   }
 
   // Selected audio generator for tests.
-  val Selected = SongOfStorms
+  def apply(samplingRate: Int): AudioGenerator = songOfStorms(samplingRate)
 
 }

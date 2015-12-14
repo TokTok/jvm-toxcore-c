@@ -2,10 +2,6 @@ package im.tox.tox4j.av.callbacks
 
 import javax.sound.sampled._
 
-import im.tox.tox4j.av.callbacks.AudioPlayback.{done, play, showWave}
-import jline.TerminalFactory
-import org.scalatest.FunSuite
-
 import scala.util.Try
 
 object AudioPlayback {
@@ -28,17 +24,6 @@ object AudioPlayback {
     (value / maxValue * maxRange).toInt
   }
 
-  def play(pcm: Array[Short]): Unit = {
-    soundLine.foreach { soundLine =>
-      val buffer = serialiseAudioFrame(pcm)
-      soundLine.write(buffer, 0, buffer.length)
-    }
-  }
-
-  def done(length: Int): Boolean = {
-    soundLine.toOption.map(_.getLongFramePosition >= length).getOrElse(true)
-  }
-
   private def serialiseAudioFrame(pcm: Array[Short]): Array[Byte] = {
     val buffer = Array.ofDim[Byte](pcm.length * 2)
     for (i <- buffer.indices by 2) {
@@ -49,37 +34,28 @@ object AudioPlayback {
     buffer
   }
 
-  private val soundLine = Try {
-    val format = new AudioFormat(8000f, 16, 1, true, true)
-    val info = new DataLine.Info(classOf[SourceDataLine], format)
-    val soundLine = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
-    soundLine.open(format, 32000)
-    soundLine.start()
-    soundLine
-  }
-
 }
 
-final class AudioPlayback extends FunSuite {
+final class AudioPlayback(samplingRate: Int) {
 
-  test("main") {
-    val terminalWidth = TerminalFactory.get.getWidth
-    val frameSize = 480
-
-    System.out.print("\u001b[2J")
-
-    for (t <- 0 to AudioGenerator.Selected.length by frameSize) {
-      val frame = AudioGenerator.Selected.nextFrame16(t, frameSize)
-      System.out.print("\u001b[H")
-      System.out.println(showWave(frame, terminalWidth))
-      System.out.println(s"t=$t")
-      System.out.flush()
-      play(frame)
+  def play(pcm: Array[Short]): Unit = {
+    soundLine.foreach { soundLine =>
+      val buffer = AudioPlayback.serialiseAudioFrame(pcm)
+      soundLine.write(buffer, 0, buffer.length)
     }
+  }
 
-    while (!done(AudioGenerator.Selected.length)) {
-      Thread.sleep(100)
-    }
+  def done(length: Int): Boolean = {
+    soundLine.toOption.map(_.getLongFramePosition >= length).getOrElse(true)
+  }
+
+  private val soundLine = Try {
+    val format = new AudioFormat(samplingRate, 16, 1, true, true)
+    val info = new DataLine.Info(classOf[SourceDataLine], format)
+    val soundLine = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
+    soundLine.open(format, samplingRate)
+    soundLine.start()
+    soundLine
   }
 
 }
