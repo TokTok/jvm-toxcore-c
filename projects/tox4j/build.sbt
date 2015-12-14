@@ -106,23 +106,23 @@ addCompilerPlugin("im.tox" %% "linters" % "0.1-SNAPSHOT")
 scalastyleConfigUrl in Test := None
 scalastyleConfig in Test := (scalaSource in Test).value / "scalastyle-config.xml"
 
-scalacOptions ++= Seq("-optimise", "-Yinline-warnings")
-
+scalacOptions ++= Seq("-Yinline-warnings", "-target:jvm-1.7")
+javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 /******************************************************************************
  * Proguard configuration.
  ******************************************************************************/
 
 
-/*
 proguardSettings
 
-ProguardKeys.proguardVersion in Proguard := "5.0"
-ProguardKeys.inputs in Proguard := Seq((classDirectory in Compile).value)
-ProguardKeys.options in Proguard ++= Seq(
-  "-verbose",
-  "-optimizationpasses 5",
-  "-allowaccessmodification",
-  "@" + (baseDirectory.value / "tools" / "proguard.txt").getPath
-)
-*/
+javaOptions in (Proguard, ProguardKeys.proguard) := Seq("-Xmx1g")
+ProguardKeys.proguardVersion in Proguard := "5.1"
+ProguardKeys.inputs in Proguard := (fullClasspath in Test).value.files.filterNot(f => Seq(
+  "asm-5.0.4.jar",
+  "jansi-1.11.jar",
+  "scala-compiler-2.11.7.jar",
+  "test-interface-1.0.jar"
+).contains(f.getName))
+ProguardKeys.binaryDeps in Proguard := (sbt.Keys.compile in Test).value.relations.allBinaryDeps.toSeq
+ProguardKeys.options in Proguard += "@" + (baseDirectory.value / "tools" / "proguard.txt").getPath

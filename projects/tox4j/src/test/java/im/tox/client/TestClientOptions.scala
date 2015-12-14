@@ -13,7 +13,7 @@ case object TestClientOptions {
   val DefaultBootstrapNode = NetworkCoreTest.nodes.headOption.get
 
   private final case class Config(
-    count: Int = 1,
+    count: Int = 0,
     load: List[ToxSecretKey] = Nil,
     address: Option[InetAddress] = None,
     port: Port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get,
@@ -24,6 +24,14 @@ case object TestClientOptions {
   implicit val portRead: Read[Port] = Read.intRead.map(Port.fromInt(_).get)
   implicit val toxPublicKeyRead: Read[Option[ToxPublicKey]] = Read.stringRead.map(ToxPublicKey.fromHexString(_).toOption)
   implicit val toxSecretKeyRead: Read[ToxSecretKey] = Read.stringRead.map(ToxSecretKey.fromHexString(_).get)
+
+  private def bootstrap(c: Config): Config = {
+    c.copy(
+      address = Some(DefaultBootstrapNode._1.getAddress),
+      port = Port.fromInt(DefaultBootstrapNode._1.getPort).get,
+      key = Some(ToxPublicKey.fromHexString(DefaultBootstrapNode._2.readable).get)
+    )
+  }
 
   private val optionParser = new scopt.OptionParser[Config](toString) {
     head(
@@ -45,11 +53,7 @@ case object TestClientOptions {
     } text "Number of test clients to spawn"
 
     opt[Unit]('b', "bootstrap") action { (x, c) =>
-      c.copy(
-        address = Some(DefaultBootstrapNode._1.getAddress),
-        port = Port.fromInt(DefaultBootstrapNode._1.getPort).get,
-        key = Some(ToxPublicKey.fromHexString(DefaultBootstrapNode._2.readable).get)
-      )
+      bootstrap(c)
     } text s"Bootstrap to the default bootstrap node $DefaultBootstrapNode"
 
     opt[Option[InetAddress]]('a', "address") action { (x, c) =>
@@ -67,16 +71,27 @@ case object TestClientOptions {
     checkConfig { c =>
       if (c.address.isDefined != c.key.isDefined) {
         failure("If one of address and key is specified, the other must be specified as well")
-      } else if (c.count <= 0) {
-        failure("The number of toxes must be greater than 0")
+      } else if (c.count < 0) {
+        failure("The number of toxes must be positive")
       } else {
         success
       }
     }
   }
 
-  def apply(args: Seq[String])(f: Config => Unit): Unit = {
-    optionParser.parse(args, Config()).foreach(f)
+  def apply(args: Seq[String])(main: Config => Unit): Unit = {
+    optionParser.parse(args, Config()).foreach { c =>
+      main(
+        if (c.count == 0 && c.load.isEmpty) {
+          bootstrap(c.copy(
+            count = 1,
+            load = List(ToxSecretKey.fromValue(Array.ofDim(ToxSecretKey.Size)).get)
+          ))
+        } else {
+          c
+        }
+      )
+    }
   }
 
 }

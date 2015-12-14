@@ -11,6 +11,7 @@ import im.tox.tox4j.core.data.{ToxNickname, ToxPublicKey, ToxStatusMessage}
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
 import im.tox.tox4j.impl.jni.{ToxAvImplFactory, ToxCoreImpl, ToxCoreImplFactory}
 import im.tox.tox4j.testing.GetDisjunction._
+import im.tox.tox4j.testing.autotest.AutoTestSuite
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
@@ -46,7 +47,7 @@ case object TestClient extends App {
     state
   }
 
-  def loadProfile(tox: ToxCore[TestState]): Profile = {
+  def loadProfile(id: Int, tox: ToxCore[TestState]): Profile = {
     Try {
       val input = new FileInputStream(new File(savePath, tox.getPublicKey.toHexString))
       try {
@@ -55,10 +56,10 @@ case object TestClient extends App {
         tox.setStatusMessage(ToxStatusMessage(profile.statusMessage.getBytes))
         tox.setNospam(profile.nospam)
         tox.setStatus(ToxCoreImpl.convert(profile.status))
-        logger.info(s"Adding ${profile.friendKeys.length} friends from saved friend list")
-        profile.friendKeys.foreach(key => logger.debug(s"- $key"))
+        logger.info(s"[$id] Adding ${profile.friendKeys.length} friends from saved friend list")
+        profile.friendKeys.foreach(key => logger.debug(s"[$id] - $key"))
         profile.friendKeys.map(ToxPublicKey.fromHexString(_).get).foreach(tox.addFriendNorequest)
-        logger.info(s"Successfully read profile for ${tox.getPublicKey}")
+        logger.info(s"[$id] Successfully read profile for ${tox.getPublicKey}")
         profile
       } finally {
         input.close()
@@ -73,7 +74,7 @@ case object TestClient extends App {
         friendKeys = tox.getFriendList.map(tox.getFriendPublicKey).map(_.toHexString)
       )
       saveProfile(tox, profile)
-      logger.info(s"Created new profile for ${tox.getPublicKey}")
+      logger.info(s"[$id] Created new profile for ${tox.getPublicKey}")
       profile
     }
   }
@@ -87,18 +88,22 @@ case object TestClient extends App {
   @tailrec
   def mainLoop(clients: List[TestClient]): Unit = {
     mainLoop {
-      val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
-      Thread.sleep(interval)
-
-      for (client <- clients) yield {
-        client.copy(
-          state = client.state
-          |> client.tox.iterate
-          |> client.av.iterate
-          |> runTasks(client.tox, client.av)
-          |> saveOnChange(client.tox, client.state.profile)
-        )
+      val (time, nextClients) = AutoTestSuite.timed {
+        for (client <- clients) yield {
+          client.copy(
+            state = client.state
+            |> client.tox.iterate
+            |> client.av.iterate
+            |> runTasks(client.tox, client.av)
+            |> saveOnChange(client.tox, client.state.profile)
+          )
+        }
       }
+
+      val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
+      Thread.sleep((interval - time) max 0)
+
+      nextClients
     }
   }
 
@@ -125,7 +130,7 @@ case object TestClient extends App {
             tox.callback(handler)
             av.callback(handler)
 
-            val profile = loadProfile(tox)
+            val profile = loadProfile(id, tox)
             logger.info(s"[$id] Friend address: ${tox.getAddress.toHexString}")
             logger.info(s"[$id] DHT public key: ${tox.getDhtId.toHexString}")
             logger.info(s"[$id] UDP port: ${tox.getUdpPort}")

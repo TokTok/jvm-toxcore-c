@@ -5,9 +5,10 @@ import java.io.Closeable
 import im.tox.core.network.Port
 import im.tox.tox4j.core.callbacks._
 import im.tox.tox4j.core.data._
-import im.tox.tox4j.core.enums.{ToxFileControl, ToxMessageType, ToxUserStatus}
+import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.exceptions._
 import im.tox.tox4j.core.options.ToxOptions
+import im.tox.tox4j.impl.jni.ToxCoreJni
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.NotNull
  * should be stopped or stop using the instance before one thread invokes [[ToxCore.close]] on it, or appropriate
  * exception handlers should be installed in all threads.
  */
-trait ToxCore[ToxCoreState] extends Closeable {
+trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
 
   /**
    * Store all information associated with the tox instance to a byte array.

@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull
  * closing of ToxAv instance, all active calls will be forcibly terminated without
  * notifying peers.
  */
-trait ToxAv[ToxCoreState] extends Closeable {
+trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
 
   /**
    * Start new A/V session. There can only be only one session per Tox instance.

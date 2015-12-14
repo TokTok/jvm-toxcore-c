@@ -1,31 +1,37 @@
-# Keep everything.
--keepparameternames
--renamesourcefileattribute SourceFile
--keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+-keepattributes *Annotation*,InnerClasses
 
--keep,allowoptimization public class * {
-    public protected *;
+-keep public class im.tox.client.** {
+    public static void main(java.lang.String[]);
 }
 
--keepclassmembernames,allowoptimization class * {
-    java.lang.Class class$(java.lang.String);
-    java.lang.Class class$(java.lang.String, boolean);
+-keep public class org.apache.log4j.ConsoleAppender {
+    public *;
 }
 
--keepclasseswithmembernames,includedescriptorclasses,allowoptimization class * {
-    native <methods>;
+-keep public class org.apache.log4j.PatternLayout {
+    public *;
 }
 
--keepclassmembers,allowoptimization enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-}
+-verbose
+-optimizationpasses 2
+-dontobfuscate
+-dontnote
 
--keepclassmembers,allowoptimization class * implements java.io.Serializable {
-    static final long serialVersionUID;
-    private static final java.io.ObjectStreamField[] serialPersistentFields;
-    private void writeObject(java.io.ObjectOutputStream);
-    private void readObject(java.io.ObjectInputStream);
-    java.lang.Object writeReplace();
-    java.lang.Object readResolve();
-}
+-dontwarn scala.**
+-dontwarn scalax.**
+-dontwarn scalaz.**
+
+# Needs javax.annotation
+-dontwarn com.google.common.**
+-dontwarn com.thoughtworks.paranamer.**
+-dontwarn org.apache.log4j.**
+-dontwarn org.fusesource.**
+-dontwarn org.jdom.xpath.*
+-dontwarn org.jfree.**
+-dontwarn org.scalacheck.**
+-dontwarn org.scalameter.**
+-dontwarn org.scalatest.**
+-dontwarn scodec.bits.*
+# Needs javax.crypto
+-dontwarn scodec.codecs.Cipher*
+-dontwarn scoverage.**

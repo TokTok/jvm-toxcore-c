@@ -192,7 +192,7 @@ object AudioGenerator {
   }
 
   // https://www.youtube.com/watch?v=S7dg0X1LskI
-  private def songOfStorms(samplingRate: Int) = generator(samplingRate * 16) { (t, _) =>
+  def songOfStorms(samplingRate: Int): AudioGenerator = generator(samplingRate * 16) { (t, _) =>
     SongOfStorms(samplingRate).sample(t)
   }
 
