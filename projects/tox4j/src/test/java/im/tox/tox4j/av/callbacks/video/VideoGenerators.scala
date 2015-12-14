@@ -55,11 +55,20 @@ object VideoGenerators {
   }
 
   /**
-   * More and more gradient bars.
+   * More and more gradient boxes.
    */
-  val Gradient = Yuv { (t, y, x) =>
+  val GradientBoxes = Yuv { (t, y, x) =>
     YuvPixel.ofRgb(
-      (x * Math.log(t)).toInt
+      (x * Math.log(t) + ((y * Math.log(t)).toInt << 8)).toInt
+    )
+  }
+
+  /**
+   * Multiplication (x * y) pattern moving up.
+   */
+  val MultiplyUp = Yuv { (t, y, x) =>
+    YuvPixel.ofRgb(
+      x * (y + t)
     )
   }
 
@@ -116,7 +125,7 @@ object VideoGenerators {
   )
 
   val Selected = VideoGenerator.scaleNearestNeighbour(4, 8, Smiley)
-  // val Selected = Smiley
+  // val Selected = MultiplyUp
   // val Selected = VideoGenerator.scaleNearestNeighbour(1, 1, Xor)
 
 }

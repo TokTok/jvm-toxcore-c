@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.callbacks.video
 
-import java.io.{FileOutputStream, DataOutputStream, File}
+import java.io.{DataOutputStream, File, FileOutputStream}
 import java.util
 
 import im.tox.tox4j.av.ToxAv
@@ -57,7 +57,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
         // Call id+1.
         state.addTask { (tox, av, state) =>
           debug(state, s"Ringing ${state.id(friendNumber)}")
-          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(8000).get)
+          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(1).get)
           state
         }
       }
@@ -130,14 +130,15 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     )(state0: State): State = {
       val state = state0.modify(_ + 1)
 
-      val times = displayImage.flatMap { display =>
-        display.displayReceived(state0.get, y, u, v, yStride, uStride, vStride)
-      }.map {
-        case (parseTime, displayTime) =>
+      val times =
+        for {
+          displayImage <- displayImage
+          (parseTime, displayTime) <- displayImage.displayReceived(state0.get, y, u, v, yStride, uStride, vStride)
+        } yield {
           s", parseTime=${parseTime}ms, displayTime=${displayTime}ms"
-      }.getOrElse("")
+        }
 
-      debug(state, s"Received frame ${state0.get}: size=($width, $height), strides=($yStride, $uStride, $vStride)$times")
+      debug(state, s"Received frame ${state0.get}: size=($width, $height), strides=($yStride, $uStride, $vStride)${times.getOrElse("")}")
 
       if (state.get >= video.length) {
         state.finish

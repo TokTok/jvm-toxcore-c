@@ -8,6 +8,7 @@ import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import im.tox.tox4j.testing.autotest.AutoTest._
+import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
@@ -107,20 +108,24 @@ final case class AutoTest(
   @tailrec
   private def mainLoop[S](clients: List[Participant[S]], iteration: Int = 0): List[S] = {
     val interval = (clients.map(_.tox.iterationInterval) ++ clients.map(_.av.iterationInterval)).min
-    logger.trace(s"Iteration $iteration, interval $interval")
     assert(interval > 0)
-    Thread.sleep(interval)
 
-    val nextClients = clients.map {
-      case Participant(tox, av, state) =>
-        Participant(
-          tox, av,
-          state
-            |> tox.iterate
-            |> av.iterate
-            |> performTasks(tox, av, interval)
-        )
+    val (iterationTime, nextClients) = timed {
+      clients.map {
+        case Participant(tox, av, state) =>
+          Participant(
+            tox, av,
+            state
+              |> tox.iterate
+              |> av.iterate
+              |> performTasks(tox, av, interval)
+          )
+      }
     }
+
+    val sleepTime = (interval - iterationTime) max 0
+    logger.trace(s"Iteration $iteration, interval=$interval, iterationTime=$iterationTime, sleepTime=$sleepTime")
+    Thread.sleep(sleepTime)
 
     if (nextClients.exists(_.state.running)) {
       mainLoop(nextClients, iteration + 1)

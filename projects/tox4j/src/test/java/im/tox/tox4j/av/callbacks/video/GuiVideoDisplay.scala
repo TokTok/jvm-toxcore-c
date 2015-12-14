@@ -1,15 +1,17 @@
 package im.tox.tox4j.av.callbacks.video
 
+import java.awt.Color
 import java.awt.image.{BufferedImage, DataBufferByte}
-import java.awt.{Color, GridBagConstraints, GridBagLayout}
 import java.io.File
 import javax.imageio.ImageIO
-import javax.swing.{ImageIcon, JDialog, JFrame, JLabel}
+import javax.swing.border.EtchedBorder
+import javax.swing.{BorderFactory, ImageIcon}
 
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.callbacks.video.GuiVideoDisplay.{UI, newImage}
 import org.slf4j.LoggerFactory
 
+import scala.swing._
 import scala.util.Try
 
 object GuiVideoDisplay {
@@ -23,45 +25,50 @@ object GuiVideoDisplay {
 
   final class UI(width: Int, height: Int) {
 
-    val senderImageView, receiverImageView = new JLabel(new ImageIcon(newImage(width, height)))
+    val senderImageView, receiverImageView = new Label {
+      border = BorderFactory.createEtchedBorder(EtchedBorder.RAISED)
+      icon = new ImageIcon(newImage(width, height))
+    }
 
-    val dialog = new JDialog(new JFrame)
-    dialog.setSize(width * 2 + 20, height + 40)
-    dialog.setLayout(new GridBagLayout)
+    val senderLabel = new Label("No frames sent yet")
+    val receiverLabel = new Label("No frames received yet")
 
-    private val constraints = new GridBagConstraints
+    val dialog = new Dialog(new Frame) {
+      contents = new BoxPanel(Orientation.Vertical) {
+        contents += new BoxPanel(Orientation.Horizontal) {
+          contents += senderImageView
+          contents += receiverImageView
+        }
+        contents += new BoxPanel(Orientation.Horizontal) {
+          contents += Swing.HGlue
+          contents += senderLabel
+          contents += Swing.HGlue
+          contents += Swing.HGlue
+          contents += receiverLabel
+          contents += Swing.HGlue
+        }
+      }
+    }
 
-    constraints.ipadx = 0
-    constraints.gridx = 0
-    constraints.gridy = 0
-    val senderLabel = new JLabel("Sent")
-    dialog.add(senderLabel, constraints)
+    dialog.pack()
 
-    constraints.ipadx = 10
-    constraints.gridx = 0
-    constraints.gridy = 1
-    dialog.add(senderImageView, constraints)
-
-    constraints.ipadx = 0
-    constraints.gridx = 1
-    constraints.gridy = 0
-    val receiverLabel = new JLabel("Received")
-    dialog.add(receiverLabel, constraints)
-
-    constraints.ipadx = 10
-    constraints.gridx = 1
-    constraints.gridy = 1
-    dialog.add(receiverImageView, constraints)
+    /**
+     * Align a width or height number to the next multiple of 2.
+     * This is required so the dumped screenshots can be turned into a video by ffmpeg.
+     */
+    private def align(dimension: Int): Int = {
+      dimension / 2 * 2 + 2
+    }
 
     def screenshot(frameNumber: Int): Unit = {
       capturePath.foreach { capturePath =>
         val image = new BufferedImage(
-          dialog.getWidth,
-          dialog.getHeight,
+          align(dialog.bounds.width),
+          align(dialog.bounds.height),
           BufferedImage.TYPE_INT_RGB
         )
 
-        dialog.paint(image.getGraphics)
+        dialog.self.paint(image.getGraphics)
 
         ImageIO.write(image, "jpg", new File(capturePath, f"$frameNumber%03d.jpg"))
       }
@@ -75,7 +82,7 @@ final case class GuiVideoDisplay(width: Int, height: Int) extends RgbVideoDispla
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  override protected val canvas: Try[UI] = Try(new GuiVideoDisplay.UI(width, height))
+  override protected lazy val canvas: Try[UI] = Try(new GuiVideoDisplay.UI(width, height))
 
   override protected def parse(r: Array[Byte], g: Array[Byte], b: Array[Byte]): ImageIcon = {
     val image = newImage(width, height)
@@ -94,30 +101,36 @@ final case class GuiVideoDisplay(width: Int, height: Int) extends RgbVideoDispla
   }
 
   override protected def displaySent(canvas: UI, frameNumber: Int, senderImage: ImageIcon): Unit = {
-    if (!canvas.dialog.isVisible) {
-      canvas.dialog.setVisible(true)
+    Swing.onEDTWait {
+      if (!canvas.dialog.visible) {
+        canvas.dialog.visible = true
+      }
+      canvas.senderLabel.text = s"Sent frame #$frameNumber"
+      canvas.senderImageView.icon = senderImage
+
+      canvas.screenshot(frameNumber)
     }
-    canvas.senderLabel.setText(s"Sent frame #$frameNumber")
-    canvas.senderImageView.setIcon(senderImage)
   }
 
   override protected def displayReceived(canvas: UI, frameNumber: Int, receiverImage: ImageIcon): Unit = {
-    if (!canvas.dialog.isVisible) {
-      canvas.dialog.setVisible(true)
-    }
-    canvas.receiverLabel.setText(s"Received frame #$frameNumber")
-    canvas.receiverImageView.setIcon(receiverImage)
+    Swing.onEDTWait {
+      canvas.receiverLabel.text = s"Received frame #$frameNumber"
+      canvas.receiverImageView.icon = receiverImage
 
-    val FrameNumber = "Sent frame #(\\d+)".r
-    canvas.senderLabel.getText match {
-      case FrameNumber(number) =>
-        if (number.toInt != frameNumber) {
-          canvas.receiverLabel.setForeground(Color.RED)
-          canvas.receiverLabel.setText(canvas.receiverLabel.getText + s" (${number.toInt - frameNumber} behind)")
+      val FrameNumber = "Sent frame #(\\d+)".r
+      val sentFrameNumber =
+        canvas.senderLabel.text match {
+          case FrameNumber(number) =>
+            if (number.toInt != frameNumber) {
+              canvas.receiverLabel.foreground = Color.RED
+              canvas.receiverLabel.text += s" (${number.toInt - frameNumber} behind)"
+            }
+            number.toInt
         }
-    }
 
-    canvas.screenshot(frameNumber)
+      // Overwrite the screenshot if this frame was received.
+      canvas.screenshot(sentFrameNumber)
+    }
   }
 
 }
