@@ -6,6 +6,7 @@
 #include "util/jni/Enum.h"
 #include "util/jni/UTFChars.h"
 #include "util/pp_cat.h"
+#include "util/to_bytes.h"
 
 
 #define JAVA_METHOD_NAME(NAME) \

@@ -1,6 +1,5 @@
 package im.tox.tox4j.av.callbacks.video
 
-import im.tox.tox4j.testing.autotest.AutoTestSuite
 import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 import org.scalatest.Assertions
 
@@ -33,7 +32,7 @@ abstract class VideoDisplay[Parsed, Canvas] extends Assertions {
   ): Option[(Int, Int)] = {
     canvas.toOption.map { canvas =>
       val (parseTime, parsed) = timed(parse(y, u, v, yStride, uStride, vStride))
-      val (displayTime, ()) = timed(displayReceived(canvas, frameNumber, parsed))
+      val displayTime = timed(displayReceived(canvas, frameNumber, parsed))
 
       (parseTime, displayTime)
     }

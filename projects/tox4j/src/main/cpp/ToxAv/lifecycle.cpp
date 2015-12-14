@@ -60,14 +60,7 @@ tox4j_audio_receive_frame_cb (uint32_t friend_number,
   auto msg = events->add_audio_receive_frame ();
   msg->set_friend_number (friend_number);
 
-  std::vector<uint8_t> pcm_bytes;
-  pcm_bytes.reserve (sample_count * channels * 2);
-  for (size_t i = 0; i < sample_count * channels; i++)
-    {
-      uint16_t sample = pcm[i];
-      pcm_bytes.push_back (sample >> 8);
-      pcm_bytes.push_back (sample & 0xff);
-    }
+  std::vector<uint8_t> pcm_bytes = to_bytes (pcm, pcm + sample_count * channels);
   msg->set_pcm (pcm_bytes.data (), pcm_bytes.size ());
 
   msg->set_channels (channels);

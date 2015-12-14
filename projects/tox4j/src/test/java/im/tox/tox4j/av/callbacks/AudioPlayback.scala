@@ -2,7 +2,7 @@ package im.tox.tox4j.av.callbacks
 
 import javax.sound.sampled._
 
-import im.tox.tox4j.av.callbacks.AudioPlayback.{play, showWave, soundLine}
+import im.tox.tox4j.av.callbacks.AudioPlayback.{done, play, showWave}
 import jline.TerminalFactory
 import org.scalatest.FunSuite
 
@@ -35,6 +35,10 @@ object AudioPlayback {
     }
   }
 
+  def done(length: Int): Boolean = {
+    soundLine.toOption.map(_.getLongFramePosition >= length).getOrElse(true)
+  }
+
   private def serialiseAudioFrame(pcm: Array[Short]): Array[Byte] = {
     val buffer = Array.ofDim[Byte](pcm.length * 2)
     for (i <- buffer.indices by 2) {
@@ -59,24 +63,22 @@ object AudioPlayback {
 final class AudioPlayback extends FunSuite {
 
   test("main") {
-    soundLine.foreach { soundLine =>
-      val terminalWidth = TerminalFactory.get.getWidth
-      val frameSize = 480
+    val terminalWidth = TerminalFactory.get.getWidth
+    val frameSize = 480
 
-      System.out.print("\u001b[2J")
+    System.out.print("\u001b[2J")
 
-      for (t <- 0 to AudioGenerator.Selected.length by frameSize) {
-        val frame = AudioGenerator.Selected.nextFrame16(t, frameSize)
-        System.out.print("\u001b[H")
-        System.out.println(showWave(frame, terminalWidth))
-        System.out.println(s"t=$t")
-        System.out.flush()
-        play(frame)
-      }
+    for (t <- 0 to AudioGenerator.Selected.length by frameSize) {
+      val frame = AudioGenerator.Selected.nextFrame16(t, frameSize)
+      System.out.print("\u001b[H")
+      System.out.println(showWave(frame, terminalWidth))
+      System.out.println(s"t=$t")
+      System.out.flush()
+      play(frame)
+    }
 
-      while (soundLine.getLongFramePosition < AudioGenerator.Selected.length) {
-        Thread.sleep(100)
-      }
+    while (!done(AudioGenerator.Selected.length)) {
+      Thread.sleep(100)
     }
   }
 

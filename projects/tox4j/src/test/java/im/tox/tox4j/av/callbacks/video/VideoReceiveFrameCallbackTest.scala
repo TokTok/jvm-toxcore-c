@@ -22,6 +22,8 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
    */
   private val frameDelay = 0
 
+  private val bitRate = BitRate.fromInt(1).get
+
   /**
    * Base directory for sent frame capture. The files can be used to replay a
    * session in case of bugs.
@@ -57,7 +59,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
         // Call id+1.
         state.addTask { (tox, av, state) =>
           debug(state, s"Ringing ${state.id(friendNumber)}")
-          av.call(friendNumber, BitRate.Disabled, BitRate.fromInt(1).get)
+          av.call(friendNumber, BitRate.Disabled, bitRate)
           state
         }
       }
@@ -86,12 +88,12 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       assert(u.length == video.width * video.height / 4)
       assert(v.length == video.width * video.height / 4)
 
-      val (displayTime, ()) = timed {
+      val displayTime = timed {
         displayImage.foreach { display =>
           display.displaySent(state0.get, y, u, v)
         }
       }
-      val (sendTime, ()) = timed {
+      val sendTime = timed {
         av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
       }
 

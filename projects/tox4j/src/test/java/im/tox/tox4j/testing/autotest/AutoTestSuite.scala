@@ -9,15 +9,33 @@ import im.tox.tox4j.testing.autotest.AutoTest.ClientState
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Timeouts
 import org.slf4j.LoggerFactory
+import shapeless.<:!<
+
+import scala.util.Random
 
 object AutoTestSuite {
 
-  def timed[A](block: => A): (Int, A) = {
-    val start = System.currentTimeMillis()
-    val result = block
-    val end = System.currentTimeMillis()
-    ((end - start).toInt, result)
+  sealed abstract class Timed[A, R] {
+
+    protected def wrap(time: Int, result: A): R
+
+    def timed(block: => A): R = {
+      val start = System.currentTimeMillis()
+      val result = block
+      val end = System.currentTimeMillis()
+      wrap((end - start).toInt, result)
+    }
+
   }
+
+  implicit def otherTimed[A](implicit notUnit: A <:!< Unit): Timed[A, (Int, A)] = new Timed[A, (Int, A)] {
+    protected def wrap(time: Int, result: A): (Int, A) = (time, result)
+  }
+  implicit val unitTimed: Timed[Unit, Int] = new Timed[Unit, Int] {
+    protected def wrap(time: Int, result: Unit): Int = time
+  }
+
+  def timed[A, R](block: => A)(implicit timed: Timed[A, R]): R = timed.timed(block)
 
 }
 
@@ -25,7 +43,7 @@ abstract class AutoTestSuite extends FunSuite with Timeouts {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  val ParticipantCount = 2
+  def maxParticipantCount: Int = 2
 
   type S
 
@@ -56,7 +74,13 @@ abstract class AutoTestSuite extends FunSuite with Timeouts {
 
   test("UDP") {
     failAfter(TestConstants.Timeout) {
-      AutoTest(ToxCoreImplFactory, ToxAvImplFactory).run(ParticipantCount, ToxOptions(), Handler)
+      val participantCount =
+        if (maxParticipantCount == 2) {
+          maxParticipantCount
+        } else {
+          new Random().nextInt(maxParticipantCount - 2) + 2
+        }
+      AutoTest(ToxCoreImplFactory, ToxAvImplFactory).run(participantCount, ToxOptions(), Handler)
     }
   }
 
