@@ -12,8 +12,6 @@ import im.tox.tox4j.impl.jni.ToxJniLog
 import im.tox.tox4j.impl.jni.proto.{JniLog, JniLogEntry}
 import org.slf4j.LoggerFactory
 
-import scala.collection.mutable
-
 final class ToxClientHttpFrontend(port: Port) {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
@@ -21,9 +19,11 @@ final class ToxClientHttpFrontend(port: Port) {
   private var jniLog: Seq[JniLogEntry] = Nil
   private var state: List[ToxClient] = Nil
 
-  // About 1 second of updates.
-  private val maxLastUpdates = 20
-  private val lastUpdates = new mutable.Queue[Long]
+  /**
+   * Expected average iterations per second when Tox is idling.
+   */
+  private val iterationsPerSecond = 1000 / 50
+  private val loadAverage = new LoadAverage(iterationsPerSecond)
 
   private val startTime = Instant()
 
@@ -39,10 +39,7 @@ final class ToxClientHttpFrontend(port: Port) {
   }
 
   def update(clients: List[ToxClient]): Unit = {
-    lastUpdates.enqueue(System.currentTimeMillis())
-    if (lastUpdates.length > maxLastUpdates) {
-      lastUpdates.dequeue()
-    }
+    loadAverage.update()
 
     state = clients
 
@@ -64,11 +61,7 @@ final class ToxClientHttpFrontend(port: Port) {
       out.println(s"$TestClient running ${state.length} Tox instances, started on $startTime.")
       out.println()
 
-      val averageUpdateTime = {
-        val times = lastUpdates.zip(lastUpdates.tail).map { case (prev, next) => next - prev }
-        times.sum / times.length
-      }
-      out.println(s"Average time between iterations: ${averageUpdateTime}ms (${1000 / averageUpdateTime} updates / second)")
+      loadAverage.print(out)
       out.println()
 
       for ((client, id) <- state.zipWithIndex) {
