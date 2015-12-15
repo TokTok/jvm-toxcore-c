@@ -2,7 +2,7 @@ package im.tox.client.callbacks
 
 import java.util
 
-import im.tox.client.TestState
+import im.tox.client.{ToxClientState, ToxClientState$}
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.ToxAv
@@ -21,7 +21,7 @@ import scalaz.Lens
  * Handles audio/video calls.
  */
 final class AudioVideoEventListener(id: Int)
-    extends IdLogging(id) with ToxEventListener[TestState] {
+    extends IdLogging(id) with ToxEventListener[ToxClientState] {
 
   private val audioBitRate = BitRate.fromInt(8).get
   private val audioLength = AudioLength.Length60
@@ -31,7 +31,7 @@ final class AudioVideoEventListener(id: Int)
 
   private val videoBitRate = BitRate.fromInt(1).get
 
-  private def say(friendNumber: ToxFriendNumber, message: String)(state: TestState): TestState = {
+  private def say(friendNumber: ToxFriendNumber, message: String)(state: ToxClientState): ToxClientState = {
     state.addTask { (tox, av, state) =>
       tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString(message).get)
       state
@@ -43,7 +43,7 @@ final class AudioVideoEventListener(id: Int)
     messageType: ToxMessageType,
     timeDelta: Int,
     message: ToxFriendMessage
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     val AudioCommand = "audio (\\w+)".r
     val VideoCommand = "video (\\w+)".r
 
@@ -64,7 +64,7 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  private def processAudioCommand(friendNumber: ToxFriendNumber, state: TestState, request: String): TestState = {
+  private def processAudioCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
     val newAudio = request match {
       case "itcrowd"      => AudioGenerator.ItCrowd(audioSamplingRate.value)
       case "mortalkombat" => AudioGenerator.MortalKombat(audioSamplingRate.value)
@@ -72,12 +72,12 @@ final class AudioVideoEventListener(id: Int)
       case _              => AudioGenerator(audioSamplingRate.value)
     }
 
-    val audioTime = TestState.friendAudioTime(friendNumber)
-    val audio = TestState.friendAudio(friendNumber)
+    val audioTime = ToxClientState.friendAudioTime(friendNumber)
+    val audio = ToxClientState.friendAudio(friendNumber)
     audio.set(audioTime.mod(_.map(_ => 0), state), newAudio) |> say(friendNumber, "changing audio track")
   }
 
-  private def processVideoCommand(friendNumber: ToxFriendNumber, state: TestState, request: String): TestState = {
+  private def processVideoCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
     val newVideo = request match {
       case "xor1"          => VideoGenerators.Xor1
       case "xor2"          => VideoGenerators.Xor2
@@ -88,8 +88,8 @@ final class AudioVideoEventListener(id: Int)
       case _               => VideoGenerators.Selected
     }
 
-    val videoFrame = TestState.friendVideoFrame(friendNumber)
-    val video = TestState.friendVideo(friendNumber)
+    val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
+    val video = ToxClientState.friendVideo(friendNumber)
     video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
   }
 
@@ -97,7 +97,7 @@ final class AudioVideoEventListener(id: Int)
     friendNumber: ToxFriendNumber,
     audioEnabled: Boolean,
     videoEnabled: Boolean
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     state.addTask { (tox, av, state) =>
       logInfo(s"Answering call from $friendNumber")
       av.answer(friendNumber, audioBitRate, videoBitRate)
@@ -116,18 +116,18 @@ final class AudioVideoEventListener(id: Int)
   private def sendNextAudioFrame(
     friendNumber: ToxFriendNumber
   )(
-    tox: ToxCore[TestState],
-    av: ToxAv[TestState],
-    state: TestState
-  ): TestState = {
-    val audioTime = TestState.friendAudioTime(friendNumber)
+    tox: ToxCore[ToxClientState],
+    av: ToxAv[ToxClientState],
+    state: ToxClientState
+  ): ToxClientState = {
+    val audioTime = ToxClientState.friendAudioTime(friendNumber)
 
     audioTime.get(state) match {
       case None =>
         state // finished
       case Some(t) =>
         // Get next audio frames and send them.
-        val audio = TestState.friendAudio(friendNumber).get(state)
+        val audio = ToxClientState.friendAudio(friendNumber).get(state)
         val nextT = t + audioFrameSize * audioFramesPerIteration
 
         for (t <- t until nextT by audioFrameSize) {
@@ -147,18 +147,18 @@ final class AudioVideoEventListener(id: Int)
   private def sendNextVideoFrame(
     friendNumber: ToxFriendNumber
   )(
-    tox: ToxCore[TestState],
-    av: ToxAv[TestState],
-    state: TestState
-  ): TestState = {
-    val videoFrame = TestState.friendVideoFrame(friendNumber)
+    tox: ToxCore[ToxClientState],
+    av: ToxAv[ToxClientState],
+    state: ToxClientState
+  ): ToxClientState = {
+    val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
 
     videoFrame.get(state) match {
       case None =>
         state // finished
       case Some(t) =>
         // Get next frame and send it.
-        val video = TestState.friendVideo(friendNumber).get(state)
+        val video = ToxClientState.friendVideo(friendNumber).get(state)
         val (y, u, v) = video.yuv(t)
         av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
         videoFrame.set(state, Some(t + 1)).addTask(sendNextVideoFrame(friendNumber))
@@ -168,7 +168,7 @@ final class AudioVideoEventListener(id: Int)
   override def callState(
     friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     (state
       |> stopAvReceiving(friendNumber, callState)
       |> startStopAudioSending(friendNumber, callState)
@@ -178,7 +178,7 @@ final class AudioVideoEventListener(id: Int)
   private def stopAvReceiving(
     friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     state.addTask { (tox, av, state) =>
       if (callState.contains(ToxavFriendCallState.SENDING_A)) {
         av.callControl(friendNumber, ToxavCallControl.MUTE_AUDIO)
@@ -193,8 +193,8 @@ final class AudioVideoEventListener(id: Int)
   private def startStopAudioSending(
     friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
-  )(state: TestState): TestState = {
-    val audioTime = TestState.friendAudioTime(friendNumber)
+  )(state: ToxClientState): ToxClientState = {
+    val audioTime = ToxClientState.friendAudioTime(friendNumber)
 
     if (callState.contains(ToxavFriendCallState.ACCEPTING_A)) {
       logInfo(s"Sending audio to friend $friendNumber")
@@ -213,8 +213,8 @@ final class AudioVideoEventListener(id: Int)
   private def startStopVideoSending(
     friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
-  )(state: TestState): TestState = {
-    val videoFrame = TestState.friendVideoFrame(friendNumber)
+  )(state: ToxClientState): ToxClientState = {
+    val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
 
     if (callState.contains(ToxavFriendCallState.ACCEPTING_V)) {
       logInfo(s"Sending video to friend $friendNumber")
@@ -235,7 +235,7 @@ final class AudioVideoEventListener(id: Int)
     friendNumber: ToxFriendNumber,
     audioBitRate: BitRate,
     videoBitRate: BitRate
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     state.addTask { (tox, av, state) =>
       av.setBitRate(friendNumber, audioBitRate, videoBitRate)
 
@@ -248,21 +248,21 @@ final class AudioVideoEventListener(id: Int)
   private def setAudioBitRate(
     friendNumber: ToxFriendNumber,
     bitRate: BitRate
-  )(state: TestState): TestState = {
-    setBitRate(TestState.friendAudioTime(friendNumber), bitRate)(state)
+  )(state: ToxClientState): ToxClientState = {
+    setBitRate(ToxClientState.friendAudioTime(friendNumber), bitRate)(state)
   }
 
   private def setVideoBitRate(
     friendNumber: ToxFriendNumber,
     bitRate: BitRate
-  )(state: TestState): TestState = {
-    setBitRate(TestState.friendVideoFrame(friendNumber), bitRate)(state)
+  )(state: ToxClientState): ToxClientState = {
+    setBitRate(ToxClientState.friendVideoFrame(friendNumber), bitRate)(state)
   }
 
   private def setBitRate(
-    lens: Lens[TestState, Option[Int]],
+    lens: Lens[ToxClientState, Option[Int]],
     bitRate: BitRate
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     if (bitRate == BitRate.Disabled) {
       // Disable audio sending.
       lens.set(state, None)
@@ -276,7 +276,7 @@ final class AudioVideoEventListener(id: Int)
     pcm: Array[Short],
     channels: AudioChannels,
     samplingRate: SamplingRate
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     state
   }
 
@@ -285,7 +285,7 @@ final class AudioVideoEventListener(id: Int)
     width: Int, height: Int,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int
-  )(state: TestState): TestState = {
+  )(state: ToxClientState): ToxClientState = {
     state
   }
 

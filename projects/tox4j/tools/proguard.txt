@@ -1,21 +1,37 @@
 -keepattributes *Annotation*,InnerClasses
 
--keep public class im.tox.client.** {
-    public static void main(java.lang.String[]);
+-keep public class im.tox.client.Main {
+  public static void main(java.lang.String[]);
+}
+
+# Constructed from JNI.
+-keep public class * extends im.tox.tox4j.exceptions.ToxException {
+  public *;
+}
+
+-keep public class * implements com.google.protobuf.ProtocolMessageEnum {
+  public *;
+}
+
+-keep public class * implements com.google.protobuf.MessageOrBuilder {
+  public *;
 }
 
 -keep public class org.apache.log4j.ConsoleAppender {
-    public *;
+  public *;
 }
 
 -keep public class org.apache.log4j.PatternLayout {
-    public *;
+  public *;
 }
 
 -verbose
 -optimizationpasses 2
 -dontobfuscate
 -dontnote
+
+# LVTT entry for 'entry' in class file com/google/protobuf/AbstractMessage$Builder does not match any LVT entry
+-optimizations !code/allocation/variable
 
 -dontwarn scala.**
 -dontwarn scalax.**

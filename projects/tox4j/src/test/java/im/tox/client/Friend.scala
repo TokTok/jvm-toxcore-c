@@ -1,10 +1,9 @@
 package im.tox.client
 
-import im.tox.client.proto.Profile
 import im.tox.tox4j.av.callbacks.AudioGenerator
 import im.tox.tox4j.av.callbacks.video.{VideoGenerators, VideoGenerator}
-import im.tox.tox4j.core.data.{ToxFriendNumber, ToxNickname, ToxStatusMessage}
-import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
+import im.tox.tox4j.core.data.{ToxStatusMessage, ToxNickname}
+import im.tox.tox4j.core.enums.{ToxUserStatus, ToxConnection}
 
 import scalaz.Lens
 
@@ -47,35 +46,5 @@ object Friend {
     (friend, video) => friend.copy(video = video),
     _.video
   )
-
-}
-
-final case class TestState(
-    // Persistent state.
-    profile: Profile = Profile.defaultInstance,
-    // Temporary state.
-    friends: Map[ToxFriendNumber, Friend] = Map.empty,
-    // Tasks to run on the next iteration.
-    tasks: List[TestClient.Task[TestState]] = Nil
-) {
-
-  def addTask(task: TestClient.Task[TestState]): TestState = {
-    copy(tasks = task :: tasks)
-  }
-
-}
-
-object TestState {
-
-  def friend(friendNumber: ToxFriendNumber): Lens[TestState, Friend] = Lens.lensu[TestState, Friend](
-    (state, friend) => state.copy(friends = state.friends + (friendNumber -> friend)),
-    _.friends(friendNumber)
-  )
-
-  def friendAudioTime(friendNumber: ToxFriendNumber): Lens[TestState, Option[Int]] = friend(friendNumber) >=> Friend.audioTime
-  def friendAudio(friendNumber: ToxFriendNumber): Lens[TestState, AudioGenerator] = friend(friendNumber) >=> Friend.audio
-
-  def friendVideoFrame(friendNumber: ToxFriendNumber): Lens[TestState, Option[Int]] = friend(friendNumber) >=> Friend.videoFrame
-  def friendVideo(friendNumber: ToxFriendNumber): Lens[TestState, VideoGenerator] = friend(friendNumber) >=> Friend.video
 
 }

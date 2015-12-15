@@ -13,13 +13,14 @@ import im.tox.tox4j.impl.jni.proto.{JniLog, JniLogEntry}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 final class TestHttpServer(port: Port) {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private var jniLog: Seq[JniLogEntry] = Nil
-  private var state: List[TestClient] = Nil
+  private var state: List[ToxClient] = Nil
 
   // About 1 second of updates.
   private val maxLastUpdates = 20
@@ -39,7 +40,7 @@ final class TestHttpServer(port: Port) {
     }
   }
 
-  def update(clients: List[TestClient]): Unit = {
+  def update(clients: List[ToxClient]): Unit = {
     lastUpdates.enqueue(System.currentTimeMillis())
     if (lastUpdates.length > maxLastUpdates) {
       lastUpdates.dequeue()
@@ -55,49 +56,47 @@ final class TestHttpServer(port: Port) {
     }
   }
 
+  private def send(exchange: HttpExchange, response: String): Unit = {
+    val bytes = response.getBytes(UTF_8)
+
+    exchange.getResponseHeaders.add("Content-Type", "text/plain; charset=utf-8")
+    exchange.sendResponseHeaders(200, bytes.length)
+
+    val os = exchange.getResponseBody
+    os.write(bytes)
+    os.close()
+  }
+
   object RootHandler extends HttpHandler {
-
-    private def send(exchange: HttpExchange, response: String): Unit = {
-      val bytes = response.getBytes(UTF_8)
-
-      exchange.getResponseHeaders.add("Content-Type", "text/plain; charset=utf-8")
-      exchange.sendResponseHeaders(200, bytes.length)
-
-      val os = exchange.getResponseBody
-      os.write(bytes)
-      os.close()
-    }
 
     override def handle(exchange: HttpExchange): Unit = {
       val state = TestHttpServer.this.state
       val response = new StringWriter
       val out = new PrintWriter(response)
 
-      try {
-        out.println(s"$TestClient running ${state.length} Tox instances, started on $startTime.")
-        out.println()
+      out.println(s"$Main running ${state.length} Tox instances, started on $startTime.")
+      out.println()
 
-        val averageUpdateTime = {
-          val times = lastUpdates.zip(lastUpdates.tail).map { case (prev, next) => next - prev }
-          times.sum / times.length
-        }
-        out.println(s"Average time between iterations: ${averageUpdateTime}ms (${1000 / averageUpdateTime} updates / second)")
-        out.println()
-
-        for (client <- state) {
-          out.println(s"Instance ${client.tox.getAddress}:")
-          out.println("  Friends:")
-          for ((friendNumber, friend) <- client.state.friends) {
-            out.println(s"    $friendNumber. $friend")
-          }
-          out.println()
-        }
-
-        out.println(s"Recent $ToxJniLog:")
-        out.println(ToxJniLog.toString(JniLog(jniLog)))
-      } finally {
-        out.close()
+      val averageUpdateTime = {
+        val times = lastUpdates.zip(lastUpdates.tail).map { case (prev, next) => next - prev }
+        times.sum / times.length
       }
+      out.println(s"Average time between iterations: ${averageUpdateTime}ms (${1000 / averageUpdateTime} updates / second)")
+      out.println()
+
+      for (client <- state) {
+        out.println(s"Instance ${client.tox.getAddress}:")
+        out.println("  Friends:")
+        for ((friendNumber, friend) <- client.state.friends) {
+          out.println(s"    $friendNumber. $friend")
+        }
+        out.println()
+      }
+
+      out.println(s"Recent $ToxJniLog:")
+      out.println(ToxJniLog.toString(JniLog(jniLog)))
+
+      out.close()
 
       send(exchange, response.toString)
     }
@@ -132,11 +131,28 @@ final class TestHttpServer(port: Port) {
 
   }
 
+  final case class ExceptionHandler(inner: HttpHandler) extends HttpHandler {
+    override def handle(exchange: HttpExchange): Unit = {
+      try {
+        inner.handle(exchange)
+      } catch {
+        case NonFatal(exception) =>
+          val response = new StringWriter
+
+          val out = new PrintWriter(response)
+          exception.printStackTrace(out)
+          out.close()
+
+          send(exchange, response.toString)
+      }
+    }
+  }
+
   logger.info(s"Starting HTTP server on $port")
   val server = HttpServer.create(new InetSocketAddress(port.value), 0)
-  server.createContext("/", RootHandler)
-  server.createContext("/profile", ProfileBinaryHandler)
-  server.createContext("/profile.txt", ProfileTextHandler)
+  server.createContext("/", ExceptionHandler(RootHandler))
+  server.createContext("/profile", ExceptionHandler(ProfileBinaryHandler))
+  server.createContext("/profile.txt", ExceptionHandler(ProfileTextHandler))
   server.setExecutor(null)
   server.start()
 

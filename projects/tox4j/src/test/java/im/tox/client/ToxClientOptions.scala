@@ -8,11 +8,11 @@ import im.tox.tox4j.core.data.{ToxPublicKey, ToxSecretKey}
 import im.tox.tox4j.testing.GetDisjunction._
 import scopt.Read
 
-case object TestClientOptions {
+case object ToxClientOptions {
 
   val DefaultBootstrapNode = NetworkCoreTest.nodes.headOption.get
 
-  private final case class Config(
+  final case class Config(
     count: Int = 0,
     load: List[ToxSecretKey] = Nil,
     nospam: Option[Int] = None,

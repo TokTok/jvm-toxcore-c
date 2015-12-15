@@ -19,19 +19,13 @@ import scala.annotation.tailrec
 import scala.util.Try
 import scala.util.control.NonFatal
 
-final case class TestClient(
-  tox: ToxCore[TestState],
-  av: ToxAv[TestState],
-  state: TestState
-)
-
-case object TestClient extends App {
+case object ProfileManager {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private val savePath = Seq(new File("tools/toxsaves"), new File("projects/tox4j/tools/toxsaves")).find(_.exists)
 
-  def saveProfile(tox: ToxCore[TestState], profile: Profile): Unit = {
+  def saveProfile(tox: ToxCore[ToxClientState], profile: Profile): Unit = {
     savePath.foreach { savePath =>
       val output = new FileOutputStream(new File(savePath, tox.getPublicKey.toHexString))
       try {
@@ -43,14 +37,14 @@ case object TestClient extends App {
     }
   }
 
-  def saveOnChange(tox: ToxCore[TestState], oldProfile: Profile)(state: TestState): TestState = {
+  def saveOnChange(tox: ToxCore[ToxClientState], oldProfile: Profile)(state: ToxClientState): ToxClientState = {
     if (oldProfile != state.profile) {
       saveProfile(tox, state.profile)
     }
     state
   }
 
-  def loadProfile(id: Int, tox: ToxCore[TestState]): Profile = {
+  def loadProfile(id: Int, tox: ToxCore[ToxClientState]): Profile = {
     Try {
       val input = new FileInputStream(new File(savePath.get, tox.getPublicKey.toHexString))
       try {
@@ -83,7 +77,7 @@ case object TestClient extends App {
 
   type Task[S] = (ToxCore[S], ToxAv[S], S) => S
 
-  def runTasks(tox: ToxCore[TestState], av: ToxAv[TestState])(state: TestState): TestState = {
+  def runTasks(tox: ToxCore[ToxClientState], av: ToxAv[ToxClientState])(state: ToxClientState): ToxClientState = {
     state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) =>
       try {
         task(tox, av, state)
@@ -96,34 +90,32 @@ case object TestClient extends App {
   }
 
   @tailrec
-  def mainLoop(httpServer: Option[TestHttpServer])(clients0: List[TestClient]): Unit = {
-    mainLoop(httpServer) {
-      val (time, (clients, interval)) = AutoTestSuite.timed {
-        httpServer.foreach(_.update(clients0))
+  def mainLoop(httpServer: Option[TestHttpServer], clients0: List[ToxClient]): Unit = {
+    val (time, (clients, interval)) = AutoTestSuite.timed {
+      httpServer.foreach(_.update(clients0))
 
-        val clients =
-          for (client <- clients0) yield {
-            client.copy(
-              state = client.state
-              |> client.tox.iterate
-              |> client.av.iterate
-              |> runTasks(client.tox, client.av)
-              |> saveOnChange(client.tox, client.state.profile)
-            )
-          }
+      val clients =
+        for (client <- clients0) yield {
+          client.copy(
+            state = client.state
+            |> client.tox.iterate
+            |> client.av.iterate
+            |> runTasks(client.tox, client.av)
+            |> saveOnChange(client.tox, client.state.profile)
+          )
+        }
 
-        val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
+      val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
 
-        (clients, interval)
-      }
-
-      Thread.sleep((interval - time) max 0)
-
-      clients
+      (clients, interval)
     }
+
+    Thread.sleep((interval - time) max 0)
+
+    mainLoop(httpServer, clients)
   }
 
-  TestClientOptions(args) { c =>
+  def run(c: ToxClientOptions.Config): Unit = {
     val httpServer = c.httpPort.map(new TestHttpServer(_))
 
     val predefined = c.load.map(key => ToxOptions(saveData = SaveDataOptions.SecretKey(key)))
@@ -131,7 +123,7 @@ case object TestClient extends App {
     val defaults = List.fill(c.count - predefined.length)(ToxOptions())
     logger.info(s"Additional default toxes: ${defaults.length}")
 
-    ToxCoreImplFactory.withToxN[TestState, Unit](predefined ++ defaults) { toxes =>
+    ToxCoreImplFactory.withToxN[ToxClientState, Unit](predefined ++ defaults) { toxes =>
       (c.address, c.key) match {
         case (Some(address), Some(key)) =>
           logger.info(s"Bootstrapping all toxes to $address:${c.port.value}")
@@ -140,7 +132,7 @@ case object TestClient extends App {
       }
 
       logger.info("Initialising AV sessions")
-      ToxAvImplFactory.withToxAvN[TestState, Unit](toxes) { avs =>
+      ToxAvImplFactory.withToxAvN[ToxClientState, Unit](toxes) { avs =>
         logger.info("Initialising event listeners and client states")
         val clients =
           for (((tox, av), id) <- avs.zipWithIndex) yield {
@@ -161,11 +153,11 @@ case object TestClient extends App {
             logger.info(s"[$id] Friend address: ${tox.getAddress.toHexString}")
             logger.info(s"[$id] DHT public key: ${tox.getDhtId.toHexString}")
             logger.info(s"[$id] UDP port: ${tox.getUdpPort}")
-            TestClient(tox, av, TestState(profile))
+            ToxClient(tox, av, ToxClientState(profile))
           }
 
         logger.info("Starting event loop")
-        mainLoop(httpServer)(clients)
+        mainLoop(httpServer, clients)
       }
     }
   }
