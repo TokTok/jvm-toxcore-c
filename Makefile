@@ -15,8 +15,7 @@ cache:
 
 heroku: cache
 	buildscripts/00_dependencies_host
-	JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64 buildscripts/04_build
-	JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64 buildscripts/05_heroku
+	PROGUARD=1 JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64 buildscripts/04_build
 
 setup:
 	buildscripts/00_dependencies_host

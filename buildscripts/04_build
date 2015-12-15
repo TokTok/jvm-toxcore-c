@@ -40,8 +40,15 @@ push @TEST_COMMANDS, (
 ) if $C->TEST_GOAL eq 'coverage';
 
 push @TEST_COMMANDS, (
-   'testOnly *TravisBenchSuite'
+   'testOnly *TravisBenchSuite',
 ) if $C->TEST_GOAL eq 'performance';
+
+
+my @PROGUARD;
+
+push @PROGUARD, (
+   'proguard:proguard',
+) if $ENV{PROGUARD};
 
 
 # Common sbt commands for all modules except build-basic:
@@ -159,7 +166,7 @@ install_modules (plan_build (
    [0, ['build-basic'],       'build-extra', @COMMANDS],
    [0, ['build-extra'],       'linters', @COMMANDS],
    [0, ['build-extra'],       'macros', @COMMANDS],
-   [1, ['linters', 'macros'], 'tox4j', @COMMANDS], # only tox4j is platform-dependent (1)
+   [1, ['linters', 'macros'], 'tox4j', @COMMANDS, @PROGUARD], # only tox4j is platform-dependent (1)
 ));
 
 
