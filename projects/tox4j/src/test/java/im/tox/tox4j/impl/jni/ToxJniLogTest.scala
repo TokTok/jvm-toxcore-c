@@ -59,20 +59,17 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     }
   }
 
-  // TODO(iphydf): Enable this when javaConversions in protobufConfig can be enabled.
-  /*
   test("Java conversions") {
     ToxJniLog() // clear
 
     ToxJniLog.maxSize = TestMaxSize
     assert(ToxJniLog().entries.isEmpty)
-    ToxCoreFactory.withTox { tox => }
+    ToxCoreImplFactory.withToxUnit { tox => }
 
     val log = ToxJniLog()
     assert(JniLog.fromJavaProto(JniLog.toJavaProto(log)) == log)
     assert(JniLog.fromAscii(log.toString) == log)
   }
-  */
 
   test("concurrent logging works") {
     ToxJniLog() // clear

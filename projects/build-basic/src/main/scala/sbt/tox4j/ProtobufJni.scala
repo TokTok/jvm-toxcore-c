@@ -35,7 +35,7 @@ object ProtobufJni extends OptionalPlugin {
     }.value,
 
     version in protobufConfig := "3.0.0-beta-1",
-    javaConversions in protobufConfig := false, // TODO(iphydf): Set this to true.
+    javaConversions in protobufConfig := true,
     flatPackage in protobufConfig := true,
 
     sourceGenerators in Compile <+= generate in Protobuf,
