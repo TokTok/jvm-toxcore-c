@@ -8,10 +8,8 @@ import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import com.typesafe.scalalogging.Logger
 import im.tox.core.network.Port
 import im.tox.tox4j.impl.jni.ToxJniLog
-import im.tox.tox4j.impl.jni.proto.{JniLogEntry, JniLog}
+import im.tox.tox4j.impl.jni.proto.{JniLog, JniLogEntry}
 import org.slf4j.LoggerFactory
-
-import scala.util.Random
 
 object TestHttpServer {
 
@@ -89,7 +87,7 @@ object TestHttpServer {
 
   }
 
-  case object ProfileHandler extends HttpHandler {
+  case object ProfileBinaryHandler extends HttpHandler {
 
     override def handle(exchange: HttpExchange): Unit = {
       exchange.getResponseHeaders.add("Content-Type", "application/octet-stream")
@@ -102,11 +100,27 @@ object TestHttpServer {
 
   }
 
+  case object ProfileTextHandler extends HttpHandler {
+
+    override def handle(exchange: HttpExchange): Unit = {
+      val result = state.map(_.state.profile.toString).mkString("\n").getBytes(UTF_8)
+
+      exchange.getResponseHeaders.add("Content-Type", "text/plain; charset=utf-8")
+      exchange.sendResponseHeaders(200, result.length)
+
+      val os = exchange.getResponseBody
+      os.write(result)
+      os.close()
+    }
+
+  }
+
   def start(port: Port): Unit = {
     logger.info(s"Starting HTTP server on $port")
     val server = HttpServer.create(new InetSocketAddress(port.value), 0)
     server.createContext("/", RootHandler)
-    server.createContext("/profile", ProfileHandler)
+    server.createContext("/profile", ProfileBinaryHandler)
+    server.createContext("/profile.txt", ProfileTextHandler)
     server.setExecutor(null)
     server.start()
   }
