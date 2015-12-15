@@ -46,6 +46,7 @@ final class AudioVideoEventListener(id: Int)
   )(state: ToxClientState): ToxClientState = {
     val AudioCommand = "audio (\\w+)".r
     val VideoCommand = "video (\\w+)".r
+    val ShowCommand = "show (\\w+)".r
 
     val command = message.toString.toLowerCase
     command match {
@@ -58,6 +59,7 @@ final class AudioVideoEventListener(id: Int)
 
       case AudioCommand(request) => processAudioCommand(friendNumber, state, request)
       case VideoCommand(request) => processVideoCommand(friendNumber, state, request)
+      case ShowCommand(request)  => processShowCommand(friendNumber, state, request)
 
       case _ =>
         say(friendNumber, s"unrecognised command: '$command'; try 'call me'")(state)
@@ -91,6 +93,20 @@ final class AudioVideoEventListener(id: Int)
     val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
     val video = ToxClientState.friendVideo(friendNumber)
     video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
+  }
+
+  private def processShowCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
+    val response: (ToxCore[ToxClientState] => String) = request match {
+      case "address" => _.getAddress.toString
+      case "dhtid"   => _.getDhtId.toString
+      case "udpport" => _.getUdpPort.toString
+      case other     => _ => s"I don't know about '${other.take(200)}'"
+    }
+
+    state.addTask { (tox, av, state) =>
+      tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString(response(tox)).get)
+      state
+    }
   }
 
   override def call(

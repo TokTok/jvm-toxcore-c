@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -x
+
+export PROGUARD=1
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64
+export PATH=$CACHE_DIR/usr/bin:$PATH
+
+buildscripts/00_dependencies_host
+
+# If the above setup step did its job, start the build.
+if which sbt && which clang && which cmake; then
+  buildscripts/04_build
+fi

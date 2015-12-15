@@ -2,7 +2,7 @@ package im.tox.client
 
 import com.typesafe.scalalogging.Logger
 import im.tox.client.callbacks._
-import im.tox.client.http.TestClientHttpFrontend
+import im.tox.client.http.ToxClientHttpFrontend
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
@@ -31,7 +31,7 @@ case object TestClient extends App {
   }
 
   @tailrec
-  private def mainLoop(httpServer: Option[TestClientHttpFrontend], clients0: List[ToxClient]): Unit = {
+  private def mainLoop(httpServer: Option[ToxClientHttpFrontend], clients0: List[ToxClient]): Unit = {
     val (time, (clients, interval)) = AutoTestSuite.timed {
       httpServer.foreach(_.update(clients0))
 
@@ -57,7 +57,7 @@ case object TestClient extends App {
   }
 
   ToxClientOptions(args) { c =>
-    val httpServer = c.httpPort.map(new TestClientHttpFrontend(_))
+    val httpServer = c.httpPort.map(new ToxClientHttpFrontend(_))
 
     val predefined = c.load.map(key => ToxOptions(saveData = SaveDataOptions.SecretKey(key)))
     logger.info(s"Creating ${c.count} toxes (${predefined.length} with predefined keys)")
@@ -91,10 +91,12 @@ case object TestClient extends App {
             val profile = ProfileManager.loadProfile(id, tox)
             // Save it again in case the file format changed.
             ProfileManager.saveProfile(tox, profile)
-            logger.info(s"[$id] Friend address: ${tox.getAddress.toHexString}")
-            logger.info(s"[$id] DHT public key: ${tox.getDhtId.toHexString}")
-            logger.info(s"[$id] UDP port: ${tox.getUdpPort}")
-            ToxClient(tox, av, ToxClientState(profile))
+            ToxClient(tox, av, ToxClientState(
+              tox.getAddress,
+              tox.getDhtId,
+              tox.getUdpPort,
+              profile
+            ))
           }
 
         logger.info("Starting event loop")

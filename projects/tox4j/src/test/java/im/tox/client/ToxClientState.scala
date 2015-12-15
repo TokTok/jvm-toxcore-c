@@ -1,15 +1,20 @@
 package im.tox.client
 
 import im.tox.client.proto.Profile
+import im.tox.core.network.Port
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.av.callbacks.AudioGenerator
 import im.tox.tox4j.av.callbacks.video.VideoGenerator
 import im.tox.tox4j.core.ToxCore
-import im.tox.tox4j.core.data.ToxFriendNumber
+import im.tox.tox4j.core.data.{ToxPublicKey, ToxFriendAddress, ToxFriendNumber}
 
 import scalaz.Lens
 
 final case class ToxClientState(
+    // Caching local node information for display.
+    address: ToxFriendAddress,
+    dhtId: ToxPublicKey,
+    udpPort: Port,
     // Persistent state.
     profile: Profile = Profile.defaultInstance,
     // Temporary state.

@@ -57,9 +57,6 @@ exec java \$SBT_OPTS -jar $BINDIR/sbt-launch.jar "\$@"
 EOF
 
    chmod 0755, "$BINDIR/sbt";
-
-   system "$BINDIR/sbt", "version";
-   die "Installation of sbt failed" if $?;
 }
 
 my @clangs = ("clang", "clang-3.6", "clang-3.7");
@@ -76,9 +73,6 @@ if (not grep { system $_, "--version"; not $? } @clangs) {
          }
       } $TARNAME;
    };
-
-   system "clang", "--version";
-   die "Installation of clang failed" if $?;
 }
 
 system "cmake", "--version";
@@ -95,7 +89,4 @@ if ($?) {
          }
       } $TARNAME;
    };
-
-   system "cmake", "--version";
-   die "Installation of cmake failed" if $?;
 }

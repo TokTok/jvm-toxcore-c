@@ -14,8 +14,7 @@ cache:
 	ln -s $(CACHE_DIR)/sbt	$(HOME)/.sbt
 
 heroku: cache
-	buildscripts/00_dependencies_host
-	PROGUARD=1 JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64 buildscripts/04_build
+	buildscripts/heroku
 
 setup:
 	buildscripts/00_dependencies_host

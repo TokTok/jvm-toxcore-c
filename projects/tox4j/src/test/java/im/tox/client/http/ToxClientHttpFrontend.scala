@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
-final class TestClientHttpFrontend(port: Port) {
+final class ToxClientHttpFrontend(port: Port) {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
@@ -57,7 +57,7 @@ final class TestClientHttpFrontend(port: Port) {
   private case object StatusHandler extends HttpHandler {
 
     override def handle(exchange: HttpExchange): Unit = {
-      val state = TestClientHttpFrontend.this.state
+      val state = ToxClientHttpFrontend.this.state
       val response = new StringWriter
       val out = new PrintWriter(response)
 
@@ -72,7 +72,9 @@ final class TestClientHttpFrontend(port: Port) {
       out.println()
 
       for (client <- state) {
-        out.println(s"Instance ${client.tox.getAddress}:")
+        out.println(s"Instance ${client.state.address}:")
+        out.println(s"  DHT Public Key: ${client.state.dhtId}")
+        out.println(s"  UDP Port: ${client.state.udpPort}")
         out.println("  Friends:")
         for ((friendNumber, friend) <- client.state.friends) {
           out.println(s"    $friendNumber. $friend")
