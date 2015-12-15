@@ -15,6 +15,8 @@ import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.testing.GetDisjunction._
 
+import scalaz.Lens
+
 /**
  * Handles audio/video calls.
  */
@@ -36,7 +38,12 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  override def friendMessage(friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: TestState): TestState = {
+  override def friendMessage(
+    friendNumber: ToxFriendNumber,
+    messageType: ToxMessageType,
+    timeDelta: Int,
+    message: ToxFriendMessage
+  )(state: TestState): TestState = {
     val AudioCommand = "audio (\\w+)".r
     val VideoCommand = "video (\\w+)".r
 
@@ -86,7 +93,11 @@ final class AudioVideoEventListener(id: Int)
     video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
   }
 
-  override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: TestState): TestState = {
+  override def call(
+    friendNumber: ToxFriendNumber,
+    audioEnabled: Boolean,
+    videoEnabled: Boolean
+  )(state: TestState): TestState = {
     state.addTask { (tox, av, state) =>
       logInfo(s"Answering call from $friendNumber")
       av.answer(friendNumber, audioBitRate, videoBitRate)
@@ -102,7 +113,13 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  private def sendNextAudioFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[TestState], av: ToxAv[TestState], state: TestState): TestState = {
+  private def sendNextAudioFrame(
+    friendNumber: ToxFriendNumber
+  )(
+    tox: ToxCore[TestState],
+    av: ToxAv[TestState],
+    state: TestState
+  ): TestState = {
     val audioTime = TestState.friendAudioTime(friendNumber)
 
     audioTime.get(state) match {
@@ -127,7 +144,13 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  private def sendNextVideoFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[TestState], av: ToxAv[TestState], state: TestState): TestState = {
+  private def sendNextVideoFrame(
+    friendNumber: ToxFriendNumber
+  )(
+    tox: ToxCore[TestState],
+    av: ToxAv[TestState],
+    state: TestState
+  ): TestState = {
     val videoFrame = TestState.friendVideoFrame(friendNumber)
 
     videoFrame.get(state) match {
@@ -142,11 +165,14 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: TestState): TestState = {
+  override def callState(
+    friendNumber: ToxFriendNumber,
+    callState: util.Collection[ToxavFriendCallState]
+  )(state: TestState): TestState = {
     (state
       |> stopAvReceiving(friendNumber, callState)
-      |> stopAudioSending(friendNumber, callState)
-      |> stopVideoSending(friendNumber, callState))
+      |> startStopAudioSending(friendNumber, callState)
+      |> startStopVideoSending(friendNumber, callState))
   }
 
   private def stopAvReceiving(
@@ -164,7 +190,7 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  private def stopAudioSending(
+  private def startStopAudioSending(
     friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
   )(state: TestState): TestState = {
@@ -184,12 +210,12 @@ final class AudioVideoEventListener(id: Int)
     }
   }
 
-  private def stopVideoSending(
+  private def startStopVideoSending(
     friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
   )(state: TestState): TestState = {
-
     val videoFrame = TestState.friendVideoFrame(friendNumber)
+
     if (callState.contains(ToxavFriendCallState.ACCEPTING_V)) {
       logInfo(s"Sending video to friend $friendNumber")
       videoFrame.set(state, Some(0))
@@ -205,34 +231,52 @@ final class AudioVideoEventListener(id: Int)
 
   }
 
-  override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: TestState): TestState = {
+  override def bitRateStatus(
+    friendNumber: ToxFriendNumber,
+    audioBitRate: BitRate,
+    videoBitRate: BitRate
+  )(state: TestState): TestState = {
     state.addTask { (tox, av, state) =>
       av.setBitRate(friendNumber, audioBitRate, videoBitRate)
 
-      val audioTime = TestState.friendAudioTime(friendNumber)
-      val videoFrame = TestState.friendVideoFrame(friendNumber)
-
-      val stateWithAudio =
-        if (audioBitRate == BitRate.Disabled) {
-          // Disable audio sending.
-          audioTime.set(state, None)
-        } else {
-          audioTime.set(state, Some(0))
-        }
-
-      val stateWithVideo =
-        if (videoBitRate == BitRate.Disabled) {
-          // Disable video sending.
-          videoFrame.set(stateWithAudio, None)
-        } else {
-          videoFrame.set(stateWithAudio, Some(0))
-        }
-
-      stateWithVideo
+      (state
+        |> setAudioBitRate(friendNumber, audioBitRate)
+        |> setVideoBitRate(friendNumber, videoBitRate))
     }
   }
 
-  override def audioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate)(state: TestState): TestState = {
+  private def setAudioBitRate(
+    friendNumber: ToxFriendNumber,
+    bitRate: BitRate
+  )(state: TestState): TestState = {
+    setBitRate(TestState.friendAudioTime(friendNumber), bitRate)(state)
+  }
+
+  private def setVideoBitRate(
+    friendNumber: ToxFriendNumber,
+    bitRate: BitRate
+  )(state: TestState): TestState = {
+    setBitRate(TestState.friendVideoFrame(friendNumber), bitRate)(state)
+  }
+
+  private def setBitRate(
+    lens: Lens[TestState, Option[Int]],
+    bitRate: BitRate
+  )(state: TestState): TestState = {
+    if (bitRate == BitRate.Disabled) {
+      // Disable audio sending.
+      lens.set(state, None)
+    } else {
+      lens.set(state, Some(0))
+    }
+  }
+
+  override def audioReceiveFrame(
+    friendNumber: ToxFriendNumber,
+    pcm: Array[Short],
+    channels: AudioChannels,
+    samplingRate: SamplingRate
+  )(state: TestState): TestState = {
     state
   }
 

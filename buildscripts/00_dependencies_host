@@ -5,6 +5,7 @@ use utf8;
 use lib 'buildscripts';
 
 use Data::Dumper;
+use File::Path 'make_path';
 
 use BuildScript;
 my $C = require C;
@@ -33,3 +34,68 @@ sub install_dependency {
 
 # Install external dependencies from git.
 install_dependency @$_ for @dependencies;
+
+system "java", "-version";
+die "No java installed" if $?;
+
+system "which", "sbt";
+if ($?) {
+   my $BINDIR = $C->PREFIX . "/bin";
+   make_path $BINDIR;
+
+   print "No sbt installed; fetching one now\n";
+   system "wget", "-O", "$BINDIR/sbt-launch.jar", "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar";
+   open my $fh, '>', "$BINDIR/sbt"
+      or die "Could not open sbt script for writing: $!";
+   print $fh <<EOF;
+#!/bin/sh
+
+set -e -x
+
+SBT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
+exec java \$SBT_OPTS -jar $BINDIR/sbt-launch.jar "\$@"
+EOF
+
+   chmod 0755, "$BINDIR/sbt";
+
+   system "$BINDIR/sbt", "version";
+   die "Installation of sbt failed" if $?;
+}
+
+my @clangs = ("clang", "clang-3.6", "clang-3.7");
+if (not grep { system $_, "--version"; not $? } @clangs) {
+   print "No clang installed; fetching one now\n";
+
+   tempd {
+      my $TARNAME = "clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04";
+      system "wget", "http://llvm.org/releases/3.7.0/$TARNAME.tar.xz";
+      system "tar", "Jxf", "$TARNAME.tar.xz";
+      pushd {
+         for (<*>) {
+            system "cp", "-a", $_, $C->PREFIX;
+         }
+      } $TARNAME;
+   };
+
+   system "clang", "--version";
+   die "Installation of clang failed" if $?;
+}
+
+system "cmake", "--version";
+if ($?) {
+   print "No cmake installed; fetching one now\n";
+
+   tempd {
+      my $TARNAME = "cmake-3.4.1-Linux-x86_64";
+      system "wget", "https://cmake.org/files/v3.4/$TARNAME.tar.gz";
+      system "tar", "zxf", "$TARNAME.tar.gz";
+      pushd {
+         for (<*>) {
+            system "cp", "-a", $_, $C->PREFIX;
+         }
+      } $TARNAME;
+   };
+
+   system "cmake", "--version";
+   die "Installation of cmake failed" if $?;
+}

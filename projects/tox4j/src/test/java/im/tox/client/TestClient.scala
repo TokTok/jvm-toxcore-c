@@ -1,10 +1,13 @@
 package im.tox.client
 
 import java.io.{File, FileInputStream, FileOutputStream}
+import java.net.InetSocketAddress
 
+import com.sun.net.httpserver.HttpServer
 import com.typesafe.scalalogging.Logger
 import im.tox.client.callbacks._
 import im.tox.client.proto.Profile
+import im.tox.core.network.Port
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
 import scala.util.Try
 import scala.util.control.NonFatal
+import scalaz.concurrent.Future
 
 final case class TestClient(
   tox: ToxCore[TestState],
@@ -97,6 +101,8 @@ case object TestClient extends App {
 
   @tailrec
   def mainLoop(clients: List[TestClient]): Unit = {
+    TestHttpServer.state = clients
+
     mainLoop {
       val (time, nextClients) = AutoTestSuite.timed {
         for (client <- clients) yield {
@@ -118,6 +124,8 @@ case object TestClient extends App {
   }
 
   TestClientOptions(args) { c =>
+    c.httpPort.foreach(TestHttpServer.start)
+
     val predefined = c.load.map(key => ToxOptions(saveData = SaveDataOptions.SecretKey(key)))
     logger.info(s"Creating ${c.count} toxes (${predefined.length} with predefined keys)")
     val defaults = List.fill(c.count - predefined.length)(ToxOptions())

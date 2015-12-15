@@ -1,4 +1,4 @@
-#if 0
+#if !defined(HAVE_GETS)
 extern "C" char *gets (char *);
 #endif
 

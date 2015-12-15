@@ -142,15 +142,28 @@ print_args (protolog::JniLogEntry &log_entry,
 
 
 /**
+ * Look up the name of a function.
+ */
+std::string get_func_name (uintptr_t func);
+
+/**
  * Look up the name of a function and set it in the log entry.
  */
 void print_func (protolog::JniLogEntry &log_entry, uintptr_t func);
 
 
+template<typename R, typename ...Args>
+std::string
+get_func_name (R func (Args...))
+{
+  return get_func_name (reinterpret_cast<uintptr_t> (func));
+}
+
+
 /**
  * Add a single address/name pair to the function map.
  */
-bool register_func (uintptr_t func, char const *name);
+bool register_func (uintptr_t func, std::string const &name);
 
 
 /**
@@ -167,7 +180,7 @@ register_funcs ()
  */
 template<typename Func, typename Name, typename ...Funcs>
 bool
-register_funcs (Func func, Name name, Funcs... funcs)
+register_funcs (Func func, Name const &name, Funcs const &...funcs)
 {
   register_func (func, name);
   return register_funcs (funcs...);

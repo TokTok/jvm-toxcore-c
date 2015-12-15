@@ -5,7 +5,7 @@ import im.tox.tox4j.av.callbacks.video.VideoGenerator.Arithmetic
 
 object VideoGenerators {
 
-  final case class Yuv(f: (Int, Int, Int) => YuvPixel) extends Arithmetic(400, 400, 100) {
+  sealed abstract class Yuv(f: (Int, Int, Int) => YuvPixel) extends Arithmetic(400, 400, 100) {
     override def yuv(t: Int, y: Int, x: Int): YuvPixel = f(t, y, x)
   }
 
@@ -17,62 +17,56 @@ object VideoGenerators {
   /**
    * Shifting colours in xor pattern.
    */
-  val Xor1 = Yuv { (t, y, x) =>
+  case object Xor1 extends Yuv((t, y, x) =>
     YuvPixel(
       (x ^ y).toByte,
       (x ^ y + t + 1).toByte,
       (x ^ y - t - 1).toByte
-    )
-  }
+    ))
 
   /**
    * Rapidly changing xor patterns.
    */
-  val Xor2 = Yuv { (t, y, x) =>
+  case object Xor2 extends Yuv((t, y, x) =>
     YuvPixel.ofRgb(
       (x ^ y) * t
-    )
-  }
+    ))
 
   /**
    * Slowly right-shifting and colour-shifting xor.
    */
-  val Xor3 = Yuv { (t, y, x) =>
+  case object Xor3 extends Yuv((t, y, x) =>
     YuvPixel.ofRgb(
       (x - (t * Math.log(t)).toInt ^ y + (t * Math.log(t)).toInt) * t
-    )
-  }
+    ))
 
   /**
    * Slowly colour-shifting xor patterns.
    */
-  val Xor4 = Yuv { (t, y, x) =>
+  case object Xor4 extends Yuv((t, y, x) =>
     YuvPixel(
       ((x ^ y) + t).toByte,
       (t * 2).toByte,
       (-t * 2 - 1).toByte
-    )
-  }
+    ))
 
   /**
    * More and more gradient boxes.
    */
-  val GradientBoxes = Yuv { (t, y, x) =>
+  case object GradientBoxes extends Yuv((t, y, x) =>
     YuvPixel.ofRgb(
       (x * Math.log(t) + ((y * Math.log(t)).toInt << 8)).toInt
-    )
-  }
+    ))
 
   /**
    * Multiplication (x * y) pattern moving up.
    */
-  val MultiplyUp = Yuv { (t, y, x) =>
+  case object MultiplyUp extends Yuv((t, y, x) =>
     YuvPixel.ofRgb(
       x * (y + t)
-    )
-  }
+    ))
 
-  final case class TextImage(rows: String*) extends VideoGenerator(rows.head.length, rows.size, 64) {
+  sealed abstract class TextImage(rows: String*) extends VideoGenerator(rows.head.length, rows.size, 64) {
     override def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
       val y = rows.mkString.getBytes
       val u = Array.fill((width / 2) * (height / 2))((t * 4).toByte)
@@ -81,7 +75,7 @@ object VideoGenerators {
     }
   }
 
-  val Smiley = TextImage(
+  case object Smiley extends TextImage(
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",

@@ -56,6 +56,8 @@ object VideoGenerator extends Assertions {
       gen
     } else {
       new VideoGenerator(gen.width * wScale, gen.height * hScale, gen.length) {
+        override def toString: String = s"scaleNearestNeighbour($wScale, $hScale, $gen)"
+
         override def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
           val yuv = gen.yuv(t)
           (

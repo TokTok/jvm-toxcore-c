@@ -88,7 +88,11 @@ TOX_METHOD (jbyteArray, SelfGetDhtId,
   jint instanceNumber)
 {
   return instances.with_instance_noerr (env, instanceNumber,
-    get_vector<uint8_t, constant_size<TOX_PUBLIC_KEY_SIZE>, tox_self_get_dht_id>, env);
+    get_vector<uint8_t,
+      constant_size<TOX_PUBLIC_KEY_SIZE>::make,
+      tox_self_get_dht_id>::make,
+    env
+  );
 }
 
 /*

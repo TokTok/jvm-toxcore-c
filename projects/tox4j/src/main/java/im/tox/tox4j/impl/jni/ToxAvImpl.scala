@@ -199,11 +199,21 @@ final class ToxAvImpl[ToxCoreState](@NotNull private val tox: ToxCoreImpl[ToxCor
     ToxAvJni.toxavBitRateSet(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
 
   @throws[ToxavSendFrameException]
-  override def audioSendFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], sampleCount: SampleCount, channels: AudioChannels, samplingRate: SamplingRate): Unit =
+  override def audioSendFrame(
+    friendNumber: ToxFriendNumber,
+    pcm: Array[Short],
+    sampleCount: SampleCount,
+    channels: AudioChannels,
+    samplingRate: SamplingRate
+  ): Unit =
     ToxAvJni.toxavAudioSendFrame(instanceNumber, friendNumber.value, pcm, sampleCount.value, channels.value, samplingRate.value)
 
   @throws[ToxavSendFrameException]
-  override def videoSendFrame(friendNumber: ToxFriendNumber, width: Int, height: Int, y: Array[Byte], u: Array[Byte], v: Array[Byte]): Unit =
+  override def videoSendFrame(
+    friendNumber: ToxFriendNumber,
+    width: Int, height: Int,
+    y: Array[Byte], u: Array[Byte], v: Array[Byte]
+  ): Unit =
     ToxAvJni.toxavVideoSendFrame(instanceNumber, friendNumber.value, width, height, y, u, v)
 
   override def callback(handler: ToxAvEventListener[ToxCoreState]): Unit = {

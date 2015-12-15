@@ -15,7 +15,7 @@ import scala.language.postfixOps
  * in ProtoLog.proto to get an idea of what can be done with this log.
  */
 // scalastyle:off non.ascii.character.disallowed
-object ToxJniLog extends (() => JniLog) {
+case object ToxJniLog {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 

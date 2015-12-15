@@ -18,7 +18,8 @@ case object TestClientOptions {
     nospam: Option[Int] = None,
     address: Option[InetAddress] = None,
     port: Port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get,
-    key: Option[ToxPublicKey] = None
+    key: Option[ToxPublicKey] = None,
+    httpPort: Option[Port] = None
   )
 
   implicit val inetAddressRead: Read[InetAddress] = Read.stringRead.map(InetAddress.getByName)
@@ -72,6 +73,10 @@ case object TestClientOptions {
     opt[ToxPublicKey]('k', "key") action { (x, c) =>
       c.copy(key = Some(x))
     } text "DHT public key of the bootstrap node"
+
+    opt[Port]('h', "http-port") action { (x, c) =>
+      c.copy(httpPort = Some(x))
+    } text "Port to run HTTP web interface on"
 
     checkConfig { c =>
       if (c.address.isDefined != c.key.isDefined) {

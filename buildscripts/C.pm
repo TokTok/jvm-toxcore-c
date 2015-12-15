@@ -18,7 +18,7 @@ $Data::Dumper::Indent = 1;
 ##############################################################################
 
 
-sub CACHEDIR { $ENV{CACHEDIR} || "$ENV{HOME}/cache" }
+sub CACHE_DIR { $ENV{CACHE_DIR} || "$ENV{HOME}/cache" }
 
 sub ALWAYS_BUILD { grep { $_ eq $_[1] } (split /,/, $ENV{ALWAYS_BUILD}) }
 sub TEST_GOAL { $ENV{TEST_GOAL} }
@@ -41,7 +41,7 @@ sub NDK_HOME {
 
 sub SBT { split /\s+/, ($ENV{SBT} || 'sbt') }
 sub JOBS { $ENV{TOX4J_JOBS} || 4 }
-sub PREFIX { CACHEDIR . "/usr" }
+sub PREFIX { CACHE_DIR . "/usr" }
 
 sub GITHUB_KEY {
    $ENV{GITHUB_KEY} || do {
@@ -56,10 +56,10 @@ sub GITHUB_KEY {
 }
 
 # Ensure that the cache path exists.
-make_path CACHEDIR;
+make_path CACHE_DIR;
 
 # Load and store the persistent program state.
-my $statefile = CACHEDIR . "/state.pst";
+my $statefile = CACHE_DIR . "/state.pst";
 my $STATE = eval { Storable::retrieve $statefile } || {};
 END { Storable::store $STATE, $statefile }
 

@@ -37,10 +37,23 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
 
   abstract class Alice(name: String, expectedFriendName: String) extends ChatClient(name, expectedFriendName) {
 
-    protected def addFriendMessageTask(friendNumber: ToxFriendNumber, bobSentFileNumber: Int, fileId: ToxFileId, tox: ToxCore[ChatState])(state: State): State
-    protected def addFileRecvTask(friendNumber: ToxFriendNumber, bobSentFileNumber: Int, bobOffset: Long, tox: ToxCore[ChatState])(state: State): State
+    protected def addFriendMessageTask(
+      friendNumber: ToxFriendNumber,
+      bobSentFileNumber: Int,
+      fileId: ToxFileId,
+      tox: ToxCore[ChatState]
+    )(state: State): State
+    protected def addFileRecvTask(
+      friendNumber: ToxFriendNumber,
+      bobSentFileNumber: Int,
+      bobOffset: Long,
+      tox: ToxCore[ChatState]
+    )(state: State): State
 
-    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connection: ToxConnection)(state: ChatState): ChatState = {
+    override def friendConnectionStatus(
+      friendNumber: ToxFriendNumber,
+      connection: ToxConnection
+    )(state: ChatState): ChatState = {
       if (isAlice) {
         if (connection != ToxConnection.NONE) {
           debug(s"is now connected to friend $friendNumber")
@@ -71,7 +84,13 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
+    override def fileRecv(
+      friendNumber: ToxFriendNumber,
+      fileNumber: Int,
+      kind: Int,
+      fileSize: Long,
+      filename: ToxFilename
+    )(state: ChatState): ChatState = {
       assert(isBob)
       debug(s"received file send request $fileNumber from friend number $friendNumber current offset ${state.get.bobOffset}")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
@@ -84,7 +103,12 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }.map(_.copy(bobSentFileNumber = fileNumber))
     }
 
-    override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: ChatState): ChatState = {
+    override def fileChunkRequest(
+      friendNumber: ToxFriendNumber,
+      fileNumber: Int,
+      position: Long,
+      length: Int
+    )(state: ChatState): ChatState = {
       assert(isAlice)
       debug(s"got request for ${length}B from $friendNumber for file $fileNumber at $position")
       assert(length >= 0)
@@ -112,7 +136,11 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }
     }
 
-    override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: ChatState): ChatState = {
+    override def fileRecvControl(
+      friendNumber: ToxFriendNumber,
+      fileNumber: Int,
+      control: ToxFileControl
+    )(state: ChatState): ChatState = {
       if (isAlice) {
         debug("receive file control from Bob")
         if (control == ToxFileControl.RESUME) {
@@ -147,7 +175,12 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }
     }
 
-    override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecvChunk(
+      friendNumber: ToxFriendNumber,
+      fileNumber: Int,
+      position: Long,
+      data: Array[Byte]
+    )(state: ChatState): ChatState = {
       assert(isBob)
       debug(s"receive file chunk from position $position of length ${data.length} shouldPause ${state.get.bobShouldPause}")
       if (data.length == 0 && state.get.bobOffset == fileData.length) {
@@ -171,7 +204,12 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }
     }
 
-    override def friendMessage(friendNumber: ToxFriendNumber, newType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: ChatState): ChatState = {
+    override def friendMessage(
+      friendNumber: ToxFriendNumber,
+      messageType: ToxMessageType,
+      timeDelta: Int,
+      message: ToxFriendMessage
+    )(state: ChatState): ChatState = {
       debug(s"received a message: ${new String(message.value)}")
       assert(new String(message.value) == "Please resume the file transfer")
       state.addTask { (tox, av, state) =>

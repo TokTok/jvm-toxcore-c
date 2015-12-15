@@ -1,6 +1,6 @@
 package sbt.tox4j
 
-import java.io.File
+import java.io.{IOException, File}
 
 import sbt.Keys._
 import sbt._
@@ -340,11 +340,17 @@ object Jni extends OptionalPlugin {
               )
 
               log.info("Fetching gtest sources")
-              command ! log match {
-                case 0 =>
-                  Some(gtestDir)
-                case exitCode =>
-                  log.info(s"command failed with exit code $exitCode:\n  $command")
+              try {
+                command ! log match {
+                  case 0 =>
+                    Some(gtestDir)
+                  case exitCode =>
+                    log.info(s"command failed with exit code $exitCode:\n  $command")
+                    None
+                }
+              } catch {
+                case e: IOException =>
+                  log.info(s"command could not be run (${e.getMessage}):\n  $command")
                   None
               }
             } else {

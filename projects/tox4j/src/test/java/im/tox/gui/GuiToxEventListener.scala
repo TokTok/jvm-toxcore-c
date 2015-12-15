@@ -30,7 +30,11 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     addMessage("selfConnectionStatus", connectionStatus)
   }
 
-  override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, @NotNull control: ToxFileControl)(state: Unit): Unit = {
+  override def fileRecvControl(
+    friendNumber: ToxFriendNumber,
+    fileNumber: Int,
+    @NotNull control: ToxFileControl
+  )(state: Unit): Unit = {
     addMessage("fileRecvControl", friendNumber, fileNumber, control)
 
     try {
@@ -48,7 +52,13 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     }
   }
 
-  override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, @NotNull filename: ToxFilename)(state: Unit): Unit = {
+  override def fileRecv(
+    friendNumber: ToxFriendNumber,
+    fileNumber: Int,
+    kind: Int,
+    fileSize: Long,
+    @NotNull filename: ToxFilename
+  )(state: Unit): Unit = {
     addMessage("fileRecv", friendNumber, fileNumber, kind, fileSize, new String(filename.value))
 
     try {
@@ -79,7 +89,12 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     }
   }
 
-  override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, @NotNull data: Array[Byte])(state: Unit): Unit = {
+  override def fileRecvChunk(
+    friendNumber: ToxFriendNumber,
+    fileNumber: Int,
+    position: Long,
+    @NotNull data: Array[Byte]
+  )(state: Unit): Unit = {
     addMessage("fileRecvChunk", friendNumber, fileNumber, position, "byte[" + data.length + ']')
     try {
       toxGui.fileModel.get(friendNumber, fileNumber).write(position, data)
@@ -89,13 +104,23 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     }
   }
 
-  override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: Unit): Unit = {
+  override def fileChunkRequest(
+    friendNumber: ToxFriendNumber,
+    fileNumber: Int,
+    position: Long,
+    length: Int
+  )(state: Unit): Unit = {
     addMessage("fileChunkRequest", friendNumber, fileNumber, position, length)
     try {
       if (length == 0) {
         toxGui.fileModel.remove(friendNumber, fileNumber)
       } else {
-        toxGui.tox.fileSendChunk(friendNumber, fileNumber, position, toxGui.fileModel.get(friendNumber, fileNumber).read(position, length))
+        toxGui.tox.fileSendChunk(
+          friendNumber,
+          fileNumber,
+          position,
+          toxGui.fileModel.get(friendNumber, fileNumber).read(position, length)
+        )
       }
     } catch {
       case e: Throwable =>
@@ -103,20 +128,34 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     }
   }
 
-  override def friendConnectionStatus(friendNumber: ToxFriendNumber, @NotNull connectionStatus: ToxConnection)(state: Unit): Unit = {
+  override def friendConnectionStatus(
+    friendNumber: ToxFriendNumber,
+    @NotNull connectionStatus: ToxConnection
+  )(state: Unit): Unit = {
     addMessage("friendConnectionStatus", friendNumber, connectionStatus)
     toxGui.friendListModel.setConnectionStatus(friendNumber, connectionStatus)
   }
 
-  override def friendLosslessPacket(friendNumber: ToxFriendNumber, @NotNull data: ToxLosslessPacket)(state: Unit): Unit = {
+  override def friendLosslessPacket(
+    friendNumber: ToxFriendNumber,
+    @NotNull data: ToxLosslessPacket
+  )(state: Unit): Unit = {
     addMessage("friendLosslessPacket", friendNumber, readablePublicKey(data.value))
   }
 
-  override def friendLossyPacket(friendNumber: ToxFriendNumber, @NotNull data: ToxLossyPacket)(state: Unit): Unit = {
+  override def friendLossyPacket(
+    friendNumber: ToxFriendNumber,
+    @NotNull data: ToxLossyPacket
+  )(state: Unit): Unit = {
     addMessage("friendLossyPacket", friendNumber, readablePublicKey(data.value))
   }
 
-  override def friendMessage(friendNumber: ToxFriendNumber, @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: ToxFriendMessage)(state: Unit): Unit = {
+  override def friendMessage(
+    friendNumber: ToxFriendNumber,
+    @NotNull messageType: ToxMessageType,
+    timeDelta: Int,
+    @NotNull message: ToxFriendMessage
+  )(state: Unit): Unit = {
     addMessage("friendMessage", friendNumber, messageType, timeDelta, new String(message.value))
   }
 
@@ -125,7 +164,11 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     toxGui.friendListModel.setName(friendNumber, new String(name.value))
   }
 
-  override def friendRequest(@NotNull publicKey: ToxPublicKey, timeDelta: Int, @NotNull message: ToxFriendRequestMessage)(state: Unit): Unit = {
+  override def friendRequest(
+    @NotNull publicKey: ToxPublicKey,
+    timeDelta: Int,
+    @NotNull message: ToxFriendRequestMessage
+  )(state: Unit): Unit = {
     addMessage("friendRequest", readablePublicKey(publicKey.value), timeDelta, new String(message.value))
   }
 

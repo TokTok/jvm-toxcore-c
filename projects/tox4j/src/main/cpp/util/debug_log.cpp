@@ -118,7 +118,7 @@ func_names ()
 
 
 bool
-register_func (uintptr_t func, char const *name)
+register_func (uintptr_t func, std::string const &name)
 {
   auto &names = func_names ();
   assert (names.find (func) == names.end ());
@@ -127,15 +127,22 @@ register_func (uintptr_t func, char const *name)
 }
 
 
-void
-print_func (protolog::JniLogEntry &log_entry, uintptr_t func)
+std::string
+get_func_name (uintptr_t func)
 {
   auto &names = func_names ();
   auto found = names.find (func);
   if (found != names.end ())
-    log_entry.set_name (found->second);
+    return found->second;
   else
-    log_entry.set_name (std::to_string (func));
+    return std::to_string (func);
+}
+
+
+void
+print_func (protolog::JniLogEntry &log_entry, uintptr_t func)
+{
+  log_entry.set_name (get_func_name (func));
 }
 
 

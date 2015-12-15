@@ -47,7 +47,7 @@ if ($C->HOST ne $C->TARGET) {
       "--platform=$PLATFORM{$C->TARGET}",
    );
 
-   my $cached_sysroot = $C->CACHEDIR . "/" . $C->TARGET;
+   my $cached_sysroot = $C->CACHE_DIR . "/" . $C->TARGET;
    if (-d $cached_sysroot) {
       # If we have a cached sysroot/usr, remove the NDK one.
       remove_tree "$toolchain/sysroot/usr";

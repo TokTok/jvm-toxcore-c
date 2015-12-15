@@ -29,19 +29,56 @@ namespace core
 
 
 template<typename T, size_t get_size (Tox const *), void get_data (Tox const *, T *)>
-auto
-get_vector (Tox const *tox, JNIEnv *env)
+struct get_vector
 {
-  std::vector<T> name (get_size (tox));
-  get_data (tox, name.data ());
+  static bool register_funcs_0 ();
 
-  return toJavaArray (env, name);
-}
+  static auto
+  make (Tox const *tox, JNIEnv *env)
+  {
+    std::vector<T> name (get_size (tox));
+    get_data (tox, name.data ());
+
+    assert (register_funcs_0 ());
+
+    return toJavaArray (env, name);
+  }
+};
+
+template<typename T, size_t get_size (Tox const *), void get_data (Tox const *, T *)>
+bool
+get_vector<T, get_size, get_data>::register_funcs_0 ()
+{
+  REGISTER_FUNCS (
+    reinterpret_cast<uintptr_t> (make),
+      "get_vector<" + get_func_name (get_size) + ", " + get_func_name (get_data) + ">"
+  );
+
+  return true;
+};
 
 
 template<std::size_t N>
-std::size_t
-constant_size (Tox const *)
+struct constant_size
 {
-  return N;
+  static bool register_funcs_0 ();
+
+  static std::size_t
+  make (Tox const *)
+  {
+    assert (register_funcs_0 ());
+    return N;
+  }
+};
+
+template<std::size_t N>
+bool
+constant_size<N>::register_funcs_0 ()
+{
+  REGISTER_FUNCS (
+    reinterpret_cast<uintptr_t> (make),
+      "constant_size<" + std::to_string (N) + ">"
+  );
+
+  return true;
 }

@@ -26,17 +26,10 @@ matrix:
 
 install:
   # Move files from cache directory.
-  - rm -rf $HOME/.m2 $HOME/.ivy2 $HOME/.sbt
-  - mkdir -p $HOME/cache/m2 $HOME/cache/ivy2 $HOME/cache/sbt
-  - ln -s $HOME/cache/m2   $HOME/.m2
-  - ln -s $HOME/cache/ivy2 $HOME/.ivy2
-  - ln -s $HOME/cache/sbt  $HOME/.sbt
+  - make cache
   # Set-up step.
   - export NDK_HOME=$HOME/android-ndk
-  - buildscripts/00_dependencies_host
-  - buildscripts/01_ndk
-  - buildscripts/02_toolchain
-  - buildscripts/03_dependencies_target
+  - make setup
 
 script:
   # Build/install step.
