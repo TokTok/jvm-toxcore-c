@@ -1,6 +1,6 @@
 -keepattributes *Annotation*,InnerClasses
 
--keep public class im.tox.client.Main {
+-keep public class im.tox.client.TestClient {
   public static void main(java.lang.String[]);
 }
 

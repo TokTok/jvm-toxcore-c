@@ -17,7 +17,7 @@ case object ToxClientOptions {
     load: List[ToxSecretKey] = Nil,
     nospam: Option[Int] = None,
     address: Option[InetAddress] = None,
-    port: Port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get,
+    bootstrapPort: Port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get,
     key: Option[ToxPublicKey] = None,
     httpPort: Option[Port] = None
   )
@@ -30,8 +30,8 @@ case object ToxClientOptions {
   private def bootstrap(c: Config): Config = {
     c.copy(
       address = Some(DefaultBootstrapNode._1.getAddress),
-      port = Port.fromInt(DefaultBootstrapNode._1.getPort).get,
-      key = Some(ToxPublicKey.fromHexString(DefaultBootstrapNode._2.readable).get)
+      bootstrapPort = Port.fromInt(DefaultBootstrapNode._1.getPort).get,
+      key = Some(ToxPublicKey.fromHexString(DefaultBootstrapNode._2.toHexString).get)
     )
   }
 
@@ -62,19 +62,19 @@ case object ToxClientOptions {
       bootstrap(c)
     } text s"Bootstrap to the default bootstrap node $DefaultBootstrapNode"
 
-    opt[InetAddress]('a', "address") action { (x, c) =>
+    opt[InetAddress]('a', "bootstrap-address") action { (x, c) =>
       c.copy(address = Some(x))
     } text "Address of the bootstrap node"
 
-    opt[Port]('p', "port") action { (x, c) =>
-      c.copy(port = x)
+    opt[Port]('p', "bootstrap-port") action { (x, c) =>
+      c.copy(bootstrapPort = x)
     } text "Port of the bootstrap node"
 
-    opt[ToxPublicKey]('k', "key") action { (x, c) =>
+    opt[ToxPublicKey]('k', "bootstrap-key") action { (x, c) =>
       c.copy(key = Some(x))
     } text "DHT public key of the bootstrap node"
 
-    opt[Port]('h', "http-port") action { (x, c) =>
+    opt[Port]('P', "port") action { (x, c) =>
       c.copy(httpPort = Some(x))
     } text "Port to run HTTP web interface on"
 

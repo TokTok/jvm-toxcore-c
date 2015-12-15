@@ -40,7 +40,7 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
    * Install ping timer: after [[Dht.Options.pingInterval]] seconds, ping again.
    */
   private def installPingTimer(pingInterval: FiniteDuration, sender: NodeInfo): IO[Unit] = {
-    IO.timedAction(pingTimer(sender.publicKey.readable), pingInterval) { (duration, dht) =>
+    IO.timedAction(pingTimer(sender.publicKey.toHexString), pingInterval) { (duration, dht) =>
       for {
         pingRequest <- PacketBuilder.makeResponse(
           dht.keyPair,
@@ -65,11 +65,11 @@ case object PingResponseHandler extends DhtUnencryptedPayloadHandler(PingRespons
    * the DHT node lists and cancel the ping timer.
    */
   private def installPingTimeoutTimer(pingTimeout: FiniteDuration, sender: NodeInfo): IO[Unit] = {
-    IO.timedAction(pingTimeoutTimer(sender.publicKey.readable), pingTimeout, Some(1)) { (duration, dht) =>
+    IO.timedAction(pingTimeoutTimer(sender.publicKey.toHexString), pingTimeout, Some(1)) { (duration, dht) =>
       \/- {
         logger.debug(s"Removing node $sender after ping timeout: ${duration.toSeconds} seconds")
         for {
-          _ <- IO.cancelTimer(pingTimer(sender.publicKey.readable))
+          _ <- IO.cancelTimer(pingTimer(sender.publicKey.toHexString))
         } yield {
           dht.removeNode(sender)
         }

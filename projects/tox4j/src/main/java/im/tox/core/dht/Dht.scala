@@ -252,7 +252,7 @@ case object Dht {
    * and the public key being searched for being the ones in the DHT friends list.
    */
   def startNodesRequestTimer(options: Options, keyPair: KeyPair): IO[Unit] = {
-    IO.timedAction(nodesRequestTimer(keyPair.publicKey.readable), options.nodesRequestInterval) { (_, dht) =>
+    IO.timedAction(nodesRequestTimer(keyPair.publicKey.toHexString), options.nodesRequestInterval) { (_, dht) =>
       for {
         nodesRequestPackets <- {
           val packets =
