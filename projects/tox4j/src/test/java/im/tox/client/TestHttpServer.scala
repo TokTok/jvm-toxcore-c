@@ -17,32 +17,36 @@ object TestHttpServer {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  var state: List[TestClient] = Nil
+  private var jniLog: Seq[JniLogEntry] = Nil
+  private var state: List[TestClient] = Nil
 
   private val UTF_8 = Charset.forName("UTF-8")
 
+  private def filterIteration(entries: Seq[JniLogEntry]): Seq[JniLogEntry] = {
+    entries.filterNot { entry =>
+      Seq(
+        "tox_iterate",
+        "toxav_iterate",
+        "tox_iteration_interval",
+        "toxav_iteration_interval"
+      ).contains(entry.name)
+    }
+  }
+
+  def update(clients: List[TestClient]): Unit = {
+    state = clients
+
+    jniLog ++= filterIteration(ToxJniLog().entries)
+
+    jniLog match {
+      case head +: tail => jniLog = head +: tail.takeRight(ToxJniLog.maxSize)
+      case _            => // No entries.
+    }
+  }
+
   object RootHandler extends HttpHandler {
 
-    private var jniLog: Seq[JniLogEntry] = Nil
-
-    def filterIteration(entries: Seq[JniLogEntry]): Seq[JniLogEntry] = {
-      entries.filterNot { entry =>
-        Seq(
-          "tox_iterate",
-          "toxav_iterate",
-          "tox_iteration_interval",
-          "toxav_iteration_interval"
-        ).contains(entry.name)
-      }
-    }
-
     private def recentToxJniLog(): JniLog = {
-      jniLog ++= filterIteration(ToxJniLog().entries)
-
-      jniLog match {
-        case head +: tail => jniLog = head +: tail.takeRight(ToxJniLog.maxSize)
-        case _            => // No entries.
-      }
       JniLog(jniLog)
     }
 
@@ -75,7 +79,7 @@ object TestHttpServer {
         }
 
         out.println(s"Recent $ToxJniLog:")
-        out.println(ToxJniLog.toString(recentToxJniLog()))
+        out.println(ToxJniLog.toString(JniLog(jniLog)))
       } finally {
         out.close()
       }

@@ -22,6 +22,8 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
+  override def maxParticipantCount: Int = 2
+
   type S = Int
 
   object Handler extends EventListener(0) {

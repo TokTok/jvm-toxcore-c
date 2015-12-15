@@ -101,7 +101,7 @@ case object TestClient extends App {
 
   @tailrec
   def mainLoop(clients: List[TestClient]): Unit = {
-    TestHttpServer.state = clients
+    TestHttpServer.update(clients)
 
     mainLoop {
       val (time, nextClients) = AutoTestSuite.timed {

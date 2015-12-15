@@ -44,7 +44,7 @@ abstract class AutoTestSuite extends FunSuite with Timeouts {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  def maxParticipantCount: Int = 2
+  protected def maxParticipantCount: Int = 2
 
   type S
 

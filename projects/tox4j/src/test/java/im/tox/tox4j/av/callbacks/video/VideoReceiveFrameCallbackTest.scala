@@ -32,6 +32,8 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
   private val capturePath = Some(new File("capture/videoSendFrame")).filter(_.isDirectory)
   capturePath.foreach(_.listFiles.foreach(_.delete()))
 
+  override def maxParticipantCount: Int = 2
+
   type S = Int
 
   object Handler extends EventListener(0) {
