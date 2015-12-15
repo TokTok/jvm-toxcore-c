@@ -1,4 +1,4 @@
-package im.tox.client
+package im.tox.client.callbacks
 
 import java.util
 

@@ -1,7 +1,8 @@
-package im.tox.client
+package im.tox.client.callbacks
 
 import java.util
 
+import im.tox.client.TestState
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.ToxAv
@@ -11,10 +12,13 @@ import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data._
-import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
+import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.testing.GetDisjunction._
 
-final class TestEventListener(id: Int)
+/**
+ * Handles audio/video calls.
+ */
+final class AudioVideoEventListener(id: Int)
     extends IdLogging(id) with ToxEventListener[TestState] {
 
   private val audioBitRate = BitRate.fromInt(8).get
@@ -24,35 +28,6 @@ final class TestEventListener(id: Int)
   private val audioFramesPerIteration = 1
 
   private val videoBitRate = BitRate.fromInt(1).get
-
-  private def updateFriend(friendNumber: ToxFriendNumber, state: TestState)(update: Friend => Friend): TestState = {
-    val updated = update(state.friends.getOrElse(friendNumber, Friend()))
-    state.copy(friends = state.friends + (friendNumber -> updated))
-  }
-
-  override def selfConnectionStatus(connectionStatus: ToxConnection)(state: TestState): TestState = {
-    state
-  }
-
-  override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: TestState): TestState = {
-    updateFriend(friendNumber, state)(_.copy(status = status))
-  }
-
-  override def friendTyping(friendNumber: ToxFriendNumber, isTyping: Boolean)(state: TestState): TestState = {
-    updateFriend(friendNumber, state)(_.copy(typing = isTyping))
-  }
-
-  override def friendName(friendNumber: ToxFriendNumber, name: ToxNickname)(state: TestState): TestState = {
-    updateFriend(friendNumber, state)(_.copy(name = name))
-  }
-
-  override def friendStatusMessage(friendNumber: ToxFriendNumber, message: ToxStatusMessage)(state: TestState): TestState = {
-    updateFriend(friendNumber, state)(_.copy(statusMessage = message))
-  }
-
-  override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: TestState): TestState = {
-    updateFriend(friendNumber, state)(_.copy(connection = connectionStatus))
-  }
 
   private def say(friendNumber: ToxFriendNumber, message: String)(state: TestState): TestState = {
     state.addTask { (tox, av, state) =>
@@ -109,44 +84,6 @@ final class TestEventListener(id: Int)
     val videoFrame = TestState.friendVideoFrame(friendNumber)
     val video = TestState.friendVideo(friendNumber)
     video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
-  }
-
-  override def friendLossyPacket(friendNumber: ToxFriendNumber, data: ToxLossyPacket)(state: TestState): TestState = {
-    state
-  }
-
-  override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: TestState): TestState = {
-    state
-  }
-
-  override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: TestState): TestState = {
-    state.addTask { (tox, av, state) =>
-      logInfo(s"Adding $publicKey as friend")
-      tox.addFriendNorequest(publicKey)
-      state.copy(
-        profile = state.profile.addFriendKeys(publicKey.toHexString)
-      )
-    }
-  }
-
-  override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: TestState): TestState = {
-    state
-  }
-
-  override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: TestState): TestState = {
-    state
-  }
-
-  override def friendLosslessPacket(friendNumber: ToxFriendNumber, data: ToxLosslessPacket)(state: TestState): TestState = {
-    state
-  }
-
-  override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: TestState): TestState = {
-    state
-  }
-
-  override def friendReadReceipt(friendNumber: ToxFriendNumber, messageId: Int)(state: TestState): TestState = {
-    state
   }
 
   override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: TestState): TestState = {
@@ -207,8 +144,24 @@ final class TestEventListener(id: Int)
 
   override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: TestState): TestState = {
     (state
+      |> stopAvReceiving(friendNumber, callState)
       |> stopAudioSending(friendNumber, callState)
       |> stopVideoSending(friendNumber, callState))
+  }
+
+  private def stopAvReceiving(
+    friendNumber: ToxFriendNumber,
+    callState: util.Collection[ToxavFriendCallState]
+  )(state: TestState): TestState = {
+    state.addTask { (tox, av, state) =>
+      if (callState.contains(ToxavFriendCallState.SENDING_A)) {
+        av.callControl(friendNumber, ToxavCallControl.MUTE_AUDIO)
+      }
+      if (callState.contains(ToxavFriendCallState.SENDING_V)) {
+        av.callControl(friendNumber, ToxavCallControl.HIDE_VIDEO)
+      }
+      state
+    }
   }
 
   private def stopAudioSending(

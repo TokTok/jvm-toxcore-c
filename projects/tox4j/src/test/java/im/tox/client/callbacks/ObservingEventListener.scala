@@ -1,12 +1,12 @@
-package im.tox.client
+package im.tox.client.callbacks
 
 import java.util
 
-import im.tox.tox4j.{ToxEventAdapter, ToxEventListener}
 import im.tox.tox4j.av.data.{AudioChannels, BitRate, SamplingRate}
 import im.tox.tox4j.av.enums.ToxavFriendCallState
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
+import im.tox.tox4j.{ToxEventAdapter, ToxEventListener}
 
 final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreState], observers: ToxEventListener[Unit]*)
     extends ToxEventAdapter[ToxCoreState] {

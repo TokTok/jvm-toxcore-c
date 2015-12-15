@@ -1,4 +1,4 @@
-package im.tox.client
+package im.tox.client.callbacks
 
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory

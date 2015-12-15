@@ -3,6 +3,7 @@ package im.tox.client
 import java.io.{File, FileInputStream, FileOutputStream}
 
 import com.typesafe.scalalogging.Logger
+import im.tox.client.callbacks._
 import im.tox.client.proto.Profile
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.ToxAv
@@ -135,7 +136,14 @@ case object TestClient extends App {
         logger.info("Initialising event listeners and client states")
         val clients =
           for (((tox, av), id) <- avs.zipWithIndex) yield {
-            val handler = new ObservingEventListener(new TestEventListener(id), new LoggingEventListener(id))
+            val handler = new ObservingEventListener(
+              new MappingEventListener(
+                new TestEventListener(id),
+                new AudioVideoEventListener(id),
+                new FriendListEventListener(id)
+              ),
+              new LoggingEventListener(id)
+            )
             tox.callback(handler)
             av.callback(handler)
 
