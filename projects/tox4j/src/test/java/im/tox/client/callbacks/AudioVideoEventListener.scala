@@ -2,7 +2,7 @@ package im.tox.client.callbacks
 
 import java.util
 
-import im.tox.client.{ToxClientState, ToxClientState$}
+import im.tox.client.{HostInfo, ToxClientState}
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.ToxAv
@@ -96,11 +96,15 @@ final class AudioVideoEventListener(id: Int)
   }
 
   private def processShowCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
+    def const(response: String)(tox: ToxCore[ToxClientState]): String = response
+
     val response: (ToxCore[ToxClientState] => String) = request match {
       case "address" => _.getAddress.toString
       case "dhtid"   => _.getDhtId.toString
       case "udpport" => _.getUdpPort.toString
-      case other     => _ => s"I don't know about '${other.take(200)}'"
+      case "ipv4"    => const(HostInfo.ipv4.toString)
+      case "ipv6"    => const(HostInfo.ipv6.toString)
+      case other     => const(s"I don't know about '${other.take(200)}'")
     }
 
     state.addTask { (tox, av, state) =>

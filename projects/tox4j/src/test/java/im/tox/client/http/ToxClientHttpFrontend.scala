@@ -6,7 +6,7 @@ import java.net.InetSocketAddress
 import codes.reactive.scalatime.Instant
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import com.typesafe.scalalogging.Logger
-import im.tox.client.{TestClient, ToxClient}
+import im.tox.client.{HostInfo, TestClient, ToxClient}
 import im.tox.core.network.Port
 import im.tox.tox4j.impl.jni.ToxJniLog
 import im.tox.tox4j.impl.jni.proto.{JniLog, JniLogEntry}
@@ -71,10 +71,13 @@ final class ToxClientHttpFrontend(port: Port) {
       out.println(s"Average time between iterations: ${averageUpdateTime}ms (${1000 / averageUpdateTime} updates / second)")
       out.println()
 
-      for (client <- state) {
-        out.println(s"Instance ${client.state.address}:")
+      for ((client, id) <- state.zipWithIndex) {
+        out.println(s"Instance $id:")
+        out.println(s"  Friend Address: ${client.state.address}")
         out.println(s"  DHT Public Key: ${client.state.dhtId}")
         out.println(s"  UDP Port: ${client.state.udpPort}")
+        out.println(s"  IPv4: ${HostInfo.ipv4}")
+        out.println(s"  IPv6: ${HostInfo.ipv6}")
         out.println("  Friends:")
         for ((friendNumber, friend) <- client.state.friends) {
           out.println(s"    $friendNumber. $friend")

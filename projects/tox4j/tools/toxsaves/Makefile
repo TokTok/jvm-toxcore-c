@@ -1,0 +1,2 @@
+update:
+	curl https://toxav.herokuapp.com/profile -o 2FE57DA347CD62431528DAAC5FBB290730FFF684AFC4CFC2ED90995F58CB3B74
