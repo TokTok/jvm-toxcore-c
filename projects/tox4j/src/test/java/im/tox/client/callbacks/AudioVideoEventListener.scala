@@ -66,9 +66,9 @@ final class AudioVideoEventListener(id: Int)
 
   private def processAudioCommand(friendNumber: ToxFriendNumber, state: TestState, request: String): TestState = {
     val newAudio = request match {
-      case "itcrowd"      => AudioGenerator.itCrowd(audioSamplingRate.value)
-      case "mortalkombat" => AudioGenerator.mortalKombat(audioSamplingRate.value)
-      case "songofstorms" => AudioGenerator.songOfStorms(audioSamplingRate.value)
+      case "itcrowd"      => AudioGenerator.ItCrowd(audioSamplingRate.value)
+      case "mortalkombat" => AudioGenerator.MortalKombat(audioSamplingRate.value)
+      case "songofstorms" => AudioGenerator.SongOfStorms(audioSamplingRate.value)
       case _              => AudioGenerator(audioSamplingRate.value)
     }
 

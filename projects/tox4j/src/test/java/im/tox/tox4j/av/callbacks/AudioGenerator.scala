@@ -1,14 +1,13 @@
 package im.tox.tox4j.av.callbacks
 
-final case class AudioGenerator(
-    sample: Int => Int,
-    length: Int = 128000
-) {
+sealed abstract class AudioGenerator(val length: Int) {
+
+  def apply(t: Int): Int
 
   def nextFrame16(t: Int, frameSize: Int): Array[Short] = {
     val frame = Array.ofDim[Short](frameSize)
     for (i <- frame.indices) {
-      frame(i) = sample(t + i).toShort
+      frame(i) = apply(t + i).toShort
     }
     frame
   }
@@ -17,68 +16,68 @@ final case class AudioGenerator(
 
 object AudioGenerator {
 
-  private def generator(length: Int)(sample: (Int, Int) => Int): AudioGenerator = {
-    AudioGenerator(t => sample(t, length), length)
-  }
-
-  private def generator(sample: Int => Int): AudioGenerator = {
-    AudioGenerator(sample)
-  }
-
   private def int(boolean: Boolean): Int = if (boolean) 1 else 0
 
-  def itCrowd(samplingRate: Int): AudioGenerator = generator((samplingRate * 12) + (samplingRate / 2) * 8) { (t0, length) =>
-    // Period
-    val t = t0 % length
+  final case class ItCrowd(samplingRate: Int) extends AudioGenerator((samplingRate * 12) + (samplingRate / 2) * 8) {
+    def apply(t0: Int): Int = {
+      // Period
+      val t = t0 % length
 
-    val a = 1 / ((samplingRate * 16) - t)
-    val b =
-      if (t > (samplingRate * 12)) {
-        t % (samplingRate / 2) * ("'&(&*$,*".charAt(t % (samplingRate * 12) / (samplingRate / 2)) - 32)
-      } else {
-        {
-          t % (samplingRate / 4) * {
-            "$$$&%%%''''%%%'&".charAt(t % (samplingRate * 4) / (samplingRate / 4)) - 32 -
-              int(t > (samplingRate * 3 + samplingRate / 2) && t < (samplingRate * 4)) * 2
+      val a = 1 / ((samplingRate * 16) - t)
+      val b =
+        if (t > (samplingRate * 12)) {
+          t % (samplingRate / 2) * ("'&(&*$,*".charAt(t % (samplingRate * 12) / (samplingRate / 2)) - 32)
+        } else {
+          {
+            t % (samplingRate / 4) * {
+              "$$$&%%%''''%%%'&".charAt(t % (samplingRate * 4) / (samplingRate / 4)) - 32 -
+                int(t > (samplingRate * 3 + samplingRate / 2) && t < (samplingRate * 4)) * 2
+            }
+          } / {
+            int(t % samplingRate < (samplingRate / 2)) + 1
           }
-        } / {
-          int(t % samplingRate < (samplingRate / 2)) + 1
         }
-      }
-    ((a | b) / (samplingRate / 8000) << 8).toShort / 5
-  }
-
-  def mortalKombat(samplingRate: Int): AudioGenerator = generator(samplingRate * 16) { (t, _) =>
-    val a = {
-      2 * t % (samplingRate / 2) * {
-        "!!#!$!%$".charAt(t % (samplingRate * 2) / (samplingRate / 4)) - 32 +
-          int(t % (samplingRate * 8) > (samplingRate * 4)) * 7
-      }
-    } * {
-      int(t % (samplingRate * 4) > (samplingRate * 2)) + 1
+      ((a | b) / (samplingRate / 8000) << 8).toShort / 5
     }
-    val b = int(t % (samplingRate * 16) > (samplingRate * 8)) * 2 * t * {
-      "%%%'%+''%%%$%+))%%%%'+'%$%%%$%%%$%%".charAt(t % (samplingRate * 8 + (samplingRate - samplingRate / 4)) / (samplingRate / 4)) - 36
-    }
-    ((a | b) / (samplingRate / 8000) << 8).toShort / 5
   }
 
-  val Sine = generator { t =>
-    (Math.sin(t / (10000d / t)) * 128).toShort << 6
-  }
-
-  val Sine2 = generator { t0 =>
-    val t =
-      if (t0 % 2 == 0) {
-        1
-      } else {
-        t0
+  final case class MortalKombat(samplingRate: Int) extends AudioGenerator(samplingRate * 16) {
+    def apply(t: Int): Int = {
+      val a = {
+        2 * t % (samplingRate / 2) * {
+          "!!#!$!%$".charAt(t % (samplingRate * 2) / (samplingRate / 4)) - 32 +
+            int(t % (samplingRate * 8) > (samplingRate * 4)) * 7
+        }
+      } * {
+        int(t % (samplingRate * 4) > (samplingRate * 2)) + 1
       }
-    (Math.sin(t / (10000d / t)) * 128).toShort << 6
+      val b = int(t % (samplingRate * 16) > (samplingRate * 8)) * 2 * t * {
+        "%%%'%+''%%%$%+))%%%%'+'%$%%%$%%%$%%".charAt(t % (samplingRate * 8 + (samplingRate - samplingRate / 4)) / (samplingRate / 4)) - 36
+      }
+      ((a | b) / (samplingRate / 8000) << 8).toShort / 5
+    }
   }
 
-  val Sine3 = generator { t =>
-    ((t & 0xF) * ((0 - t) & 0xF) * (((t & 0x10) >> 3) - 1) * 0x80 / 0x41 + 0x80) << 7
+  case object Sine extends AudioGenerator(128000) {
+    def apply(t: Int): Int = (Math.sin(t / (10000d / t)) * 128).toShort << 6
+  }
+
+  case object Sine2 extends AudioGenerator(128000) {
+    def apply(t0: Int): Int = {
+      val t =
+        if (t0 % 2 == 0) {
+          1
+        } else {
+          t0
+        }
+      (Math.sin(t / (10000d / t)) * 128).toShort << 6
+    }
+  }
+
+  case object Sine3 extends AudioGenerator(128000) {
+    def apply(t: Int): Int = {
+      ((t & 0xF) * ((0 - t) & 0xF) * (((t & 0x10) >> 3) - 1) * 0x80 / 0x41 + 0x80) << 7
+    }
   }
 
   private final class Oscillator(val sampleRate: Int) extends AnyVal {
@@ -123,7 +122,8 @@ object AudioGenerator {
     }
   }
 
-  private final case class SongOfStorms(samplingRate: Int) extends AnyVal {
+  // https://www.youtube.com/watch?v=S7dg0X1LskI
+  final case class SongOfStorms(samplingRate: Int) extends AudioGenerator(samplingRate * 16) {
 
     private def melody(t: Int) = play(t, Seq[Double](
       146.83, 174.61, 293.66, 293.66,
@@ -178,7 +178,7 @@ object AudioGenerator {
       0, 0, 0, 0
     ), samplingRate, 8, 1.0 / 40)
 
-    def sample(t: Int): Short = {
+    def apply(t: Int): Int = {
       val osc = new Oscillator(samplingRate)
       Seq(
         osc.sine(t, melody(t), 0.35),
@@ -191,12 +191,7 @@ object AudioGenerator {
 
   }
 
-  // https://www.youtube.com/watch?v=S7dg0X1LskI
-  def songOfStorms(samplingRate: Int): AudioGenerator = generator(samplingRate * 16) { (t, _) =>
-    SongOfStorms(samplingRate).sample(t)
-  }
-
   // Selected audio generator for tests.
-  def apply(samplingRate: Int): AudioGenerator = songOfStorms(samplingRate)
+  def apply(samplingRate: Int): AudioGenerator = SongOfStorms(samplingRate)
 
 }
