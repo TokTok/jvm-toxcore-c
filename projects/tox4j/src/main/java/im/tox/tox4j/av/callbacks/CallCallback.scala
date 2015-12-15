@@ -1,5 +1,7 @@
 package im.tox.tox4j.av.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
+
 /**
  * Triggered when a friend calls us.
  */
@@ -10,6 +12,6 @@ trait CallCallback[ToxCoreState] {
    * @param videoEnabled True if friend is sending video.
    */
   def call(
-    friendNumber: Int, audioEnabled: Boolean, videoEnabled: Boolean
+    friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean
   )(state: ToxCoreState): ToxCoreState = state
 }

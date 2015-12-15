@@ -2,7 +2,7 @@ package im.tox.tox4j.core.bench
 
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
-import im.tox.tox4j.core.data.{ToxNickname, ToxPublicKey}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxNickname, ToxPublicKey}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
 import im.tox.tox4j.impl.jni.ToxCoreImpl
@@ -10,6 +10,7 @@ import im.tox.tox4j.testing.GetDisjunction._
 
 final class CoreCallbackTimingBench extends TimingReport {
 
+  val friendNumber = ToxFriendNumber.fromInt(1).get
   val publicKey = ToxPublicKey.fromValue(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).get
   val nickname = ToxNickname.fromValue(Array.ofDim[Byte](ToxNickname.MaxSize)).get
   val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
@@ -27,20 +28,20 @@ final class CoreCallbackTimingBench extends TimingReport {
   }
 
   def invokeAllCallbacks(tox: ToxCoreImpl[Unit]): Unit = {
-    tox.invokeFileChunkRequest(1, 2, 3, 4)
-    tox.invokeFileRecv(1, 2, 3, 4, data)
-    tox.invokeFileRecvChunk(1, 2, 3, data)
-    tox.invokeFileRecvControl(1, 2, ToxFileControl.PAUSE)
-    tox.invokeFriendConnectionStatus(1, ToxConnection.TCP)
-    tox.invokeFriendLosslessPacket(1, data)
-    tox.invokeFriendLossyPacket(1, data)
-    tox.invokeFriendMessage(1, ToxMessageType.NORMAL, 2, data)
-    tox.invokeFriendName(1, nickname)
-    tox.invokeFriendReadReceipt(1, 2)
+    tox.invokeFileChunkRequest(friendNumber, 2, 3, 4)
+    tox.invokeFileRecv(friendNumber, 2, 3, 4, data)
+    tox.invokeFileRecvChunk(friendNumber, 2, 3, data)
+    tox.invokeFileRecvControl(friendNumber, 2, ToxFileControl.PAUSE)
+    tox.invokeFriendConnectionStatus(friendNumber, ToxConnection.TCP)
+    tox.invokeFriendLosslessPacket(friendNumber, data)
+    tox.invokeFriendLossyPacket(friendNumber, data)
+    tox.invokeFriendMessage(friendNumber, ToxMessageType.NORMAL, 2, data)
+    tox.invokeFriendName(friendNumber, nickname)
+    tox.invokeFriendReadReceipt(friendNumber, 2)
     tox.invokeFriendRequest(publicKey, 1, data)
-    tox.invokeFriendStatus(1, ToxUserStatus.AWAY)
-    tox.invokeFriendStatusMessage(1, data)
-    tox.invokeFriendTyping(1, isTyping = true)
+    tox.invokeFriendStatus(friendNumber, ToxUserStatus.AWAY)
+    tox.invokeFriendStatusMessage(friendNumber, data)
+    tox.invokeFriendTyping(friendNumber, isTyping = true)
     tox.invokeSelfConnectionStatus(ToxConnection.TCP)
   }
 
@@ -59,7 +60,7 @@ final class CoreCallbackTimingBench extends TimingReport {
       usingTox(iterations1k) in {
         case (sz, tox: ToxCoreImpl[Unit]) =>
           (0 until sz) foreach { _ =>
-            tox.invokeFileChunkRequest(1, 2, 3, 4)
+            tox.invokeFileChunkRequest(friendNumber, 2, 3, 4)
           }
       }
     }
@@ -83,20 +84,20 @@ final class CoreCallbackTimingBench extends TimingReport {
       }
     }
 
-    invokePerformance("invokeFileChunkRequest", _.invokeFileChunkRequest(1, 2, 3, 4))
-    invokePerformance("invokeFileRecv", _.invokeFileRecv(1, 2, 3, 4, data))
-    invokePerformance("invokeFileRecvChunk", _.invokeFileRecvChunk(1, 2, 3, data))
-    invokePerformance("invokeFileRecvControl", _.invokeFileRecvControl(1, 2, ToxFileControl.PAUSE))
-    invokePerformance("invokeFriendConnectionStatus", _.invokeFriendConnectionStatus(1, ToxConnection.TCP))
-    invokePerformance("invokeFriendLosslessPacket", _.invokeFriendLosslessPacket(1, data))
-    invokePerformance("invokeFriendLossyPacket", _.invokeFriendLossyPacket(1, data))
-    invokePerformance("invokeFriendMessage", _.invokeFriendMessage(1, ToxMessageType.NORMAL, 2, data))
-    invokePerformance("invokeFriendName", _.invokeFriendName(1, nickname))
-    invokePerformance("invokeFriendReadReceipt", _.invokeFriendReadReceipt(1, 2))
+    invokePerformance("invokeFileChunkRequest", _.invokeFileChunkRequest(friendNumber, 2, 3, 4))
+    invokePerformance("invokeFileRecv", _.invokeFileRecv(friendNumber, 2, 3, 4, data))
+    invokePerformance("invokeFileRecvChunk", _.invokeFileRecvChunk(friendNumber, 2, 3, data))
+    invokePerformance("invokeFileRecvControl", _.invokeFileRecvControl(friendNumber, 2, ToxFileControl.PAUSE))
+    invokePerformance("invokeFriendConnectionStatus", _.invokeFriendConnectionStatus(friendNumber, ToxConnection.TCP))
+    invokePerformance("invokeFriendLosslessPacket", _.invokeFriendLosslessPacket(friendNumber, data))
+    invokePerformance("invokeFriendLossyPacket", _.invokeFriendLossyPacket(friendNumber, data))
+    invokePerformance("invokeFriendMessage", _.invokeFriendMessage(friendNumber, ToxMessageType.NORMAL, 2, data))
+    invokePerformance("invokeFriendName", _.invokeFriendName(friendNumber, nickname))
+    invokePerformance("invokeFriendReadReceipt", _.invokeFriendReadReceipt(friendNumber, 2))
     invokePerformance("invokeFriendRequest", _.invokeFriendRequest(publicKey, 1, data))
-    invokePerformance("invokeFriendStatus", _.invokeFriendStatus(1, ToxUserStatus.AWAY))
-    invokePerformance("invokeFriendStatusMessage", _.invokeFriendStatusMessage(1, data))
-    invokePerformance("invokeFriendTyping", _.invokeFriendTyping(1, isTyping = true))
+    invokePerformance("invokeFriendStatus", _.invokeFriendStatus(friendNumber, ToxUserStatus.AWAY))
+    invokePerformance("invokeFriendStatusMessage", _.invokeFriendStatusMessage(friendNumber, data))
+    invokePerformance("invokeFriendTyping", _.invokeFriendTyping(friendNumber, isTyping = true))
     invokePerformance("invokeSelfConnectionStatus", _.invokeSelfConnectionStatus(ToxConnection.TCP))
 
   }

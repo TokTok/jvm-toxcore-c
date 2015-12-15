@@ -1,5 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
+
 /**
  * This event is triggered when a friend starts or stops typing.
  */
@@ -9,6 +11,6 @@ trait FriendTypingCallback[ToxCoreState] {
    * @param isTyping Whether the friend started (true) or stopped (false) typing.
    */
   def friendTyping(
-    friendNumber: Int, isTyping: Boolean
+    friendNumber: ToxFriendNumber, isTyping: Boolean
   )(state: ToxCoreState): ToxCoreState = state
 }

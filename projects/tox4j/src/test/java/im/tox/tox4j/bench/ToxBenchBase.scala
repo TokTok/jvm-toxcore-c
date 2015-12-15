@@ -4,7 +4,7 @@ import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.picklers.Implicits._
 import im.tox.tox4j.core._
-import im.tox.tox4j.core.data.{ToxFriendAddress, ToxNickname, ToxPublicKey, ToxStatusMessage}
+import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.exceptions.ToxNewException
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
 import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl, ToxCoreImplFactory}
@@ -234,8 +234,8 @@ object ToxBenchBase {
    * @param tox The Tox instance to extract the friends from.
    * @return A pair containing the passed Tox instance and a random slice of the friend list.
    */
-  def toxAndFriendNumbers(limit: Int = 0)(tox: ToxCore[Unit]): (Seq[Int], ToxCore[Unit]) = {
-    val friendList = random.shuffle(tox.getFriendList.toSeq)
+  def toxAndFriendNumbers(limit: Int = 0)(tox: ToxCore[Unit]): (Seq[ToxFriendNumber], ToxCore[Unit]) = {
+    val friendList = random.shuffle(tox.getFriendNumbers.toSeq)
     if (limit != 0) {
       (friendList.slice(0, limit), tox)
     } else {

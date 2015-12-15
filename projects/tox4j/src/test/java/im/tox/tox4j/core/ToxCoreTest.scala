@@ -2,7 +2,7 @@ package im.tox.tox4j.core
 
 import im.tox.tox4j.core.SmallNat._
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
-import im.tox.tox4j.core.data.ToxFriendRequestMessage
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendRequestMessage}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.impl.jni.{ToxCoreImpl, ToxCoreImplFactory}
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.withToxUnit
@@ -16,7 +16,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
     forAll { (count: SmallNat, message: Array[Byte]) =>
       whenever(message.length >= 1 && message.length <= ToxCoreConstants.MaxFriendRequestLength) {
         withToxUnit { tox =>
-          (0 until count) foreach { i =>
+          (0 until count).map(ToxFriendNumber.fromInt(_).get) foreach { i =>
             withToxUnit { friend =>
               val friendNumber = tox.addFriend(
                 friend.getAddress,

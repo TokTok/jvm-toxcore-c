@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.data.ToxStatusMessage
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxStatusMessage}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -11,7 +11,7 @@ final class FriendStatusMessageCallbackTest extends AliceBobTest {
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
-    override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         state.addTask { (tox, av, state) =>
@@ -23,7 +23,7 @@ final class FriendStatusMessageCallbackTest extends AliceBobTest {
       }
     }
 
-    override def friendStatusMessage(friendNumber: Int, message: ToxStatusMessage)(state: ChatState): ChatState = {
+    override def friendStatusMessage(friendNumber: ToxFriendNumber, message: ToxStatusMessage)(state: ChatState): ChatState = {
       debug(s"friend changed status message to: ${new String(message.value)}")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
 

@@ -1,7 +1,7 @@
 package im.tox.tox4j.core
 
 import im.tox.tox4j.ToxCoreTestBase
-import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxNickname, ToxStatusMessage}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendRequestMessage, ToxNickname, ToxStatusMessage}
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{withTox, withToxUnit}
@@ -107,7 +107,7 @@ final class LoadSaveTest extends FunSuite {
 
   test("Friend") {
     testLoadSave(new Check() {
-      private var expected: Int = 1
+      private var expected = ToxFriendNumber.fromInt(1).get
 
       override def change(tox: ToxCore[Unit]): Boolean = {
         withToxUnit { toxFriend =>
@@ -120,8 +120,8 @@ final class LoadSaveTest extends FunSuite {
       }
 
       override def check(tox: ToxCore[Unit]): Unit = {
-        assert(tox.getFriendList.length == 1)
-        assert(tox.getFriendList(0) == expected)
+        assert(tox.getFriendNumbers.length == 1)
+        assert(tox.getFriendNumbers(0) == expected)
       }
     })
   }

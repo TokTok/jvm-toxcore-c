@@ -2,7 +2,7 @@ package im.tox.tox4j.core.callbacks
 
 import java.util.Random
 
-import im.tox.tox4j.core.data.{ToxFileId, ToxFilename}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -31,7 +31,7 @@ final class FileTransferTest extends AliceBobTest {
 
   class Alice(name: String, expectedFriendName: String) extends ChatClient(name, expectedFriendName) {
 
-    override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE && isAlice) {
         state.addTask { (tox, av, state) =>
@@ -49,7 +49,7 @@ final class FileTransferTest extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       debug(s"received file send request $fileNumber from friend number $friendNumber")
       assert(isBob)
       assert(friendNumber == AliceBobTestBase.FriendNumber)
@@ -64,13 +64,13 @@ final class FileTransferTest extends AliceBobTest {
       }
     }
 
-    override def fileRecvControl(friendNumber: Int, fileNumber: Int, control: ToxFileControl)(state: ChatState): ChatState = {
+    override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: ChatState): ChatState = {
       debug(s"file control from $friendNumber for file $fileNumber: $control")
       assert(isAlice)
       state
     }
 
-    override def fileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int)(state: ChatState): ChatState = {
+    override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: ChatState): ChatState = {
       debug(s"got request for ${length}B from $friendNumber for file $fileNumber at $position")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(isAlice)
@@ -96,7 +96,7 @@ final class FileTransferTest extends AliceBobTest {
       }
     }
 
-    override def fileRecvChunk(friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: ChatState): ChatState = {
       debug(s"got ${data.length}B from $friendNumber at $position")
       assert(isBob)
       assert(friendNumber == AliceBobTestBase.FriendNumber)

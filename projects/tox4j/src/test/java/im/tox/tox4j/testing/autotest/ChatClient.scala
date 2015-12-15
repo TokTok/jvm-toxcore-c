@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter
-import im.tox.tox4j.core.data.{ToxFriendAddress, ToxPublicKey}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendAddress, ToxPublicKey}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.exceptions.ToxException
 import im.tox.tox4j.testing.GetDisjunction._
@@ -109,7 +109,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
     state
   }
 
-  override def friendConnectionStatus(friendNumber: Int, connection: ToxConnection)(state: ChatStateT[T]): ChatStateT[T] = {
+  override def friendConnectionStatus(friendNumber: ToxFriendNumber, connection: ToxConnection)(state: ChatStateT[T]): ChatStateT[T] = {
     assert(friendNumber == AliceBobTestBase.FriendNumber)
     if (connection != ToxConnection.NONE) {
       debug(s"is now connected to friend $friendNumber with " + connection)

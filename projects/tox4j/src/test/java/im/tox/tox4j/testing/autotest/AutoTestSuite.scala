@@ -2,6 +2,7 @@ package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.TestConstants
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.{ToxAvImplFactory, ToxCoreImplFactory}
@@ -57,7 +58,7 @@ abstract class AutoTestSuite extends FunSuite with Timeouts {
     }
 
     override def friendConnectionStatus(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       connectionStatus: ToxConnection
     )(state: State): State = {
       debug(state, s"Friend ${state.id(friendNumber)}'s connection: $connectionStatus")

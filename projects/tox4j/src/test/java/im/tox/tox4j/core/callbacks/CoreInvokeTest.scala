@@ -25,21 +25,21 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
     }
 
     // scalastyle:off line.size.limit
-    override def friendTyping(friendNumber: Int, isTyping: Boolean)(state: Event): Event = setEvent(FriendTyping(friendNumber, isTyping))(state)
-    override def friendStatusMessage(friendNumber: Int, message: ToxStatusMessage)(state: Event): Event = setEvent(FriendStatusMessage(friendNumber, message.value))(state)
-    override def fileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int)(state: Event): Event = setEvent(FileChunkRequest(friendNumber, fileNumber, position, length))(state)
-    override def fileRecvChunk(friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte])(state: Event): Event = setEvent(FileRecvChunk(friendNumber, fileNumber, position, data))(state)
-    override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: Event): Event = setEvent(FriendConnectionStatus(friendNumber, connectionStatus))(state)
+    override def friendTyping(friendNumber: ToxFriendNumber, isTyping: Boolean)(state: Event): Event = setEvent(FriendTyping(friendNumber, isTyping))(state)
+    override def friendStatusMessage(friendNumber: ToxFriendNumber, message: ToxStatusMessage)(state: Event): Event = setEvent(FriendStatusMessage(friendNumber, message.value))(state)
+    override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: Event): Event = setEvent(FileChunkRequest(friendNumber, fileNumber, position, length))(state)
+    override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: Event): Event = setEvent(FileRecvChunk(friendNumber, fileNumber, position, data))(state)
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: Event): Event = setEvent(FriendConnectionStatus(friendNumber, connectionStatus))(state)
     override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: Event): Event = setEvent(FriendRequest(publicKey.value, timeDelta, message.value))(state)
-    override def friendLossyPacket(friendNumber: Int, data: ToxLossyPacket)(state: Event): Event = setEvent(FriendLossyPacket(friendNumber, data.value))(state)
-    override def friendStatus(friendNumber: Int, status: ToxUserStatus)(state: Event): Event = setEvent(FriendStatus(friendNumber, status))(state)
+    override def friendLossyPacket(friendNumber: ToxFriendNumber, data: ToxLossyPacket)(state: Event): Event = setEvent(FriendLossyPacket(friendNumber, data.value))(state)
+    override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: Event): Event = setEvent(FriendStatus(friendNumber, status))(state)
     override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Event): Event = setEvent(SelfConnectionStatus(connectionStatus))(state)
-    override def friendReadReceipt(friendNumber: Int, messageId: Int)(state: Event): Event = setEvent(FriendReadReceipt(friendNumber, messageId))(state)
-    override def friendName(friendNumber: Int, name: ToxNickname)(state: Event): Event = setEvent(FriendName(friendNumber, name.value))(state)
-    override def friendLosslessPacket(friendNumber: Int, data: ToxLosslessPacket)(state: Event): Event = setEvent(FriendLosslessPacket(friendNumber, data.value))(state)
-    override def friendMessage(friendNumber: Int, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: Event): Event = setEvent(FriendMessage(friendNumber, messageType, timeDelta, message.value))(state)
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: Event): Event = setEvent(FileRecv(friendNumber, fileNumber, kind, fileSize, filename.value))(state)
-    override def fileRecvControl(friendNumber: Int, fileNumber: Int, control: ToxFileControl)(state: Event): Event = setEvent(FileRecvControl(friendNumber, fileNumber, control))(state)
+    override def friendReadReceipt(friendNumber: ToxFriendNumber, messageId: Int)(state: Event): Event = setEvent(FriendReadReceipt(friendNumber, messageId))(state)
+    override def friendName(friendNumber: ToxFriendNumber, name: ToxNickname)(state: Event): Event = setEvent(FriendName(friendNumber, name.value))(state)
+    override def friendLosslessPacket(friendNumber: ToxFriendNumber, data: ToxLosslessPacket)(state: Event): Event = setEvent(FriendLosslessPacket(friendNumber, data.value))(state)
+    override def friendMessage(friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: Event): Event = setEvent(FriendMessage(friendNumber, messageType, timeDelta, message.value))(state)
+    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: Event): Event = setEvent(FileRecv(friendNumber, fileNumber, kind, fileSize, filename.value))(state)
+    override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: Event): Event = setEvent(FileRecvControl(friendNumber, fileNumber, control))(state)
     // scalastyle:on line.size.limit
   }
 
@@ -59,15 +59,19 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
 
   private val random = new Random
 
-  private implicit val arbPublicKey: Arbitrary[ToxPublicKey] = {
-    Arbitrary(Gen.const(ToxCoreConstants.PublicKeySize).map(Array.ofDim[Byte]).map { array =>
+  private implicit val arbToxPublicKey: Arbitrary[ToxPublicKey] = {
+    Arbitrary(Gen.const(ToxPublicKey.Size).map(Array.ofDim[Byte]).map { array =>
       random.nextBytes(array)
       array(array.length - 1) = 0
       ToxPublicKey.fromValue(array).get
     })
   }
 
-  private implicit val arbNickname: Arbitrary[ToxNickname] = {
+  private implicit val arbToxFriendNumber: Arbitrary[ToxFriendNumber] = {
+    Arbitrary(arbitrary[Int].map(ToxFriendNumber.unsafeFromInt))
+  }
+
+  private implicit val arbToxNickname: Arbitrary[ToxNickname] = {
     Arbitrary(arbitrary[Array[Byte]].map(ToxNickname.unsafeFromValue))
   }
 
@@ -88,7 +92,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendTyping") {
-    forAll { (friendNumber: Int, isTyping: Boolean) =>
+    forAll { (friendNumber: ToxFriendNumber, isTyping: Boolean) =>
       callbackTest(
         _.invokeFriendTyping(friendNumber, isTyping),
         FriendTyping(friendNumber, isTyping)
@@ -97,7 +101,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendStatusMessage") {
-    forAll { (friendNumber: Int, message: Array[Byte]) =>
+    forAll { (friendNumber: ToxFriendNumber, message: Array[Byte]) =>
       callbackTest(
         _.invokeFriendStatusMessage(friendNumber, message),
         FriendStatusMessage(friendNumber, message)
@@ -106,7 +110,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FileChunkRequest") {
-    forAll { (friendNumber: Int, fileNumber: Int, position: Long, length: Int) =>
+    forAll { (friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int) =>
       callbackTest(
         _.invokeFileChunkRequest(friendNumber, fileNumber, position, length),
         FileChunkRequest(friendNumber, fileNumber, position, length)
@@ -115,7 +119,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FileRecvChunk") {
-    forAll { (friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte]) =>
+    forAll { (friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte]) =>
       callbackTest(
         _.invokeFileRecvChunk(friendNumber, fileNumber, position, data),
         FileRecvChunk(friendNumber, fileNumber, position, data)
@@ -124,7 +128,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendConnectionStatus") {
-    forAll { (friendNumber: Int, connectionStatus: ToxConnection) =>
+    forAll { (friendNumber: ToxFriendNumber, connectionStatus: ToxConnection) =>
       callbackTest(
         _.invokeFriendConnectionStatus(friendNumber, connectionStatus),
         FriendConnectionStatus(friendNumber, connectionStatus)
@@ -142,7 +146,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendLossyPacket") {
-    forAll { (friendNumber: Int, data: Array[Byte]) =>
+    forAll { (friendNumber: ToxFriendNumber, data: Array[Byte]) =>
       callbackTest(
         _.invokeFriendLossyPacket(friendNumber, data),
         FriendLossyPacket(friendNumber, data)
@@ -151,7 +155,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendStatus") {
-    forAll { (friendNumber: Int, status: ToxUserStatus) =>
+    forAll { (friendNumber: ToxFriendNumber, status: ToxUserStatus) =>
       callbackTest(
         _.invokeFriendStatus(friendNumber, status),
         FriendStatus(friendNumber, status)
@@ -169,7 +173,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendReadReceipt") {
-    forAll { (friendNumber: Int, messageId: Int) =>
+    forAll { (friendNumber: ToxFriendNumber, messageId: Int) =>
       callbackTest(
         _.invokeFriendReadReceipt(friendNumber, messageId),
         FriendReadReceipt(friendNumber, messageId)
@@ -178,7 +182,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendName") {
-    forAll { (friendNumber: Int, name: ToxNickname) =>
+    forAll { (friendNumber: ToxFriendNumber, name: ToxNickname) =>
       callbackTest(
         _.invokeFriendName(friendNumber, name),
         FriendName(friendNumber, name.value)
@@ -187,7 +191,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendLosslessPacket") {
-    forAll { (friendNumber: Int, data: Array[Byte]) =>
+    forAll { (friendNumber: ToxFriendNumber, data: Array[Byte]) =>
       callbackTest(
         _.invokeFriendLosslessPacket(friendNumber, data),
         FriendLosslessPacket(friendNumber, data)
@@ -196,7 +200,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendMessage") {
-    forAll { (friendNumber: Int, messageType: ToxMessageType, timeDelta: Int, message: Array[Byte]) =>
+    forAll { (friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: Array[Byte]) =>
       callbackTest(
         _.invokeFriendMessage(friendNumber, messageType, timeDelta, message),
         FriendMessage(friendNumber, messageType, /* timeDelta */ 0, message)
@@ -205,7 +209,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FileRecv") {
-    forAll { (friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte]) =>
+    forAll { (friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte]) =>
       callbackTest(
         _.invokeFileRecv(friendNumber, fileNumber, kind, fileSize, filename),
         FileRecv(friendNumber, fileNumber, kind, fileSize, filename)
@@ -214,7 +218,7 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FileRecvControl") {
-    forAll { (friendNumber: Int, fileNumber: Int, control: ToxFileControl) =>
+    forAll { (friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl) =>
       callbackTest(
         _.invokeFileRecvControl(friendNumber, fileNumber, control),
         FileRecvControl(friendNumber, fileNumber, control)
@@ -226,19 +230,19 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
 
 object CoreInvokeTest {
   sealed trait Event
-  private final case class FriendTyping(friendNumber: Int, isTyping: Boolean) extends Event
-  private final case class FriendStatusMessage(friendNumber: Int, message: ByteArray) extends Event
-  private final case class FileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int) extends Event
-  private final case class FileRecvChunk(friendNumber: Int, fileNumber: Int, position: Long, data: ByteArray) extends Event
-  private final case class FriendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection) extends Event
+  private final case class FriendTyping(friendNumber: ToxFriendNumber, isTyping: Boolean) extends Event
+  private final case class FriendStatusMessage(friendNumber: ToxFriendNumber, message: ByteArray) extends Event
+  private final case class FileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int) extends Event
+  private final case class FileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: ByteArray) extends Event
+  private final case class FriendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection) extends Event
   private final case class FriendRequest(publicKey: ByteArray, timeDelta: Int, message: ByteArray) extends Event
-  private final case class FriendLossyPacket(friendNumber: Int, data: ByteArray) extends Event
-  private final case class FriendStatus(friendNumber: Int, status: ToxUserStatus) extends Event
+  private final case class FriendLossyPacket(friendNumber: ToxFriendNumber, data: ByteArray) extends Event
+  private final case class FriendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus) extends Event
   private final case class SelfConnectionStatus(connectionStatus: ToxConnection) extends Event
-  private final case class FriendReadReceipt(friendNumber: Int, messageId: Int) extends Event
-  private final case class FriendName(friendNumber: Int, name: ByteArray) extends Event
-  private final case class FriendLosslessPacket(friendNumber: Int, data: ByteArray) extends Event
-  private final case class FriendMessage(friendNumber: Int, messageType: ToxMessageType, timeDelta: Int, message: ByteArray) extends Event
-  private final case class FileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ByteArray) extends Event
-  private final case class FileRecvControl(friendNumber: Int, fileNumber: Int, control: ToxFileControl) extends Event
+  private final case class FriendReadReceipt(friendNumber: ToxFriendNumber, messageId: Int) extends Event
+  private final case class FriendName(friendNumber: ToxFriendNumber, name: ByteArray) extends Event
+  private final case class FriendLosslessPacket(friendNumber: ToxFriendNumber, data: ByteArray) extends Event
+  private final case class FriendMessage(friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: ByteArray) extends Event
+  private final case class FileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ByteArray) extends Event
+  private final case class FileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl) extends Event
 }

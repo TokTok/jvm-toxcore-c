@@ -3,6 +3,7 @@ package im.tox.tox4j.testing.autotest
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.testing.ToxTestMixin
 import im.tox.tox4j.testing.autotest.AliceBobTestBase.Chatter
 import org.scalatest.FunSuite
@@ -12,7 +13,7 @@ import scala.annotation.tailrec
 import scalaz.Scalaz._
 
 object AliceBobTestBase {
-  val FriendNumber = 10
+  val FriendNumber = ToxFriendNumber.fromInt(10).get
 
   final case class Chatter[T](
     tox: ToxCore[ChatStateT[T]],
@@ -72,8 +73,8 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
           withToxAv(bob) { bobAv =>
             assert(alice ne bob)
 
-            addFriends(alice, AliceBobTestBase.FriendNumber)
-            addFriends(bob, AliceBobTestBase.FriendNumber)
+            addFriends(alice, AliceBobTestBase.FriendNumber.value)
+            addFriends(bob, AliceBobTestBase.FriendNumber.value)
 
             alice.addFriendNorequest(bob.getPublicKey)
             bob.addFriendNorequest(alice.getPublicKey)

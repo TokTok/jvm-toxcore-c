@@ -1,7 +1,6 @@
 package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.core.options.{ProxyOptions, SaveDataOptions}
-import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{withToxUnit, withToxes}
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite

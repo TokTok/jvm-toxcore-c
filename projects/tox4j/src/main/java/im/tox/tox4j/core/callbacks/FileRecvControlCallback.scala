@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxFileControl
 import org.jetbrains.annotations.NotNull
 
@@ -17,6 +18,6 @@ trait FileRecvControlCallback[ToxCoreState] {
    * @param control The file control command received.
    */
   def fileRecvControl(
-    friendNumber: Int, fileNumber: Int, @NotNull control: ToxFileControl
+    friendNumber: ToxFriendNumber, fileNumber: Int, @NotNull control: ToxFileControl
   )(state: ToxCoreState): ToxCoreState = state
 }

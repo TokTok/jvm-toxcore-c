@@ -1,5 +1,6 @@
 package im.tox.tox4j.av.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -26,7 +27,7 @@ trait VideoReceiveFrameCallback[ToxCoreState] {
    *                calculating plane buffer size.
    */
   def videoReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     width: Int, height: Int,
     @NotNull y: Array[Byte], @NotNull u: Array[Byte], @NotNull v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int

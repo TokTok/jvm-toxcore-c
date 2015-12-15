@@ -67,7 +67,7 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
     try {
       toxGui.tox = new ToxCoreImpl[Unit](toxOptions)
 
-      for (friendNumber <- toxGui.tox.getFriendList) {
+      for (friendNumber <- toxGui.tox.getFriendNumbers) {
         toxGui.friendListModel.add(
           friendNumber,
           toxGui.tox.getFriendPublicKey(friendNumber)

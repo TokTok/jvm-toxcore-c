@@ -2,7 +2,7 @@ package im.tox.tox4j.av.callbacks
 
 import im.tox.tox4j.av.data.BitRate
 import im.tox.tox4j.av.exceptions.ToxavCallException
-import im.tox.tox4j.core.data.ToxFriendMessage
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendMessage}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxMessageType}
 import im.tox.tox4j.testing.GetDisjunction._
 import im.tox.tox4j.testing.ToxExceptionChecks
@@ -15,7 +15,7 @@ final class CallCallbackTest extends AutoTestSuite with ToxExceptionChecks {
   object Handler extends EventListener(()) {
 
     override def friendConnectionStatus(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       connectionStatus: ToxConnection
     )(state0: State): State = {
       val state = super.friendConnectionStatus(friendNumber, connectionStatus)(state0)
@@ -31,7 +31,7 @@ final class CallCallbackTest extends AutoTestSuite with ToxExceptionChecks {
       }
     }
 
-    override def call(friendNumber: Int, audioEnabled: Boolean, videoEnabled: Boolean)(state: State): State = {
+    override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: State): State = {
       if (state.id(friendNumber) == state.id.prev) {
         state.addTask { (tox, av, state) =>
           // Calling them back while they are ringing is invalid.
@@ -50,7 +50,7 @@ final class CallCallbackTest extends AutoTestSuite with ToxExceptionChecks {
     }
 
     override def friendMessage(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       messageType: ToxMessageType,
       timeDelta: Int,
       message: ToxFriendMessage

@@ -7,6 +7,7 @@ import im.tox.tox4j.av.data.{AudioChannels, BitRate, SampleCount, SamplingRate}
 import im.tox.tox4j.av.enums.ToxavCallControl
 import im.tox.tox4j.av.exceptions._
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -72,7 +73,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    * @param videoBitRate Video bit rate in Kb/sec. Set this to 0 to disable video sending.
    */
   @throws[ToxavCallException]
-  def call(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate): Unit
+  def call(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit
 
   /**
    * Accept an incoming call.
@@ -85,7 +86,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    * @param videoBitRate Video bit rate in Kb/sec. Set this to 0 to disable video sending.
    */
   @throws[ToxavAnswerException]
-  def answer(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate): Unit
+  def answer(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit
 
   /**
    * Sends a call control command to a friend.
@@ -94,7 +95,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    * @param control The control command to send.
    */
   @throws[ToxavCallControlException]
-  def callControl(friendNumber: Int, @NotNull control: ToxavCallControl): Unit
+  def callControl(friendNumber: ToxFriendNumber, @NotNull control: ToxavCallControl): Unit
 
   /**
    * Set the audio and video bit rate to be used in subsequent audio frames.
@@ -106,7 +107,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    *                     Pass -1 to leave unchanged.
    */
   @throws[ToxavBitRateSetException]
-  def setBitRate(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate): Unit
+  def setBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit
 
   /**
    * Send an audio frame to a friend.
@@ -128,7 +129,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    */
   @throws[ToxavSendFrameException]
   def audioSendFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     @NotNull pcm: Array[Short],
     sampleCount: SampleCount,
     channels: AudioChannels,
@@ -151,7 +152,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    */
   @throws[ToxavSendFrameException]
   def videoSendFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     width: Int, height: Int,
     @NotNull y: Array[Byte], @NotNull u: Array[Byte], @NotNull v: Array[Byte]
   ): Unit

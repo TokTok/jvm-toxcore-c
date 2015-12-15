@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -22,6 +23,6 @@ trait FileRecvChunkCallback[ToxCoreState] {
    * @param data A byte array containing the received chunk.
    */
   def fileRecvChunk(
-    friendNumber: Int, fileNumber: Int, position: Long, @NotNull data: Array[Byte]
+    friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, @NotNull data: Array[Byte]
   )(state: ToxCoreState): ToxCoreState = state
 }

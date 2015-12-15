@@ -12,14 +12,14 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
     extends ToxEventAdapter[ToxCoreState] {
 
   override def friendStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     status: ToxUserStatus
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendStatus(friendNumber, status)(_))
   }
 
   override def friendTyping(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     isTyping: Boolean
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendTyping(friendNumber, isTyping)(_))
@@ -32,14 +32,14 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def friendName(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     name: ToxNickname
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendName(friendNumber, name)(_))
   }
 
   override def friendMessage(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     messageType: ToxMessageType,
     timeDelta: Int,
     message: ToxFriendMessage
@@ -48,14 +48,14 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def friendLossyPacket(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     data: ToxLossyPacket
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendLossyPacket(friendNumber, data)(_))
   }
 
   override def fileRecv(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     kind: Int,
     fileSize: Long,
@@ -73,7 +73,7 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def fileChunkRequest(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     position: Long,
     length: Int
@@ -82,7 +82,7 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def fileRecvChunk(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     position: Long,
     data: Array[Byte]
@@ -91,21 +91,21 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def friendLosslessPacket(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     data: ToxLosslessPacket
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendLosslessPacket(friendNumber, data)(_))
   }
 
   override def friendConnectionStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     connectionStatus: ToxConnection
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendConnectionStatus(friendNumber, connectionStatus)(_))
   }
 
   override def fileRecvControl(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     control: ToxFileControl
   )(state: ToxCoreState): ToxCoreState = {
@@ -113,21 +113,21 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def friendStatusMessage(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     message: ToxStatusMessage
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendStatusMessage(friendNumber, message)(_))
   }
 
   override def friendReadReceipt(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     messageId: Int
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.friendReadReceipt(friendNumber, messageId)(_))
   }
 
   override def call(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     audioEnabled: Boolean,
     videoEnabled: Boolean
   )(state: ToxCoreState): ToxCoreState = {
@@ -135,14 +135,14 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def callState(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
   )(state: ToxCoreState): ToxCoreState = {
     mappers.foldRight(state)(_.callState(friendNumber, callState)(_))
   }
 
   override def bitRateStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     audioBitRate: BitRate,
     videoBitRate: BitRate
   )(state: ToxCoreState): ToxCoreState = {
@@ -150,7 +150,7 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def audioReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     pcm: Array[Short],
     channels: AudioChannels,
     samplingRate: SamplingRate
@@ -159,7 +159,7 @@ final class MappingEventListener[ToxCoreState](mappers: ToxEventListener[ToxCore
   }
 
   override def videoReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     width: Int, height: Int,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int

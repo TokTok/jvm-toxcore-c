@@ -3,6 +3,7 @@ package im.tox.tox4j.av.callbacks
 import java.util
 
 import im.tox.tox4j.av.enums.ToxavFriendCallState
+import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -16,6 +17,6 @@ trait CallStateCallback[ToxCoreState] {
    *                  effectively a Set. Any [[ToxavFriendCallState]] value is contained exactly 0 or 1 times.
    */
   def callState(
-    friendNumber: Int, @NotNull callState: util.Collection[ToxavFriendCallState]
+    friendNumber: ToxFriendNumber, @NotNull callState: util.Collection[ToxavFriendCallState]
   )(state: ToxCoreState): ToxCoreState = state
 }

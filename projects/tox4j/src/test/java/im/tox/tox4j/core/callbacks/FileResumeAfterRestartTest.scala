@@ -48,7 +48,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
       }
     }
 
-    override def friendConnectionStatus(friendNumber: Int, connection: ToxConnection)(state: ChatState): ChatState = {
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connection: ToxConnection)(state: ChatState): ChatState = {
       if (isAlice) {
         if (connection != ToxConnection.NONE) {
           debug(s"is now connected to friend $friendNumber")
@@ -85,7 +85,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
       }
     }
 
-    override def fileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int)(state: ChatState): ChatState = {
+    override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: ChatState): ChatState = {
       assert(isAlice)
       debug(s"got request for ${length}B from $friendNumber for file $fileNumber at $position")
       assert(length >= 0)
@@ -119,7 +119,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       assert(isBob)
       debug(s"received file send request $fileNumber from friend number $friendNumber current offset $bobOffset")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
@@ -136,7 +136,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
       }
     }
 
-    override def fileRecvChunk(friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: ChatState): ChatState = {
       assert(isBob)
       debug(s"receive file chunk from position $position of length ${data.length}")
       if (data.length == 0 && receivedData.length == bobOffset) {

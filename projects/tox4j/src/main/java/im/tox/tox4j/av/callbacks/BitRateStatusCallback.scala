@@ -1,6 +1,7 @@
 package im.tox.tox4j.av.callbacks
 
 import im.tox.tox4j.av.data.BitRate
+import im.tox.tox4j.core.data.ToxFriendNumber
 
 /**
  * The event is triggered when the network becomes too saturated for current
@@ -14,6 +15,6 @@ trait BitRateStatusCallback[ToxCoreState] {
    * @param videoBitRate Suggested maximum video bit rate in Kb/sec.
    */
   def bitRateStatus(
-    friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate
+    friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate
   )(state: ToxCoreState): ToxCoreState = state
 }

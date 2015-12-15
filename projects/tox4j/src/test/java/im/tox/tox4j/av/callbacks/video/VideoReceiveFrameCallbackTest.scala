@@ -7,6 +7,7 @@ import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.ToxavFriendCallState
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
@@ -48,7 +49,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     }
 
     override def friendConnectionStatus(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       connectionStatus: ToxConnection
     )(state0: State): State = {
       val state = super.friendConnectionStatus(friendNumber, connectionStatus)(state0)
@@ -65,7 +66,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    override def call(friendNumber: Int, audioEnabled: Boolean, videoEnabled: Boolean)(state: State): State = {
+    override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: State): State = {
       if (state.id(friendNumber) == state.id.prev) {
         state.addTask { (tox, av, state) =>
           debug(state, s"Got a call from ${state.id(friendNumber)}; accepting")
@@ -78,7 +79,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    private def sendFrame(friendNumber: Int)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
+    private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
       val state = state0.modify(_ + 1)
 
       val (generationTime, (y, u, v)) = timed {
@@ -119,13 +120,13 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    override def callState(friendNumber: Int, callState: util.Collection[ToxavFriendCallState])(state: State): State = {
+    override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: State): State = {
       debug(state, s"Call with ${state.id(friendNumber)} is now $callState")
       state.addTask(sendFrame(friendNumber))
     }
 
     override def videoReceiveFrame(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       width: Int, height: Int,
       y: Array[Byte], u: Array[Byte], v: Array[Byte],
       yStride: Int, uStride: Int, vStride: Int

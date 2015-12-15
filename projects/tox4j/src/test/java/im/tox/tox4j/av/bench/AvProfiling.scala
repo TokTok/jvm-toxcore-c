@@ -1,6 +1,7 @@
 package im.tox.tox4j.av.bench
 
 import im.tox.tox4j.av.data.{AudioChannels, SamplingRate}
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl}
 
@@ -11,7 +12,7 @@ object AvProfiling extends App {
   val tox = new ToxCoreImpl[Unit](ToxOptions())
   val toxAv = new ToxAvImpl[Unit](tox)
 
-  val friendNumber = 1
+  val friendNumber = ToxFriendNumber.fromInt(1).get
   val pcm = Array.ofDim[Short](200)
 
   val random = new Random

@@ -5,10 +5,12 @@ import im.tox.tox4j.av.data.{AudioChannels, SamplingRate}
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.impl.jni.ToxAvImpl
 
 final class AvCallbackTimingBench extends TimingReport {
 
+  val friendNumber = ToxFriendNumber.fromInt(1).get
   val publicKey = Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)
   val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
 
@@ -35,7 +37,7 @@ final class AvCallbackTimingBench extends TimingReport {
       usingToxAv(iterations1k, pcm) in {
         case (sz, pcm: Array[Short], toxAv: ToxAvImpl[Unit]) =>
           (0 until sz) foreach { _ =>
-            toxAv.invokeAudioReceiveFrame(1, pcm, AudioChannels.Mono, SamplingRate.Rate8k)
+            toxAv.invokeAudioReceiveFrame(friendNumber, pcm, AudioChannels.Mono, SamplingRate.Rate8k)
             toxAv.iterate(())
           }
       }

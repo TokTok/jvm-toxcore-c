@@ -1,5 +1,6 @@
 package im.tox.tox4j.impl.jni
 
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.impl.jni.proto.JniLog
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
@@ -8,6 +9,8 @@ import org.scalatest.prop.PropertyChecks
 final class ToxJniLogTest extends FunSuite with PropertyChecks {
 
   private val TestMaxSize = 100
+
+  private val friendNumber = ToxFriendNumber.fromInt(0).get
 
   test("constructing and destroying a Tox instance with logging enabled should result in a non-empty log") {
     ToxJniLog() // clear
@@ -40,7 +43,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     ToxCoreImplFactory.withToxUnit { tox => }
     val count1 = ToxJniLog().entries.size
 
-    ToxCoreImplFactory.withToxUnit { tox => tox.friendExists(0) }
+    ToxCoreImplFactory.withToxUnit { tox => tox.friendExists(friendNumber) }
     val count2 = ToxJniLog().entries.size
 
     assert(count2 == count1 + 1)
@@ -81,7 +84,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
           override def run(): Unit = {
             ToxCoreImplFactory.withToxUnit { tox =>
               for (_ <- 0 until iterations) {
-                tox.friendExists(0)
+                tox.friendExists(friendNumber)
               }
             }
           }

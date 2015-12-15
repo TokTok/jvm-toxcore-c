@@ -4,7 +4,7 @@ import im.tox.core.network.Port
 import im.tox.core.random.RandomCore
 import im.tox.tox4j.TestConstants.Iterations
 import im.tox.tox4j.core._
-import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxNickname, ToxPublicKey, ToxStatusMessage}
+import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{ProxyOptions, ToxOptions}
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory
@@ -245,7 +245,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
 
   test("AddFriend") {
     withToxUnit { tox =>
-      (0 until Iterations) foreach { i =>
+      (0 until Iterations).map(ToxFriendNumber.fromInt(_).get) foreach { i =>
         withToxUnit { friend =>
           val friendNumber = tox.addFriend(
             friend.getAddress,
@@ -260,7 +260,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
 
   test("AddFriendNoRequest") {
     withToxUnit { tox =>
-      (0 until Iterations) foreach { i =>
+      (0 until Iterations).map(ToxFriendNumber.fromInt(_).get) foreach { i =>
         withToxUnit { friend =>
           val friendNumber = tox.addFriendNorequest(friend.getPublicKey)
           assert(friendNumber == i)
@@ -294,9 +294,9 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withToxUnit { tox =>
       addFriends(tox, 5)
       assert(tox.getFriendList sameElements Array[Int](0, 1, 2, 3, 4))
-      tox.deleteFriend(2)
+      tox.deleteFriend(ToxFriendNumber.fromInt(2).get)
       assert(tox.getFriendList sameElements Array[Int](0, 1, 3, 4))
-      tox.deleteFriend(3)
+      tox.deleteFriend(ToxFriendNumber.fromInt(3).get)
       assert(tox.getFriendList sameElements Array[Int](0, 1, 4))
       addFriends(tox, 1)
       assert(tox.getFriendList sameElements Array[Int](0, 1, 2, 4))
@@ -308,33 +308,34 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("FriendExists") {
     withToxUnit { tox =>
       addFriends(tox, 3)
-      assert(tox.friendExists(0))
-      assert(tox.friendExists(1))
-      assert(tox.friendExists(2))
-      assert(!tox.friendExists(3))
-      assert(!tox.friendExists(4))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(0).get))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(1).get))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(2).get))
+      assert(!tox.friendExists(ToxFriendNumber.fromInt(3).get))
+      assert(!tox.friendExists(ToxFriendNumber.fromInt(4).get))
     }
   }
 
   test("FriendExists2") {
     withToxUnit { tox =>
       addFriends(tox, 3)
-      assert(tox.friendExists(0))
-      assert(tox.friendExists(1))
-      assert(tox.friendExists(2))
-      tox.deleteFriend(1)
-      assert(tox.friendExists(0))
-      assert(!tox.friendExists(1))
-      assert(tox.friendExists(2))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(0).get))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(1).get))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(2).get))
+      tox.deleteFriend(ToxFriendNumber.fromInt(1).get)
+      assert(tox.friendExists(ToxFriendNumber.fromInt(0).get))
+      assert(!tox.friendExists(ToxFriendNumber.fromInt(1).get))
+      assert(tox.friendExists(ToxFriendNumber.fromInt(2).get))
     }
   }
 
   test("GetFriendPublicKey") {
     withToxUnit { tox =>
       addFriends(tox, 1)
-      assert(tox.getFriendPublicKey(0).value.length == ToxCoreConstants.PublicKeySize)
-      assert(tox.getFriendPublicKey(0).value sameElements tox.getFriendPublicKey(0).value)
-      val entropy = RandomCore.entropy(tox.getFriendPublicKey(0).value)
+      val friendNumber = ToxFriendNumber.fromInt(0).get
+      assert(tox.getFriendPublicKey(friendNumber).value.length == ToxCoreConstants.PublicKeySize)
+      assert(tox.getFriendPublicKey(friendNumber).value sameElements tox.getFriendPublicKey(friendNumber).value)
+      val entropy = RandomCore.entropy(tox.getFriendPublicKey(friendNumber).value)
       assert(entropy >= 0.5, s"Entropy of friend's public key should be >= 0.5, but was $entropy")
     }
   }
@@ -342,7 +343,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("GetFriendByPublicKey") {
     withToxUnit { tox =>
       addFriends(tox, 10)
-      (0 until 10) foreach { i =>
+      (0 until 10).map(ToxFriendNumber.fromInt(_).get) foreach { i =>
         assert(tox.friendByPublicKey(tox.getFriendPublicKey(i)) == i)
       }
     }
@@ -351,12 +352,13 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetTyping") {
     withToxUnit { tox =>
       addFriends(tox, 1)
-      tox.setTyping(0, false)
-      tox.setTyping(0, true)
-      tox.setTyping(0, false)
-      tox.setTyping(0, false)
-      tox.setTyping(0, true)
-      tox.setTyping(0, true)
+      val friendNumber = ToxFriendNumber.fromInt(0).get
+      tox.setTyping(friendNumber, false)
+      tox.setTyping(friendNumber, true)
+      tox.setTyping(friendNumber, false)
+      tox.setTyping(friendNumber, false)
+      tox.setTyping(friendNumber, true)
+      tox.setTyping(friendNumber, true)
     }
   }
 

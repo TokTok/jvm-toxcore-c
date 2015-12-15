@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.util.Try
+import scala.util.control.NonFatal
 
 final case class TestClient(
   tox: ToxCore[TestState],
@@ -71,7 +72,7 @@ case object TestClient extends App {
         statusMessage = tox.getStatusMessage.toString,
         nospam = tox.getNospam,
         status = ToxCoreImpl.convert(tox.getStatus),
-        friendKeys = tox.getFriendList.map(tox.getFriendPublicKey).map(_.toHexString)
+        friendKeys = tox.getFriendNumbers.map(tox.getFriendPublicKey).map(_.toHexString)
       )
       saveProfile(tox, profile)
       logger.info(s"[$id] Created new profile for ${tox.getPublicKey}")
@@ -82,7 +83,15 @@ case object TestClient extends App {
   type Task[S] = (ToxCore[S], ToxAv[S], S) => S
 
   def runTasks(tox: ToxCore[TestState], av: ToxAv[TestState])(state: TestState): TestState = {
-    state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) => task(tox, av, state) }
+    state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) =>
+      try {
+        task(tox, av, state)
+      } catch {
+        case NonFatal(exception) =>
+          logger.error("Caught exception while executing task", exception)
+          state
+      }
+    }
   }
 
   @tailrec

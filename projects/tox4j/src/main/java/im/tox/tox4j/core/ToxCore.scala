@@ -253,7 +253,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    */
   @throws[ToxFriendAddException]
   @throws[IllegalArgumentException]("if the Friend Address was not the right length.")
-  def addFriend(@NotNull address: ToxFriendAddress, @NotNull message: ToxFriendRequestMessage): Int
+  def addFriend(@NotNull address: ToxFriendAddress, @NotNull message: ToxFriendRequestMessage): ToxFriendNumber
 
   /**
    * Add a friend without sending a friend request.
@@ -272,7 +272,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    */
   @throws[ToxFriendAddException]
   @throws[IllegalArgumentException]("if the Public Key was not the right length.")
-  def addFriendNorequest(@NotNull publicKey: ToxPublicKey): Int
+  def addFriendNorequest(@NotNull publicKey: ToxPublicKey): ToxFriendNumber
 
   /**
    * Remove a friend from the friend list.
@@ -284,7 +284,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param friendNumber the friend number to delete.
    */
   @throws[ToxFriendDeleteException]
-  def deleteFriend(friendNumber: Int): Unit
+  def deleteFriend(friendNumber: ToxFriendNumber): Unit
 
   /**
    * Gets the friend number for the specified Public Key.
@@ -293,7 +293,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @return the friend number that is associated with the Public Key.
    */
   @throws[ToxFriendByPublicKeyException]
-  def friendByPublicKey(@NotNull publicKey: ToxPublicKey): Int
+  def friendByPublicKey(@NotNull publicKey: ToxPublicKey): ToxFriendNumber
 
   /**
    * Gets the Public Key for the specified friend number.
@@ -303,7 +303,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    */
   @NotNull
   @throws[ToxFriendGetPublicKeyException]
-  def getFriendPublicKey(friendNumber: Int): ToxPublicKey
+  def getFriendPublicKey(friendNumber: ToxFriendNumber): ToxPublicKey
 
   /**
    * Checks whether a friend with the specified friend number exists.
@@ -315,7 +315,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param friendNumber the friend number to check.
    * @return true if such a friend exists.
    */
-  def friendExists(friendNumber: Int): Boolean
+  def friendExists(friendNumber: ToxFriendNumber): Boolean
 
   /**
    * Get an array of currently valid friend numbers.
@@ -329,6 +329,19 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
   def getFriendList: Array[Int]
 
   /**
+   * Get an array of [[ToxFriendNumber]] objects with the same values as [[getFriendList]].
+   *
+   * This method exists for Java compatibility, because [[getFriendList]] must return an
+   * int array.
+   *
+   * @return [[getFriendList]] mapped to [[ToxFriendNumber]].
+   */
+  @NotNull
+  def getFriendNumbers: Array[ToxFriendNumber] = {
+    getFriendList.map(ToxFriendNumber.unsafeFromInt)
+  }
+
+  /**
    * Tell friend number whether or not we are currently typing.
    *
    * The client is responsible for turning it on or off.
@@ -337,7 +350,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param typing       <code>true</code> if we are currently typing.
    */
   @throws[ToxSetTypingException]
-  def setTyping(friendNumber: Int, typing: Boolean): Unit
+  def setTyping(friendNumber: ToxFriendNumber, typing: Boolean): Unit
 
   /**
    * Send a text chat message to an online friend.
@@ -365,7 +378,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @return the message ID.
    */
   @throws[ToxFriendSendMessageException]
-  def friendSendMessage(friendNumber: Int, @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: ToxFriendMessage): Int
+  def friendSendMessage(friendNumber: ToxFriendNumber, @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: ToxFriendMessage): Int
 
   /**
    * Sends a file control command to a friend for a given file transfer.
@@ -375,7 +388,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param control The control command to send.
    */
   @throws[ToxFileControlException]
-  def fileControl(friendNumber: Int, fileNumber: Int, @NotNull control: ToxFileControl): Unit
+  def fileControl(friendNumber: ToxFriendNumber, fileNumber: Int, @NotNull control: ToxFileControl): Unit
 
   /**
    * Sends a file seek control command to a friend for a given file transfer.
@@ -388,7 +401,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param position The position that the file should be seeked to.
    */
   @throws[ToxFileSeekException]
-  def fileSeek(friendNumber: Int, fileNumber: Int, position: Long): Unit
+  def fileSeek(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long): Unit
 
   /**
    * Return the file id associated to the file transfer as a byte array.
@@ -397,7 +410,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param fileNumber The friend-specific identifier for the file transfer.
    */
   @throws[ToxFileGetException]
-  def getFileFileId(friendNumber: Int, fileNumber: Int): ToxFileId
+  def getFileFileId(friendNumber: ToxFriendNumber, fileNumber: Int): ToxFileId
 
   /**
    * Send a file transmission request.
@@ -454,7 +467,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    *         Any pattern in file numbers should not be relied on.
    */
   @throws[ToxFileSendException]
-  def fileSend(friendNumber: Int, kind: Int, fileSize: Long, @NotNull fileId: ToxFileId, @NotNull filename: ToxFilename): Int
+  def fileSend(friendNumber: ToxFriendNumber, kind: Int, fileSize: Long, @NotNull fileId: ToxFileId, @NotNull filename: ToxFilename): Int
 
   /**
    * Send a chunk of file data to a friend.
@@ -473,7 +486,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param data The chunk data.
    */
   @throws[ToxFileSendChunkException]
-  def fileSendChunk(friendNumber: Int, fileNumber: Int, position: Long, @NotNull data: Array[Byte]): Unit
+  def fileSendChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, @NotNull data: Array[Byte]): Unit
 
   /**
    * Send a custom lossy packet to a friend.
@@ -492,7 +505,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param data A byte array containing the packet data including packet id.
    */
   @throws[ToxFriendCustomPacketException]
-  def friendSendLossyPacket(friendNumber: Int, @NotNull data: ToxLossyPacket): Unit
+  def friendSendLossyPacket(friendNumber: ToxFriendNumber, @NotNull data: ToxLossyPacket): Unit
 
   /**
    * Send a custom lossless packet to a friend.
@@ -507,7 +520,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    * @param data A byte array containing the packet data including packet id.
    */
   @throws[ToxFriendCustomPacketException]
-  def friendSendLosslessPacket(friendNumber: Int, @NotNull data: ToxLosslessPacket): Unit
+  def friendSendLosslessPacket(friendNumber: ToxFriendNumber, @NotNull data: ToxLosslessPacket): Unit
 
   /**
    * Register the core event handler.

@@ -7,6 +7,7 @@ import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 
 final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
+
   private val validAddress = ToxCoreImplFactory.withToxUnit(_.getAddress)
 
   test("InvalidAddress1") {

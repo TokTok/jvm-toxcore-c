@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import org.jetbrains.annotations.NotNull
 
@@ -16,6 +17,6 @@ trait FriendConnectionStatusCallback[ToxCoreState] {
    * @param connectionStatus The new connection status.
    */
   def friendConnectionStatus(
-    friendNumber: Int, @NotNull connectionStatus: ToxConnection
+    friendNumber: ToxFriendNumber, @NotNull connectionStatus: ToxConnection
   )(state: ToxCoreState): ToxCoreState = state
 }

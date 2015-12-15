@@ -3,6 +3,7 @@ package im.tox.tox4j.testing
 import im.tox.core.error.CoreError
 import im.tox.tox4j.DhtNodeSelector._
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.exceptions.{ToxBootstrapException, ToxFriendAddException, ToxNewException}
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import org.jetbrains.annotations.NotNull
@@ -23,7 +24,7 @@ trait ToxTestMixin extends ToxExceptionChecks {
 
   @throws[ToxNewException]
   @throws[ToxFriendAddException]
-  protected def addFriends[ToxCoreState](@NotNull tox: ToxCore[ToxCoreState], count: Int): Int = {
+  protected def addFriends[ToxCoreState](@NotNull tox: ToxCore[ToxCoreState], count: Int): ToxFriendNumber = {
     if (count < 1) {
       throw new IllegalArgumentException("Cannot add less than 1 friend: " + count)
     }

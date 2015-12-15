@@ -1,6 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 
 /**
  * This event is triggered when Core is ready to send more file data.
@@ -29,6 +30,6 @@ trait FileChunkRequestCallback[ToxCoreState] {
    * @param length The number of bytes requested for the current chunk.
    */
   def fileChunkRequest(
-    friendNumber: Int, fileNumber: Int, position: Long, length: Int
+    friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int
   )(state: ToxCoreState): ToxCoreState = state
 }

@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.core._
-import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxPublicKey}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendRequestMessage, ToxPublicKey}
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -20,7 +20,7 @@ final class FriendRequestCallbackTest extends AliceBobTest {
       state
     }
 
-    override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         state.finish

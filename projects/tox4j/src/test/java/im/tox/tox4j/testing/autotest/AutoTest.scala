@@ -5,6 +5,7 @@ import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks.ToxAvEventListener
 import im.tox.tox4j.av.{ToxAv, ToxAvFactory}
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import im.tox.tox4j.testing.autotest.AutoTest._
@@ -32,7 +33,7 @@ object AutoTest {
 
   final case class ClientState[S](
       id: ParticipantId,
-      friendList: Map[Int, ParticipantId],
+      friendList: Map[ToxFriendNumber, ParticipantId],
       state: S,
       tasks: List[(Int, Task[S])] = Nil,
       running: Boolean = true
@@ -63,7 +64,7 @@ object AutoTest {
       copy(state = f(state))
     }
 
-    def id(friendNumber: Int): ParticipantId = {
+    def id(friendNumber: ToxFriendNumber): ParticipantId = {
       friendList(friendNumber)
     }
 

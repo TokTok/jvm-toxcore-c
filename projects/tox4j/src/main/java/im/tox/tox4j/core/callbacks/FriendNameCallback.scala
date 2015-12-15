@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.data.ToxNickname
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxNickname}
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -12,6 +12,6 @@ trait FriendNameCallback[ToxCoreState] {
    * @param name The new nickname.
    */
   def friendName(
-    friendNumber: Int, @NotNull name: ToxNickname
+    friendNumber: ToxFriendNumber, @NotNull name: ToxNickname
   )(state: ToxCoreState): ToxCoreState = state
 }

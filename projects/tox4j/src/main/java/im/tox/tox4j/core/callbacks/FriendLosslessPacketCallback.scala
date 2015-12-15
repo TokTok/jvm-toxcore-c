@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.data.ToxLosslessPacket
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxLosslessPacket}
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -12,6 +12,6 @@ trait FriendLosslessPacketCallback[ToxCoreState] {
    * @param data A byte array containing the received packet data. The first byte is the packet id.
    */
   def friendLosslessPacket(
-    friendNumber: Int, @NotNull data: ToxLosslessPacket
+    friendNumber: ToxFriendNumber, @NotNull data: ToxLosslessPacket
   )(state: ToxCoreState): ToxCoreState = state
 }

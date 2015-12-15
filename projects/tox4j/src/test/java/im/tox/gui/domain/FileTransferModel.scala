@@ -4,9 +4,12 @@ import java.io.{File, IOException}
 import java.util.NoSuchElementException
 import javax.swing.AbstractListModel
 
+import im.tox.tox4j.core.data.ToxFriendNumber
+
 import scala.collection.mutable.ArrayBuffer
 
 final class FileTransferModel extends AbstractListModel[FileTransfer] {
+
   private val transfers = new ArrayBuffer[ArrayBuffer[FileTransfer]]
 
   override def getSize: Int = {
@@ -29,33 +32,34 @@ final class FileTransferModel extends AbstractListModel[FileTransfer] {
     throw new NoSuchElementException(String.valueOf(index))
   }
 
-  private def ensureFileNumber(friendNumber: Int, fileNumber: Int): ArrayBuffer[FileTransfer] = {
-    while (transfers.length <= friendNumber) {
+  private def ensureFileNumber(friendNumber: ToxFriendNumber, fileNumber: Int): ArrayBuffer[FileTransfer] = {
+    while (transfers.length <= friendNumber.value) {
       transfers += new ArrayBuffer[FileTransfer]
     }
-    val list = transfers(friendNumber)
+    val list = transfers(friendNumber.value)
     while (list.size <= fileNumber) {
       list += null
     }
     list
   }
 
-  def addOutgoing(friendNumber: Int, file: File, fileNumber: Int): Unit = {
+  def addOutgoing(friendNumber: ToxFriendNumber, file: File, fileNumber: Int): Unit = {
     val list = ensureFileNumber(friendNumber, fileNumber)
     list(fileNumber) = new FileTransferOutgoing(file)
   }
 
-  def addIncoming(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, file: File): Unit = {
+  def addIncoming(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, file: File): Unit = {
     val list = ensureFileNumber(friendNumber, fileNumber)
     list(fileNumber) = new FileTransferIncoming(file, kind, fileSize)
   }
 
-  def get(friendNumber: Int, fileNumber: Int): FileTransfer = {
-    transfers(friendNumber)(fileNumber)
+  def get(friendNumber: ToxFriendNumber, fileNumber: Int): FileTransfer = {
+    transfers(friendNumber.value)(fileNumber)
   }
 
   @throws[IOException]
-  def remove(friendNumber: Int, fileNumber: Int): Unit = {
+  def remove(friendNumber: ToxFriendNumber, fileNumber: Int): Unit = {
     get(friendNumber, fileNumber).close()
   }
+
 }

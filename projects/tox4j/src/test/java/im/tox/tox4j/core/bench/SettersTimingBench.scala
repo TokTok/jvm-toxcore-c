@@ -3,9 +3,12 @@ package im.tox.tox4j.core.bench
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxUserStatus
 
 final class SettersTimingBench extends TimingReport {
+
+  private val friendNumber = ToxFriendNumber.fromInt(0).get
 
   timing of classOf[ToxCore[Unit]] in {
 
@@ -40,7 +43,7 @@ final class SettersTimingBench extends TimingReport {
     measure method "setTyping" in {
       usingTox(iterations10k) in {
         case (sz, tox) =>
-          (0 until sz) foreach (_ => tox.setTyping(0, typing = true))
+          (0 until sz) foreach (_ => tox.setTyping(friendNumber, typing = true))
       }
     }
 

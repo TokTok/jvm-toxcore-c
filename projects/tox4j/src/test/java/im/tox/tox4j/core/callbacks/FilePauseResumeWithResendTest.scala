@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.core.ToxCore
-import im.tox.tox4j.core.data.{ToxFileId, ToxFilename}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.{ToxFileControl, ToxFileKind}
 
 final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
@@ -11,7 +11,7 @@ final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
   final class Alice(name: String, expectedFriendName: String) extends super.Alice(name, expectedFriendName) {
 
     protected override def addFriendMessageTask(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       fileId: ToxFileId,
       tox: ToxCore[ChatState]
@@ -35,7 +35,7 @@ final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
     }
 
     protected override def addFileRecvTask(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       bobOffset: Long,
       tox: ToxCore[ChatState]

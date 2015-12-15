@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.data.ToxFilename
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFilename}
 import im.tox.tox4j.core.enums.ToxFileControl
 import org.jetbrains.annotations.NotNull
 
@@ -22,6 +22,6 @@ trait FileRecvCallback[ToxCoreState] {
    * @param filename Name of the file. May not be the actual name. This name was sent along with the file send request.
    */
   def fileRecv(
-    friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, @NotNull filename: ToxFilename
+    friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, @NotNull filename: ToxFilename
   )(state: ToxCoreState): ToxCoreState = state
 }

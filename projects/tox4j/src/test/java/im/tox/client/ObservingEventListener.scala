@@ -12,7 +12,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
     extends ToxEventAdapter[ToxCoreState] {
 
   override def friendStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     status: ToxUserStatus
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendStatus(friendNumber, status)(()))
@@ -20,7 +20,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendTyping(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     isTyping: Boolean
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendTyping(friendNumber, isTyping)(()))
@@ -35,7 +35,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendName(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     name: ToxNickname
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendName(friendNumber, name)(()))
@@ -43,7 +43,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendMessage(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     messageType: ToxMessageType,
     timeDelta: Int,
     message: ToxFriendMessage
@@ -53,7 +53,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendLossyPacket(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     data: ToxLossyPacket
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendLossyPacket(friendNumber, data)(()))
@@ -61,7 +61,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def fileRecv(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     kind: Int,
     fileSize: Long,
@@ -81,7 +81,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def fileChunkRequest(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     position: Long,
     length: Int
@@ -91,7 +91,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def fileRecvChunk(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     position: Long,
     data: Array[Byte]
@@ -101,7 +101,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendLosslessPacket(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     data: ToxLosslessPacket
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendLosslessPacket(friendNumber, data)(()))
@@ -109,7 +109,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendConnectionStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     connectionStatus: ToxConnection
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendConnectionStatus(friendNumber, connectionStatus)(()))
@@ -117,7 +117,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def fileRecvControl(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     control: ToxFileControl
   )(state: ToxCoreState): ToxCoreState = {
@@ -126,7 +126,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendStatusMessage(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     message: ToxStatusMessage
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendStatusMessage(friendNumber, message)(()))
@@ -134,7 +134,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def friendReadReceipt(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     messageId: Int
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.friendReadReceipt(friendNumber, messageId)(()))
@@ -142,7 +142,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def call(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     audioEnabled: Boolean,
     videoEnabled: Boolean
   )(state: ToxCoreState): ToxCoreState = {
@@ -151,7 +151,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def callState(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.callState(friendNumber, callState)(()))
@@ -159,7 +159,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def bitRateStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     audioBitRate: BitRate,
     videoBitRate: BitRate
   )(state: ToxCoreState): ToxCoreState = {
@@ -168,7 +168,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def audioReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     pcm: Array[Short],
     channels: AudioChannels,
     samplingRate: SamplingRate
@@ -178,7 +178,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
   }
 
   override def videoReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     width: Int, height: Int,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int

@@ -4,7 +4,7 @@ import org.scalatest.FunSuite
 
 abstract class NamingConventionsTest(jniClass: Class[_], traitClass: Class[_]) extends FunSuite {
 
-  val exemptions = Seq("callback", "load", "close", "create")
+  val exemptions = Seq("callback", "load", "close", "create", "getFriendNumbers")
 
   test("Java method names should be derivable from JNI method names") {
     val jniMethods = MethodMap(jniClass)

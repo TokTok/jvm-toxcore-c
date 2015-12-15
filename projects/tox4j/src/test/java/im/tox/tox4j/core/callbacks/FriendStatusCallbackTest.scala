@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -17,7 +18,7 @@ final class FriendStatusCallbackTest extends AliceBobTest {
       }
     }
 
-    override def friendStatus(friendNumber: Int, status: ToxUserStatus)(state: ChatState): ChatState = {
+    override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: ChatState): ChatState = {
       debug(s"friend changed status to: $status")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
 

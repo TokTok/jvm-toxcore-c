@@ -3,7 +3,7 @@ package im.tox.tox4j.core.bench
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.{Confidence, TimingReport}
 import im.tox.tox4j.core.ToxCore
-import im.tox.tox4j.core.data.ToxFriendRequestMessage
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendRequestMessage}
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalameter.Gen
 import org.scalameter.picklers.Implicits._
@@ -15,13 +15,13 @@ final class FriendListTimingBench extends TimingReport {
    */
   private def clearFriendList(pair: (_, ToxCore[Unit])): Unit = {
     val tox = pair._2
-    tox.getFriendList.tail foreach tox.deleteFriend
+    tox.getFriendNumbers.tail foreach tox.deleteFriend
   }
 
   /**
    * Fills the friend list back up with the expected number of friends.
    */
-  private def refillFriendList(pair: (Seq[Int], ToxCore[Unit])): Unit = {
+  private def refillFriendList(pair: (Seq[ToxFriendNumber], ToxCore[Unit])): Unit = {
     val (friendList, tox) = pair
     val missing = friendList.length - tox.getFriendList.length
     assert(missing >= 0)

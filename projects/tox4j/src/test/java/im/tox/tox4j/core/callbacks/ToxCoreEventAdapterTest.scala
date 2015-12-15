@@ -9,6 +9,7 @@ import org.scalatest.FunSuite
 final class ToxCoreEventAdapterTest extends FunSuite {
 
   private val listener = new ToxCoreEventAdapter[Unit]
+  private val friendNumber = ToxFriendNumber.fromInt(0).get
 
   def test[T](f: => Unit)(implicit evidence: Manifest[T]): Unit = {
     test(evidence.runtimeClass.getSimpleName)(f)
@@ -19,31 +20,31 @@ final class ToxCoreEventAdapterTest extends FunSuite {
   }
 
   test[FileRecvControl] {
-    listener.fileRecvControl(0, 0, ToxFileControl.RESUME)(())
+    listener.fileRecvControl(friendNumber, 0, ToxFileControl.RESUME)(())
   }
 
   test[FileRecv] {
-    listener.fileRecv(0, 0, ToxFileKind.DATA, 0, ToxFilename.fromString("").get)(())
+    listener.fileRecv(friendNumber, 0, ToxFileKind.DATA, 0, ToxFilename.fromString("").get)(())
   }
 
   test[FileRecvChunk] {
-    listener.fileRecvChunk(0, 0, 0, Array.empty)(())
+    listener.fileRecvChunk(friendNumber, 0, 0, Array.empty)(())
   }
 
   test[FileChunkRequest] {
-    listener.fileChunkRequest(0, 0, 0, 0)(())
+    listener.fileChunkRequest(friendNumber, 0, 0, 0)(())
   }
 
   test[FriendConnectionStatus] {
-    listener.friendConnectionStatus(0, ToxConnection.NONE)(())
+    listener.friendConnectionStatus(friendNumber, ToxConnection.NONE)(())
   }
 
   test[FriendMessage] {
-    listener.friendMessage(0, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").get)(())
+    listener.friendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").get)(())
   }
 
   test[FriendName] {
-    listener.friendName(0, ToxNickname.fromString("").get)(())
+    listener.friendName(friendNumber, ToxNickname.fromString("").get)(())
   }
 
   test[FriendRequest] {
@@ -55,27 +56,27 @@ final class ToxCoreEventAdapterTest extends FunSuite {
   }
 
   test[FriendStatus] {
-    listener.friendStatus(0, ToxUserStatus.NONE)(())
+    listener.friendStatus(friendNumber, ToxUserStatus.NONE)(())
   }
 
   test[FriendStatusMessage] {
-    listener.friendStatusMessage(0, ToxStatusMessage.fromString("").get)(())
+    listener.friendStatusMessage(friendNumber, ToxStatusMessage.fromString("").get)(())
   }
 
   test[FriendTyping] {
-    listener.friendTyping(0, isTyping = false)(())
+    listener.friendTyping(friendNumber, isTyping = false)(())
   }
 
   test[FriendLosslessPacket] {
-    listener.friendLosslessPacket(0, ToxLosslessPacket.fromByteArray(160, Array.empty).get)(())
+    listener.friendLosslessPacket(friendNumber, ToxLosslessPacket.fromByteArray(160, Array.empty).get)(())
   }
 
   test[FriendLossyPacket] {
-    listener.friendLossyPacket(0, ToxLossyPacket.fromByteArray(200, Array.empty).get)(())
+    listener.friendLossyPacket(friendNumber, ToxLossyPacket.fromByteArray(200, Array.empty).get)(())
   }
 
   test[FriendReadReceipt] {
-    listener.friendReadReceipt(0, 0)(())
+    listener.friendReadReceipt(friendNumber, 0)(())
   }
 
 }

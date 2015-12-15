@@ -7,6 +7,7 @@ import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.ToxavFriendCallState
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
@@ -31,7 +32,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     val displayWave = !sys.env.contains("TRAVIS")
 
     override def friendConnectionStatus(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       connectionStatus: ToxConnection
     )(state0: State): State = {
       val state = super.friendConnectionStatus(friendNumber, connectionStatus)(state0)
@@ -48,7 +49,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    override def call(friendNumber: Int, audioEnabled: Boolean, videoEnabled: Boolean)(state: State): State = {
+    override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: State): State = {
       if (state.id(friendNumber) == state.id.prev) {
         state.addTask { (tox, av, state) =>
           debug(state, s"Got a call from ${state.id(friendNumber)}; accepting")
@@ -61,7 +62,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    private def sendFrame(friendNumber: Int)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
+    private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
       val state = state0.modify(_ + frameSize * framesPerIteration)
 
       for (t <- state0.get until state.get by frameSize) {
@@ -82,12 +83,12 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    override def callState(friendNumber: Int, callState: util.Collection[ToxavFriendCallState])(state: State): State = {
+    override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: State): State = {
       debug(state, s"Call with ${state.id(friendNumber)} is now $callState")
       state.addTask(sendFrame(friendNumber))
     }
 
-    override def bitRateStatus(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate)(state: State): State = {
+    override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: State): State = {
       debug(state, s"Bit rate in call with ${state.id(friendNumber)} should change to $audioBitRate for audio and $videoBitRate for video")
       state
     }
@@ -103,7 +104,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     }
 
     override def audioReceiveFrame(
-      friendNumber: Int,
+      friendNumber: ToxFriendNumber,
       pcm: Array[Short],
       channels: AudioChannels,
       samplingRate: SamplingRate
@@ -128,7 +129,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
       // Start a thread to consume the frames.
       Future {
-        while (!playback.done(audio.length)) {
+        while (!queue.isEmpty || !playback.done(audio.length)) {
           val (t, receivedPcm) = queue.take()
           val expectedPcm = audio.nextFrame16(t, frameSize)
 

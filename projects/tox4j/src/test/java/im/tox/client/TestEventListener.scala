@@ -9,7 +9,6 @@ import im.tox.tox4j.av.callbacks.AudioGenerator
 import im.tox.tox4j.av.callbacks.video.VideoGenerators
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
-import im.tox.tox4j.av.exceptions.ToxavSendFrameException
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
@@ -26,7 +25,7 @@ final class TestEventListener(id: Int)
 
   private val videoBitRate = BitRate.fromInt(1).get
 
-  private def updateFriend(friendNumber: Int, state: TestState)(update: Friend => Friend): TestState = {
+  private def updateFriend(friendNumber: ToxFriendNumber, state: TestState)(update: Friend => Friend): TestState = {
     val updated = update(state.friends.getOrElse(friendNumber, Friend()))
     state.copy(friends = state.friends + (friendNumber -> updated))
   }
@@ -35,34 +34,34 @@ final class TestEventListener(id: Int)
     state
   }
 
-  override def friendStatus(friendNumber: Int, status: ToxUserStatus)(state: TestState): TestState = {
+  override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: TestState): TestState = {
     updateFriend(friendNumber, state)(_.copy(status = status))
   }
 
-  override def friendTyping(friendNumber: Int, isTyping: Boolean)(state: TestState): TestState = {
+  override def friendTyping(friendNumber: ToxFriendNumber, isTyping: Boolean)(state: TestState): TestState = {
     updateFriend(friendNumber, state)(_.copy(typing = isTyping))
   }
 
-  override def friendName(friendNumber: Int, name: ToxNickname)(state: TestState): TestState = {
+  override def friendName(friendNumber: ToxFriendNumber, name: ToxNickname)(state: TestState): TestState = {
     updateFriend(friendNumber, state)(_.copy(name = name))
   }
 
-  override def friendStatusMessage(friendNumber: Int, message: ToxStatusMessage)(state: TestState): TestState = {
+  override def friendStatusMessage(friendNumber: ToxFriendNumber, message: ToxStatusMessage)(state: TestState): TestState = {
     updateFriend(friendNumber, state)(_.copy(statusMessage = message))
   }
 
-  override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: TestState): TestState = {
+  override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: TestState): TestState = {
     updateFriend(friendNumber, state)(_.copy(connection = connectionStatus))
   }
 
-  private def say(friendNumber: Int, message: String)(state: TestState): TestState = {
+  private def say(friendNumber: ToxFriendNumber, message: String)(state: TestState): TestState = {
     state.addTask { (tox, av, state) =>
       tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString(message).get)
       state
     }
   }
 
-  override def friendMessage(friendNumber: Int, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: TestState): TestState = {
+  override def friendMessage(friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: TestState): TestState = {
     val AudioCommand = "audio (\\w+)".r
     val VideoCommand = "video (\\w+)".r
 
@@ -83,7 +82,7 @@ final class TestEventListener(id: Int)
     }
   }
 
-  private def processAudioCommand(friendNumber: Int, state: TestState, request: String): TestState = {
+  private def processAudioCommand(friendNumber: ToxFriendNumber, state: TestState, request: String): TestState = {
     val newAudio = request match {
       case "itcrowd"      => AudioGenerator.itCrowd(audioSamplingRate.value)
       case "mortalkombat" => AudioGenerator.mortalKombat(audioSamplingRate.value)
@@ -96,7 +95,7 @@ final class TestEventListener(id: Int)
     audio.set(audioTime.mod(_.map(_ => 0), state), newAudio) |> say(friendNumber, "changing audio track")
   }
 
-  private def processVideoCommand(friendNumber: Int, state: TestState, request: String): TestState = {
+  private def processVideoCommand(friendNumber: ToxFriendNumber, state: TestState, request: String): TestState = {
     val newVideo = request match {
       case "xor1"          => VideoGenerators.Xor1
       case "xor2"          => VideoGenerators.Xor2
@@ -112,11 +111,11 @@ final class TestEventListener(id: Int)
     video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
   }
 
-  override def friendLossyPacket(friendNumber: Int, data: ToxLossyPacket)(state: TestState): TestState = {
+  override def friendLossyPacket(friendNumber: ToxFriendNumber, data: ToxLossyPacket)(state: TestState): TestState = {
     state
   }
 
-  override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: TestState): TestState = {
+  override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: TestState): TestState = {
     state
   }
 
@@ -130,27 +129,27 @@ final class TestEventListener(id: Int)
     }
   }
 
-  override def fileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int)(state: TestState): TestState = {
+  override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: TestState): TestState = {
     state
   }
 
-  override def fileRecvChunk(friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte])(state: TestState): TestState = {
+  override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: TestState): TestState = {
     state
   }
 
-  override def friendLosslessPacket(friendNumber: Int, data: ToxLosslessPacket)(state: TestState): TestState = {
+  override def friendLosslessPacket(friendNumber: ToxFriendNumber, data: ToxLosslessPacket)(state: TestState): TestState = {
     state
   }
 
-  override def fileRecvControl(friendNumber: Int, fileNumber: Int, control: ToxFileControl)(state: TestState): TestState = {
+  override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: TestState): TestState = {
     state
   }
 
-  override def friendReadReceipt(friendNumber: Int, messageId: Int)(state: TestState): TestState = {
+  override def friendReadReceipt(friendNumber: ToxFriendNumber, messageId: Int)(state: TestState): TestState = {
     state
   }
 
-  override def call(friendNumber: Int, audioEnabled: Boolean, videoEnabled: Boolean)(state: TestState): TestState = {
+  override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: TestState): TestState = {
     state.addTask { (tox, av, state) =>
       logInfo(s"Answering call from $friendNumber")
       av.answer(friendNumber, audioBitRate, videoBitRate)
@@ -166,7 +165,7 @@ final class TestEventListener(id: Int)
     }
   }
 
-  private def sendNextAudioFrame(friendNumber: Int)(tox: ToxCore[TestState], av: ToxAv[TestState], state: TestState): TestState = {
+  private def sendNextAudioFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[TestState], av: ToxAv[TestState], state: TestState): TestState = {
     val audioTime = TestState.friendAudioTime(friendNumber)
 
     audioTime.get(state) match {
@@ -191,7 +190,7 @@ final class TestEventListener(id: Int)
     }
   }
 
-  private def sendNextVideoFrame(friendNumber: Int)(tox: ToxCore[TestState], av: ToxAv[TestState], state: TestState): TestState = {
+  private def sendNextVideoFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[TestState], av: ToxAv[TestState], state: TestState): TestState = {
     val videoFrame = TestState.friendVideoFrame(friendNumber)
 
     videoFrame.get(state) match {
@@ -206,42 +205,54 @@ final class TestEventListener(id: Int)
     }
   }
 
-  override def callState(friendNumber: Int, callState: util.Collection[ToxavFriendCallState])(state: TestState): TestState = {
-    val audioTime = TestState.friendAudioTime(friendNumber)
-    val videoFrame = TestState.friendVideoFrame(friendNumber)
-
-    val stateWithAudio =
-      if (callState.contains(ToxavFriendCallState.ACCEPTING_A)) {
-        logInfo(s"Sending audio to friend $friendNumber")
-        audioTime.set(state, Some(0))
-          .addTask(sendNextAudioFrame(friendNumber))
-      } else {
-        audioTime.mod({
-          case None => None
-          case Some(_) =>
-            logInfo(s"Stopped sending audio to friend $friendNumber")
-            None
-        }, state)
-      }
-
-    val stateWithVideo =
-      if (callState.contains(ToxavFriendCallState.ACCEPTING_V)) {
-        logInfo(s"Sending video to friend $friendNumber")
-        videoFrame.set(stateWithAudio, Some(0))
-          .addTask(sendNextVideoFrame(friendNumber))
-      } else {
-        videoFrame.mod({
-          case None => None
-          case Some(_) =>
-            logInfo(s"Stopped sending video to friend $friendNumber")
-            None
-        }, state)
-      }
-
-    stateWithVideo
+  override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: TestState): TestState = {
+    (state
+      |> stopAudioSending(friendNumber, callState)
+      |> stopVideoSending(friendNumber, callState))
   }
 
-  override def bitRateStatus(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate)(state: TestState): TestState = {
+  private def stopAudioSending(
+    friendNumber: ToxFriendNumber,
+    callState: util.Collection[ToxavFriendCallState]
+  )(state: TestState): TestState = {
+    val audioTime = TestState.friendAudioTime(friendNumber)
+
+    if (callState.contains(ToxavFriendCallState.ACCEPTING_A)) {
+      logInfo(s"Sending audio to friend $friendNumber")
+      audioTime.set(state, Some(0))
+        .addTask(sendNextAudioFrame(friendNumber))
+    } else {
+      audioTime.mod({
+        case None => None
+        case Some(_) =>
+          logInfo(s"Stopped sending audio to friend $friendNumber")
+          None
+      }, state)
+    }
+  }
+
+  private def stopVideoSending(
+    friendNumber: ToxFriendNumber,
+    callState: util.Collection[ToxavFriendCallState]
+  )(state: TestState): TestState = {
+
+    val videoFrame = TestState.friendVideoFrame(friendNumber)
+    if (callState.contains(ToxavFriendCallState.ACCEPTING_V)) {
+      logInfo(s"Sending video to friend $friendNumber")
+      videoFrame.set(state, Some(0))
+        .addTask(sendNextVideoFrame(friendNumber))
+    } else {
+      videoFrame.mod({
+        case None => None
+        case Some(_) =>
+          logInfo(s"Stopped sending video to friend $friendNumber")
+          None
+      }, state)
+    }
+
+  }
+
+  override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: TestState): TestState = {
     state.addTask { (tox, av, state) =>
       av.setBitRate(friendNumber, audioBitRate, videoBitRate)
 
@@ -268,12 +279,12 @@ final class TestEventListener(id: Int)
     }
   }
 
-  override def audioReceiveFrame(friendNumber: Int, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate)(state: TestState): TestState = {
+  override def audioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate)(state: TestState): TestState = {
     state
   }
 
   override def videoReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     width: Int, height: Int,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int

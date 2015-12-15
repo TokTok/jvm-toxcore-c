@@ -12,14 +12,14 @@ final class LoggingEventListener(id: Int)
     extends IdLogging(id) with ToxEventListener[Unit] {
 
   override def friendStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     status: ToxUserStatus
   )(state: Unit): Unit = {
     logInfo(s"friendStatus($friendNumber, $status)")
   }
 
   override def friendTyping(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     isTyping: Boolean
   )(state: Unit): Unit = {
     logInfo(s"friendTyping($friendNumber, $isTyping)")
@@ -32,14 +32,14 @@ final class LoggingEventListener(id: Int)
   }
 
   override def friendName(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     name: ToxNickname
   )(state: Unit): Unit = {
     logInfo(s"friendName($friendNumber, ${new String(name.value)})")
   }
 
   override def friendMessage(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     messageType: ToxMessageType,
     timeDelta: Int,
     message: ToxFriendMessage
@@ -48,14 +48,14 @@ final class LoggingEventListener(id: Int)
   }
 
   override def friendLossyPacket(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     data: ToxLossyPacket
   )(state: Unit): Unit = {
     logInfo(s"friendLossyPacket($friendNumber, ${new String(data.value)})")
   }
 
   override def fileRecv(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     kind: Int,
     fileSize: Long,
@@ -77,7 +77,7 @@ final class LoggingEventListener(id: Int)
   }
 
   override def fileChunkRequest(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     position: Long,
     length: Int
@@ -86,7 +86,7 @@ final class LoggingEventListener(id: Int)
   }
 
   override def fileRecvChunk(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     position: Long,
     data: Array[Byte]
@@ -95,21 +95,21 @@ final class LoggingEventListener(id: Int)
   }
 
   override def friendLosslessPacket(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     data: ToxLosslessPacket
   )(state: Unit): Unit = {
     logInfo(s"friendLosslessPacket($friendNumber, ${new String(data.value)})")
   }
 
   override def friendConnectionStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     connectionStatus: ToxConnection
   )(state: Unit): Unit = {
     logInfo(s"friendConnectionStatus($friendNumber, $connectionStatus)")
   }
 
   override def fileRecvControl(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     fileNumber: Int,
     control: ToxFileControl
   )(state: Unit): Unit = {
@@ -117,21 +117,21 @@ final class LoggingEventListener(id: Int)
   }
 
   override def friendStatusMessage(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     message: ToxStatusMessage
   )(state: Unit): Unit = {
     logInfo(s"friendStatusMessage($friendNumber, ${new String(message.value)})")
   }
 
   override def friendReadReceipt(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     messageId: Int
   )(state: Unit): Unit = {
     logInfo(s"friendReadReceipt($friendNumber, $messageId)")
   }
 
   override def call(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     audioEnabled: Boolean,
     videoEnabled: Boolean
   )(state: Unit): Unit = {
@@ -139,14 +139,14 @@ final class LoggingEventListener(id: Int)
   }
 
   override def callState(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     callState: util.Collection[ToxavFriendCallState]
   )(state: Unit): Unit = {
     logInfo(s"callState($friendNumber, $callState)")
   }
 
   override def bitRateStatus(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     audioBitRate: BitRate,
     videoBitRate: BitRate
   )(state: Unit): Unit = {
@@ -154,7 +154,7 @@ final class LoggingEventListener(id: Int)
   }
 
   override def audioReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     pcm: Array[Short],
     channels: AudioChannels,
     samplingRate: SamplingRate
@@ -163,7 +163,7 @@ final class LoggingEventListener(id: Int)
   }
 
   override def videoReceiveFrame(
-    friendNumber: Int,
+    friendNumber: ToxFriendNumber,
     width: Int, height: Int,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int

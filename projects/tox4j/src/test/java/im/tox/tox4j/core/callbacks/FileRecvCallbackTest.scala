@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.data.{ToxFileId, ToxFilename}
+import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileKind}
 import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
@@ -20,7 +20,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
       }
     }
 
-    override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         assert(friendNumber == AliceBobTestBase.FriendNumber)
@@ -39,7 +39,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       debug("received file send request " + fileNumber + " from friend number " + friendNumber)
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(fileNumber == (0 | 0x10000))
