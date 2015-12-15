@@ -80,7 +80,7 @@ final class ToxClientHttpFrontend(port: Port) {
         out.println(s"  IPv6: ${HostInfo.ipv6}")
         out.println("  Friends:")
         for ((friendNumber, friend) <- client.state.friends) {
-          out.println(s"    $friendNumber. $friend")
+          out.println(s"    $friendNumber -> $friend")
         }
         out.println()
       }
