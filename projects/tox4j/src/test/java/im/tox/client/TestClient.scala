@@ -12,11 +12,17 @@ import im.tox.tox4j.testing.autotest.AutoTestSuite
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
+import scala.concurrent.duration._
+import scala.language.postfixOps
 import scala.util.control.NonFatal
 
 case object TestClient extends App {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
+  private val watchdog = Watchdog(name = this.toString, period = 1 second, timeout = 5 seconds) { watchdog =>
+    logger.error("Watchdog timer expired; shutting down application")
+    System.exit(1)
+  }
 
   private def runTasks(tox: ToxCore[ToxClientState], av: ToxAv[ToxClientState])(state: ToxClientState): ToxClientState = {
     state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) =>
@@ -33,6 +39,7 @@ case object TestClient extends App {
   @tailrec
   private def mainLoop(httpServer: Option[ToxClientHttpFrontend], clients0: List[ToxClient]): Unit = {
     val (time, (clients, interval)) = AutoTestSuite.timed {
+      watchdog.ping()
       httpServer.foreach(_.update(clients0))
 
       val clients =
