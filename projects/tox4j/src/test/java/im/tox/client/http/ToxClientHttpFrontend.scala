@@ -65,12 +65,15 @@ final class ToxClientHttpFrontend(port: Port) {
       out.println()
 
       for ((client, id) <- state.zipWithIndex) {
-        out.println(s"Instance $id:")
-        out.println(s"  Friend Address: ${client.state.address}")
-        out.println(s"  DHT Public Key: ${client.state.dhtId}")
-        out.println(s"  UDP Port: ${client.state.udpPort}")
-        out.println(s"  IPv4: ${HostInfo.ipv4}")
-        out.println(s"  IPv6: ${HostInfo.ipv6}")
+        out.println(s"Instance $id (connection = ${client.state.connection}):")
+        out.println(s"  Name:           ${client.state.profile.name}")
+        out.println(s"  Status message: ${client.state.profile.statusMessage}")
+        out.println(s"  Status:         ${client.state.profile.status}")
+        out.println(s"  Friend address: ${client.state.address}")
+        out.println(s"  DHT public key: ${client.state.dhtId}")
+        out.println(s"  UDP port:       ${client.state.udpPort}")
+        out.println(s"  IPv4 address:   ${HostInfo.ipv4}")
+        out.println(s"  IPv6 address:   ${HostInfo.ipv6}")
         out.println("  Friends:")
         for ((friendNumber, friend) <- client.state.friends) {
           out.println(s"    $friendNumber -> $friend")

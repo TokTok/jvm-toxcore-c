@@ -11,7 +11,9 @@ final class TestEventListener(id: Int)
   override def selfConnectionStatus(
     connectionStatus: ToxConnection
   )(state: ToxClientState): ToxClientState = {
-    state
+    state.copy(
+      connection = connectionStatus
+    )
   }
 
   override def friendLossyPacket(

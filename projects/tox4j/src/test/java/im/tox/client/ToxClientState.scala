@@ -7,6 +7,7 @@ import im.tox.tox4j.av.callbacks.AudioGenerator
 import im.tox.tox4j.av.callbacks.video.VideoGenerator
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.{ToxFriendAddress, ToxFriendNumber, ToxPublicKey}
+import im.tox.tox4j.core.enums.ToxConnection
 
 import scala.collection.immutable.TreeMap
 import scalaz.Lens
@@ -19,6 +20,7 @@ final case class ToxClientState(
     // Persistent state.
     profile: Profile = Profile.defaultInstance,
     // Temporary state.
+    connection: ToxConnection = ToxConnection.NONE,
     friends: TreeMap[ToxFriendNumber, Friend] = TreeMap.empty,
     // Tasks to run on the next iteration.
     tasks: List[ToxClientState.Task[ToxClientState]] = Nil
