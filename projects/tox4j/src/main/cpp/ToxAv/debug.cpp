@@ -7,7 +7,7 @@
 
 template<>
 void
-print_arg<ToxAV *> (protolog::Value &value, ToxAV *tox)
+print_arg<ToxAV *> (protolog::Value &value, ToxAV *const &tox)
 {
   static std::vector<ToxAV *> ids;
   auto found = std::find (ids.begin (), ids.end (), tox);
@@ -21,7 +21,7 @@ print_arg<ToxAV *> (protolog::Value &value, ToxAV *tox)
 
 template<>
 void
-print_arg<int16_t const *> (protolog::Value &value, int16_t const *data)
+print_arg<int16_t const *> (protolog::Value &value, int16_t const *const &data)
 {
   if (data != nullptr)
     value.set_v_string ("out audio samples");
@@ -31,7 +31,7 @@ print_arg<int16_t const *> (protolog::Value &value, int16_t const *data)
 
 template<>
 void
-print_arg<av::Events *> (protolog::Value &value, av::Events *events)
+print_arg<av::Events *> (protolog::Value &value, av::Events *const &events)
 {
   if (events != nullptr)
     value.set_v_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");

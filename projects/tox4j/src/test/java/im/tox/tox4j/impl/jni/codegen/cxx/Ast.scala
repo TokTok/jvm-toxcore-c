@@ -9,6 +9,7 @@ object Ast {
   sealed trait Type
 
   final case class Typename(name: String) extends Type
+  final case class Const(inner: Type) extends Type
   final case class Pointer(inner: Type) extends Type
   final case class Reference(inner: Type) extends Type
 

@@ -22,9 +22,9 @@ struct wrapped_value
 
   template<typename FuncT, typename ...Args>
   static wrapped_value
-  wrap (FuncT func, Args ...args)
+  wrap (FuncT func, Args &&...args)
   {
-    return { func (args...) };
+    return { func (std::forward<Args> (args)...) };
   }
 };
 
@@ -36,9 +36,9 @@ struct wrapped_value<void>
 
   template<typename FuncT, typename ...Args>
   static wrapped_value
-  wrap (FuncT func, Args ...args)
+  wrap (FuncT func, Args &&...args)
   {
-    func (args...);
+    func (std::forward<Args> (args)...);
     return { };
   }
 };
@@ -50,9 +50,9 @@ struct wrapped_value<void>
  */
 template<typename FuncT, typename ...Args>
 wrapped_value<typename std::result_of<FuncT (Args...)>::type>
-wrap_void (FuncT func, Args ...args)
+wrap_void (FuncT func, Args &&...args)
 {
   return wrapped_value<
     typename std::result_of<FuncT (Args...)>::type
-  >::wrap (func, args...);
+  >::wrap (func, std::forward<Args> (args)...);
 }

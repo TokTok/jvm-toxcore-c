@@ -49,7 +49,7 @@ TOX_METHOD (jint, FileSend,
 
   return instances.with_instance_err (env, instanceNumber,
     identity,
-    tox_file_send, friendNumber, kind, fileSize, fileIdData.data (), filenameData.data (), filenameData.size ()
+    tox_file_send, friendNumber, kind, fileSize, fileIdData, filenameData.data (), filenameData.size ()
   );
 }
 

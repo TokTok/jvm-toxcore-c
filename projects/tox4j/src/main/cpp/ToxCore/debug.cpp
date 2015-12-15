@@ -7,7 +7,7 @@
 
 template<>
 void
-print_arg<Tox *> (protolog::Value &value, Tox *tox)
+print_arg<Tox *> (protolog::Value &value, Tox *const &tox)
 {
   static std::vector<Tox *> ids;
   auto found = std::find (ids.begin (), ids.end (), tox);
@@ -21,7 +21,7 @@ print_arg<Tox *> (protolog::Value &value, Tox *tox)
 
 template<>
 void
-print_arg<Tox_Options *> (protolog::Value &value, Tox_Options *options)
+print_arg<Tox_Options *> (protolog::Value &value, Tox_Options *const &options)
 {
   if (options == nullptr)
     value.set_v_string ("<null>");
@@ -42,7 +42,7 @@ print_arg<Tox_Options *> (protolog::Value &value, Tox_Options *options)
 
 template<>
 void
-print_arg<core::Events *> (protolog::Value &value, core::Events *events)
+print_arg<core::Events *> (protolog::Value &value, core::Events *const &events)
 {
   if (events != nullptr)
     value.set_v_string ("<core::Events[" + std::to_string (events->ByteSize ()) + "]>");
@@ -55,7 +55,7 @@ print_arg<core::Events *> (protolog::Value &value, core::Events *events)
 
 template<>
 void
-print_arg<TOX_FILE_KIND> (protolog::Value &value, TOX_FILE_KIND kind)
+print_arg<TOX_FILE_KIND> (protolog::Value &value, TOX_FILE_KIND const &kind)
 {
   switch (kind)
     {

@@ -155,26 +155,26 @@ print_func (protolog::JniLogEntry &log_entry, uintptr_t func)
 
 template<typename Arg>
 void
-print_arg (protolog::Value &value, Arg arg)
+print_arg (protolog::Value &value, Arg const &arg)
 {
   value.set_v_sint64 (arg);
 }
 
-template void print_arg<         bool     > (protolog::Value &,          bool     );
-template void print_arg<  signed char     > (protolog::Value &,   signed char     );
-template void print_arg<unsigned char     > (protolog::Value &, unsigned char     );
-template void print_arg<  signed short    > (protolog::Value &,   signed short    );
-template void print_arg<unsigned short    > (protolog::Value &, unsigned short    );
-template void print_arg<  signed int      > (protolog::Value &,   signed int      );
-template void print_arg<unsigned int      > (protolog::Value &, unsigned int      );
-template void print_arg<  signed long     > (protolog::Value &,   signed long     );
-template void print_arg<unsigned long     > (protolog::Value &, unsigned long     );
-template void print_arg<  signed long long> (protolog::Value &,   signed long long);
-template void print_arg<unsigned long long> (protolog::Value &, unsigned long long);
+template void print_arg<         bool     > (protolog::Value &,          bool      const &);
+template void print_arg<  signed char     > (protolog::Value &,   signed char      const &);
+template void print_arg<unsigned char     > (protolog::Value &, unsigned char      const &);
+template void print_arg<  signed short    > (protolog::Value &,   signed short     const &);
+template void print_arg<unsigned short    > (protolog::Value &, unsigned short     const &);
+template void print_arg<  signed int      > (protolog::Value &,   signed int       const &);
+template void print_arg<unsigned int      > (protolog::Value &, unsigned int       const &);
+template void print_arg<  signed long     > (protolog::Value &,   signed long      const &);
+template void print_arg<unsigned long     > (protolog::Value &, unsigned long      const &);
+template void print_arg<  signed long long> (protolog::Value &,   signed long long const &);
+template void print_arg<unsigned long long> (protolog::Value &, unsigned long long const &);
 
 template<>
 void
-print_arg<char const *> (protolog::Value &value, char const *data)
+print_arg<char const *> (protolog::Value &value, char const *const &data)
 {
   if (data != nullptr)
     value.set_v_string (data);
@@ -184,20 +184,20 @@ print_arg<char const *> (protolog::Value &value, char const *data)
 
 template<>
 void
-print_arg<uint8_t *> (protolog::Value &value, uint8_t *data)
+print_arg<uint8_t *> (protolog::Value &value, uint8_t *const &data)
 {
   if (data != nullptr)
-    value.set_v_string ("in data");
+    value.set_v_string ("<out bytes>");
   else
     value.set_v_string ("<null>");
 }
 
 template<>
 void
-print_arg<uint8_t const *> (protolog::Value &value, uint8_t const *data)
+print_arg<uint8_t const *> (protolog::Value &value, uint8_t const *const &data)
 {
   if (data != nullptr)
-    value.set_v_string ("out data");
+    value.set_v_string ("<bytes>");
   else
     value.set_v_string ("<null>");
 }
@@ -211,32 +211,25 @@ print_arg (protolog::Value &value, uint8_t const *data, std::size_t length)
     value.set_v_string ("<null>");
 }
 
-template<>
 void
-print_arg<JNIEnv *> (protolog::Value &value, JNIEnv *data)
+print_arg (protolog::Value &value, int16_t const *data, std::size_t length)
 {
   if (data != nullptr)
-    value.set_v_string ("<JNIEnv>");
+    value.set_v_string ("<short[" + std::to_string (length) + "]>");
   else
     value.set_v_string ("<null>");
 }
 
 template<>
 void
-print_arg<jbyteArray> (protolog::Value &value, jbyteArray data)
+print_arg<std::vector<uint8_t>> (protolog::Value &value, std::vector<uint8_t> const &data)
 {
-  if (data != nullptr)
-    value.set_v_string ("<jbyteArray>");
-  else
-    value.set_v_string ("<null>");
+  value.set_v_bytes (data.data (), data.size ());
 }
 
 template<>
 void
-print_arg<jintArray> (protolog::Value &value, jintArray data)
+print_arg<std::vector<uint32_t>> (protolog::Value &value, std::vector<uint32_t> const &data)
 {
-  if (data != nullptr)
-    value.set_v_string ("<jintArray>");
-  else
-    value.set_v_string ("<null>");
+  value.set_v_string ("<int[" + std::to_string (data.size ()) + "]>");
 }

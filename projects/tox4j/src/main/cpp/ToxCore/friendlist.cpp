@@ -18,7 +18,7 @@ TOX_METHOD (jint, FriendAdd,
   tox4j_assert (!address || addressData.size () == TOX_ADDRESS_SIZE);
   return instances.with_instance_err (env, instanceNumber,
     identity,
-    tox_friend_add, addressData.data (), messageData.data (), messageData.size ()
+    tox_friend_add, addressData, messageData.data (), messageData.size ()
   );
 }
 
@@ -34,7 +34,7 @@ TOX_METHOD (jint, FriendAddNorequest,
   tox4j_assert (!publicKey || public_key.size () == TOX_PUBLIC_KEY_SIZE);
   return instances.with_instance_err (env, instanceNumber,
     identity,
-    tox_friend_add_norequest, public_key.data ()
+    tox_friend_add_norequest, public_key
   );
 }
 
@@ -63,7 +63,7 @@ TOX_METHOD (jint, FriendByPublicKey,
   tox4j_assert (!publicKey || public_key.size () == TOX_PUBLIC_KEY_SIZE);
   return instances.with_instance_err (env, instanceNumber,
     identity,
-    tox_friend_by_public_key, public_key.data ()
+    tox_friend_by_public_key, public_key
   );
 }
 
@@ -96,8 +96,7 @@ TOX_METHOD (jintArray, SelfGetFriendList,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint32_t,
       tox_self_get_friend_list_size,
-      tox_self_get_friend_list>::make,
-    env
+      tox_self_get_friend_list>::make
   );
 }
 

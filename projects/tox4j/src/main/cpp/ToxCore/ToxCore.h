@@ -33,15 +33,15 @@ struct get_vector
 {
   static bool register_funcs_0 ();
 
-  static auto
-  make (Tox const *tox, JNIEnv *env)
+  static std::vector<T>
+  make (Tox const *tox)
   {
     std::vector<T> name (get_size (tox));
     get_data (tox, name.data ());
 
     assert (register_funcs_0 ());
 
-    return toJavaArray (env, name);
+    return name;
   }
 };
 

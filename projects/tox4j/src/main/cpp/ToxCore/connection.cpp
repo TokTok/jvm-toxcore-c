@@ -24,7 +24,7 @@ toxBootstrapLike (bool function (Tox *tox,
   tox4j_assert (!publicKey || public_key.size () == TOX_PUBLIC_KEY_SIZE);
 
   return instances.with_instance_ign (env, instanceNumber,
-    function, UTFChars (env, address).data (), port, public_key.data ()
+    function, UTFChars (env, address).data (), port, public_key
   );
 }
 
@@ -90,8 +90,7 @@ TOX_METHOD (jbyteArray, SelfGetDhtId,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       constant_size<TOX_PUBLIC_KEY_SIZE>::make,
-      tox_self_get_dht_id>::make,
-    env
+      tox_self_get_dht_id>::make
   );
 }
 

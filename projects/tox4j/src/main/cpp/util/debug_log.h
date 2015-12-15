@@ -1,6 +1,7 @@
 #ifndef DEBUG_LOG_H
 #define DEBUG_LOG_H
 
+#include "util/jni/ArrayFromJava.h"
 #include "util/pp_attributes.h"
 #include "util/pp_cat.h"
 #include "util/unused.h"
@@ -29,13 +30,24 @@ namespace protolog = im::tox::tox4j::impl::jni::proto;
  * For user-defined types, the print_arg function must be specialised as well.
  */
 template<typename Arg>
-void print_arg (protolog::Value &value, Arg arg);
+void print_arg (protolog::Value &value, Arg const &arg);
 
 /**
- * Overload for byte arrays of known length. In this case, the bytes are put
- * in a "bytes" member of the protobuf.
+ * Overload for byte and short arrays of known length. In this case, the values
+ * are put in a "bytes" member of the protobuf.
  */
 void print_arg (protolog::Value &value, uint8_t const *data, std::size_t length);
+void print_arg (protolog::Value &value, int16_t const *data, std::size_t length);
+
+/**
+ * Overload for arrays with static bounds.
+ */
+template<typename T, std::size_t N>
+void
+print_arg (protolog::Value &value, T const (&array)[N])
+{
+  print_arg (value, array, N);
+}
 
 /**
  * The overload for unique_ptr just calls print_arg on the raw pointer.
@@ -45,6 +57,22 @@ void
 print_arg (protolog::Value &value, std::unique_ptr<Arg, ArgDeleter> const &arg)
 {
   print_arg (value, arg.get ());
+}
+
+/**
+ * An overload for Java arrays passed to C functions without their size.
+ */
+template<
+  typename JType,
+  typename CType,
+  typename JavaArray,
+  JType *(JNIEnv::*GetArrayElements) (JavaArray, jboolean *),
+  void (JNIEnv::*ReleaseArrayElements) (JavaArray, JType *, jint)
+>
+void
+print_arg (protolog::Value &value, detail::MakeArrayFromJava<JType, CType, JavaArray, GetArrayElements, ReleaseArrayElements> const &array)
+{
+  print_arg (value, array.data (), array.size ());
 }
 
 /**
@@ -106,7 +134,7 @@ print_args (protolog::JniLogEntry &log_entry)
  * This forward declaration exists so that the data+size overload can call it.
  */
 template<typename ...Args>
-void print_args (protolog::JniLogEntry &log_entry, Args ...args);
+void print_args (protolog::JniLogEntry &log_entry, Args const &...args);
 
 /**
  * Overload for byte arrays of known size. This is declared before the
@@ -116,7 +144,7 @@ void print_args (protolog::JniLogEntry &log_entry, Args ...args);
 template<typename ...Args>
 void
 print_args (protolog::JniLogEntry &log_entry,
-            uint8_t const *data, std::size_t size, Args ...args)
+            uint8_t const *data, std::size_t size, Args const &...args)
 {
   protolog::Value *value = log_entry.add_arguments ();
   print_arg (*value, data, size);
@@ -126,7 +154,7 @@ print_args (protolog::JniLogEntry &log_entry,
 template<typename Arg0, typename ...Args>
 void
 print_args (protolog::JniLogEntry &log_entry,
-            Arg0 arg0, Args ...args)
+            Arg0 const &arg0, Args const &...args)
 {
   protolog::Value *value = log_entry.add_arguments ();
   print_arg (*value, arg0);
@@ -300,7 +328,7 @@ struct LogEntry
    * omit uninteresting arguments for the log.
    */
   template<typename Func, typename ...Args>
-  LogEntry (Func func, Args ...args)
+  LogEntry (Func func, Args const &...args)
   {
     static_assert (
       std::is_function<typename std::remove_pointer<Func>::type>::value,
@@ -318,7 +346,7 @@ struct LogEntry
    * The same as above but with an instance number.
    */
   template<typename Func, typename ...Args>
-  LogEntry (int instanceNumber, Func func, Args ...args)
+  LogEntry (int instanceNumber, Func func, Args const &...args)
     : LogEntry (func, args...)
   {
     if (entry)
@@ -334,12 +362,12 @@ struct LogEntry
    */
   template<typename FuncT, typename ...Args>
   auto
-  print_result (FuncT func, Args ...args)
+  print_result (FuncT func, Args &&...args)
   {
     if (entry)
       {
         auto start = std::chrono::system_clock::now();
-        auto result = wrap_void (func, args...);
+        auto result = wrap_void (func, std::forward<Args> (args)...);
         auto end = std::chrono::system_clock::now();
 
         using std::chrono::duration_cast;
@@ -356,10 +384,10 @@ struct LogEntry
 
         print_arg (*entry->mutable_result (), result);
 
-        return result.unwrap ();
+        return result;
       }
 
-    return func (args...);
+    return wrap_void (func, std::forward<Args> (args)...);
   }
 
 private:

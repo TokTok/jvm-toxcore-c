@@ -7,6 +7,64 @@
 #include <iostream>
 
 
+
+/*****************************************************************************
+ *
+ * Conversion of C++ values to Java values.
+ *
+ *****************************************************************************/
+
+
+template<typename ToxFunc, typename ...Args>
+struct conversions
+{
+  template<typename T>
+  static T
+  from_java (T value)
+  {
+    return value;
+  }
+
+  template<
+    typename JType,
+    typename CType,
+    typename JavaArray,
+    JType *(JNIEnv::*GetArrayElements) (JavaArray, jboolean *),
+    void (JNIEnv::*ReleaseArrayElements) (JavaArray, JType *, jint)
+  >
+  static auto
+  from_java (detail::MakeArrayFromJava<JType, CType, JavaArray, GetArrayElements, ReleaseArrayElements> const &array)
+  {
+    return array.data ();
+  }
+
+
+  template<typename T>
+  static T
+  to_java (JNIEnv *env, wrapped_value<T> &&wrapped)
+  {
+    unused (env);
+    return wrapped.unwrap ();
+  }
+
+  template<typename T>
+  static auto
+  to_java (JNIEnv *env, wrapped_value<std::vector<T>> &&wrapped)
+  {
+    return toJavaArray (env, wrapped.unwrap ());
+  }
+
+  static auto
+  to_java (JNIEnv *env, LogEntry &log_entry, ToxFunc func, Args ...args)
+  {
+    return to_java (env, log_entry.print_result (func, from_java (args)...));
+  }
+};
+
+
+
+
+
 /*****************************************************************************
  *
  * Error handling code.
@@ -189,13 +247,15 @@ with_error_handling (LogEntry &log_entry,
                      JNIEnv *env,
                      SuccessFunc success_func,
                      ToxFunc tox_func,
-                     Args ...args)
+                     Args &&...args)
 {
   using error_type = typename error_type_of<ToxFunc>::type;
 
   // Create an error code value and pass a pointer to the tox function.
   error_type error;
-  auto value = log_entry.print_result (tox_func, args..., &error);
+  auto value = conversions<ToxFunc, Args..., error_type *>::to_java (
+    env, log_entry, tox_func, std::forward<Args> (args)..., &error
+  );
   // Handle it, producing either a SUCCESS or a FAILURE with the error code.
   ErrorHandling result = handle_error_enum<error_type> (error);
   switch (result.result)
@@ -245,10 +305,13 @@ struct ToxInstances
   with_error_handling (JNIEnv *env,
                        SuccessFunc success_func,
                        ToxFunc tox_func,
-                       Args ...args)
+                       Args &&...args)
   {
     LogEntry log_entry (tox_func, args...);
-    return ::with_error_handling<Object> (log_entry, env, success_func, tox_func, args...);
+    return ::with_error_handling<Object> (
+      log_entry, env, success_func,
+      tox_func, std::forward<Args> (args)...
+    );
   }
 
 
@@ -261,14 +324,17 @@ struct ToxInstances
                      jint instanceNumber,
                      SuccessFunc success_func,
                      ToxFunc tox_func,
-                     Args ...args)
+                     Args &&...args)
   {
     return this->with_instance (env, instanceNumber,
-      [=] (Object *tox, Events &events)
+      [&] (Object *tox, Events &events)
         {
           unused (events);
           LogEntry log_entry (instanceNumber, tox_func, tox, args...);
-          return ::with_error_handling<Object> (log_entry, env, success_func, tox_func, tox, args...);
+          return ::with_error_handling<Object> (
+            log_entry, env, success_func,
+            tox_func, tox, std::forward<Args> (args)...
+          );
         }
     );
   }
@@ -284,13 +350,15 @@ struct ToxInstances
   with_instance_ign (JNIEnv *env,
                      jint instanceNumber,
                      ToxFunc tox_func,
-                     Args ...args)
+                     Args &&...args)
   {
     struct ignore
     {
       void operator () (bool) { }
     };
-    return with_instance_err (env, instanceNumber, ignore (), tox_func, args...);
+    return with_instance_err (env, instanceNumber, ignore (),
+      tox_func, std::forward<Args> (args)...
+    );
   }
 
 
@@ -302,14 +370,16 @@ struct ToxInstances
   with_instance_noerr (JNIEnv *env,
                        jint instanceNumber,
                        ToxFunc tox_func,
-                       Args ...args)
+                       Args &&...args)
   {
     return this->with_instance (env, instanceNumber,
       [&] (Object *tox, Events &events)
         {
           unused (events);
           LogEntry log_entry (instanceNumber, tox_func, tox, args...);
-          return log_entry.print_result (tox_func, tox, args...);
+          return conversions<ToxFunc, Object *, Args...>::to_java (
+            env, log_entry, tox_func, tox, std::forward<Args> (args)...
+          );
         }
     );
   }

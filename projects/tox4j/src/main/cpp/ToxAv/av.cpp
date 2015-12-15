@@ -112,7 +112,7 @@ TOX_METHOD (void, AudioSendFrame,
     return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
 
   return instances.with_instance_ign (env, instanceNumber,
-    toxav_audio_send_frame, friendNumber, pcmData.data (), sampleCount, channels, samplingRate
+    toxav_audio_send_frame, friendNumber, pcmData, sampleCount, channels, samplingRate
   );
 }
 
@@ -136,7 +136,7 @@ TOX_METHOD (void, VideoSendFrame,
     return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
 
   return instances.with_instance_ign (env, instanceNumber,
-    toxav_video_send_frame, friendNumber, width, height, yData.data (), uData.data (), vData.data ()
+    toxav_video_send_frame, friendNumber, width, height, yData, uData, vData
   );
 }
 

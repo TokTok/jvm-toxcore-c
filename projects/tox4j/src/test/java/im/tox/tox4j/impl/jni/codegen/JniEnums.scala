@@ -63,7 +63,7 @@ object JniEnums extends CodeGenerator {
         name = "print_arg",
         params = Seq(
           Param(Reference(Typename("protolog::Value")), "value"),
-          Param(Typename(cxxEnum), "arg")
+          Param(Reference(Const(Typename(cxxEnum))), "arg")
         ),
         body = CompoundStmt(
           Switch(Identifier("arg"), CompoundStmt(values.flatMap { value =>

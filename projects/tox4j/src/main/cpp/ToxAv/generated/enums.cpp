@@ -38,7 +38,7 @@ Enum::valueOf<TOXAV_CALL_CONTROL> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOXAV_CALL_CONTROL> (protolog::Value &value, TOXAV_CALL_CONTROL arg)
+print_arg<TOXAV_CALL_CONTROL> (protolog::Value &value, TOXAV_CALL_CONTROL const &arg)
 {
   switch (arg)
     {
@@ -87,7 +87,7 @@ Enum::valueOf<TOXAV_FRIEND_CALL_STATE> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOXAV_FRIEND_CALL_STATE> (protolog::Value &value, TOXAV_FRIEND_CALL_STATE arg)
+print_arg<TOXAV_FRIEND_CALL_STATE> (protolog::Value &value, TOXAV_FRIEND_CALL_STATE const &arg)
 {
   switch (arg)
     {

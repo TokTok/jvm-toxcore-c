@@ -344,8 +344,7 @@ TOX_METHOD (jbyteArray, GetSavedata,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       tox_get_savedata_size,
-      tox_get_savedata>::make,
-    env
+      tox_get_savedata>::make
   );
 }
 

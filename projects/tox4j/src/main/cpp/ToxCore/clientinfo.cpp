@@ -16,8 +16,7 @@ TOX_METHOD (jbyteArray, SelfGetPublicKey,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       constant_size<TOX_PUBLIC_KEY_SIZE>::make,
-      tox_self_get_public_key>::make,
-    env
+      tox_self_get_public_key>::make
   );
 }
 
@@ -32,8 +31,7 @@ TOX_METHOD (jbyteArray, SelfGetSecretKey,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       constant_size<TOX_SECRET_KEY_SIZE>::make,
-      tox_self_get_secret_key>::make,
-    env
+      tox_self_get_secret_key>::make
   );
 }
 
@@ -48,8 +46,7 @@ TOX_METHOD (jbyteArray, SelfGetAddress,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       constant_size<TOX_ADDRESS_SIZE>::make,
-      tox_self_get_address>::make,
-    env
+      tox_self_get_address>::make
   );
 }
 
@@ -78,8 +75,7 @@ TOX_METHOD (jbyteArray, SelfGetName,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       tox_self_get_name_size,
-      tox_self_get_name>::make,
-    env
+      tox_self_get_name>::make
   );
 }
 
@@ -107,8 +103,7 @@ TOX_METHOD (jbyteArray, SelfGetStatusMessage,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint8_t,
       tox_self_get_status_message_size,
-      tox_self_get_status_message>::make,
-    env
+      tox_self_get_status_message>::make
   );
 }
 

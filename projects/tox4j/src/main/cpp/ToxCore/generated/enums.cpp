@@ -30,7 +30,7 @@ Enum::valueOf<TOX_CONNECTION> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOX_CONNECTION> (protolog::Value &value, TOX_CONNECTION arg)
+print_arg<TOX_CONNECTION> (protolog::Value &value, TOX_CONNECTION const &arg)
 {
   switch (arg)
     {
@@ -69,7 +69,7 @@ Enum::valueOf<TOX_FILE_CONTROL> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOX_FILE_CONTROL> (protolog::Value &value, TOX_FILE_CONTROL arg)
+print_arg<TOX_FILE_CONTROL> (protolog::Value &value, TOX_FILE_CONTROL const &arg)
 {
   switch (arg)
     {
@@ -106,7 +106,7 @@ Enum::valueOf<TOX_MESSAGE_TYPE> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOX_MESSAGE_TYPE> (protolog::Value &value, TOX_MESSAGE_TYPE arg)
+print_arg<TOX_MESSAGE_TYPE> (protolog::Value &value, TOX_MESSAGE_TYPE const &arg)
 {
   switch (arg)
     {
@@ -144,7 +144,7 @@ Enum::valueOf<TOX_PROXY_TYPE> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOX_PROXY_TYPE> (protolog::Value &value, TOX_PROXY_TYPE arg)
+print_arg<TOX_PROXY_TYPE> (protolog::Value &value, TOX_PROXY_TYPE const &arg)
 {
   switch (arg)
     {
@@ -183,7 +183,7 @@ Enum::valueOf<TOX_SAVEDATA_TYPE> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOX_SAVEDATA_TYPE> (protolog::Value &value, TOX_SAVEDATA_TYPE arg)
+print_arg<TOX_SAVEDATA_TYPE> (protolog::Value &value, TOX_SAVEDATA_TYPE const &arg)
 {
   switch (arg)
     {
@@ -222,7 +222,7 @@ Enum::valueOf<TOX_USER_STATUS> (JNIEnv *env, jint ordinal)
 
 template<>
 void
-print_arg<TOX_USER_STATUS> (protolog::Value &value, TOX_USER_STATUS arg)
+print_arg<TOX_USER_STATUS> (protolog::Value &value, TOX_USER_STATUS const &arg)
 {
   switch (arg)
     {
