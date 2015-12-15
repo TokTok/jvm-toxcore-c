@@ -3,6 +3,7 @@ package im.tox.tox4j.av.callbacks
 import java.util
 import java.util.concurrent.ArrayBlockingQueue
 
+import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.ToxavFriendCallState
@@ -12,10 +13,14 @@ import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
 import jline.TerminalFactory
+import org.slf4j.LoggerFactory
 
+import scala.annotation.tailrec
 import scalaz.concurrent.Future
 
 final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
+
+  private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   type S = Int
 
@@ -114,23 +119,20 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       debug(state, s"Received audio frame: ${state.get} / ${audio.length}")
       assert(channels == AudioChannels.Mono)
       assert(samplingRate == this.samplingRate)
-      frameBuffer.add((state0.get, pcm))
+      frameBuffer.add(Some((state0.get, pcm)))
 
       if (state.get >= audio.length) {
+        frameBuffer.add(None)
         waitForPlayback(audio.length)(state)
       } else {
         state
       }
     }
 
-    private lazy val frameBuffer = {
-      // Make the queue large enough to hold half the audio frames.
-      val queue = new ArrayBlockingQueue[(Int, Array[Short])](audio.length / frameSize / 2)
-
-      // Start a thread to consume the frames.
-      Future {
-        while (!queue.isEmpty || !playback.done(audio.length)) {
-          val (t, receivedPcm) = queue.take()
+    @tailrec
+    private def playFrames(queue: ArrayBlockingQueue[Option[(Int, Array[Short])]]): Unit = {
+      queue.take() match {
+        case Some((t, receivedPcm)) =>
           val expectedPcm = audio.nextFrame16(t, frameSize)
 
           assert(receivedPcm.length == expectedPcm.length)
@@ -148,8 +150,20 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
           }
 
           playback.play(receivedPcm)
-        }
-      }.start
+
+          playFrames(queue)
+
+        case None =>
+          logger.debug("Terminating audio playback thread")
+      }
+    }
+
+    private lazy val frameBuffer = {
+      // Make the queue large enough to hold half the audio frames.
+      val queue = new ArrayBlockingQueue[Option[(Int, Array[Short])]](audio.length / frameSize / 2)
+
+      // Start a thread to consume the frames.
+      Future(playFrames(queue)).start
 
       queue
     }

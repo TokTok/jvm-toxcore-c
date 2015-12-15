@@ -133,4 +133,6 @@ final case class GuiVideoDisplay(width: Int, height: Int) extends RgbVideoDispla
     }
   }
 
+  override def close(): Unit = canvas.foreach(_.dialog.close())
+
 }

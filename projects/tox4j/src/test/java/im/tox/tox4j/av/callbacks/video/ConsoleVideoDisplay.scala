@@ -31,4 +31,6 @@ final case class ConsoleVideoDisplay(width: Int, height: Int) extends VideoDispl
     }
   }
 
+  override def close(): Unit = ()
+
 }

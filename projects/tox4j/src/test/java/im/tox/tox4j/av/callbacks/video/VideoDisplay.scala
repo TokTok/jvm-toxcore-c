@@ -1,11 +1,13 @@
 package im.tox.tox4j.av.callbacks.video
 
+import java.io.Closeable
+
 import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 import org.scalatest.Assertions
 
 import scala.util.Try
 
-abstract class VideoDisplay[Parsed, Canvas] extends Assertions {
+abstract class VideoDisplay[Parsed, Canvas] extends Assertions with Closeable {
 
   def width: Int
   def height: Int

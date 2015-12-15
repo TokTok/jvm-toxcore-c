@@ -144,6 +144,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       debug(state, s"Received frame ${state0.get}: size=($width, $height), strides=($yStride, $uStride, $vStride)${times.getOrElse("")}")
 
       if (state.get >= video.length) {
+        displayImage.foreach(_.close())
         state.finish
       } else {
         state
