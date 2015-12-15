@@ -4,6 +4,7 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.InetSocketAddress
 import java.nio.charset.Charset
 
+import codes.reactive.scalatime.Instant
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import com.typesafe.scalalogging.Logger
 import im.tox.core.network.Port
@@ -11,13 +12,20 @@ import im.tox.tox4j.impl.jni.ToxJniLog
 import im.tox.tox4j.impl.jni.proto.{JniLog, JniLogEntry}
 import org.slf4j.LoggerFactory
 
-object TestHttpServer {
+import scala.collection.mutable
+
+final class TestHttpServer(port: Port) {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private var jniLog: Seq[JniLogEntry] = Nil
   private var state: List[TestClient] = Nil
 
+  // About 1 second of updates.
+  private val maxLastUpdates = 20
+  private val lastUpdates: mutable.Queue[Long] = new mutable.Queue[Long]
+
+  private val startTime = Instant()
   private val UTF_8 = Charset.forName("UTF-8")
 
   private def filterIteration(entries: Seq[JniLogEntry]): Seq[JniLogEntry] = {
@@ -32,6 +40,11 @@ object TestHttpServer {
   }
 
   def update(clients: List[TestClient]): Unit = {
+    lastUpdates.enqueue(System.currentTimeMillis())
+    if (lastUpdates.length > maxLastUpdates) {
+      lastUpdates.dequeue()
+    }
+
     state = clients
 
     jniLog ++= filterIteration(ToxJniLog().entries)
@@ -43,10 +56,6 @@ object TestHttpServer {
   }
 
   object RootHandler extends HttpHandler {
-
-    private def recentToxJniLog(): JniLog = {
-      JniLog(jniLog)
-    }
 
     private def send(exchange: HttpExchange, response: String): Unit = {
       val bytes = response.getBytes(UTF_8)
@@ -60,13 +69,21 @@ object TestHttpServer {
     }
 
     override def handle(exchange: HttpExchange): Unit = {
-      val state = TestHttpServer.state
+      val state = TestHttpServer.this.state
       val response = new StringWriter
       val out = new PrintWriter(response)
 
       try {
-        out.println(s"$TestClient running ${state.length} Tox instances.")
+        out.println(s"$TestClient running ${state.length} Tox instances, started on $startTime.")
         out.println()
+
+        val averageUpdateTime = {
+          val times = lastUpdates.zip(lastUpdates.tail).map { case (prev, next) => next - prev }
+          times.sum / times.length
+        }
+        out.println(s"Average time between iterations: ${averageUpdateTime}ms (${1000 / averageUpdateTime} updates / second)")
+        out.println()
+
         for (client <- state) {
           out.println(s"Instance ${client.tox.getAddress}:")
           out.println("  Friends:")
@@ -115,14 +132,12 @@ object TestHttpServer {
 
   }
 
-  def start(port: Port): Unit = {
-    logger.info(s"Starting HTTP server on $port")
-    val server = HttpServer.create(new InetSocketAddress(port.value), 0)
-    server.createContext("/", RootHandler)
-    server.createContext("/profile", ProfileBinaryHandler)
-    server.createContext("/profile.txt", ProfileTextHandler)
-    server.setExecutor(null)
-    server.start()
-  }
+  logger.info(s"Starting HTTP server on $port")
+  val server = HttpServer.create(new InetSocketAddress(port.value), 0)
+  server.createContext("/", RootHandler)
+  server.createContext("/profile", ProfileBinaryHandler)
+  server.createContext("/profile.txt", ProfileTextHandler)
+  server.setExecutor(null)
+  server.start()
 
 }

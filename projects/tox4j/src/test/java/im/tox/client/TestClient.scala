@@ -1,13 +1,10 @@
 package im.tox.client
 
 import java.io.{File, FileInputStream, FileOutputStream}
-import java.net.InetSocketAddress
 
-import com.sun.net.httpserver.HttpServer
 import com.typesafe.scalalogging.Logger
 import im.tox.client.callbacks._
 import im.tox.client.proto.Profile
-import im.tox.core.network.Port
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
@@ -21,7 +18,6 @@ import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
 import scala.util.Try
 import scala.util.control.NonFatal
-import scalaz.concurrent.Future
 
 final case class TestClient(
   tox: ToxCore[TestState],
@@ -100,31 +96,35 @@ case object TestClient extends App {
   }
 
   @tailrec
-  def mainLoop(clients: List[TestClient]): Unit = {
-    TestHttpServer.update(clients)
+  def mainLoop(httpServer: Option[TestHttpServer])(clients0: List[TestClient]): Unit = {
+    mainLoop(httpServer) {
+      val (time, (clients, interval)) = AutoTestSuite.timed {
+        httpServer.foreach(_.update(clients0))
 
-    mainLoop {
-      val (time, nextClients) = AutoTestSuite.timed {
-        for (client <- clients) yield {
-          client.copy(
-            state = client.state
-            |> client.tox.iterate
-            |> client.av.iterate
-            |> runTasks(client.tox, client.av)
-            |> saveOnChange(client.tox, client.state.profile)
-          )
-        }
+        val clients =
+          for (client <- clients0) yield {
+            client.copy(
+              state = client.state
+              |> client.tox.iterate
+              |> client.av.iterate
+              |> runTasks(client.tox, client.av)
+              |> saveOnChange(client.tox, client.state.profile)
+            )
+          }
+
+        val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
+
+        (clients, interval)
       }
 
-      val interval = (clients.map(_.av.iterationInterval) ++ clients.map(_.tox.iterationInterval)).min
       Thread.sleep((interval - time) max 0)
 
-      nextClients
+      clients
     }
   }
 
   TestClientOptions(args) { c =>
-    c.httpPort.foreach(TestHttpServer.start)
+    val httpServer = c.httpPort.map(new TestHttpServer(_))
 
     val predefined = c.load.map(key => ToxOptions(saveData = SaveDataOptions.SecretKey(key)))
     logger.info(s"Creating ${c.count} toxes (${predefined.length} with predefined keys)")
@@ -165,7 +165,7 @@ case object TestClient extends App {
           }
 
         logger.info("Starting event loop")
-        mainLoop(clients)
+        mainLoop(httpServer)(clients)
       }
     }
   }
