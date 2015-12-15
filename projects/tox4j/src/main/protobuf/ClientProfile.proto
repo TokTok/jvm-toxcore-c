@@ -7,7 +7,6 @@ import "Core.proto";
 // A client profile containing all the information needed to reconstruct a
 // complete client state.
 message Profile {
-  string secret_key = 1;
   string name = 2;
   string status_message = 3;
   uint32 nospam = 4;

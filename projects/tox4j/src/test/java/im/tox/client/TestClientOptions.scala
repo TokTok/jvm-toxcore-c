@@ -15,14 +15,15 @@ case object TestClientOptions {
   private final case class Config(
     count: Int = 0,
     load: List[ToxSecretKey] = Nil,
+    nospam: Option[Int] = None,
     address: Option[InetAddress] = None,
     port: Port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get,
     key: Option[ToxPublicKey] = None
   )
 
-  implicit val inetAddressRead: Read[Option[InetAddress]] = Read.stringRead.map(InetAddress.getByName).map(Option.apply)
+  implicit val inetAddressRead: Read[InetAddress] = Read.stringRead.map(InetAddress.getByName)
   implicit val portRead: Read[Port] = Read.intRead.map(Port.fromInt(_).get)
-  implicit val toxPublicKeyRead: Read[Option[ToxPublicKey]] = Read.stringRead.map(ToxPublicKey.fromHexString(_).toOption)
+  implicit val toxPublicKeyRead: Read[ToxPublicKey] = Read.stringRead.map(ToxPublicKey.fromHexString(_).get)
   implicit val toxSecretKeyRead: Read[ToxSecretKey] = Read.stringRead.map(ToxSecretKey.fromHexString(_).get)
 
   private def bootstrap(c: Config): Config = {
@@ -52,20 +53,24 @@ case object TestClientOptions {
       c.copy(count = x)
     } text "Number of test clients to spawn"
 
+    opt[Int]('n', "nospam") action { (x, c) =>
+      c.copy(nospam = Some(x))
+    } text "Nospam for new tox instances"
+
     opt[Unit]('b', "bootstrap") action { (x, c) =>
       bootstrap(c)
     } text s"Bootstrap to the default bootstrap node $DefaultBootstrapNode"
 
-    opt[Option[InetAddress]]('a', "address") action { (x, c) =>
-      c.copy(address = x)
+    opt[InetAddress]('a', "address") action { (x, c) =>
+      c.copy(address = Some(x))
     } text "Address of the bootstrap node"
 
     opt[Port]('p', "port") action { (x, c) =>
       c.copy(port = x)
     } text "Port of the bootstrap node"
 
-    opt[Option[ToxPublicKey]]('k', "key") action { (x, c) =>
-      c.copy(key = x)
+    opt[ToxPublicKey]('k', "key") action { (x, c) =>
+      c.copy(key = Some(x))
     } text "DHT public key of the bootstrap node"
 
     checkConfig { c =>

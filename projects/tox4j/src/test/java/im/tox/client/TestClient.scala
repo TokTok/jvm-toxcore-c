@@ -29,16 +29,17 @@ case object TestClient extends App {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private val savePath = new File("toxsaves")
-  savePath.mkdir()
+  private val savePath = Seq(new File("tools/toxsaves"), new File("projects/tox4j/tools/toxsaves")).find(_.exists)
 
   def saveProfile(tox: ToxCore[TestState], profile: Profile): Unit = {
-    val output = new FileOutputStream(new File(savePath, tox.getPublicKey.toHexString))
-    try {
-      profile.writeTo(output)
-      logger.info(s"Saved profile for ${tox.getPublicKey}")
-    } finally {
-      output.close()
+    savePath.foreach { savePath =>
+      val output = new FileOutputStream(new File(savePath, tox.getPublicKey.toHexString))
+      try {
+        profile.writeTo(output)
+        logger.info(s"Saved profile for ${tox.getPublicKey}")
+      } finally {
+        output.close()
+      }
     }
   }
 
@@ -51,7 +52,7 @@ case object TestClient extends App {
 
   def loadProfile(id: Int, tox: ToxCore[TestState]): Profile = {
     Try {
-      val input = new FileInputStream(new File(savePath, tox.getPublicKey.toHexString))
+      val input = new FileInputStream(new File(savePath.get, tox.getPublicKey.toHexString))
       try {
         val profile = Profile.parseFrom(input)
         tox.setName(ToxNickname(profile.name.getBytes))
@@ -68,7 +69,6 @@ case object TestClient extends App {
       }
     } getOrElse {
       val profile = Profile(
-        secretKey = tox.getSecretKey.toHexString,
         name = tox.getName.toString,
         statusMessage = tox.getStatusMessage.toString,
         nospam = tox.getNospam,
@@ -148,6 +148,8 @@ case object TestClient extends App {
             av.callback(handler)
 
             val profile = loadProfile(id, tox)
+            // Save it again in case the file format changed.
+            saveProfile(tox, profile)
             logger.info(s"[$id] Friend address: ${tox.getAddress.toHexString}")
             logger.info(s"[$id] DHT public key: ${tox.getDhtId.toHexString}")
             logger.info(s"[$id] UDP port: ${tox.getUdpPort}")
