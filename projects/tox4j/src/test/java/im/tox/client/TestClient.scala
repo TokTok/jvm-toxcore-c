@@ -88,6 +88,9 @@ case object TestClient extends App {
       (clients, interval)
     }
 
+    if (interval * 2 - time < 0) {
+      logger.warn(s"Processing time ($time ms) is significantly longer than iteration interval ($interval ms)")
+    }
     Thread.sleep((interval - time) max 0)
 
     mainLoop(httpServer, clients)
