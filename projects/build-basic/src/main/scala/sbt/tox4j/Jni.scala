@@ -253,7 +253,10 @@ object Jni extends OptionalPlugin {
       // Make shared lib available at runtime. Must be used with forked JVM to work.
       javaOptions ++= Seq(
         s"-Djava.library.path=${binPath.value}",
-        "-Xmx1g"
+        "-Xmx1g",
+        "-Xbatch",
+        "-Xcheck:jni",
+        "-Xfuture"
       ),
       initialCommands in console := "im.tox.tox4j.JavaLibraryPath.addLibraryPath(\"" + binPath.value + "\")",
       // Required in order to have a separate JVM to set Java options.
