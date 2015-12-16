@@ -30,7 +30,6 @@ final case class Watchdog(
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private val Disabled = Long.MaxValue
-  private val Stopped = Long.MinValue
 
   /**
    * Start at the maximum time, so the first call to [[ping]] will
@@ -40,20 +39,18 @@ final case class Watchdog(
 
   private implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
 
-  new Timer(toString, true).schedule(new TimerTask {
+  private val timer = new Timer(toString, true)
+  timer.schedule(new TimerTask {
     override def run(): Unit = {
-      while (lastUpdate.get != Stopped) {
-        if (System.currentTimeMillis() - timeout.toMillis > lastUpdate.get) {
-          logger.debug(s"${Watchdog.this} expired")
-          lastUpdate.lazySet(Stopped)
-          onExpired(Watchdog.this)
-        }
-        val allocatedMemory = Runtime.getRuntime.totalMemory
-        if (allocatedMemory > memoryLimit) {
-          logger.warn(s"Memory limit reached: $allocatedMemory > $memoryLimit")
-        }
+      if (System.currentTimeMillis() - timeout.toMillis > lastUpdate.get) {
+        logger.debug(s"${Watchdog.this} expired")
+        onExpired(Watchdog.this)
+        timer.cancel()
       }
-      logger.debug(s"${Watchdog.this} stopped")
+      val allocatedMemory = Runtime.getRuntime.totalMemory
+      if (allocatedMemory > memoryLimit) {
+        logger.warn(s"Memory limit reached: $allocatedMemory > $memoryLimit")
+      }
     }
   }, period.toMillis, period.toMillis)
 
@@ -65,10 +62,8 @@ final case class Watchdog(
   }
 
   def stop(): Unit = {
-    if (lastUpdate.get != Stopped) {
-      logger.debug(s"Stopping $this")
-      lastUpdate.lazySet(Stopped)
-    }
+    logger.debug(s"$this stopped")
+    timer.cancel()
   }
 
   override def toString: String = {
