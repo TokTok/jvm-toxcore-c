@@ -22,7 +22,7 @@ final class LoadAverage(iterationsPerSecond: Int) {
     for (queue <- queues) {
       val average = queue.average
       out.printf(
-        "  last %4d: %dms (%d iterations per second)\n",
+        "  last %4d: %d ms (%d iterations per second)\n",
         Integer.valueOf(queue.maxSize),
         Integer.valueOf(average),
         Integer.valueOf(1000 / average)

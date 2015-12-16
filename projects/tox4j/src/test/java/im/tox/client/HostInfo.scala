@@ -23,13 +23,13 @@ object HostInfo {
   private def printMemory(memory: Double)(out: PrintWriter): Unit = {
     val (count, unit) =
       if (memory > 1024 * 1024 * 1024) {
-        (memory / 1024 / 1024 / 1024, "G")
+        (memory / 1024 / 1024 / 1024, " GiB")
       } else if (memory > 1024 * 1024) {
-        (memory / 1024 / 1024, "M")
+        (memory / 1024 / 1024, " MiB")
       } else if (memory > 1024) {
-        (memory / 1024, "K")
+        (memory / 1024, " KiB")
       } else {
-        (memory, "B")
+        (memory, " B")
       }
 
     printDouble(count)(out)
