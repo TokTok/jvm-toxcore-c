@@ -137,7 +137,7 @@ case object TestClient extends App {
 
             // Set the name/status message in the tox instance.
             tox.setName(ToxNickname.fromString(name).get)
-            tox.setStatusMessage(ToxStatusMessage.fromString(name).get)
+            tox.setStatusMessage(ToxStatusMessage.fromString(statusMessage).get)
 
             // Save it again, changing the name/status message and updating the file format.
             ProfileManager.saveProfile(tox, profile)
