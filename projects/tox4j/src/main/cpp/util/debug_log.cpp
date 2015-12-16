@@ -12,7 +12,10 @@
 #include <jni.h>
 
 
-#define MAX_DATA_LOG_LENGTH 128UL
+/**
+ * Maximum number of bytes logged in a "bytes" value.
+ */
+static std::size_t const MAX_DATA_LOG_LENGTH = 128;
 
 
 /****************************************************************************
