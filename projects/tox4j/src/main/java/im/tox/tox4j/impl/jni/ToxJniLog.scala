@@ -106,7 +106,7 @@ case object ToxJniLog {
         if (value.truncated == 0) {
           s"byte[${bytes.size}]"
         } else {
-          s"byte[${value.truncated}] (truncated)"
+          s"byte[${value.truncated}]"
         }
       case V.VSint64(sint64)          => sint64.toString
       case V.VString(string)          => string

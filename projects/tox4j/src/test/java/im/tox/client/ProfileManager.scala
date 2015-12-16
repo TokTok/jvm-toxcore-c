@@ -22,11 +22,7 @@ case object ProfileManager {
     savePath.foreach { savePath =>
       val output = new FileOutputStream(new File(savePath, tox.getPublicKey.toHexString))
       try {
-        profile
-          // Don't save the name/status message for now, as they are set on startup.
-          .withName("")
-          .withStatusMessage("")
-          .writeTo(output)
+        profile.writeTo(output)
         logger.info(s"Saved profile for ${tox.getPublicKey}")
       } finally {
         output.close()

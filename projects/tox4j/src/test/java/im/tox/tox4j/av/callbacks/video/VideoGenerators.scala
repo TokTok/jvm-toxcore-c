@@ -5,8 +5,20 @@ import im.tox.tox4j.av.callbacks.video.VideoGenerator.Arithmetic
 
 object VideoGenerators {
 
-  sealed abstract class Yuv(f: (Int, Int, Int) => YuvPixel) extends Arithmetic(400, 400, 100) {
-    override def yuv(t: Int, y: Int, x: Int): YuvPixel = f(t, y, x)
+  sealed abstract class Yuv(
+      f: (Int, Int, Int) => YuvPixel,
+      width: Int = 400,
+      height: Int = 400
+  ) extends Arithmetic(width, height, 100) {
+
+    override protected final def yuv(t: Int, y: Int, x: Int): YuvPixel = f(t, y, x)
+
+    override final def resize(width: Int, height: Int): VideoGenerator = {
+      new Yuv(f, width, height) {
+        override def productPrefix: String = Yuv.this.productPrefix
+      }
+    }
+
   }
 
   // TODO(iphydf): Several of these break with the following error in
@@ -66,13 +78,19 @@ object VideoGenerators {
       x * (y + t)
     ))
 
-  sealed abstract class TextImage(rows: String*) extends VideoGenerator(rows.head.length, rows.size, 64) {
-    override def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
+  sealed class TextImage(rows: String*) extends VideoGenerator(rows.head.length, rows.size, 64) {
+
+    override final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
       val y = rows.mkString.getBytes
       val u = Array.fill((width / 2) * (height / 2))((t * 4).toByte)
       val v = Array.fill((width / 2) * (height / 2))((-t * 4 - 1).toByte)
       (y, u, v)
     }
+
+    override final def resize(width: Int, height: Int): VideoGenerator = {
+      VideoGenerator.resizeNearestNeighbour(width, height, this)
+    }
+
   }
 
   case object Smiley extends TextImage(
@@ -118,8 +136,6 @@ object VideoGenerators {
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   )
 
-  val Selected = VideoGenerator.scaleNearestNeighbour(4, 8, Smiley)
-  // val Selected = MultiplyUp
-  // val Selected = VideoGenerator.scaleNearestNeighbour(1, 1, Xor)
+  val Selected = VideoGenerator.resizeNearestNeighbour(400, 400, Smiley)
 
 }

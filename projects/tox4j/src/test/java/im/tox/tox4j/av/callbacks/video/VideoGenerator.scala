@@ -5,15 +5,22 @@ import org.scalatest.Assertions
 
 abstract class VideoGenerator(val width: Int, val height: Int, val length: Int) {
   def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte])
+  def resize(width: Int, height: Int): VideoGenerator
 }
 
 object VideoGenerator extends Assertions {
 
   abstract class Arithmetic(width: Int, height: Int, length: Int) extends VideoGenerator(width, height, length) {
 
-    def yuv(t: Int, y: Int, x: Int): YuvPixel
+    def productPrefix: String
 
-    override def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
+    override final def toString: String = {
+      s"$productPrefix($width, $height)"
+    }
+
+    protected def yuv(t: Int, y: Int, x: Int): YuvPixel
+
+    override final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
       val y = Array.ofDim[Byte](width * height)
       val u = Array.ofDim[Byte](width * height / 4)
       val v = Array.ofDim[Byte](width * height / 4)
@@ -51,12 +58,14 @@ object VideoGenerator extends Assertions {
     result
   }
 
-  def scaleNearestNeighbour(wScale: Int, hScale: Int, gen: VideoGenerator): VideoGenerator = {
-    if (wScale == 1 && hScale == 1) {
+  def resizeNearestNeighbour(width: Int, height: Int, gen: VideoGenerator): VideoGenerator = {
+    if (width == gen.width && height == gen.height) {
       gen
     } else {
-      new VideoGenerator(gen.width * wScale, gen.height * hScale, gen.length) {
-        override def toString: String = s"scaleNearestNeighbour($wScale, $hScale, $gen)"
+      new VideoGenerator(width max 50 min 400, height max 50 min 400, gen.length) {
+        override def toString: String = s"resizeNearestNeighbour($width, $height, $gen)"
+
+        override def resize(width: Int, height: Int): VideoGenerator = gen.resize(width, height)
 
         override def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
           val yuv = gen.yuv(t)

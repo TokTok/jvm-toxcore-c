@@ -7,7 +7,7 @@ import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.av.callbacks.AudioGenerator
-import im.tox.tox4j.av.callbacks.video.VideoGenerators
+import im.tox.tox4j.av.callbacks.video.{VideoGenerator, VideoGenerators}
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.core.ToxCore
@@ -44,9 +44,9 @@ final class AudioVideoEventListener(id: Int)
     timeDelta: Int,
     message: ToxFriendMessage
   )(state: ToxClientState): ToxClientState = {
-    val AudioCommand = "audio (\\w+)".r
-    val VideoCommand = "video (\\w+)".r
-    val ShowCommand = "show (\\w+)".r
+    val AudioCommand = "audio\\s+(.+)".r
+    val VideoCommand = "video\\s+(.+)".r
+    val ShowCommand = "show\\s+(.+)".r
 
     val command = message.toString.toLowerCase
     command match {
@@ -80,19 +80,35 @@ final class AudioVideoEventListener(id: Int)
   }
 
   private def processVideoCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
-    val newVideo = request match {
+    val video = ToxClientState.friendVideo(friendNumber)
+    val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
+
+    val oldVideo = video.get(state)
+    val newVideo = selectNewVideo(request, oldVideo)
+
+    video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
+  }
+
+  private def selectNewVideo(request: String, oldVideo: VideoGenerator): VideoGenerator = {
+    val ResizeCommand = "size (\\d+)\\s+(\\d+)".r
+
+    request match {
+      case ResizeCommand(width, height) => oldVideo.resize(width.toInt, height.toInt)
+      case changeVideo                  => selectNewVideo(changeVideo).resize(oldVideo.width, oldVideo.height)
+    }
+  }
+
+  private def selectNewVideo(changeVideo: String): VideoGenerator = {
+    changeVideo match {
       case "xor1"          => VideoGenerators.Xor1
       case "xor2"          => VideoGenerators.Xor2
       case "xor3"          => VideoGenerators.Xor3
       case "xor4"          => VideoGenerators.Xor4
       case "gradientboxes" => VideoGenerators.GradientBoxes
       case "multiplyup"    => VideoGenerators.MultiplyUp
+      case "smiley"        => VideoGenerators.Selected
       case _               => VideoGenerators.Selected
     }
-
-    val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
-    val video = ToxClientState.friendVideo(friendNumber)
-    video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
   }
 
   private def processShowCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {

@@ -102,7 +102,14 @@ final class ToxClientHttpFrontend(port: Port) {
           case _                   => state.head
         }
 
-      HttpUtil.send(exchange, client.state.profile)
+      HttpUtil.send(
+        exchange,
+        client.state.profile
+          // Don't save the name/status message in the web-save,
+          // as they are set on startup.
+          .withName("")
+          .withStatusMessage("")
+      )
     }
 
   }
