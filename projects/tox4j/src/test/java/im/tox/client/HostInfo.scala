@@ -36,10 +36,8 @@ object HostInfo {
     out.println(unit)
   }
 
-  private def printGcStatistics(out: PrintWriter): Unit = {
+  private def printGcStatistics(uptime: Long, out: PrintWriter): Unit = {
     out.println("GC statistics:")
-    val uptime = ManagementFactory.getRuntimeMXBean.getUptime
-    out.print("    VM uptime:        "); out.print(uptime); out.println(" ms")
     val gcMxs = ManagementFactory.getGarbageCollectorMXBeans.iterator()
     while (gcMxs.hasNext) {
       val gcMx = gcMxs.next()
@@ -53,8 +51,11 @@ object HostInfo {
   def printSystemInfo(out: PrintWriter): Unit = {
     val runtime = Runtime.getRuntime
 
+    val uptime = ManagementFactory.getRuntimeMXBean.getUptime
+
     out.println(TestClient.toString)
     out.print("  Start time:           "); out.println(startTime)
+    out.print("  VM uptime:            "); out.print(uptime); out.println(" ms")
     out.print("  Available processors: "); out.println(runtime.availableProcessors)
     out.print("  Free memory:          "); printMemory(runtime.freeMemory)(out)
     out.print("  Max memory:           "); printMemory(runtime.maxMemory)(out)
@@ -64,7 +65,7 @@ object HostInfo {
     out.print("  IPv6 address:         "); out.println(HostInfo.ipv6)
     out.println()
 
-    printGcStatistics(out)
+    printGcStatistics(uptime, out)
   }
 
 }
