@@ -1,6 +1,6 @@
 package im.tox.client.callbacks
 
-import im.tox.client.{ToxClientState, ToxClientState$}
+import im.tox.client.ToxClientState
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl}

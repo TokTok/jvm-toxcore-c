@@ -1,5 +1,6 @@
 -keepattributes *Annotation*,InnerClasses
 
+# Main entry point.
 -keep public class im.tox.client.TestClient {
   public static void main(java.lang.String[]);
 }
@@ -9,6 +10,11 @@
   public *;
 }
 
+-keep public class **Exception$Code extends java.lang.Enum {
+  public *;
+}
+
+# Constructed through descriptor reflection.
 -keep public class * implements com.google.protobuf.ProtocolMessageEnum {
   public *;
 }
@@ -17,6 +23,7 @@
   public *;
 }
 
+# Configured through log4j.properties.
 -keep public class org.apache.log4j.ConsoleAppender {
   public *;
 }
