@@ -102,11 +102,16 @@ case object ToxJniLog {
 
   def toString(value: Value): String = {
     value.v match {
-      case V.Empty                    => "void"
+      case V.VBytes(bytes) =>
+        if (value.truncated == 0) {
+          s"byte[${bytes.size}]"
+        } else {
+          s"byte[${value.truncated}] (truncated)"
+        }
       case V.VSint64(sint64)          => sint64.toString
       case V.VString(string)          => string
-      case V.VBytes(bytes)            => s"bytes[${bytes.size}]"
       case V.VObject(Struct(members)) => s"{${members.map(toString).mkString("; ")}}"
+      case V.Empty                    => "void"
     }
   }
 

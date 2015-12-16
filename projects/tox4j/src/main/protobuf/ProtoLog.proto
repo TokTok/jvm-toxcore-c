@@ -19,11 +19,12 @@ message Struct {
 
 // A single argument or return value.
 message Value {
+  uint32 truncated = 1;
   oneof v {
-    sint64 v_sint64 = 1;
-    string v_string = 2;
-    bytes v_bytes = 3;
-    Struct v_object = 4;
+    sint64 v_sint64 = 2;
+    string v_string = 3;
+    bytes  v_bytes  = 4;
+    Struct v_object = 5;
   }
 }
 

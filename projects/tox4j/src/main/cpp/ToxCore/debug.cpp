@@ -44,10 +44,10 @@ template<>
 void
 print_arg<core::Events *> (protolog::Value &value, core::Events *const &events)
 {
-  if (events != nullptr)
-    value.set_v_string ("<core::Events[" + std::to_string (events->ByteSize ()) + "]>");
-  else
+  if (events == nullptr)
     value.set_v_string ("<null>");
+  else
+    value.set_v_string ("<core::Events[" + std::to_string (events->ByteSize ()) + "]>");
 }
 
 #define enum_case(ENUM)                               \

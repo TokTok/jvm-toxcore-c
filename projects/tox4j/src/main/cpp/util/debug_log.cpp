@@ -11,6 +11,9 @@
 #include <jni.h>
 
 
+#define MAX_DATA_LOG_LENGTH 128UL
+
+
 /****************************************************************************
  *
  * :: Log and log entry.
@@ -191,60 +194,54 @@ template<>
 void
 print_arg<char const *> (protolog::Value &value, char const *const &data)
 {
-  if (data != nullptr)
+  if (data == nullptr)
+    value.set_v_string ("<null>");
+  else
     value.set_v_string (data);
-  else
-    value.set_v_string ("<null>");
-}
-
-template<>
-void
-print_arg<uint8_t *> (protolog::Value &value, uint8_t *const &data)
-{
-  if (data != nullptr)
-    value.set_v_string ("<out bytes>");
-  else
-    value.set_v_string ("<null>");
 }
 
 template<>
 void
 print_arg<uint8_t const *> (protolog::Value &value, uint8_t const *const &data)
 {
-  if (data != nullptr)
-    value.set_v_string ("<bytes>");
-  else
+  if (data == nullptr)
     value.set_v_string ("<null>");
+  else
+    value.set_v_string ("byte[]");
 }
 
 void
 print_arg (protolog::Value &value, uint8_t const *data, std::size_t length)
 {
-  if (data != nullptr)
-    value.set_v_bytes (data, length);
-  else
+  if (data == nullptr)
     value.set_v_string ("<null>");
+  else
+    {
+      value.set_v_bytes (data, std::min (length, MAX_DATA_LOG_LENGTH));
+      if (length > MAX_DATA_LOG_LENGTH)
+        value.set_truncated (length);
+    }
 }
 
 void
 print_arg (protolog::Value &value, int16_t const *data, std::size_t length)
 {
-  if (data != nullptr)
-    value.set_v_string ("<short[" + std::to_string (length) + "]>");
-  else
+  if (data == nullptr)
     value.set_v_string ("<null>");
+  else
+    value.set_v_string ("short[" + std::to_string (length) + "]");
 }
 
 template<>
 void
 print_arg<std::vector<uint8_t>> (protolog::Value &value, std::vector<uint8_t> const &data)
 {
-  value.set_v_bytes (data.data (), data.size ());
+  print_arg (value, data.data (), data.size ());
 }
 
 template<>
 void
 print_arg<std::vector<uint32_t>> (protolog::Value &value, std::vector<uint32_t> const &data)
 {
-  value.set_v_string ("<int[" + std::to_string (data.size ()) + "]>");
+  value.set_v_string ("int[" + std::to_string (data.size ()) + "]");
 }

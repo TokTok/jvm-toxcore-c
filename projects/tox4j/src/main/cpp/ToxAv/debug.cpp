@@ -23,20 +23,20 @@ template<>
 void
 print_arg<int16_t const *> (protolog::Value &value, int16_t const *const &data)
 {
-  if (data != nullptr)
-    value.set_v_string ("out audio samples");
-  else
+  if (data == nullptr)
     value.set_v_string ("<null>");
+  else
+    value.set_v_string ("<audio samples>");
 }
 
 template<>
 void
 print_arg<av::Events *> (protolog::Value &value, av::Events *const &events)
 {
-  if (events != nullptr)
-    value.set_v_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");
-  else
+  if (events == nullptr)
     value.set_v_string ("<null>");
+  else
+    value.set_v_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");
 }
 
 #endif
