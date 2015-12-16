@@ -93,7 +93,7 @@ final class AudioVideoEventListener(id: Int)
     val ResizeCommand = "size (\\d+)\\s+(\\d+)".r
 
     request match {
-      case ResizeCommand(width, height) => oldVideo.resize(width.toInt, height.toInt)
+      case ResizeCommand(width, height) => oldVideo.resize(Width.clamp(width.toInt), Height.clamp(height.toInt))
       case changeVideo                  => selectNewVideo(changeVideo).resize(oldVideo.width, oldVideo.height)
     }
   }
@@ -196,7 +196,7 @@ final class AudioVideoEventListener(id: Int)
         // Get next frame and send it.
         val video = ToxClientState.friendVideo(friendNumber).get(state)
         val (y, u, v) = video.yuv(t)
-        av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
+        av.videoSendFrame(friendNumber, video.width.value, video.height.value, y, u, v)
         videoFrame.set(state, Some(t + 1)).addTask(sendNextVideoFrame(friendNumber))
     }
   }

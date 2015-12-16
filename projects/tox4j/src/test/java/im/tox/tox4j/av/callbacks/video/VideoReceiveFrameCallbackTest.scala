@@ -42,7 +42,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       if (sys.env.contains("TRAVIS")) {
         None
       } else {
-        if (video.height * video.width <= 100 * 40) {
+        if (video.size <= 100 * 40) {
           Some(ConsoleVideoDisplay(video.width, video.height))
         } else {
           Some(GuiVideoDisplay(video.width, video.height))
@@ -87,9 +87,9 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       val (generationTime, (y, u, v)) = timed {
         video.yuv(state0.get)
       }
-      assert(y.length == video.width * video.height)
-      assert(u.length == video.width * video.height / 4)
-      assert(v.length == video.width * video.height / 4)
+      assert(y.length == video.size)
+      assert(u.length == video.size / 4)
+      assert(v.length == video.size / 4)
 
       val displayTime = timed {
         displayImage.foreach { display =>
@@ -97,13 +97,13 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
         }
       }
       val sendTime = timed {
-        av.videoSendFrame(friendNumber, video.width, video.height, y, u, v)
+        av.videoSendFrame(friendNumber, video.width.value, video.height.value, y, u, v)
       }
 
       capturePath.foreach { capturePath =>
         val out = new DataOutputStream(new FileOutputStream(new File(capturePath, f"${state0.get}%03d.dump")))
-        out.writeInt(video.width)
-        out.writeInt(video.height)
+        out.writeInt(video.width.value)
+        out.writeInt(video.height.value)
         out.write(y)
         out.write(u)
         out.write(v)

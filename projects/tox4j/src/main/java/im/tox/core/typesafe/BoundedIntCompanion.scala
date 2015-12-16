@@ -11,6 +11,10 @@ abstract class BoundedIntCompanion[T <: AnyVal](
 
   protected def unsafeFromInt(value: Int): T
 
+  final def clamp(value: Int): T = {
+    unsafeFromInt(value min MaxValue max MinValue)
+  }
+
   final override def fromInt(value: Int): Option[T] = {
     if (MinValue <= value && value <= MaxValue) {
       Some(unsafeFromInt(value))

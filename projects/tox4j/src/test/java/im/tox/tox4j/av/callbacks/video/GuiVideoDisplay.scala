@@ -9,6 +9,7 @@ import javax.swing.{BorderFactory, ImageIcon}
 
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.callbacks.video.GuiVideoDisplay.{UI, newImage}
+import im.tox.tox4j.av.data.{Height, Width}
 import org.slf4j.LoggerFactory
 
 import scala.swing._
@@ -19,11 +20,11 @@ object GuiVideoDisplay {
   private val capturePath = Some(new File("capture/video")).filter(_.isDirectory)
   capturePath.foreach(_.listFiles.foreach(_.delete()))
 
-  private def newImage(width: Int, height: Int): BufferedImage = {
-    new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR)
+  private def newImage(width: Width, height: Height): BufferedImage = {
+    new BufferedImage(width.value, height.value, BufferedImage.TYPE_3BYTE_BGR)
   }
 
-  final class UI(width: Int, height: Int) {
+  final class UI(width: Width, height: Height) {
 
     val senderImageView, receiverImageView = new Label {
       border = BorderFactory.createEtchedBorder(EtchedBorder.RAISED)
@@ -78,7 +79,7 @@ object GuiVideoDisplay {
 
 }
 
-final case class GuiVideoDisplay(width: Int, height: Int) extends RgbVideoDisplay[ImageIcon, UI] {
+final case class GuiVideoDisplay(width: Width, height: Height) extends RgbVideoDisplay[ImageIcon, UI] {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 

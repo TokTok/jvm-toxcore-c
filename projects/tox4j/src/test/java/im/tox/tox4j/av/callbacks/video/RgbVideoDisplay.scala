@@ -8,6 +8,9 @@ abstract class RgbVideoDisplay[Parsed, Canvas] extends VideoDisplay[Parsed, Canv
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int
   ): Parsed = {
+    val width = this.width.value
+    val height = this.height.value
+
     val (r, g, b) = VideoConversions.YUVtoRGB(width, height, y, u, v, yStride, uStride, vStride)
     assert(r.length == width * height)
     assert(g.length == width * height)

@@ -1,16 +1,18 @@
 package im.tox.tox4j.av.callbacks.video
 
 import im.tox.tox4j.av.callbacks.video.VideoConversions.YuvPixel
+import im.tox.tox4j.av.data.{Width, Height}
 import org.scalatest.Assertions
 
-abstract class VideoGenerator(val width: Int, val height: Int, val length: Int) {
+abstract class VideoGenerator(val width: Width, val height: Height, val length: Int) {
+  def size: Int = width.value * height.value
   def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte])
-  def resize(width: Int, height: Int): VideoGenerator
+  def resize(width: Width, height: Height): VideoGenerator
 }
 
 object VideoGenerator extends Assertions {
 
-  abstract class Arithmetic(width: Int, height: Int, length: Int) extends VideoGenerator(width, height, length) {
+  abstract class Arithmetic(width: Width, height: Height, length: Int) extends VideoGenerator(width, height, length) {
 
     def productPrefix: String
 
@@ -21,6 +23,9 @@ object VideoGenerator extends Assertions {
     protected def yuv(t: Int, y: Int, x: Int): YuvPixel
 
     override final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
+      val width = this.width.value
+      val height = this.height.value
+
       val y = Array.ofDim[Byte](width * height)
       val u = Array.ofDim[Byte](width * height / 4)
       val v = Array.ofDim[Byte](width * height / 4)
@@ -40,7 +45,13 @@ object VideoGenerator extends Assertions {
 
   }
 
-  private def resizeNearestNeighbour(pixels: Array[Byte], oldWidth: Int, oldHeight: Int, newWidth: Int, newHeight: Int): Array[Byte] = {
+  private def resizeNearestNeighbour(
+    pixels: Array[Byte],
+    oldWidth: Int,
+    oldHeight: Int,
+    newWidth: Int,
+    newHeight: Int
+  ): Array[Byte] = {
     val result = Array.ofDim[Byte](newWidth * newHeight)
 
     val xRatio = oldWidth / newWidth.toDouble
@@ -58,21 +69,21 @@ object VideoGenerator extends Assertions {
     result
   }
 
-  def resizeNearestNeighbour(width: Int, height: Int, gen: VideoGenerator): VideoGenerator = {
+  def resizeNearestNeighbour(width: Width, height: Height, gen: VideoGenerator): VideoGenerator = {
     if (width == gen.width && height == gen.height) {
       gen
     } else {
-      new VideoGenerator(width max 50 min 1280, height max 50 min 720, gen.length) {
+      new VideoGenerator(width, height, gen.length) {
         override def toString: String = s"resizeNearestNeighbour($width, $height, $gen)"
 
-        override def resize(width: Int, height: Int): VideoGenerator = gen.resize(width, height)
+        override def resize(width: Width, height: Height): VideoGenerator = gen.resize(width, height)
 
         override def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
           val yuv = gen.yuv(t)
           (
-            resizeNearestNeighbour(yuv._1, gen.width, gen.height, width, height),
-            resizeNearestNeighbour(yuv._2, gen.width / 2, gen.height / 2, width / 2, height / 2),
-            resizeNearestNeighbour(yuv._3, gen.width / 2, gen.height / 2, width / 2, height / 2)
+            resizeNearestNeighbour(yuv._1, gen.width.value, gen.height.value, width.value, height.value),
+            resizeNearestNeighbour(yuv._2, gen.width.value / 2, gen.height.value / 2, width.value / 2, height.value / 2),
+            resizeNearestNeighbour(yuv._3, gen.width.value / 2, gen.height.value / 2, width.value / 2, height.value / 2)
           )
         }
       }

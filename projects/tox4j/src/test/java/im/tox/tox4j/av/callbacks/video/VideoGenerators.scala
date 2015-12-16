@@ -2,18 +2,19 @@ package im.tox.tox4j.av.callbacks.video
 
 import im.tox.tox4j.av.callbacks.video.VideoConversions.YuvPixel
 import im.tox.tox4j.av.callbacks.video.VideoGenerator.Arithmetic
+import im.tox.tox4j.av.data.{Height, Width}
 
 object VideoGenerators {
 
   sealed abstract class Yuv(
       f: (Int, Int, Int) => YuvPixel,
-      width: Int = 400,
-      height: Int = 400
+      width: Width = Width.fromInt(400).get,
+      height: Height = Height.fromInt(400).get
   ) extends Arithmetic(width, height, 100) {
 
     override protected final def yuv(t: Int, y: Int, x: Int): YuvPixel = f(t, y, x)
 
-    override final def resize(width: Int, height: Int): VideoGenerator = {
+    override final def resize(width: Width, height: Height): VideoGenerator = {
       new Yuv(f, width, height) {
         override def productPrefix: String = Yuv.this.productPrefix
       }
@@ -78,16 +79,19 @@ object VideoGenerators {
       x * (y + t)
     ))
 
-  sealed class TextImage(rows: String*) extends VideoGenerator(rows.head.length, rows.size, 64) {
+  sealed class TextImage(rows: String*) extends VideoGenerator(Width.fromInt(rows.head.length).get, Height.fromInt(rows.size).get, 64) {
 
     override final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
+      val width = this.width.value
+      val height = this.height.value
+
       val y = rows.mkString.getBytes
       val u = Array.fill((width / 2) * (height / 2))((t * 4).toByte)
       val v = Array.fill((width / 2) * (height / 2))((-t * 4 - 1).toByte)
       (y, u, v)
     }
 
-    override final def resize(width: Int, height: Int): VideoGenerator = {
+    override final def resize(width: Width, height: Height): VideoGenerator = {
       VideoGenerator.resizeNearestNeighbour(width, height, this)
     }
 
@@ -136,6 +140,6 @@ object VideoGenerators {
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   )
 
-  val Selected = VideoGenerator.resizeNearestNeighbour(400, 400, Smiley)
+  val Selected = VideoGenerator.resizeNearestNeighbour(Width.fromInt(400).get, Height.fromInt(400).get, Smiley)
 
 }
