@@ -39,13 +39,14 @@ object HostInfo {
   private def printGcStatistics(out: PrintWriter): Unit = {
     out.println("GC statistics:")
     val uptime = ManagementFactory.getRuntimeMXBean.getUptime
+    out.print("    VM uptime:        "); out.print(uptime); out.println(" ms")
     val gcMxs = ManagementFactory.getGarbageCollectorMXBeans.iterator()
     while (gcMxs.hasNext) {
       val gcMx = gcMxs.next()
       out.print("  "); out.print(gcMx.getName); out.println(":")
       out.print("    Collection count: "); out.print(gcMx.getCollectionCount); out.println()
       out.print("    Collection time:  "); out.print(gcMx.getCollectionTime)
-      out.print(" (ratio="); printDouble(gcMx.getCollectionTime.toDouble / uptime)(out); out.println(")")
+      out.print(" ms (ratio="); printDouble(gcMx.getCollectionTime.toDouble / uptime)(out); out.println(")")
     }
   }
 

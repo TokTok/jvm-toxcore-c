@@ -62,7 +62,7 @@ object VideoGenerator extends Assertions {
     if (width == gen.width && height == gen.height) {
       gen
     } else {
-      new VideoGenerator(width max 50 min 400, height max 50 min 400, gen.length) {
+      new VideoGenerator(width max 50 min 1280, height max 50 min 720, gen.length) {
         override def toString: String = s"resizeNearestNeighbour($width, $height, $gen)"
 
         override def resize(width: Int, height: Int): VideoGenerator = gen.resize(width, height)
