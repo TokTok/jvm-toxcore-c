@@ -278,24 +278,13 @@ final class AudioVideoEventListener(id: Int)
     state.addTask { (tox, av, state) =>
       av.setBitRate(friendNumber, audioBitRate, videoBitRate)
 
+      val audioTime = ToxClientState.friendAudioTime(friendNumber)
+      val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
+
       (state
-        |> setAudioBitRate(friendNumber, audioBitRate)
-        |> setVideoBitRate(friendNumber, videoBitRate))
+        |> setBitRate("audio", audioTime, audioBitRate)
+        |> setBitRate("video", videoFrame, videoBitRate))
     }
-  }
-
-  private def setAudioBitRate(
-    friendNumber: ToxFriendNumber,
-    bitRate: BitRate
-  )(state: ToxClientState): ToxClientState = {
-    setBitRate("audio", ToxClientState.friendAudioTime(friendNumber), bitRate)(state)
-  }
-
-  private def setVideoBitRate(
-    friendNumber: ToxFriendNumber,
-    bitRate: BitRate
-  )(state: ToxClientState): ToxClientState = {
-    setBitRate("video", ToxClientState.friendVideoFrame(friendNumber), bitRate)(state)
   }
 
   private def setBitRate(
