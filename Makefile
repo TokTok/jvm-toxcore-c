@@ -16,6 +16,12 @@ cache:
 heroku: cache
 	buildscripts/heroku
 
+heroku-start:
+	heroku maintenance:off; heroku scale web=1
+
+heroku-stop:
+	heroku maintenance:on; heroku scale web=0
+
 setup:
 	buildscripts/00_dependencies_host
 	buildscripts/01_ndk

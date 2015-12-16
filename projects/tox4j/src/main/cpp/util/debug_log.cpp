@@ -48,11 +48,25 @@ JniLog::Entry::Entry (data *log, protolog::JniLogEntry *entry, std::unique_lock<
 
 JniLog::Entry::~Entry ()
 {
+  // Check if this entry needs to be filtered out.
   if (entry && std::find (log->filters.begin (), log->filters.end (), entry->name ()) != log->filters.end ())
     {
-      // This entry needs to be filtered out.
-      entry = nullptr;
-      log->log.mutable_entries ()->RemoveLast ();
+      auto *entries = log->log.mutable_entries ();
+
+      // Search for the current entry in the recently added entries.
+      auto found = std::find_if (entries->rbegin (), entries->rend (),
+        [this](auto const &element)
+        { return &element == entry; }
+      );
+
+      // This would mean the log was cleared before the mutex was unlocked.
+      assert (found != entries->rend ());
+
+      // Remove the entry from the log, moving the ones after it to the front
+      // by one place. These should not be many, usually just one. During a
+      // single entry's lifetime, only event processing can happen recursively.
+      int deleted_index = entries->rend () - found - 1;
+      entries->DeleteSubrange (deleted_index, 1);
     }
 }
 
