@@ -77,9 +77,13 @@ throw_tox_exception (JNIEnv *env, char const *module, char const *prefix, char c
     return;
 
   jobject enumCode = env->CallStaticObjectMethod (enumClass, valueOf, env->NewStringUTF (code));
+  if (env->ExceptionCheck ())
+    return;
   tox4j_assert (enumCode);
 
   jobject exception = env->NewObject (exceptionClass, constructor, enumCode);
+  if (env->ExceptionCheck ())
+    return;
   tox4j_assert (exception);
 
   env->Throw ((jthrowable)exception);
