@@ -269,15 +269,14 @@ final class AudioVideoEventListener(id: Int)
 
   override def bitRateStatus(
     friendNumber: ToxFriendNumber,
-    audioBitRate: BitRate,
-    videoBitRate: BitRate
+    audioBitRate0: BitRate,
+    videoBitRate0: BitRate
   )(state: ToxClientState): ToxClientState = {
+    val audioBitRate = audioBitRate0.copy(audioBitRate0.value max 8)
+    val videoBitRate = videoBitRate0.copy(videoBitRate0.value max 1)
+
     state.addTask { (tox, av, state) =>
-      av.setBitRate(
-        friendNumber,
-        audioBitRate.copy(videoBitRate.value min 8),
-        videoBitRate.copy(videoBitRate.value min 1)
-      )
+      av.setBitRate(friendNumber, audioBitRate, videoBitRate)
 
       (state
         |> setAudioBitRate(friendNumber, audioBitRate)
@@ -289,22 +288,23 @@ final class AudioVideoEventListener(id: Int)
     friendNumber: ToxFriendNumber,
     bitRate: BitRate
   )(state: ToxClientState): ToxClientState = {
-    setBitRate(ToxClientState.friendAudioTime(friendNumber), bitRate)(state)
+    setBitRate("audio", ToxClientState.friendAudioTime(friendNumber), bitRate)(state)
   }
 
   private def setVideoBitRate(
     friendNumber: ToxFriendNumber,
     bitRate: BitRate
   )(state: ToxClientState): ToxClientState = {
-    setBitRate(ToxClientState.friendVideoFrame(friendNumber), bitRate)(state)
+    setBitRate("video", ToxClientState.friendVideoFrame(friendNumber), bitRate)(state)
   }
 
   private def setBitRate(
+    target: String,
     lens: Lens[ToxClientState, Option[Int]],
     bitRate: BitRate
   )(state: ToxClientState): ToxClientState = {
     if (bitRate == BitRate.Disabled) {
-      // Disable audio sending.
+      logInfo(s"Stopping $target sending")
       lens.set(state, None)
     } else {
       lens.set(state, Some(0))
