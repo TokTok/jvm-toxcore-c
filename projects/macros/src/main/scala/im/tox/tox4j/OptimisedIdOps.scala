@@ -68,7 +68,7 @@ object OptimisedIdOps {
         // This transforms the remainder of the direct lambdas of the form a |> ((a: A) => body)
         // to { val $tmp = a; { val a = $tmp; body } }.
         case Function(List(ValDef(_, name, ty, _)), body) =>
-          val tmpName = TermName("$id_ops_tmp_" + random.nextInt())
+          val tmpName = TermName("$id_ops_tmp_" + random.nextInt(Byte.MaxValue))
 
           val tmpDecl = ValDef(Modifiers(), tmpName, ty, unwrappedSelf)
           val argDecl = ValDef(Modifiers(), name, ty, Ident(tmpName))
@@ -77,7 +77,12 @@ object OptimisedIdOps {
 
           q"{ $tmpDecl; { $argDecl; $reparsedBody } }"
 
+        case ident @ Ident(_) =>
+          // Don't warn for simple identifier expressions.
+          q"$ident($unwrappedSelf)"
+
         case wrappedFunction =>
+          c.warning(wrappedFunction.pos, "Could not optimise |>: " + showRaw(wrappedFunction))
           q"$wrappedFunction($unwrappedSelf)"
       }
     }
@@ -85,7 +90,11 @@ object OptimisedIdOps {
   }
 
   def reverseApplyImpl[A, B](c: whitebox.Context)(f: c.Expr[A => B]): c.Expr[B] = {
-    c.Expr[B](MakeTree[c.type](c)(f.tree))
+    val result = MakeTree[c.type](c)(f.tree)
+    if (sys.env.contains("VERBOSE_MACROS")) {
+      c.info(result.pos, c.universe.show(result), force = false)
+    }
+    c.Expr[B](result)
   }
 
 }

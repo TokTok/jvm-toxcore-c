@@ -1,6 +1,7 @@
 package im.tox.tox4j
 
 import scala.collection.immutable.TreeSet
+import scala.language.existentials
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -49,9 +50,11 @@ object EnumerationMacros {
   def sealedInstancesOfImpl[A: c.WeakTypeTag](c: blackbox.Context): c.Expr[TreeSet[A]] = {
     import c.universe._
 
-    c.Expr[TreeSet[A]] {
-      MakeTree[c.type](c)(weakTypeOf[A].typeSymbol.asClass)
+    val result = MakeTree[c.type](c)(weakTypeOf[A].typeSymbol.asClass)
+    if (sys.env.contains("VERBOSE_MACROS")) {
+      c.info(result.pos, show(result), force = false)
     }
+    c.Expr[TreeSet[A]](result)
   }
 
 }

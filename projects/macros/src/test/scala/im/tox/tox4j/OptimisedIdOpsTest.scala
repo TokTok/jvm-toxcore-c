@@ -41,4 +41,14 @@ final class OptimisedIdOpsTest extends FunSuite {
     assert(x == 2)
   }
 
+  test("passed to higher order functions (_ arguments)") {
+    val x = Seq(1, 2, 3).map(_ |> (_ + 1) |> (_ * 2))
+    assert(x == Seq(4, 6, 8))
+  }
+
+  test("passed to higher order functions (named arguments)") {
+    val x = Seq(1, 2, 3).map(_ |> (x => x + 1) |> (x => x * 2))
+    assert(x == Seq(4, 6, 8))
+  }
+
 }
