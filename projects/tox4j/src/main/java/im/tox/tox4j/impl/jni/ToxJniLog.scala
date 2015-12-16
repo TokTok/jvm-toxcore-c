@@ -144,8 +144,14 @@ case object ToxJniLog {
     out.print(") = ")
     print(entry.result.getOrElse(Value.defaultInstance))(out)
     out.print(" [")
-    out.print((entry.elapsedNanos nanos).toMicros)
-    out.print(" µs")
+    val elapsedNanos = entry.elapsedNanos.nanos
+    if (elapsedNanos.toMicros == 0) {
+      out.print(elapsedNanos.toNanos)
+      out.print(" ns")
+    } else {
+      out.print(elapsedNanos.toMicros)
+      out.print(" µs")
+    }
     entry.instanceNumber match {
       case 0 =>
       case instanceNumber =>
