@@ -11,9 +11,39 @@ final class TimeQueue(val maxSize: Int, queue: mutable.Queue[Long] = new mutable
     }
   }
 
-  def average: Int = {
-    val times = queue.zip(queue.tail).map { case (prev, next) => (next - prev).toInt }
-    times.sum / times.length
+  /**
+   * Reference implementation.
+   */
+  def averageRef: Int = {
+    if (queue.isEmpty) {
+      0
+    } else {
+      val times = queue.zip(queue.tail).map { case (prev, next) => (next - prev).toInt }
+      times.sum / times.length
+    }
   }
+
+  /**
+   * Optimised implementation.
+   */
+  def averageOpt: Int = {
+    if (queue.isEmpty) {
+      0
+    } else {
+      var sum = 0
+
+      val a = queue.iterator
+      val b = queue.iterator
+      b.next()
+
+      while (b.hasNext) {
+        sum += (b.next() - a.next()).toInt
+      }
+
+      sum / (queue.length - 1)
+    }
+  }
+
+  def average: Int = averageOpt
 
 }

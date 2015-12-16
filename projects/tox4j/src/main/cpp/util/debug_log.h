@@ -247,6 +247,9 @@ register_funcs (Func func, Name const &name, Funcs const &...funcs)
  */
 struct JniLog
 {
+  // Private data is hidden in the implementation file.
+  struct data;
+
   /**
    * The log entry wraps a protolog::JniLogEntry pointer and a mutex lock guard,
    * which is created when a new entry is created, and held until the Entry goes
@@ -260,7 +263,7 @@ struct JniLog
   {
     Entry (Entry &&) = default;
 
-    Entry (protolog::JniLogEntry *entry = nullptr, std::unique_lock<std::recursive_mutex> lock = { });
+    Entry (data *log = nullptr, protolog::JniLogEntry *entry = nullptr, std::unique_lock<std::recursive_mutex> lock = { });
     ~Entry ();
 
     protolog::JniLogEntry *operator -> () const { return  entry; }
@@ -268,6 +271,7 @@ struct JniLog
     explicit operator bool () const { return entry; }
 
   private:
+    data *log;
     protolog::JniLogEntry *entry;
     std::unique_lock<std::recursive_mutex> lock;
   };
@@ -301,9 +305,17 @@ struct JniLog
   void max_size (int max_size);
   int max_size () const;
 
+  /**
+   * Get the number of entries in the log.
+   */
+  int size () const;
+
+  /**
+   * Set filters to avoid logging certain calls.
+   */
+  void filter (std::vector<std::string> filters);
+
 private:
-  // Private data is hidden in the implementation file.
-  struct data;
   std::unique_ptr<data> self;
 };
 

@@ -6,9 +6,7 @@ import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final case class PublicKey private[crypto] (value: IndexedSeq[Byte]) extends AnyVal {
   def toHexString: String = PublicKey.toHexString(this)
-  override def toString: String = {
-    s"${getClass.getSimpleName}($toHexString)"
-  }
+  override def toString: String = s"$productPrefix($toHexString)"
 }
 
 case object PublicKey extends KeyCompanion[PublicKey, Security.NonSensitive](

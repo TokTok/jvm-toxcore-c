@@ -95,8 +95,9 @@ public final class ToxCoreJni {
   static native void invokeFriendReadReceipt(int instanceNumber, int friendNumber, int messageId);
 
   static native byte[] tox4jLastLog();
-  static native void tox4jSetLogging(boolean enabled);
+  static native int tox4jGetCurrentLogSize();
   static native void tox4jSetMaxLogSize(int maxSize);
   static native int tox4jGetMaxLogSize();
+  static native void tox4jSetLogFilter(String[] filter);
 
 }

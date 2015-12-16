@@ -3,6 +3,7 @@ package im.tox.client
 import java.io.InputStreamReader
 import java.net.URL
 import java.util.concurrent.ScheduledExecutorService
+import java.util.{Timer, TimerTask}
 
 import com.google.common.io.CharStreams
 import com.typesafe.scalalogging.Logger
@@ -11,8 +12,6 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
-import scalaz.{\/-, -\/}
-import scalaz.stream.time
 
 /**
  * A class that periodically (1 minute by default) fetches a URL.
@@ -32,12 +31,11 @@ final class Curl(url: URL, refreshEvery: Duration = 10 minutes) {
 
   private implicit val scheduler: ScheduledExecutorService = scalaz.stream.DefaultScheduler
 
-  time.awakeEvery(refreshEvery).map { _ =>
-    result = update.orElse(result)
-  }.run.runAsync {
-    case -\/(failure) => logger.error(s"Unexpected error in Curl($url)", failure)
-    case \/-(())      => logger.error(s"Unexpected termination of Curl($url)")
-  }
+  new Timer(s"Curl($url)", true).schedule(new TimerTask {
+    override def run(): Unit = {
+      result = update.orElse(result)
+    }
+  }, refreshEvery.toMillis, refreshEvery.toMillis)
 
   override def toString: String = result.toString
 

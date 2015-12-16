@@ -273,7 +273,11 @@ final class AudioVideoEventListener(id: Int)
     videoBitRate: BitRate
   )(state: ToxClientState): ToxClientState = {
     state.addTask { (tox, av, state) =>
-      av.setBitRate(friendNumber, audioBitRate, videoBitRate)
+      av.setBitRate(
+        friendNumber,
+        audioBitRate.copy(videoBitRate.value min 8),
+        videoBitRate.copy(videoBitRate.value min 1)
+      )
 
       (state
         |> setAudioBitRate(friendNumber, audioBitRate)

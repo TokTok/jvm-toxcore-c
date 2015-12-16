@@ -1,5 +1,7 @@
 package im.tox.tox4j.impl.jni
 
+import java.io.{PrintWriter, StringWriter}
+
 import com.google.protobuf.InvalidProtocolBufferException
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.impl.jni.proto.Value.V
@@ -20,10 +22,14 @@ case object ToxJniLog {
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   /**
-   * Enable or disable logging. Logging is enabled by default, as it won't affect
-   * performance adversely after the first [[maxSize]] messages.
+   * By default, filter out the functions called on every iteration.
    */
-  def enabled(enabled: Boolean): Unit = ToxCoreJni.tox4jSetLogging(enabled)
+  filterNot(
+    "tox_iterate",
+    "toxav_iterate",
+    "tox_iteration_interval",
+    "toxav_iteration_interval"
+  )
 
   /**
    * Set the maximum number of entries in the log. After this limit is reached,
@@ -33,6 +39,17 @@ case object ToxJniLog {
    */
   def maxSize_=(maxSize: Int): Unit = ToxCoreJni.tox4jSetMaxLogSize(maxSize)
   def maxSize: Int = ToxCoreJni.tox4jGetMaxLogSize
+
+  /**
+   * The current size of the log on the native side. Can be used to determine
+   * whether it needs to be fetched.
+   */
+  def size: Int = ToxCoreJni.tox4jGetCurrentLogSize
+
+  /**
+   * Set a filter to avoid logging certain calls.
+   */
+  def filterNot(filter: String*): Unit = ToxCoreJni.tox4jSetLogFilter(filter.toArray)
 
   /**
    * Retrieve and clear the current call log. Calling [[ToxJniLog]] twice with no
@@ -58,21 +75,35 @@ case object ToxJniLog {
     }
   }
 
+  private def printDelimited[A](list: Iterable[A], separator: String)(print: A => PrintWriter => Unit)(out: PrintWriter): Unit = {
+    val i = list.iterator
+    if (i.hasNext) {
+      print(i.next())(out)
+      while (i.hasNext) { // scalastyle:ignore while
+        out.print(separator)
+        print(i.next())(out)
+      }
+    }
+  }
+
   /**
    * Pretty-print the log as function calls with time offset from the first message. E.g.
    * [0.000000] tox_new_unique({udp_enabled=1; ipv6_enabled=0; ...}) [20 µs, #1]
    *
    * The last part is the time spent in the native function followed by the instance number.
    */
-  def toString(log: JniLog): String = {
+  def print(log: JniLog)(out: PrintWriter): Unit = {
     log.entries.headOption match {
-      case None => ""
+      case None =>
       case Some(first) =>
-        log.entries.map(toString(first.timestamp.getOrElse(Timestamp.defaultInstance))).mkString("\n")
+        for (entry <- log.entries) {
+          print(first.timestamp.getOrElse(Timestamp.defaultInstance))(entry)(out)
+          out.println()
+        }
     }
   }
 
-  private def formattedTimeDiff(a: Timestamp, b: Timestamp): String = {
+  private def printFormattedTimeDiff(a: Timestamp, b: Timestamp)(out: PrintWriter): Unit = {
     assert(a.nanos < 1000000000)
     assert(b.nanos < 1000000000)
 
@@ -86,37 +117,76 @@ case object ToxJniLog {
       }
     }
 
-    f"${timeDiff.seconds}%d.${(timeDiff.nanos nanos).toMicros}%06d"
+    val micros = (timeDiff.nanos nanos).toMicros.toInt
+    out.print(timeDiff.seconds)
+    out.print('.')
+    out.print {
+      // scalastyle:off if.brace
+      if (false) ""
+      else if (micros < 10) "00000"
+      else if (micros < 100) "0000"
+      else if (micros < 1000) "000"
+      else if (micros < 10000) "00"
+      else if (micros < 100000) "0"
+      else if (micros < 1000000) ""
+      // scalastyle:on if.brace
+    }
+    out.print(micros)
   }
 
-  def toString(startTime: Timestamp)(entry: JniLogEntry): String = {
-    val time = formattedTimeDiff(entry.timestamp.getOrElse(Timestamp.defaultInstance), startTime)
-    s"[$time] ${entry.name}(${entry.arguments.map(toString).mkString(", ")}) = " +
-      s"${toString(entry.result.getOrElse(Value.defaultInstance))} [${(entry.elapsedNanos nanos).toMicros} µs" + {
-        entry.instanceNumber match {
-          case 0              => ""
-          case instanceNumber => s", #$instanceNumber"
-        }
-      } + "]"
+  def print(startTime: Timestamp)(entry: JniLogEntry)(out: PrintWriter): Unit = {
+    out.print('[')
+    printFormattedTimeDiff(entry.timestamp.getOrElse(Timestamp.defaultInstance), startTime)(out)
+    out.print("] ")
+    out.print(entry.name)
+    out.print('(')
+    printDelimited(entry.arguments, ", ")(print)(out)
+    out.print(") = ")
+    print(entry.result.getOrElse(Value.defaultInstance))(out)
+    out.print(" [")
+    out.print((entry.elapsedNanos nanos).toMicros)
+    out.print(" µs")
+    entry.instanceNumber match {
+      case 0 =>
+      case instanceNumber =>
+        out.print(", #")
+        out.print(instanceNumber)
+    }
+    out.print("]")
   }
 
-  def toString(value: Value): String = {
+  def print(value: Value)(out: PrintWriter): Unit = {
     value.v match {
       case V.VBytes(bytes) =>
+        out.print("byte[")
         if (value.truncated == 0) {
-          s"byte[${bytes.size}]"
+          out.print(bytes.size)
         } else {
-          s"byte[${value.truncated}]"
+          out.print(value.truncated)
         }
-      case V.VSint64(sint64)          => sint64.toString
-      case V.VString(string)          => string
-      case V.VObject(Struct(members)) => s"{${members.map(toString).mkString("; ")}}"
-      case V.Empty                    => "void"
+        out.print("]")
+      case V.VObject(Struct(members)) =>
+        out.print('{')
+        printDelimited(members, "; ")(print)(out)
+        out.print('}')
+      case V.VSint64(sint64) => out.print(sint64)
+      case V.VString(string) => out.print(string)
+      case V.Empty           => out.print("void")
     }
   }
 
-  def toString(member: (String, Value)): String = {
-    s"${member._1}=${toString(member._2)}"
+  def print(member: (String, Value))(out: PrintWriter): Unit = {
+    out.print(member._1)
+    out.print('=')
+    print(member._2)(out)
+  }
+
+  def toString(log: JniLog): String = {
+    val stringWriter = new StringWriter
+    val out = new PrintWriter(stringWriter)
+    print(log)(out)
+    out.close()
+    stringWriter.toString
   }
 
 }

@@ -51,22 +51,26 @@ case object TestClient extends App {
   )
 
   private def runTasks(tox: ToxCore[ToxClientState], av: ToxAv[ToxClientState])(state: ToxClientState): ToxClientState = {
-    state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) =>
-      try {
-        task(tox, av, state)
-      } catch {
-        case NonFatal(exception) =>
-          logger.error("Caught exception while executing task", exception)
-          state
+    if (state.tasks.isEmpty) {
+      state
+    } else {
+      state.tasks.foldRight(state.copy(tasks = Nil)) { (task, state) =>
+        try {
+          task(tox, av, state)
+        } catch {
+          case NonFatal(exception) =>
+            logger.error("Caught exception while executing task", exception)
+            state
+        }
       }
     }
   }
 
   @tailrec
-  private def mainLoop(httpServer: Option[ToxClientHttpFrontend], clients0: List[ToxClient]): Unit = {
+  private def mainLoop(httpServer: ToxClientHttpFrontend, clients0: List[ToxClient]): Unit = {
     val (time, (clients, interval)) = AutoTestSuite.timed {
       watchdog.ping()
-      httpServer.foreach(_.update(clients0))
+      httpServer.update(clients0)
 
       val clients =
         for (client <- clients0) yield {
@@ -90,7 +94,7 @@ case object TestClient extends App {
   }
 
   ToxClientOptions(args) { c =>
-    val httpServer = c.httpPort.map(new ToxClientHttpFrontend(_))
+    val httpServer = new ToxClientHttpFrontend(c.httpPort)
 
     val predefined = c.load.map(key => ToxOptions(saveData = SaveDataOptions.SecretKey(key)))
     logger.info(s"Creating ${c.count} toxes (${predefined.length} with predefined keys)")

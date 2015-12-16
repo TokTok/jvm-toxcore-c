@@ -91,9 +91,7 @@ object OptimisedIdOps {
 
   def reverseApplyImpl[A, B](c: whitebox.Context)(f: c.Expr[A => B]): c.Expr[B] = {
     val result = MakeTree[c.type](c)(f.tree)
-    if (sys.env.contains("VERBOSE_MACROS")) {
-      c.info(result.pos, c.universe.show(result), force = false)
-    }
+    // c.info(result.pos, c.universe.show(result), force = false)
     c.Expr[B](result)
   }
 

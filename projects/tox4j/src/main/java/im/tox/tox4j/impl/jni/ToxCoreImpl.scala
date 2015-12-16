@@ -369,10 +369,15 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
       |> dispatchFriendLosslessPacket(events.friendLosslessPacket))
   }
 
+  @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
   override def iterate(state: ToxCoreState): ToxCoreState = {
-    Option(ToxCoreJni.toxIterate(instanceNumber))
-      .map(CoreEvents.parseFrom)
-      .toIterable.foldLeft(state)(dispatchEvents)
+    val eventData = ToxCoreJni.toxIterate(instanceNumber)
+    if (eventData != null) { // scalastyle:ignore null
+      val events = CoreEvents.parseFrom(eventData)
+      dispatchEvents(state, events)
+    } else {
+      state
+    }
   }
 
   override def getPublicKey: ToxPublicKey =

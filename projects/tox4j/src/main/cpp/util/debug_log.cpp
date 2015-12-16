@@ -2,6 +2,7 @@
 
 #include <tox/core.h>
 
+#include <algorithm>
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
@@ -30,11 +31,13 @@ struct JniLog::data
   int max_size = 100;
   std::recursive_mutex mutex;
   protolog::JniLog log;
+  std::vector<std::string> filters;
 };
 
 
-JniLog::Entry::Entry (protolog::JniLogEntry *entry, std::unique_lock<std::recursive_mutex> lock)
-  : entry (entry)
+JniLog::Entry::Entry (data *log, protolog::JniLogEntry *entry, std::unique_lock<std::recursive_mutex> lock)
+  : log (log)
+  , entry (entry)
   , lock (std::move (lock))
 {
 }
@@ -42,6 +45,12 @@ JniLog::Entry::Entry (protolog::JniLogEntry *entry, std::unique_lock<std::recurs
 
 JniLog::Entry::~Entry ()
 {
+  if (entry && std::find (log->filters.begin (), log->filters.end (), entry->name ()) != log->filters.end ())
+    {
+      // This entry needs to be filtered out.
+      entry = nullptr;
+      log->log.mutable_entries ()->RemoveLast ();
+    }
 }
 
 
@@ -67,7 +76,7 @@ JniLog::new_entry ()
   if (self->log.entries_size () >= self->max_size)
     // If the log is full, unlock right away and return null.
     return nullptr;
-  return JniLog::Entry (self->log.add_entries (), std::move (lock));
+  return JniLog::Entry (self.get (), self->log.add_entries (), std::move (lock));
 }
 
 std::vector<char>
@@ -98,8 +107,7 @@ JniLog::clear ()
 bool
 JniLog::empty () const
 {
-  std::lock_guard<std::recursive_mutex> lock (self->mutex);
-  return self->log.entries_size () == 0;
+  return size () == 0;
 }
 
 void
@@ -112,6 +120,20 @@ int
 JniLog::max_size () const
 {
   return self->max_size;
+}
+
+int
+JniLog::size () const
+{
+  std::lock_guard<std::recursive_mutex> lock (self->mutex);
+  return self->log.entries_size ();
+}
+
+void
+JniLog::filter (std::vector<std::string> filters)
+{
+  std::lock_guard<std::recursive_mutex> lock (self->mutex);
+  self->filters = std::move (filters);
 }
 
 

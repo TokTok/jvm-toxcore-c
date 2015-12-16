@@ -51,9 +51,7 @@ object EnumerationMacros {
     import c.universe._
 
     val result = MakeTree[c.type](c)(weakTypeOf[A].typeSymbol.asClass)
-    if (sys.env.contains("VERBOSE_MACROS")) {
-      c.info(result.pos, show(result), force = false)
-    }
+    // c.info(result.pos, show(result), force = false)
     c.Expr[TreeSet[A]](result)
   }
 

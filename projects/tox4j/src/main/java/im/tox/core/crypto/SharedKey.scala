@@ -4,10 +4,8 @@ import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final case class SharedKey private[crypto] (value: Array[Byte]) extends AnyVal {
-  def readable: String = SharedKey.toHexString(this)
-  override def toString: String = {
-    s"${getClass.getSimpleName}($readable)"
-  }
+  def toHexString: String = SharedKey.toHexString(this)
+  override def toString: String = s"$productPrefix($toHexString)"
 }
 
 case object SharedKey extends KeyCompanion[SharedKey, Security.Sensitive](

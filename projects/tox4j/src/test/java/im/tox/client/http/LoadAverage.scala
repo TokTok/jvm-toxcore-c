@@ -20,7 +20,13 @@ final class LoadAverage(iterationsPerSecond: Int) {
   def print(out: PrintWriter): Unit = {
     out.println("Average time between iterations:")
     for (queue <- queues) {
-      out.println(f"  last ${queue.maxSize}%4d: ${queue.average}ms (${1000 / queue.average} iterations per second)")
+      val average = queue.average
+      out.printf(
+        "  last %4d: %dms (%d iterations per second)\n",
+        Integer.valueOf(queue.maxSize),
+        Integer.valueOf(average),
+        Integer.valueOf(1000 / average)
+      )
     }
   }
 

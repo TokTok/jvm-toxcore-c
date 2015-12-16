@@ -4,10 +4,8 @@ import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.core.ToxCoreConstants
 
 final case class ToxFileId private (value: Array[Byte]) extends AnyVal {
-  def readable: String = ToxFileId.toHexString(this)
-  override def toString: String = {
-    s"${getClass.getSimpleName}($readable)"
-  }
+  def toHexString: String = ToxFileId.toHexString(this)
+  override def toString: String = s"$productPrefix($toHexString)"
 }
 
 case object ToxFileId extends KeyCompanion[ToxFileId, Security.Sensitive](

@@ -8,7 +8,7 @@ abstract class KeyCompanionTest[T <: AnyVal, S <: Security](
     companion: KeyCompanion[T, S]
 )(implicit final val arbT: Arbitrary[T]) extends ModuleCompanionTest[T, S](companion) {
 
-  test("testFromHexString") {
+  test("fromHexString") {
     forAll(Gen.containerOfN[Array, Char](
       companion.Size * 2,
       Gen.oneOf(
@@ -21,9 +21,21 @@ abstract class KeyCompanionTest[T <: AnyVal, S <: Security](
     }
   }
 
-  test("testToString") {
+  test("toString") {
     forAll { (self: T) =>
       assert(companion.equals(companion.fromHexString(self.toString).get, self))
+    }
+  }
+
+  test("toHexString") {
+    forAll { (self: T) =>
+      assert(companion.equals(companion.fromHexString(companion.toHexString(self)).get, self))
+    }
+  }
+
+  test("optimised toHexString") {
+    forAll { (self: T) =>
+      assert(companion.toHexStringOpt(self) == companion.toHexStringRef(self))
     }
   }
 

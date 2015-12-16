@@ -103,4 +103,35 @@ JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_tox4jGetMaxLogSize
   return jni_log.max_size ();
 }
 
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    tox4jGetCurrentLogSize
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_tox4jGetCurrentLogSize
+  (JNIEnv *, jclass)
+{
+  return jni_log.size ();
+}
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    tox4jSetLogFilter
+ * Signature: ([Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_tox4jSetLogFilter
+  (JNIEnv *env, jclass, jobjectArray filters)
+{
+  int stringCount = env->GetArrayLength (filters);
+
+  std::vector<std::string> filter_strings;
+  for (int i = 0; i < stringCount; i++)
+    {
+      UTFChars filter (env, static_cast<jstring> (env->GetObjectArrayElement(filters, i)));
+      filter_strings.push_back (filter.to_string ());
+    }
+
+  jni_log.filter (std::move (filter_strings));
+}
+
 #endif

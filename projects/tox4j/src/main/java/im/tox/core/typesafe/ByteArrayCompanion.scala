@@ -25,9 +25,37 @@ abstract class ByteArrayCompanion[T <: AnyVal, S <: Security](
     fromValue(value.getBytes(UTF_8))
   }
 
-  final def toHexString(self: T): String = {
+  /**
+   * Reference implementation.
+   */
+  final def toHexStringRef(self: T): String = {
     toValue(self).iterator.map(c => f"$c%02X").mkString
   }
+
+  /**
+   * Optimised implementation.
+   */
+  final def toHexStringOpt(self: T): String = {
+    val sb = new StringBuilder
+    val i = toValue(self).iterator
+    while (i.hasNext) { // scalastyle:ignore while
+      val byte = i.next() & 0xff
+      sb.append(toHexDigit(byte >> 4))
+      sb.append(toHexDigit(byte & 15))
+    }
+    sb.toString
+  }
+
+  private def toHexDigit(digit: Int): Char = {
+    assert(digit < 16)
+    if (digit < 10) {
+      ('0' + digit).toChar
+    } else {
+      ('A' + digit - 10).toChar
+    }
+  }
+
+  final def toHexString(self: T): String = toHexStringOpt(self)
 
   /**
    * Parses a human-readable hex string as binary key.

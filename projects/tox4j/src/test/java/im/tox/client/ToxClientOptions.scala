@@ -19,7 +19,7 @@ case object ToxClientOptions {
     address: Option[InetAddress] = None,
     bootstrapPort: Port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get,
     key: Option[ToxPublicKey] = None,
-    httpPort: Option[Port] = None
+    httpPort: Port = Port.fromInt(8080).get
   )
 
   implicit val inetAddressRead: Read[InetAddress] = Read.stringRead.map(InetAddress.getByName)
@@ -75,9 +75,8 @@ case object ToxClientOptions {
     } text "DHT public key of the bootstrap node"
 
     opt[Port]('P', "port") action { (x, c) =>
-      c.copy(httpPort = Some(x))
-    } text "Port to run HTTP web interface on"
-
+      c.copy(httpPort = x)
+    } text s"Port to run HTTP web interface on (default: ${Config().httpPort})"
     checkConfig { c =>
       if (c.address.isDefined != c.key.isDefined) {
         failure("If one of address and key is specified, the other must be specified as well")

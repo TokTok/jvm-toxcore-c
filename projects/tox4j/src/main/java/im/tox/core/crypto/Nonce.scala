@@ -5,10 +5,8 @@ import im.tox.core.typesafe.{KeyCompanion, Security}
 import im.tox.tox4j.crypto.ToxCryptoConstants
 
 final case class Nonce private[crypto] (value: IndexedSeq[Byte]) extends AnyVal {
-  def readable: String = Nonce.toHexString(this)
-  override def toString: String = {
-    s"${getClass.getSimpleName}($readable)"
-  }
+  def toHexString: String = Nonce.toHexString(this)
+  override def toString: String = s"$productPrefix($toHexString)"
 }
 
 case object Nonce extends KeyCompanion[Nonce, Security.NonSensitive](

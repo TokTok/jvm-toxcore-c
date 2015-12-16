@@ -94,7 +94,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
       val log = ToxJniLog()
       assert(log.entries.size < 10000)
       assert(log.entries.size == threadCount + threadCount * iterations)
-      assert(ToxJniLog.toString(log).count(_ == '\n') == log.entries.size - 1)
+      assert(ToxJniLog.toString(log).count(_ == '\n') == log.entries.size)
     }
 
     assert(ToxJniLog().entries.isEmpty)

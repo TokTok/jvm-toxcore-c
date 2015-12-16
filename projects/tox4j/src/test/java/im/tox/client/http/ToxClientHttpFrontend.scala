@@ -1,12 +1,10 @@
 package im.tox.client.http
 
-import java.io.{PrintWriter, StringWriter}
 import java.net.InetSocketAddress
 
-import codes.reactive.scalatime.Instant
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import com.typesafe.scalalogging.Logger
-import im.tox.client.{HostInfo, TestClient, ToxClient}
+import im.tox.client.{HostInfo, ToxClient}
 import im.tox.core.network.Port
 import im.tox.tox4j.impl.jni.ToxJniLog
 import im.tox.tox4j.impl.jni.proto.{JniLog, JniLogEntry}
@@ -25,16 +23,12 @@ final class ToxClientHttpFrontend(port: Port) {
   private val iterationsPerSecond = 1000 / 50
   private val loadAverage = new LoadAverage(iterationsPerSecond)
 
-  private val startTime = Instant()
+  private def fetchJniLog(): Unit = {
+    jniLog ++= ToxJniLog().entries
 
-  private def filterIteration(entries: Seq[JniLogEntry]): Seq[JniLogEntry] = {
-    entries.filterNot { entry =>
-      Seq(
-        "tox_iterate",
-        "toxav_iterate",
-        "tox_iteration_interval",
-        "toxav_iteration_interval"
-      ).contains(entry.name)
+    jniLog match {
+      case head +: tail => jniLog = head +: tail.takeRight(ToxJniLog.maxSize)
+      case _            => // No entries.
     }
   }
 
@@ -43,50 +37,34 @@ final class ToxClientHttpFrontend(port: Port) {
 
     state = clients
 
-    jniLog ++= filterIteration(ToxJniLog().entries)
-
-    jniLog match {
-      case head +: tail => jniLog = head +: tail.takeRight(ToxJniLog.maxSize)
-      case _            => // No entries.
+    if (ToxJniLog.size >= ToxJniLog.maxSize / 2) {
+      logger.debug(s"Fetching JNI log (${ToxJniLog.size} >= ${ToxJniLog.maxSize} / 2)")
+      fetchJniLog()
     }
   }
 
   private case object StatusHandler extends HttpHandler {
 
     override def handle(exchange: HttpExchange): Unit = {
-      val state = ToxClientHttpFrontend.this.state
-      val response = new StringWriter
-      val out = new PrintWriter(response)
+      HttpUtil.sendText(exchange) { out =>
+        val state = ToxClientHttpFrontend.this.state
 
-      out.println(s"$TestClient running ${state.length} Tox instances, started on $startTime.")
-      out.println()
-
-      loadAverage.print(out)
-      out.println()
-
-      for ((client, id) <- state.zipWithIndex) {
-        out.println(s"Instance $id (connection = ${client.state.connection}):")
-        out.println(s"  Name:           ${client.state.profile.name}")
-        out.println(s"  Status message: ${client.state.profile.statusMessage}")
-        out.println(s"  Status:         ${client.state.profile.status}")
-        out.println(s"  Friend address: ${client.state.address}")
-        out.println(s"  DHT public key: ${client.state.dhtId}")
-        out.println(s"  UDP port:       ${client.state.udpPort}")
-        out.println(s"  IPv4 address:   ${HostInfo.ipv4}")
-        out.println(s"  IPv6 address:   ${HostInfo.ipv6}")
-        out.println("  Friends:")
-        for ((friendNumber, friend) <- client.state.friends) {
-          out.println(s"    $friendNumber -> $friend")
-        }
+        HostInfo.printSystemInfo(out)
         out.println()
+
+        loadAverage.print(out)
+        out.println()
+
+        for ((client, id) <- state.zipWithIndex) {
+          client.printInfo(out, id)
+          out.println()
+        }
+
+        // Force an update before serving it to the user.
+        fetchJniLog()
+        out.println(s"Recent $ToxJniLog:")
+        ToxJniLog.print(JniLog(jniLog))(out)
       }
-
-      out.println(s"Recent $ToxJniLog:")
-      out.println(ToxJniLog.toString(JniLog(jniLog)))
-
-      out.close()
-
-      HttpUtil.send(exchange, response.toString)
     }
 
   }
@@ -117,9 +95,12 @@ final class ToxClientHttpFrontend(port: Port) {
   private case object ProfileTextHandler extends HttpHandler {
 
     override def handle(exchange: HttpExchange): Unit = {
-      val result = state.map(_.state.profile.toString).mkString("\n")
-
-      HttpUtil.send(exchange, result)
+      HttpUtil.sendText(exchange) { out =>
+        for ((client, id) <- state.zipWithIndex) {
+          out.println(s"Client $id")
+          out.println(client.state.profile)
+        }
+      }
     }
 
   }

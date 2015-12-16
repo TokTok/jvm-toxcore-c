@@ -1,6 +1,7 @@
 #pragma once
 
 #include <jni.h>
+#include <string>
 
 
 /*****************************************************************************
@@ -24,6 +25,8 @@ struct UTFChars
   char const *data () const { return chars; }
 
   size_t size () const { return (size_t)string ? env->GetStringUTFLength (string) : 0; }
+
+  std::string to_string () const { return std::string (data (), size ()); }
 
 private:
   JNIEnv *env;
