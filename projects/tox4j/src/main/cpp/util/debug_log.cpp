@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <map>
 
 #include <jni.h>
@@ -70,6 +71,20 @@ std::vector<char>
 JniLog::clear ()
 {
   std::lock_guard<std::recursive_mutex> lock (self->mutex);
+
+  // Try to update log entries with numeric names.
+  for (protolog::JniLogEntry &entry : *self->log.mutable_entries ())
+    {
+      assert (!entry.name ().empty ());
+      if (std::isdigit (entry.name ()[0]))
+        {
+          std::istringstream in (entry.name ());
+          std::uintptr_t pointer;
+          in >> pointer;
+          entry.set_name (get_func_name (pointer));
+        }
+    }
+
   std::vector<char> buffer (self->log.ByteSize ());
   self->log.SerializeToArray (buffer.data (), buffer.size ());
   self->log.Clear ();
@@ -109,16 +124,16 @@ JniLog::max_size () const
  * initialisation order does not guarantee the map to be initialised when it
  * is accessed from another translation unit calling register_func.
  */
-static std::map<uintptr_t, std::string const> &
+static std::map<std::uintptr_t, std::string const> &
 func_names ()
 {
-  static std::map<uintptr_t, std::string const> func_names;
+  static std::map<std::uintptr_t, std::string const> func_names;
   return func_names;
 }
 
 
 bool
-register_func (uintptr_t func, std::string const &name)
+register_func (std::uintptr_t func, std::string const &name)
 {
   auto &names = func_names ();
   assert (names.find (func) == names.end ());
@@ -128,7 +143,7 @@ register_func (uintptr_t func, std::string const &name)
 
 
 std::string
-get_func_name (uintptr_t func)
+get_func_name (std::uintptr_t func)
 {
   auto &names = func_names ();
   auto found = names.find (func);
@@ -140,7 +155,7 @@ get_func_name (uintptr_t func)
 
 
 void
-print_func (protolog::JniLogEntry &log_entry, uintptr_t func)
+print_func (protolog::JniLogEntry &log_entry, std::uintptr_t func)
 {
   log_entry.set_name (get_func_name (func));
 }
