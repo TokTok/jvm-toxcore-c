@@ -2,35 +2,36 @@ package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxUserStatus
-import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
+import im.tox.tox4j.testing.autotest.AutoTestSuite
 
-final class FriendStatusCallbackTest extends AliceBobTest {
+final class FriendStatusCallbackTest extends AutoTestSuite {
 
-  override type State = ToxUserStatus
-  override def initialState: State = ToxUserStatus.NONE
+  type S = ToxUserStatus
 
-  protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
+  object Handler extends EventListener(ToxUserStatus.NONE) {
 
-    private def go(state: ChatState)(status: ToxUserStatus): ChatState = {
+    private def go(status: ToxUserStatus)(state: State): State = {
       state.addTask { (tox, av, state) =>
         tox.setStatus(status)
-        state.set(status)
+        state.put(status)
       }
     }
 
-    override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: ChatState): ChatState = {
-      debug(s"friend changed status to: $status")
-      assert(friendNumber == AliceBobTestBase.FriendNumber)
+    override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: State): State = {
+      debug(state, s"friend changed status to: $status")
+
+      val isAlice = state.friendList(friendNumber) == state.id.next
+      val isBob = state.friendList(friendNumber) == state.id.prev
 
       state.get match {
         case ToxUserStatus.NONE =>
           if (isAlice) {
             assert(status == ToxUserStatus.NONE)
-            go(state)(ToxUserStatus.AWAY)
+            go(ToxUserStatus.AWAY)(state)
           } else {
             if (status != ToxUserStatus.NONE) {
               assert(status == ToxUserStatus.AWAY)
-              go(state)(ToxUserStatus.BUSY)
+              go(ToxUserStatus.BUSY)(state)
             } else {
               state
             }
@@ -39,7 +40,7 @@ final class FriendStatusCallbackTest extends AliceBobTest {
         case selfStatus =>
           if (isAlice && selfStatus == ToxUserStatus.AWAY) {
             assert(status == ToxUserStatus.BUSY)
-            go(state)(ToxUserStatus.NONE)
+            go(ToxUserStatus.NONE)(state)
               .finish
           } else if (isBob && selfStatus == ToxUserStatus.BUSY) {
             assert(status == ToxUserStatus.NONE)
