@@ -1,5 +1,6 @@
 package im.tox.tox4j.av.callbacks
 
+import im.tox.tox4j.av.data.{Height, Width}
 import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.NotNull
 
@@ -28,8 +29,15 @@ trait VideoReceiveFrameCallback[ToxCoreState] {
    */
   def videoReceiveFrame(
     friendNumber: ToxFriendNumber,
-    width: Int, height: Int,
+    width: Width, height: Height,
     @NotNull y: Array[Byte], @NotNull u: Array[Byte], @NotNull v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int
   )(state: ToxCoreState): ToxCoreState = state
+
+  /**
+   * An implementation may choose to keep the arrays to copy the data to around
+   * as an optimisation. If this method does not return [[None]], the arrays in
+   * the [[Some]] are passed to [[videoReceiveFrame]] as y, u, and v.
+   */
+  def videoFrameCachedYUV(width: Width, height: Height): Option[(Array[Byte], Array[Byte], Array[Byte])] = None
 }

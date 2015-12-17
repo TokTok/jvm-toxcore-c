@@ -4,7 +4,7 @@ import java.util
 
 import im.tox.tox4j.ToxAvTestBase
 import im.tox.tox4j.av.callbacks.AvInvokeTest._
-import im.tox.tox4j.av.data.{AudioChannels, BitRate, SamplingRate}
+import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.ToxavFriendCallState
 import im.tox.tox4j.core.SmallNat
 import im.tox.tox4j.core.callbacks.InvokeTest.{ByteArray, ShortArray}
@@ -32,8 +32,8 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
     override def audioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate)(state: Option[Event]): Option[Event] = setEvent(AudioReceiveFrame(friendNumber, pcm, channels, samplingRate))(state)
     override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: Option[Event]): Option[Event] = setEvent(BitRateStatus(friendNumber, audioBitRate, videoBitRate))(state)
     override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: Option[Event]): Option[Event] = setEvent(Call(friendNumber, audioEnabled, videoEnabled))(state)
-    override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: Option[Event]): Option[Event] = setEvent(CallState(friendNumber, callState.asScala.toSet))(state)
-    override def videoReceiveFrame(friendNumber: ToxFriendNumber, width: Int, height: Int, y: Array[Byte], u: Array[Byte], v: Array[Byte], yStride: Int, uStride: Int, vStride: Int)(state: Option[Event]): Option[Event] = setEvent(VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride))(state)
+    override def callState(friendNumber: ToxFriendNumber, callState: util.EnumSet[ToxavFriendCallState])(state: Option[Event]): Option[Event] = setEvent(CallState(friendNumber, callState.asScala.toSet))(state)
+    override def videoReceiveFrame(friendNumber: ToxFriendNumber, width: Width, height: Height, y: Array[Byte], u: Array[Byte], v: Array[Byte], yStride: Int, uStride: Int, vStride: Int)(state: Option[Event]): Option[Event] = setEvent(VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride))(state)
     // scalastyle:on line.size.limit
   }
 
@@ -60,6 +60,14 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
 
   private implicit val arbToxavFriendCallState: Arbitrary[ToxavFriendCallState] = {
     Arbitrary(Arbitrary.arbInt.arbitrary.map { i => ToxavFriendCallState.values()(Math.abs(i % ToxavFriendCallState.values().length)) })
+  }
+
+  private implicit val arbWidth: Arbitrary[Width] = {
+    Arbitrary(Arbitrary.arbInt.arbitrary.map(Width.clamp))
+  }
+
+  private implicit val arbHeight: Arbitrary[Height] = {
+    Arbitrary(Arbitrary.arbInt.arbitrary.map(Height.clamp))
   }
 
   private implicit val arbSamplingRate: Arbitrary[SamplingRate] = {
@@ -119,7 +127,7 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
     assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, callState: Set[ToxavFriendCallState]) =>
       callbackTest(
-        _.invokeCallState(friendNumber, callState.asJavaCollection),
+        _.invokeCallState(friendNumber, util.EnumSet.copyOf(callState.asJavaCollection)),
         CallState(friendNumber, callState)
       )
     }
@@ -127,11 +135,13 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
 
   test("VideoReceiveFrame") {
     assume(ToxAvTestBase.enabled)
-    forAll { (friendNumber: ToxFriendNumber, width: SmallNat, height: SmallNat, yStride: SmallNat, uStride: SmallNat, vStride: SmallNat) =>
-      whenever(width > 0 && height > 0) {
-        val y = Array.ofDim[Byte]((width max yStride) * height)
-        val u = Array.ofDim[Byte](((width / 2) max Math.abs(uStride)) * (height / 2))
-        val v = Array.ofDim[Byte](((width / 2) max Math.abs(vStride)) * (height / 2))
+    forAll { (friendNumber: ToxFriendNumber, width: Width, height: Height, yStride: SmallNat, uStride: SmallNat, vStride: SmallNat) =>
+      val w = width.value
+      val h = height.value
+      whenever(w > 0 && h > 0) {
+        val y = Array.ofDim[Byte]((w max yStride) * h)
+        val u = Array.ofDim[Byte](((w / 2) max Math.abs(uStride)) * (h / 2))
+        val v = Array.ofDim[Byte](((w / 2) max Math.abs(vStride)) * (h / 2))
         random.nextBytes(y)
         random.nextBytes(u)
         random.nextBytes(v)
@@ -151,5 +161,5 @@ object AvInvokeTest {
   private final case class BitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate) extends Event
   private final case class Call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean) extends Event
   private final case class CallState(friendNumber: ToxFriendNumber, callState: Set[ToxavFriendCallState]) extends Event
-  private final case class VideoReceiveFrame(friendNumber: ToxFriendNumber, width: Int, height: Int, y: ByteArray, u: ByteArray, v: ByteArray, yStride: Int, uStride: Int, vStride: Int) extends Event // scalastyle:ignore line.size.limit
+  private final case class VideoReceiveFrame(friendNumber: ToxFriendNumber, width: Width, height: Height, y: ByteArray, u: ByteArray, v: ByteArray, yStride: Int, uStride: Int, vStride: Int) extends Event // scalastyle:ignore line.size.limit
 }

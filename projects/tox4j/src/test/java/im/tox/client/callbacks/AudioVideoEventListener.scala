@@ -35,10 +35,6 @@ final class AudioVideoEventListener(id: Int)
     timeDelta: Int,
     message: ToxFriendMessage
   )(state: ToxClientState): ToxClientState = {
-    val AudioCommand = "audio\\s+(.+)".r
-    val VideoCommand = "video\\s+(.+)".r
-    val ShowCommand = "show\\s+(.+)".r
-
     val command = message.toString.toLowerCase
     command match {
       case "call me" =>
@@ -48,9 +44,9 @@ final class AudioVideoEventListener(id: Int)
           state
         }
 
-      case AudioCommand(request) => AudioCommandHandler(audioSamplingRate)(friendNumber, state, request)
-      case VideoCommand(request) => VideoCommandHandler(friendNumber, state, request)
-      case ShowCommand(request)  => ShowCommandHandler(friendNumber, state, request)
+      case AudioCommandHandler.Pattern(request) => AudioCommandHandler(friendNumber, state, request)
+      case VideoCommandHandler.Pattern(request) => VideoCommandHandler(friendNumber, state, request)
+      case ShowCommandHandler.Pattern(request)  => ShowCommandHandler(friendNumber, state, request)
 
       case _ =>
         say(friendNumber, s"unrecognised command: '$command'; try 'call me'")(state)
@@ -68,10 +64,10 @@ final class AudioVideoEventListener(id: Int)
       av.callControl(friendNumber, ToxavCallControl.MUTE_AUDIO)
       av.callControl(friendNumber, ToxavCallControl.HIDE_VIDEO)
 
-      val callState = new util.ArrayList[ToxavFriendCallState]
-      if (audioEnabled) callState.add(ToxavFriendCallState.ACCEPTING_A)
-      if (videoEnabled) callState.add(ToxavFriendCallState.ACCEPTING_V)
-      av.invokeCallState(friendNumber, callState)
+      av.invokeCallState(friendNumber, util.EnumSet.of(
+        ToxavFriendCallState.ACCEPTING_A,
+        ToxavFriendCallState.ACCEPTING_V
+      ))
 
       state
     }
@@ -95,7 +91,7 @@ final class AudioVideoEventListener(id: Int)
         val nextT = t + audioFrameSize * audioFramesPerIteration
 
         for (t <- t until nextT by audioFrameSize) {
-          val pcm = audio.nextFrame16(t, audioFrameSize)
+          val pcm = audio.nextFrame16(audioLength, audioSamplingRate, t)
           av.audioSendFrame(
             friendNumber,
             pcm,
@@ -131,7 +127,7 @@ final class AudioVideoEventListener(id: Int)
 
   override def callState(
     friendNumber: ToxFriendNumber,
-    callState: util.Collection[ToxavFriendCallState]
+    callState: util.EnumSet[ToxavFriendCallState]
   )(state: ToxClientState): ToxClientState = {
     (state
       |> stopAvReceiving(friendNumber, callState)
@@ -239,7 +235,7 @@ final class AudioVideoEventListener(id: Int)
 
   override def videoReceiveFrame(
     friendNumber: ToxFriendNumber,
-    width: Int, height: Int,
+    width: Width, height: Height,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int
   )(state: ToxClientState): ToxClientState = {

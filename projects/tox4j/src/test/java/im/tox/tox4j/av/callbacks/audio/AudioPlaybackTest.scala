@@ -1,5 +1,6 @@
-package im.tox.tox4j.av.callbacks
+package im.tox.tox4j.av.callbacks.audio
 
+import im.tox.tox4j.av.data.{AudioLength, SampleCount, SamplingRate}
 import jline.TerminalFactory
 import org.scalatest.FunSuite
 
@@ -7,20 +8,21 @@ final class AudioPlaybackTest extends FunSuite {
 
   val displayWave = !sys.env.contains("TRAVIS")
 
-  val samplingRate = 48000
-  val audio = AudioGenerator(samplingRate)
+  val samplingRate = SamplingRate.Rate48k
+  val audioLength = AudioLength.Length60
+  val frameSize = SampleCount(audioLength, samplingRate)
+  val audio = AudioGenerators.default
   val playback = new AudioPlayback(samplingRate)
 
   test("main") {
     val terminalWidth = TerminalFactory.get.getWidth
-    val frameSize = samplingRate / 8
 
     if (displayWave) {
       System.out.print("\u001b[2J")
     }
 
-    for (t <- 0 to audio.length by frameSize) {
-      val frame = audio.nextFrame16(t, frameSize)
+    for (t <- 0 to audio.length(samplingRate) by frameSize.value) {
+      val frame = audio.nextFrame16(audioLength, samplingRate, t)
       if (displayWave) {
         System.out.print("\u001b[H")
         System.out.println(AudioPlayback.showWave(frame, terminalWidth))
@@ -30,7 +32,7 @@ final class AudioPlaybackTest extends FunSuite {
       playback.play(frame)
     }
 
-    while (!playback.done(audio.length)) {
+    while (!playback.done(audio.length(samplingRate))) {
       Thread.sleep(100)
     }
   }

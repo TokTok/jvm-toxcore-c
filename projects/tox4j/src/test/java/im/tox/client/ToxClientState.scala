@@ -3,7 +3,7 @@ package im.tox.client
 import im.tox.client.proto.Profile
 import im.tox.core.network.Port
 import im.tox.tox4j.av.ToxAv
-import im.tox.tox4j.av.callbacks.AudioGenerator
+import im.tox.tox4j.av.callbacks.audio.AudioGenerator
 import im.tox.tox4j.av.callbacks.video.VideoGenerator
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.{ToxFriendAddress, ToxFriendNumber, ToxPublicKey}

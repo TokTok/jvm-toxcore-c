@@ -152,7 +152,7 @@ object VideoGenerators extends Assertions {
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   )
 
-  val All = Map[String, (Width, Height, Int) => VideoGenerator](
+  val all = Map[String, (Width, Height, Int) => VideoGenerator](
     "xor1" -> Xor1,
     "xor2" -> Xor2,
     "xor3" -> Xor3,
@@ -164,7 +164,7 @@ object VideoGenerators extends Assertions {
     "smiley" -> { (w, h, _) => VideoGenerator.resizeNearestNeighbour(w, h, Smiley) }
   )
 
-  val Selected = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
-  // val Selected = Xor4(DefaultWidth, DefaultHeight)
+  val default = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
+  // val default = Xor4(DefaultWidth, DefaultHeight)
 
 }

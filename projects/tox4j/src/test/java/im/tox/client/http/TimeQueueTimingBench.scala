@@ -3,7 +3,7 @@ package im.tox.client.http
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
 
-final class TimeQueueBench extends TimingReport {
+final class TimeQueueTimingBench extends TimingReport {
 
   val size100k = range("size")(100000)
   val size1M = range("size")(1000000)
@@ -14,7 +14,7 @@ final class TimeQueueBench extends TimingReport {
     queue
   }
 
-  timing of classOf[TimeQueue] in {
+  timing.of[TimeQueue] {
 
     measure method "averageRef" in {
       using(size100k.map(makeQueue)) in (_.averageRef)

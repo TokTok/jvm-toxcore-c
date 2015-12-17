@@ -13,7 +13,7 @@ final class IterateTimingBench extends TimingReport {
 
   val eventListener = new ToxCoreEventAdapter[Unit]
 
-  timing of classOf[ToxCore] in {
+  timing.of[ToxCore] {
 
     measure method "iterate" in {
       usingTox(iterations10k) in {

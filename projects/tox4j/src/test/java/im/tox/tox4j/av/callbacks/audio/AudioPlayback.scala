@@ -1,6 +1,8 @@
-package im.tox.tox4j.av.callbacks
+package im.tox.tox4j.av.callbacks.audio
 
 import javax.sound.sampled._
+
+import im.tox.tox4j.av.data.SamplingRate
 
 import scala.util.Try
 
@@ -36,7 +38,7 @@ object AudioPlayback {
 
 }
 
-final class AudioPlayback(samplingRate: Int) {
+final class AudioPlayback(samplingRate: SamplingRate) {
 
   def play(pcm: Array[Short]): Unit = {
     soundLine.foreach { soundLine =>
@@ -50,10 +52,10 @@ final class AudioPlayback(samplingRate: Int) {
   }
 
   private val soundLine = Try {
-    val format = new AudioFormat(samplingRate, 16, 1, true, true)
+    val format = new AudioFormat(samplingRate.value, 16, 1, true, true)
     val info = new DataLine.Info(classOf[SourceDataLine], format)
     val soundLine = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
-    soundLine.open(format, samplingRate)
+    soundLine.open(format, samplingRate.value)
     soundLine.start()
     soundLine
   }

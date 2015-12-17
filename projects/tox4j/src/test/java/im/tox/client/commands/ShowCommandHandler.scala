@@ -8,6 +8,8 @@ import im.tox.tox4j.testing.GetDisjunction._
 
 object ShowCommandHandler extends Say {
 
+  val Pattern = "show\\s+(.+)".r
+
   def apply(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
     def const(response: String)(tox: ToxCore): String = response
 

@@ -4,13 +4,13 @@ import im.tox.tox4j.av.data.{Height, Width}
 import im.tox.tox4j.bench.{Confidence, TimingReport}
 import im.tox.tox4j.bench.ToxBenchBase._
 
-final class VideoGeneratorBench extends TimingReport {
+final class VideoGeneratorTimingBench extends TimingReport {
 
   protected override def confidence = Confidence.normal
 
   val frames100k = range("frames")(500)
 
-  timing of classOf[VideoGenerator] in {
+  timing.of[VideoGenerator] {
 
     performance of "Xor5" in {
 

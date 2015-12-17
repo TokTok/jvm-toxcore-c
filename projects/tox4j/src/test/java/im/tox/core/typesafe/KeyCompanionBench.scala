@@ -13,7 +13,7 @@ abstract class KeyCompanionBench[T <: AnyVal, S <: Security] extends TimingRepor
     Gen.listOfN(size, arbT.arbitrary)(Gen.Parameters.default).get
   }
 
-  timing of companion.getClass in {
+  timing.of[KeyCompanion[T, S]] {
 
     measure method "toHexStringRef" in {
       using(iterations1k.map(makeKeys)) in (_.foreach(companion.toHexStringRef))

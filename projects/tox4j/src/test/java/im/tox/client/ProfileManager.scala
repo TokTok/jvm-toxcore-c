@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.Logger
 import im.tox.client.proto.Profile
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.{ToxNickname, ToxPublicKey, ToxStatusMessage}
-import im.tox.tox4j.impl.jni.ToxCoreImpl
+import im.tox.tox4j.impl.jni.ToxCoreEventDispatch
 import im.tox.tox4j.testing.GetDisjunction._
 import org.slf4j.LoggerFactory
 
@@ -45,7 +45,7 @@ case object ProfileManager {
         tox.setName(ToxNickname(profile.name.getBytes))
         tox.setStatusMessage(ToxStatusMessage(profile.statusMessage.getBytes))
         tox.setNospam(profile.nospam)
-        tox.setStatus(ToxCoreImpl.convert(profile.status))
+        tox.setStatus(ToxCoreEventDispatch.convert(profile.status))
         logger.info(s"[$id] Adding ${profile.friendKeys.length} friends from saved friend list")
         profile.friendKeys.foreach(key => logger.debug(s"[$id] - $key"))
         profile.friendKeys.map(ToxPublicKey.fromHexString(_).get).foreach(tox.addFriendNorequest)
@@ -59,7 +59,7 @@ case object ProfileManager {
         name = tox.getName.toString,
         statusMessage = tox.getStatusMessage.toString,
         nospam = tox.getNospam,
-        status = ToxCoreImpl.convert(tox.getStatus),
+        status = ToxCoreEventDispatch.convert(tox.getStatus),
         friendKeys = tox.getFriendNumbers.map(tox.getFriendPublicKey).map(_.toHexString)
       )
       saveProfile(tox, profile)

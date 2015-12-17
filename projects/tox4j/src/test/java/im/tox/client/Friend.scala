@@ -1,9 +1,9 @@
 package im.tox.client
 
-import im.tox.tox4j.av.callbacks.AudioGenerator
-import im.tox.tox4j.av.callbacks.video.{VideoGenerators, VideoGenerator}
-import im.tox.tox4j.core.data.{ToxStatusMessage, ToxNickname}
-import im.tox.tox4j.core.enums.{ToxUserStatus, ToxConnection}
+import im.tox.tox4j.av.callbacks.audio.{AudioGenerator, AudioGenerators}
+import im.tox.tox4j.av.callbacks.video.{VideoGenerator, VideoGenerators}
+import im.tox.tox4j.core.data.{ToxNickname, ToxStatusMessage}
+import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
 
 import scalaz.Lens
 
@@ -17,12 +17,12 @@ final case class Friend(
   // The 't' argument to audio generators.
   audioTime: Option[Int] = None,
   // The current audio generator for this friend.
-  audio: AudioGenerator = AudioGenerator(8000),
+  audio: AudioGenerator = AudioGenerators.default,
 
   // The frame number for video generators.
   videoFrame: Option[Int] = None,
   // The current video generator for this friend
-  video: VideoGenerator = VideoGenerators.Selected
+  video: VideoGenerator = VideoGenerators.default
 )
 
 object Friend {

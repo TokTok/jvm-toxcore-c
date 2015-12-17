@@ -2,7 +2,7 @@ package im.tox.client.callbacks
 
 import java.util
 
-import im.tox.tox4j.av.data.{AudioChannels, BitRate, SamplingRate}
+import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.ToxavFriendCallState
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
@@ -152,7 +152,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
 
   override def callState(
     friendNumber: ToxFriendNumber,
-    callState: util.Collection[ToxavFriendCallState]
+    callState: util.EnumSet[ToxavFriendCallState]
   )(state: ToxCoreState): ToxCoreState = {
     observers.foreach(_.callState(friendNumber, callState)(()))
     next.callState(friendNumber, callState)(state)
@@ -179,7 +179,7 @@ final class ObservingEventListener[ToxCoreState](next: ToxEventListener[ToxCoreS
 
   override def videoReceiveFrame(
     friendNumber: ToxFriendNumber,
-    width: Int, height: Int,
+    width: Width, height: Height,
     y: Array[Byte], u: Array[Byte], v: Array[Byte],
     yStride: Int, uStride: Int, vStride: Int
   )(state: ToxCoreState): ToxCoreState = {

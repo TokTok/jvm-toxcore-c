@@ -28,7 +28,7 @@ final class FriendListTimingBench extends TimingReport {
     friendKeys(missing) foreach tox.addFriendNorequest
   }
 
-  timing of classOf[ToxCore] in {
+  timing.of[ToxCore] {
 
     measure method "addFriend" in {
       using(friends(100) map friendAddresses, toxInstance.cached) tearDown clearFriendList in {

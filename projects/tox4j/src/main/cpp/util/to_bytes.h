@@ -1,28 +1,29 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
+#include <string>
 
-static inline void
-to_bytes (std::vector<uint8_t> &bytes, int16_t value)
+template<typename OutputIterator>
+static OutputIterator
+to_bytes (OutputIterator output, int16_t value)
 {
-  bytes.push_back (value >> 8);
-  bytes.push_back (value & 0xff);
+  *output++ = value >> 8;
+  *output++ = value & 0xff;
+  return output;
 }
 
 
 template<typename Iterator>
-std::vector<uint8_t>
-to_bytes (Iterator begin, Iterator end)
+void
+to_bytes (Iterator begin, Iterator end, std::string &bytes)
 {
-  std::vector<uint8_t> bytes;
-  bytes.reserve ((end - begin) * sizeof (*begin));
+  bytes.resize ((end - begin) * sizeof (*begin));
+
+  auto output = bytes.begin ();
   while (begin != end)
     {
       auto value = *begin;
-      to_bytes (bytes, value);
+      output = to_bytes (output, value);
       ++begin;
     }
-
-  return bytes;
 }

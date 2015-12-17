@@ -9,7 +9,7 @@ import org.scalacheck.Arbitrary
 /**
  * Benchmark.
  */
-abstract class DistanceMetricBench[Metric <: DistanceMetric[Metric]](metric: DistanceMetricCompanion[Metric]) extends TimingReport {
+abstract class DistanceMetricTimingBench[Metric <: DistanceMetric[Metric]](metric: DistanceMetricCompanion[Metric]) extends TimingReport {
 
   protected override def confidence = Confidence.normal
 
@@ -37,7 +37,7 @@ abstract class DistanceMetricBench[Metric <: DistanceMetric[Metric]](metric: Dis
   val distPairs10k = iterations10k map makeDistancePairs
   val distPairs100k = iterations100k map makeDistancePairs
 
-  timing of metric.getClass in {
+  timing.of[metric.type] {
 
     measure method "x < y" in {
       using(distPairs100k) in { dists =>

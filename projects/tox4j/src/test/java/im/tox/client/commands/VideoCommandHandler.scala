@@ -8,6 +8,8 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 
 object VideoCommandHandler extends Say {
 
+  val Pattern = "video\\s+(.+)".r
+
   def apply(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
     val video = ToxClientState.friendVideo(friendNumber)
 
@@ -25,7 +27,7 @@ object VideoCommandHandler extends Say {
 
     request match {
       case ResizeCommand(width, height) => Some(oldVideo.resize(Width.clamp(width.toInt), Height.clamp(height.toInt)))
-      case changeVideo                  => VideoGenerators.All.get(changeVideo).map(_(oldVideo.width, oldVideo.height, 0))
+      case changeVideo                  => VideoGenerators.all.get(changeVideo).map(_(oldVideo.width, oldVideo.height, 0))
     }
   }
 
@@ -39,7 +41,7 @@ object VideoCommandHandler extends Say {
   }
 
   private def showVideoOptions(friendNumber: ToxFriendNumber, request: String)(state: ToxClientState): ToxClientState = {
-    say(friendNumber, s"No such video '$request'. Options: " + VideoGenerators.All.keys.mkString(", "))(state)
+    say(friendNumber, s"No such video '$request'. Options: " + VideoGenerators.all.keys.mkString(", "))(state)
   }
 
 }

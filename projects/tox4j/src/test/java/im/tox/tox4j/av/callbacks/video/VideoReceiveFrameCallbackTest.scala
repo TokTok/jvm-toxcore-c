@@ -15,7 +15,7 @@ import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 
 final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
 
-  private val video = VideoGenerators.Selected
+  private val video = VideoGenerators.default
 
   /**
    * The time to wait for the next frame. Increase this if you need more time
@@ -122,14 +122,14 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: State): State = {
+    override def callState(friendNumber: ToxFriendNumber, callState: util.EnumSet[ToxavFriendCallState])(state: State): State = {
       debug(state, s"Call with ${state.id(friendNumber)} is now $callState")
       state.addTask(sendFrame(friendNumber))
     }
 
     override def videoReceiveFrame(
       friendNumber: ToxFriendNumber,
-      width: Int, height: Int,
+      width: Width, height: Height,
       y: Array[Byte], u: Array[Byte], v: Array[Byte],
       yStride: Int, uStride: Int, vStride: Int
     )(state0: State): State = {
@@ -143,7 +143,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
           s", parseTime=${parseTime}ms, displayTime=${displayTime}ms"
         }
 
-      debug(state, s"Received frame ${state0.get}: size=($width, $height), strides=($yStride, $uStride, $vStride)${times.getOrElse("")}")
+      debug(state, s"Received frame ${state0.get}: $width, $height, strides=($yStride, $uStride, $vStride)${times.getOrElse("")}")
 
       if (state.get >= video.length) {
         displayImage.foreach(_.close())

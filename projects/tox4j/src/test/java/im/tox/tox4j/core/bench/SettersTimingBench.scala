@@ -10,7 +10,7 @@ final class SettersTimingBench extends TimingReport {
 
   private val friendNumber = ToxFriendNumber.fromInt(0).get
 
-  timing of classOf[ToxCore] in {
+  timing.of[ToxCore] {
 
     measure method "setNoSpam" in {
       usingTox(iterations100k) in {

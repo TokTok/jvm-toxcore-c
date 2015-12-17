@@ -12,7 +12,7 @@ final class ToxCoreTimingBench extends TimingReport {
   val port = Port.fromInt(8080).get
   val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
 
-  timing of classOf[ToxCore] in {
+  timing.of[ToxCore] {
 
     measure method "bootstrap" in {
       usingTox(nodes) in {

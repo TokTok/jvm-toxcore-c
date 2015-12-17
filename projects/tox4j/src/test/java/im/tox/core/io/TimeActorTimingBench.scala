@@ -10,13 +10,13 @@ import scala.language.postfixOps
 import scalaz.concurrent.Task
 import scalaz.stream._
 
-final class TimeActorBench extends TimingReport {
+final class TimeActorTimingBench extends TimingReport {
 
   protected override def confidence = Confidence.normal
 
   val timerCounts = range("timers")(1000)
 
-  timing of TimeActor.getClass in {
+  timing.of[TimeActor.type] {
 
     performance of "replacing a single timer N times" in {
       def makeTask(actionCount: Int): Process[Task, Unit] = {

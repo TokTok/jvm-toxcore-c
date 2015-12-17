@@ -48,7 +48,7 @@ final class CoreCallbackTimingBench extends TimingReport {
     tox.invokeSelfConnectionStatus(ToxConnection.TCP)
   }
 
-  timing of classOf[ToxCore] in {
+  timing.of[ToxCore] {
 
     measure method "iterate" in {
       usingTox(iterations1k) in {

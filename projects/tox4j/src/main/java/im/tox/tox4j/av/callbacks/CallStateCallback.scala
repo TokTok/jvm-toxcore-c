@@ -17,6 +17,6 @@ trait CallStateCallback[ToxCoreState] {
    *                  effectively a Set. Any [[ToxavFriendCallState]] value is contained exactly 0 or 1 times.
    */
   def callState(
-    friendNumber: ToxFriendNumber, @NotNull callState: util.Collection[ToxavFriendCallState]
+    friendNumber: ToxFriendNumber, @NotNull callState: util.EnumSet[ToxavFriendCallState]
   )(state: ToxCoreState): ToxCoreState = state
 }
