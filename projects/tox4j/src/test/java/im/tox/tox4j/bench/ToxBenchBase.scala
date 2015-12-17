@@ -41,7 +41,11 @@ abstract class ToxBenchBase extends Bench.OfflineRegressionReport {
   final override def defaultConfig: Context = Context.empty ++ Context(
     verbose -> false,
     reports.resultDir -> "target/benchmarks",
-    exec.jvmflags -> List("-Djava.library.path=" + sys.props("java.library.path")),
+    exec.jvmflags -> List(
+      // "-XX:+UnlockDiagnosticVMOptions",
+      // "-XX:CompileCommand=print *Xor1Opt$.yuv",
+      "-Djava.library.path=" + sys.props("java.library.path")
+    ),
     exec.reinstantiation.frequency -> 1000,
     exec.reinstantiation.fullGC -> true
   ) ++ confidence

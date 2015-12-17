@@ -5,12 +5,20 @@ object VideoConversions {
 
   final case class YuvPixel(y: Byte, u: Byte, v: Byte)
 
+  def RGBtoY(r: Int, g: Int, b: Int): Byte = clamp(((66 * r + 129 * g + 25 * b + 128) >> 8) + 16)
+  def RGBtoU(r: Int, g: Int, b: Int): Byte = clamp(((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128)
+  def RGBtoV(r: Int, g: Int, b: Int): Byte = clamp(((112 * r - 94 * g - 18 * b + 128) >> 8) + 128)
+
+  def RGBtoY(rgb: Int): Byte = RGBtoY((rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff)
+  def RGBtoU(rgb: Int): Byte = RGBtoU((rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff)
+  def RGBtoV(rgb: Int): Byte = RGBtoV((rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff)
+
   object YuvPixel {
     def ofRgb(r: Int, g: Int, b: Int): YuvPixel = {
       YuvPixel(
-        y = clamp(((66 * r + 129 * g + 25 * b + 128) >> 8) + 16),
-        u = clamp(((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128),
-        v = clamp(((112 * r - 94 * g - 18 * b + 128) >> 8) + 128)
+        y = RGBtoY(r, g, b),
+        u = RGBtoU(r, g, b),
+        v = RGBtoV(r, g, b)
       )
     }
 

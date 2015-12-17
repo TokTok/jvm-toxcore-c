@@ -1,26 +1,11 @@
 package im.tox.tox4j.av.callbacks.video
 
-import im.tox.tox4j.av.callbacks.video.VideoConversions.YuvPixel
-import im.tox.tox4j.av.callbacks.video.VideoGenerator.Arithmetic
 import im.tox.tox4j.av.data.{Height, Width}
 
 object VideoGenerators {
 
-  sealed abstract class Yuv(
-      f: (Int, Int, Int) => YuvPixel,
-      width: Width = Width.fromInt(400).get,
-      height: Height = Height.fromInt(400).get
-  ) extends Arithmetic(width, height, 100) {
-
-    override protected final def yuv(t: Int, y: Int, x: Int): YuvPixel = f(t, y, x)
-
-    override final def resize(width: Width, height: Height): VideoGenerator = {
-      new Yuv(f, width, height) {
-        override def productPrefix: String = Yuv.this.productPrefix
-      }
-    }
-
-  }
+  private val DefaultWidth = Width.fromInt(400).get
+  private val DefaultHeight = Height.fromInt(400).get
 
   // TODO(iphydf): Several of these break with the following error in
   // libtoxcore.log, especially at higher resolutions:
@@ -30,74 +15,70 @@ object VideoGenerators {
   /**
    * Shifting colours in xor pattern.
    */
-  case object Xor1 extends Yuv((t, y, x) =>
-    YuvPixel(
-      (x ^ y).toByte,
-      (x ^ y + t + 1).toByte,
-      (x ^ y - t - 1).toByte
-    ))
+  final case class Xor1(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends ArithmeticVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    def y(t: Int, y: Int, x: Int): Byte = (x ^ y).toByte
+    def u(t: Int, y: Int, x: Int): Byte = (x ^ y + t + 1).toByte
+    def v(t: Int, y: Int, x: Int): Byte = (x ^ y - t - 1).toByte
+  }
 
   /**
    * Rapidly changing xor patterns.
    */
-  case object Xor2 extends Yuv((t, y, x) =>
-    YuvPixel.ofRgb(
-      (x ^ y) * t
-    ))
+  final case class Xor2(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    def rgb(t: Int, y: Int, x: Int): Int = (x ^ y) * t
+  }
 
   /**
    * Slowly right-shifting and colour-shifting xor.
    */
-  case object Xor3 extends Yuv((t, y, x) =>
-    YuvPixel.ofRgb(
-      (x - (t * Math.log(t)).toInt ^ y + (t * Math.log(t)).toInt) * t
-    ))
+  final case class Xor3(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    def rgb(t: Int, y: Int, x: Int): Int = (x - (t * Math.log(t)).toInt ^ y + (t * Math.log(t)).toInt) * t
+  }
 
   /**
    * Slowly colour-shifting xor patterns.
    */
-  case object Xor4 extends Yuv((t, y, x) =>
-    YuvPixel(
-      ((x ^ y) + t).toByte,
-      (t * 2).toByte,
-      (-t * 2 - 1).toByte
-    ))
+  final case class Xor4(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends ArithmeticVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    def y(t: Int, y: Int, x: Int): Byte = ((x ^ y) + t).toByte
+    def u(t: Int, y: Int, x: Int): Byte = (t * 2).toByte
+    def v(t: Int, y: Int, x: Int): Byte = (-t * 2 - 1).toByte
+  }
+
+  final case class Xor5(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends ArithmeticVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    def y(t: Int, y: Int, x: Int): Byte = (t + x ^ y).toByte
+    def u(t: Int, y: Int, x: Int): Byte = (x ^ y + t + 1).toByte
+    def v(t: Int, y: Int, x: Int): Byte = (x ^ y - t - 1).toByte
+  }
 
   /**
    * More and more gradient boxes.
    */
-  case object GradientBoxes extends Yuv((t, y, x) =>
-    YuvPixel.ofRgb(
-      (x * Math.log(t) + ((y * Math.log(t)).toInt << 8)).toInt
-    ))
+  final case class GradientBoxes(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    def rgb(t: Int, y: Int, x: Int): Int = (x * Math.log(t) + ((y * Math.log(t)).toInt << 8)).toInt
+  }
 
   /**
    * Multiplication (x * y) pattern moving up.
    */
-  case object MultiplyUp extends Yuv((t, y, x) =>
-    YuvPixel.ofRgb(
-      x * (y + t)
-    ))
+  final case class MultiplyUp(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
-  sealed class TextImage(rows: String*) extends VideoGenerator(Width.fromInt(rows.head.length).get, Height.fromInt(rows.size).get, 64) {
-
-    override final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
-      val width = this.width.value
-      val height = this.height.value
-
-      val y = rows.mkString.getBytes
-      val u = Array.fill((width / 2) * (height / 2))((t * 4).toByte)
-      val v = Array.fill((width / 2) * (height / 2))((-t * 4 - 1).toByte)
-      (y, u, v)
-    }
-
-    override final def resize(width: Width, height: Height): VideoGenerator = {
-      VideoGenerator.resizeNearestNeighbour(width, height, this)
-    }
-
+    def rgb(t: Int, y: Int, x: Int): Int = x * (y + t)
   }
 
-  case object Smiley extends TextImage(
+  case object Smiley extends TextImageGenerator(
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
@@ -140,6 +121,7 @@ object VideoGenerators {
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   )
 
-  val Selected = VideoGenerator.resizeNearestNeighbour(Width.fromInt(400).get, Height.fromInt(400).get, Smiley)
+  val Selected = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
+  // val Selected = Xor5
 
 }

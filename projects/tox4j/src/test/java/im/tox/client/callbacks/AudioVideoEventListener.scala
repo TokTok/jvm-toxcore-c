@@ -100,12 +100,13 @@ final class AudioVideoEventListener(id: Int)
 
   private def selectNewVideo(changeVideo: String): VideoGenerator = {
     changeVideo match {
-      case "xor1"          => VideoGenerators.Xor1
-      case "xor2"          => VideoGenerators.Xor2
-      case "xor3"          => VideoGenerators.Xor3
-      case "xor4"          => VideoGenerators.Xor4
-      case "gradientboxes" => VideoGenerators.GradientBoxes
-      case "multiplyup"    => VideoGenerators.MultiplyUp
+      case "xor1"          => VideoGenerators.Xor1()
+      case "xor2"          => VideoGenerators.Xor2()
+      case "xor3"          => VideoGenerators.Xor3()
+      case "xor4"          => VideoGenerators.Xor4()
+      case "xor5"          => VideoGenerators.Xor5()
+      case "gradientboxes" => VideoGenerators.GradientBoxes()
+      case "multiplyup"    => VideoGenerators.MultiplyUp()
       case "smiley"        => VideoGenerators.Selected
       case _               => VideoGenerators.Selected
     }
