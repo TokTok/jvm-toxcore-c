@@ -15,7 +15,8 @@ final class VideoGeneratorBench extends TimingReport {
     performance of "Xor5" in {
 
       using(frames100k) in { frames =>
-        val generator = VideoGenerators.Xor5()
+        val generator = VideoGenerators
+          .Xor5(VideoGenerators.DefaultWidth, VideoGenerators.DefaultHeight)
 
         var i = 0
         while (i < frames) {
@@ -28,7 +29,9 @@ final class VideoGeneratorBench extends TimingReport {
     performance of "Xor5.resize(401, 401)" in {
 
       using(frames100k) in { frames =>
-        val generator = VideoGenerators.Xor5().resize(Width(401), Height(401))
+        val generator = VideoGenerators
+          .Xor5(VideoGenerators.DefaultWidth, VideoGenerators.DefaultHeight)
+          .resize(Width(401), Height(401))
 
         var i = 0
         while (i < frames) {

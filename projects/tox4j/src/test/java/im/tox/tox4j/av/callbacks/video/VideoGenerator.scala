@@ -14,6 +14,9 @@ abstract class VideoGenerator {
 
   final def size: Int = width.value * height.value
 
+  protected final def w: Int = width.value
+  protected final def h: Int = height.value
+
 }
 
 object VideoGenerator extends Assertions {

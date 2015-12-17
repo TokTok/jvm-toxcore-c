@@ -2,18 +2,16 @@ package im.tox.client.callbacks
 
 import java.util
 
-import im.tox.client.{HostInfo, ToxClientState}
+import im.tox.client.commands.{AudioCommandHandler, ShowCommandHandler, VideoCommandHandler}
+import im.tox.client.{Say, ToxClientState}
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.ToxAv
-import im.tox.tox4j.av.callbacks.AudioGenerator
-import im.tox.tox4j.av.callbacks.video.{VideoGenerator, VideoGenerators}
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.ToxMessageType
-import im.tox.tox4j.testing.GetDisjunction._
 
 import scalaz.Lens
 
@@ -21,9 +19,7 @@ import scalaz.Lens
  * Handles audio/video calls.
  */
 final class AudioVideoEventListener(id: Int)
-    extends IdLogging(id) with ToxEventListener[ToxClientState] {
-
-  private val maxResponse: Int = 200
+    extends IdLogging(id) with ToxEventListener[ToxClientState] with Say {
 
   private val audioBitRate = BitRate.fromInt(8).get
   private val audioLength = AudioLength.Length60
@@ -32,13 +28,6 @@ final class AudioVideoEventListener(id: Int)
   private val audioFramesPerIteration = 1
 
   private val videoBitRate = BitRate.fromInt(1).get
-
-  private def say(friendNumber: ToxFriendNumber, message: String)(state: ToxClientState): ToxClientState = {
-    state.addTask { (tox, av, state) =>
-      tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString(message).get)
-      state
-    }
-  }
 
   override def friendMessage(
     friendNumber: ToxFriendNumber,
@@ -59,76 +48,12 @@ final class AudioVideoEventListener(id: Int)
           state
         }
 
-      case AudioCommand(request) => processAudioCommand(friendNumber, state, request)
-      case VideoCommand(request) => processVideoCommand(friendNumber, state, request)
-      case ShowCommand(request)  => processShowCommand(friendNumber, state, request)
+      case AudioCommand(request) => AudioCommandHandler(audioSamplingRate)(friendNumber, state, request)
+      case VideoCommand(request) => VideoCommandHandler(friendNumber, state, request)
+      case ShowCommand(request)  => ShowCommandHandler(friendNumber, state, request)
 
       case _ =>
-        say(friendNumber, s"unrecognised command: '${command.take(maxResponse)}'; try 'call me'")(state)
-    }
-  }
-
-  private def processAudioCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
-    val newAudio = request match {
-      case "itcrowd"      => AudioGenerator.ItCrowd(audioSamplingRate.value)
-      case "mortalkombat" => AudioGenerator.MortalKombat(audioSamplingRate.value)
-      case "songofstorms" => AudioGenerator.SongOfStorms(audioSamplingRate.value)
-      case _              => AudioGenerator(audioSamplingRate.value)
-    }
-
-    val audioTime = ToxClientState.friendAudioTime(friendNumber)
-    val audio = ToxClientState.friendAudio(friendNumber)
-    audio.set(audioTime.mod(_.map(_ => 0), state), newAudio) |> say(friendNumber, "changing audio track")
-  }
-
-  private def processVideoCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
-    val video = ToxClientState.friendVideo(friendNumber)
-    val videoFrame = ToxClientState.friendVideoFrame(friendNumber)
-
-    val oldVideo = video.get(state)
-    val newVideo = selectNewVideo(request, oldVideo)
-
-    video.set(videoFrame.mod(_.map(_ => 0), state), newVideo) |> say(friendNumber, "changing video")
-  }
-
-  private def selectNewVideo(request: String, oldVideo: VideoGenerator): VideoGenerator = {
-    val ResizeCommand = "size (\\d+)\\s+(\\d+)".r
-
-    request match {
-      case ResizeCommand(width, height) => oldVideo.resize(Width.clamp(width.toInt), Height.clamp(height.toInt))
-      case changeVideo                  => selectNewVideo(changeVideo).resize(oldVideo.width, oldVideo.height)
-    }
-  }
-
-  private def selectNewVideo(changeVideo: String): VideoGenerator = {
-    changeVideo match {
-      case "xor1"          => VideoGenerators.Xor1()
-      case "xor2"          => VideoGenerators.Xor2()
-      case "xor3"          => VideoGenerators.Xor3()
-      case "xor4"          => VideoGenerators.Xor4()
-      case "xor5"          => VideoGenerators.Xor5()
-      case "gradientboxes" => VideoGenerators.GradientBoxes()
-      case "multiplyup"    => VideoGenerators.MultiplyUp()
-      case "smiley"        => VideoGenerators.Selected
-      case _               => VideoGenerators.Selected
-    }
-  }
-
-  private def processShowCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
-    def const(response: String)(tox: ToxCore): String = response
-
-    val response: (ToxCore => String) = request match {
-      case "address" => _.getAddress.toString
-      case "dhtid"   => _.getDhtId.toString
-      case "udpport" => _.getUdpPort.toString
-      case "ipv4"    => const(HostInfo.ipv4.toString)
-      case "ipv6"    => const(HostInfo.ipv6.toString)
-      case other     => const(s"I don't know about '${other.take(maxResponse)}'")
-    }
-
-    state.addTask { (tox, av, state) =>
-      tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString(response(tox)).get)
-      state
+        say(friendNumber, s"unrecognised command: '$command'; try 'call me'")(state)
     }
   }
 

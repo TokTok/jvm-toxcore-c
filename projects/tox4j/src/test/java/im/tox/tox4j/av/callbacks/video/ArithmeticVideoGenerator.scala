@@ -10,9 +10,9 @@ abstract class ArithmeticVideoGenerator extends VideoGenerator {
   private final val uArray = Array.ofDim[Byte](size / 4)
   private final val vArray = Array.ofDim[Byte](size / 4)
 
-  protected def y(t: Int, yPos: Int, xPos: Int): Byte
-  protected def u(t: Int, yPos: Int, xPos: Int): Byte
-  protected def v(t: Int, yPos: Int, xPos: Int): Byte
+  protected def y(t: Int, x: Int, y: Int): Int
+  protected def u(t: Int, x: Int, y: Int): Int
+  protected def v(t: Int, x: Int, y: Int): Int
 
   final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
     yuv(t, width.value, height.value)
@@ -30,7 +30,7 @@ abstract class ArithmeticVideoGenerator extends VideoGenerator {
     while (yPos < height) {
       var xPos = 0
       while (xPos < width) {
-        yArray(yPos * width + xPos) = y(t, yPos, xPos)
+        yArray(yPos * width + xPos) = y(t, xPos, yPos).toByte
 
         xPos += 1
       }
@@ -44,8 +44,8 @@ abstract class ArithmeticVideoGenerator extends VideoGenerator {
     while (yPos < height) {
       var xPos = 0
       while (xPos < width) {
-        uArray(yPos * width + xPos) = u(t, yPos * 2 + 1, xPos * 2 + 1)
-        vArray(yPos * width + xPos) = v(t, yPos * 2 + 1, xPos * 2 + 1)
+        uArray(yPos * width + xPos) = u(t, xPos * 2 + 1, yPos * 2 + 1).toByte
+        vArray(yPos * width + xPos) = v(t, xPos * 2 + 1, yPos * 2 + 1).toByte
 
         xPos += 1
       }

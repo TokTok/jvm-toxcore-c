@@ -1,11 +1,12 @@
 package im.tox.tox4j.av.callbacks.video
 
 import im.tox.tox4j.av.data.{Height, Width}
+import org.scalatest.Assertions
 
-object VideoGenerators {
+object VideoGenerators extends Assertions {
 
-  private val DefaultWidth = Width.fromInt(400).get
-  private val DefaultHeight = Height.fromInt(400).get
+  val DefaultWidth = Width.fromInt(400).get
+  val DefaultHeight = Height.fromInt(400).get
 
   // TODO(iphydf): Several of these break with the following error in
   // libtoxcore.log, especially at higher resolutions:
@@ -18,15 +19,15 @@ object VideoGenerators {
   final case class Xor1(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends ArithmeticVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
-    def y(t: Int, y: Int, x: Int): Byte = (x ^ y).toByte
-    def u(t: Int, y: Int, x: Int): Byte = (x ^ y + t + 1).toByte
-    def v(t: Int, y: Int, x: Int): Byte = (x ^ y - t - 1).toByte
+    protected def y(t: Int, x: Int, y: Int): Int = x ^ y
+    protected def u(t: Int, x: Int, y: Int): Int = x ^ y + t + 1
+    protected def v(t: Int, x: Int, y: Int): Int = x ^ y - t - 1
   }
 
   /**
    * Rapidly changing xor patterns.
    */
-  final case class Xor2(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+  final case class Xor2(width: Width, height: Height, length: Int = 100) extends RgbVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
     def rgb(t: Int, y: Int, x: Int): Int = (x ^ y) * t
@@ -35,7 +36,7 @@ object VideoGenerators {
   /**
    * Slowly right-shifting and colour-shifting xor.
    */
-  final case class Xor3(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+  final case class Xor3(width: Width, height: Height, length: Int = 100) extends RgbVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
     def rgb(t: Int, y: Int, x: Int): Int = (x - (t * Math.log(t)).toInt ^ y + (t * Math.log(t)).toInt) * t
@@ -44,26 +45,56 @@ object VideoGenerators {
   /**
    * Slowly colour-shifting xor patterns.
    */
-  final case class Xor4(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends ArithmeticVideoGenerator {
+  final case class Xor4(width: Width, height: Height, length: Int = 100) extends ArithmeticVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
-    def y(t: Int, y: Int, x: Int): Byte = ((x ^ y) + t).toByte
-    def u(t: Int, y: Int, x: Int): Byte = (t * 2).toByte
-    def v(t: Int, y: Int, x: Int): Byte = (-t * 2 - 1).toByte
+    protected def y(t: Int, x: Int, y: Int): Int = (x ^ y) + t
+    protected def u(t: Int, x: Int, y: Int): Int = t * 2
+    protected def v(t: Int, x: Int, y: Int): Int = -t * 2 - 1
   }
 
-  final case class Xor5(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends ArithmeticVideoGenerator {
+  final case class Xor5(width: Width, height: Height, length: Int = 100) extends ArithmeticVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
-    def y(t: Int, y: Int, x: Int): Byte = (t + x ^ y).toByte
-    def u(t: Int, y: Int, x: Int): Byte = (x ^ y + t + 1).toByte
-    def v(t: Int, y: Int, x: Int): Byte = (x ^ y - t - 1).toByte
+    protected def y(t: Int, x: Int, y: Int): Int = t + x ^ y
+    protected def u(t: Int, x: Int, y: Int): Int = x ^ y + t + 1
+    protected def v(t: Int, x: Int, y: Int): Int = x ^ y - t - 1
+  }
+
+  private def gradient(top: Boolean, left: Boolean, x: Int, y: Int, w: Int, h: Int): Double = {
+    val value =
+      if (top && left) {
+        (x * 512 / w) min (y * 512 / h)
+      } else if (top && !left) {
+        ((w - x) * 512 / w) min (y * 512 / h)
+      } else if (!top && left) {
+        (x * 512 / w) min ((h - y) * 512 / h)
+      } else {
+        ((w - x) * 512 / w) min ((h - y) * 512 / h)
+      }
+    assert(value >= 0)
+    assert(value <= 256)
+    value.toDouble / 256
+  }
+
+  final case class XorGradient(width: Width, height: Height, length: Int = 100) extends ArithmeticVideoGenerator {
+    def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
+
+    protected def y(t: Int, x: Int, y: Int): Int = {
+      val top = y <= h / 2
+      val left = x <= w / 2
+
+      (gradient(top, left, x, y, w, h) * (x ^ y) + t).toInt
+    }
+
+    protected def u(t: Int, x: Int, y: Int): Int = t * 2
+    protected def v(t: Int, x: Int, y: Int): Int = -t * 2 - 1
   }
 
   /**
    * More and more gradient boxes.
    */
-  final case class GradientBoxes(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+  final case class GradientBoxes(width: Width, height: Height, length: Int = 100) extends RgbVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
     def rgb(t: Int, y: Int, x: Int): Int = (x * Math.log(t) + ((y * Math.log(t)).toInt << 8)).toInt
@@ -72,7 +103,7 @@ object VideoGenerators {
   /**
    * Multiplication (x * y) pattern moving up.
    */
-  final case class MultiplyUp(width: Width = DefaultWidth, height: Height = DefaultHeight, length: Int = 100) extends RgbVideoGenerator {
+  final case class MultiplyUp(width: Width, height: Height, length: Int = 100) extends RgbVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width = width, height = height)
 
     def rgb(t: Int, y: Int, x: Int): Int = x * (y + t)
@@ -121,7 +152,19 @@ object VideoGenerators {
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   )
 
+  val All = Map[String, (Width, Height, Int) => VideoGenerator](
+    "xor1" -> Xor1,
+    "xor2" -> Xor2,
+    "xor3" -> Xor3,
+    "xor4" -> Xor4,
+    "xor5" -> Xor5,
+    "xorgradient" -> XorGradient,
+    "gradientboxes" -> GradientBoxes,
+    "multiplyup" -> MultiplyUp,
+    "smiley" -> { (w, h, _) => VideoGenerator.resizeNearestNeighbour(w, h, Smiley) }
+  )
+
   val Selected = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
-  // val Selected = Xor5
+  // val Selected = Xor4(DefaultWidth, DefaultHeight)
 
 }
