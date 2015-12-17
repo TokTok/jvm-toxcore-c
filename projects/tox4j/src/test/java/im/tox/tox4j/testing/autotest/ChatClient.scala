@@ -14,7 +14,7 @@ import scala.annotation.tailrec
 
 final case class ChatStateT[T](
     state: T,
-    tasks: Seq[((ToxCore[ChatStateT[T]], ToxAv[ChatStateT[T]], ChatStateT[T]) => ChatStateT[T], Array[StackTraceElement])] = Nil,
+    tasks: Seq[((ToxCore, ToxAv, ChatStateT[T]) => ChatStateT[T], Array[StackTraceElement])] = Nil,
     chatting: Boolean = true
 ) {
 
@@ -37,7 +37,7 @@ final case class ChatStateT[T](
     e
   }
 
-  private[autotest] def runTasks(tox: ToxCore[ChatStateT[T]], av: ToxAv[ChatStateT[T]]): ChatStateT[T] = {
+  private[autotest] def runTasks(tox: ToxCore, av: ToxAv): ChatStateT[T] = {
     tasks.reverse.foldLeft(copy[T](tasks = Nil)) {
       case (nextState, (task, stacktrace)) =>
         try {
@@ -49,7 +49,7 @@ final case class ChatStateT[T](
     }
   }
 
-  def addTask(task: (ToxCore[ChatStateT[T]], ToxAv[ChatStateT[T]], ChatStateT[T]) => ChatStateT[T]): ChatStateT[T] = {
+  def addTask(task: (ToxCore, ToxAv, ChatStateT[T]) => ChatStateT[T]): ChatStateT[T] = {
     val creationTrace = Thread.currentThread.getStackTrace
     copy[T](tasks = (task, creationTrace.slice(2, creationTrace.length)) +: tasks)
   }
@@ -98,7 +98,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
   protected def isAlice = selfName == "Alice"
   protected def isBob = selfName == "Bob"
 
-  def setup(tox: ToxCore[ChatStateT[T]])(state: ChatStateT[T]): ChatStateT[T] = state
+  def setup(tox: ToxCore)(state: ChatStateT[T]): ChatStateT[T] = state
 
   override def selfConnectionStatus(connectionStatus: ToxConnection)(state: ChatStateT[T]): ChatStateT[T] = {
     if (connectionStatus != ToxConnection.NONE) {

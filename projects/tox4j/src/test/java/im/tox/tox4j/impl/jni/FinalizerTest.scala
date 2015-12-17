@@ -14,13 +14,13 @@ final class FinalizerTest extends FlatSpec {
 
   "Garbage collection" should "not crash the JVM when collecting a closed ToxCoreImpl" in {
     System.gc()
-    new ToxCoreImpl[Unit](new ToxOptions).close()
+    new ToxCoreImpl(new ToxOptions).close()
     System.gc()
   }
 
   it should "not crash the JVM when collecting an unclosed ToxCoreImpl" in {
     System.gc()
-    new ToxCoreImpl[Unit](new ToxOptions)
+    new ToxCoreImpl(new ToxOptions)
     System.gc()
   }
 

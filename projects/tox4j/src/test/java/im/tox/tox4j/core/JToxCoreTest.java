@@ -42,9 +42,8 @@ public final class JToxCoreTest extends JUnitSuite {
 
   @Test
   public void testJavaUsability() {
-    try (ToxCore<Void> tox = new ToxCoreImpl<>(options)) {
-      tox.callback(handler);
-      tox.iterate(null);
+    try (ToxCore tox = new ToxCoreImpl(options)) {
+      tox.iterate(handler, null);
       int friendNumber = tox.addFriend(null, null);
       Assert.fail("No exception thrown, null friend added as " + friendNumber);
     } catch (ToxFriendAddException e) {
@@ -61,12 +60,11 @@ public final class JToxCoreTest extends JUnitSuite {
   public void testJavaApi() {
     final byte[] bytes = "hello".getBytes();
 
-    try (ToxCore<Void> tox = new ToxCoreImpl<>(options)) {
+    try (ToxCore tox = new ToxCoreImpl(options)) {
       expectInt(tox.addFriend(bytes, bytes));
       expectInt(tox.addFriendNorequest(bytes));
       tox.addTcpRelay("hello", 0, bytes);
       tox.bootstrap("hello", 0, bytes);
-      tox.callback(handler);
       tox.close();
       tox.deleteFriend(0);
       tox.fileControl(0, 0, ToxFileControl.CANCEL);
@@ -92,9 +90,9 @@ public final class JToxCoreTest extends JUnitSuite {
       ToxUserStatus status = tox.getStatus();
       expectInt(tox.getTcpPort());
       expectInt(tox.getUdpPort());
-      Void nothing = tox.iterate(null);
+      Void nothing = tox.iterate(null, null);
       expectInt(tox.iterationInterval());
-      ToxCore<Void> tox2 = tox.load(options);
+      ToxCore tox2 = tox.load(options);
       tox.setName(bytes);
       tox.setNospam(0);
       tox.setStatus(ToxUserStatus.AWAY);

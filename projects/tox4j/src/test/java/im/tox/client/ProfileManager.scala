@@ -18,7 +18,7 @@ case object ProfileManager {
 
   private val savePath = Seq(new File("tools/toxsaves"), new File("projects/tox4j/tools/toxsaves")).find(_.exists)
 
-  def saveProfile(tox: ToxCore[ToxClientState], profile: Profile): Unit = {
+  def saveProfile(tox: ToxCore, profile: Profile): Unit = {
     savePath.foreach { savePath =>
       val output = new FileOutputStream(new File(savePath, tox.getPublicKey.toHexString))
       try {
@@ -30,14 +30,14 @@ case object ProfileManager {
     }
   }
 
-  def saveOnChange(tox: ToxCore[ToxClientState], oldProfile: Profile)(state: ToxClientState): ToxClientState = {
+  def saveOnChange(tox: ToxCore, oldProfile: Profile)(state: ToxClientState): ToxClientState = {
     if (oldProfile != state.profile) {
       saveProfile(tox, state.profile)
     }
     state
   }
 
-  def loadProfile(id: Int, tox: ToxCore[ToxClientState]): Profile = {
+  def loadProfile(id: Int, tox: ToxCore): Profile = {
     Try {
       val input = new FileInputStream(new File(savePath.get, tox.getPublicKey.toHexString))
       try {

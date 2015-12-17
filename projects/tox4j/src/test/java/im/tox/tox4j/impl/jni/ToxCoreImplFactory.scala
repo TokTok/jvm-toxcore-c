@@ -9,20 +9,20 @@ import scala.collection.mutable.ArrayBuffer
 @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Nothing"))
 object ToxCoreImplFactory extends ToxCoreFactory {
 
-  private final val toxes = new ArrayBuffer[ToxCore[_]]
+  private final val toxes = new ArrayBuffer[ToxCore]
 
-  private def make[ToxCoreState](options: ToxOptions = ToxOptions()): ToxCore[ToxCoreState] = {
+  private def make(options: ToxOptions = ToxOptions()): ToxCore = {
     try {
-      new ToxCoreImpl[ToxCoreState](options)
+      new ToxCoreImpl(options)
     } catch {
       case e: ToxNewException if e.code == ToxNewException.Code.PORT_ALLOC =>
         System.gc()
-        new ToxCoreImpl[ToxCoreState](options)
+        new ToxCoreImpl(options)
     }
   }
 
-  private def makeList(count: Int, options: ToxOptions = ToxOptions()): ToxList[Unit] = {
-    new ToxList[Unit](() => { this(options) }, count)
+  private def makeList(count: Int, options: ToxOptions = ToxOptions()): ToxList = {
+    new ToxList(() => { this(options) }, count)
   }
 
   def destroyAll(): Unit = {
@@ -31,53 +31,53 @@ object ToxCoreImplFactory extends ToxCoreFactory {
     System.gc()
   }
 
-  def apply(options: ToxOptions): ToxCore[Unit] = {
-    val tox = make[Unit](options)
+  def apply(options: ToxOptions): ToxCore = {
+    val tox = make(options)
     toxes += tox
     tox
   }
 
-  def withToxUnit[R](options: ToxOptions)(f: ToxCore[Unit] => R): R = {
-    withTox(make[Unit](options))(f)
+  def withToxUnit[R](options: ToxOptions)(f: ToxCore => R): R = {
+    withTox(make(options))(f)
   }
 
-  def withToxUnit[R](ipv6Enabled: Boolean, udpEnabled: Boolean, proxy: ProxyOptions)(f: ToxCore[Unit] => R): R = {
+  def withToxUnit[R](ipv6Enabled: Boolean, udpEnabled: Boolean, proxy: ProxyOptions)(f: ToxCore => R): R = {
     withToxUnit(ToxOptions(ipv6Enabled, udpEnabled, proxy))(f)
   }
 
-  def withToxUnit[R](ipv6Enabled: Boolean, udpEnabled: Boolean)(f: ToxCore[Unit] => R): R = {
+  def withToxUnit[R](ipv6Enabled: Boolean, udpEnabled: Boolean)(f: ToxCore => R): R = {
     withToxUnit(ToxOptions(ipv6Enabled, udpEnabled))(f)
   }
 
-  def withToxUnit[R](fatalErrors: Boolean)(f: ToxCore[Unit] => R): R = {
+  def withToxUnit[R](fatalErrors: Boolean)(f: ToxCore => R): R = {
     withToxUnit(ToxOptions(fatalErrors = fatalErrors))(f)
   }
 
-  def withToxUnit[R](saveData: SaveDataOptions)(f: ToxCore[Unit] => R): R = {
+  def withToxUnit[R](saveData: SaveDataOptions)(f: ToxCore => R): R = {
     withToxUnit(new ToxOptions(saveData = saveData))(f)
   }
 
-  def withToxUnit[R](f: ToxCore[Unit] => R): R = {
+  def withToxUnit[R](f: ToxCore => R): R = {
     withToxUnit(ipv6Enabled = true, udpEnabled = true)(f)
   }
 
-  def withTox[ToxCoreState, R](options: ToxOptions)(f: ToxCore[ToxCoreState] => R): R = {
-    withTox(make[ToxCoreState](options))(f)
+  def withTox[R](options: ToxOptions)(f: ToxCore => R): R = {
+    withTox(make(options))(f)
   }
 
-  def withToxS[ToxCoreState, R](options: ToxOptions)(f: ToxCore[ToxCoreState] => R): R = {
-    withTox(make[ToxCoreState](options))(f)
+  def withToxS[R](options: ToxOptions)(f: ToxCore => R): R = {
+    withTox(make(options))(f)
   }
 
-  def withToxS[ToxCoreState, R](ipv6Enabled: Boolean, udpEnabled: Boolean)(f: ToxCore[ToxCoreState] => R): R = {
+  def withToxS[R](ipv6Enabled: Boolean, udpEnabled: Boolean)(f: ToxCore => R): R = {
     withToxS(ToxOptions(ipv6Enabled, udpEnabled))(f)
   }
 
-  def withToxS[ToxCoreState, R](ipv6Enabled: Boolean, udpEnabled: Boolean, proxy: ProxyOptions)(f: ToxCore[ToxCoreState] => R): R = {
+  def withToxS[R](ipv6Enabled: Boolean, udpEnabled: Boolean, proxy: ProxyOptions)(f: ToxCore => R): R = {
     withToxS(ToxOptions(ipv6Enabled, udpEnabled, proxy))(f)
   }
 
-  def withToxes[R](count: Int, options: ToxOptions)(f: ToxList[Unit] => R): R = {
+  def withToxes[R](count: Int, options: ToxOptions)(f: ToxList => R): R = {
     val toxes = makeList(count, options)
     try {
       f(toxes)
@@ -86,7 +86,7 @@ object ToxCoreImplFactory extends ToxCoreFactory {
     }
   }
 
-  def withToxes[R](count: Int)(f: ToxList[Unit] => R): R = {
+  def withToxes[R](count: Int)(f: ToxList => R): R = {
     withToxes(count, ToxOptions())(f)
   }
 

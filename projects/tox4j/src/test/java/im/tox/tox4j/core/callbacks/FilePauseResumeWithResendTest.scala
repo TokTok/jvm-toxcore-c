@@ -14,7 +14,7 @@ final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
       friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       fileId: ToxFileId,
-      tox: ToxCore[ChatState]
+      tox: ToxCore
     )(state: State): State = {
       if (isAlice) {
         state.copy(
@@ -38,7 +38,7 @@ final class FilePauseResumeWithResendTest extends FilePauseResumeTestBase {
       friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       bobOffset: Long,
-      tox: ToxCore[ChatState]
+      tox: ToxCore
     )(state: State): State = {
       debug(s"seek file to $bobOffset")
       tox.fileSeek(friendNumber, bobSentFileNumber, bobOffset)

@@ -23,6 +23,8 @@ import scalaz.Lens
 final class AudioVideoEventListener(id: Int)
     extends IdLogging(id) with ToxEventListener[ToxClientState] {
 
+  private val maxResponse: Int = 200
+
   private val audioBitRate = BitRate.fromInt(8).get
   private val audioLength = AudioLength.Length60
   private val audioSamplingRate = SamplingRate.Rate8k
@@ -62,7 +64,7 @@ final class AudioVideoEventListener(id: Int)
       case ShowCommand(request)  => processShowCommand(friendNumber, state, request)
 
       case _ =>
-        say(friendNumber, s"unrecognised command: '$command'; try 'call me'")(state)
+        say(friendNumber, s"unrecognised command: '${command.take(maxResponse)}'; try 'call me'")(state)
     }
   }
 
@@ -113,15 +115,15 @@ final class AudioVideoEventListener(id: Int)
   }
 
   private def processShowCommand(friendNumber: ToxFriendNumber, state: ToxClientState, request: String): ToxClientState = {
-    def const(response: String)(tox: ToxCore[ToxClientState]): String = response
+    def const(response: String)(tox: ToxCore): String = response
 
-    val response: (ToxCore[ToxClientState] => String) = request match {
+    val response: (ToxCore => String) = request match {
       case "address" => _.getAddress.toString
       case "dhtid"   => _.getDhtId.toString
       case "udpport" => _.getUdpPort.toString
       case "ipv4"    => const(HostInfo.ipv4.toString)
       case "ipv6"    => const(HostInfo.ipv6.toString)
-      case other     => const(s"I don't know about '${other.take(200)}'")
+      case other     => const(s"I don't know about '${other.take(maxResponse)}'")
     }
 
     state.addTask { (tox, av, state) =>
@@ -141,10 +143,10 @@ final class AudioVideoEventListener(id: Int)
       av.callControl(friendNumber, ToxavCallControl.MUTE_AUDIO)
       av.callControl(friendNumber, ToxavCallControl.HIDE_VIDEO)
 
-      // val callState = new util.ArrayList[ToxavFriendCallState]
-      // if (audioEnabled) callState.add(ToxavFriendCallState.ACCEPTING_A)
-      // if (videoEnabled) callState.add(ToxavFriendCallState.ACCEPTING_V)
-      // av.invokeCallState(friendNumber, callState)
+      val callState = new util.ArrayList[ToxavFriendCallState]
+      if (audioEnabled) callState.add(ToxavFriendCallState.ACCEPTING_A)
+      if (videoEnabled) callState.add(ToxavFriendCallState.ACCEPTING_V)
+      av.invokeCallState(friendNumber, callState)
 
       state
     }
@@ -153,8 +155,8 @@ final class AudioVideoEventListener(id: Int)
   private def sendNextAudioFrame(
     friendNumber: ToxFriendNumber
   )(
-    tox: ToxCore[ToxClientState],
-    av: ToxAv[ToxClientState],
+    tox: ToxCore,
+    av: ToxAv,
     state: ToxClientState
   ): ToxClientState = {
     val audioTime = ToxClientState.friendAudioTime(friendNumber)
@@ -184,8 +186,8 @@ final class AudioVideoEventListener(id: Int)
   private def sendNextVideoFrame(
     friendNumber: ToxFriendNumber
   )(
-    tox: ToxCore[ToxClientState],
-    av: ToxAv[ToxClientState],
+    tox: ToxCore,
+    av: ToxAv,
     state: ToxClientState
   ): ToxClientState = {
     val videoFrame = ToxClientState.friendVideoFrame(friendNumber)

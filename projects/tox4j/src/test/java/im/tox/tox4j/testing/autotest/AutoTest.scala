@@ -2,9 +2,8 @@ package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
-import im.tox.tox4j.av.callbacks.ToxAvEventListener
+import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.{ToxAv, ToxAvFactory}
-import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
@@ -16,9 +15,7 @@ import scala.annotation.tailrec
 
 object AutoTest {
 
-  type Core[S] = ToxCore[ClientState[S]]
-  type Av[S] = ToxAv[ClientState[S]]
-  type Task[S] = (Core[S], Av[S], ClientState[S]) => ClientState[S]
+  type Task[S] = (ToxCore, ToxAv, ClientState[S]) => ClientState[S]
 
   /**
    * A participant in the test network. These are unique across all instances,
@@ -70,18 +67,17 @@ object AutoTest {
 
   }
 
-  final case class Participant[S](
-    tox: Core[S],
-    av: Av[S],
-    state: ClientState[S]
-  )
-
-  abstract class EventListener[S]
-      extends ToxCoreEventListener[ClientState[S]]
-      with ToxAvEventListener[ClientState[S]] {
+  abstract class EventListener[S] extends ToxEventListener[ClientState[S]] {
     type State = ClientState[S]
     def initial: S
   }
+
+  final case class Participant[S](
+    tox: ToxCore,
+    av: ToxAv,
+    handler: EventListener[S],
+    state: ClientState[S]
+  )
 
 }
 
@@ -93,8 +89,8 @@ final case class AutoTest(
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private def performTasks[S](
-    tox: Core[S],
-    av: Av[S],
+    tox: ToxCore,
+    av: ToxAv,
     interval: Int
   )(state: ClientState[S]): ClientState[S] = {
     val (delayed, runnable) = state.tasks.partition(_._1 >= 0)
@@ -113,12 +109,12 @@ final case class AutoTest(
 
     val (iterationTime, nextClients) = timed {
       clients.map {
-        case Participant(tox, av, state) =>
+        case Participant(tox, av, handler, state) =>
           Participant(
-            tox, av,
+            tox, av, handler,
             state
-              |> tox.iterate
-              |> av.iterate
+              |> tox.iterate(handler)
+              |> av.iterate(handler)
               |> performTasks(tox, av, interval)
           )
       }
@@ -140,8 +136,8 @@ final case class AutoTest(
     options: ToxOptions,
     handler: EventListener[S]
   ): List[S] = {
-    coreFactory.withToxN[ClientState[S], List[S]](count, options) { toxes =>
-      avFactory.withToxAvN[ClientState[S], List[S]](toxes) { avs =>
+    coreFactory.withToxN[List[S]](count, options) { toxes =>
+      avFactory.withToxAvN[List[S]](toxes) { avs =>
         val states = {
           val avsWithIds =
             for (((tox, av), id) <- avs.zipWithIndex) yield {
@@ -162,9 +158,7 @@ final case class AutoTest(
           for ((tox, av, id, friendList) <- states) yield {
             logger.debug(s"Participant $id's friends: $friendList")
             assert(!friendList.valuesIterator.contains(id))
-            tox.callback(handler)
-            av.callback(handler)
-            Participant(tox, av, ClientState(id, friendList, handler.initial))
+            Participant(tox, av, handler, ClientState(id, friendList, handler.initial))
           }
 
         mainLoop(participants)

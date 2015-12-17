@@ -41,7 +41,7 @@ object MainView {
 }
 
 final class MainView extends MainViewBase {
-  var tox: ToxCore[Unit] = null
+  var tox: ToxCore = null
   var eventLoop: Thread = null
 
   var messageModel = new DefaultListModel[String]

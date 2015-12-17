@@ -13,7 +13,7 @@ import scalaz.\/
 
 trait ToxTestMixin extends ToxExceptionChecks {
 
-  protected def interceptWithTox[E <: Enum[E]](code: E)(f: ToxCore[Unit] => Unit) = {
+  protected def interceptWithTox[E <: Enum[E]](code: E)(f: ToxCore => Unit) = {
     intercept(code) {
       ToxCoreImplFactory.withToxUnit { tox =>
         addFriends(tox, 1)
@@ -24,7 +24,7 @@ trait ToxTestMixin extends ToxExceptionChecks {
 
   @throws[ToxNewException]
   @throws[ToxFriendAddException]
-  protected def addFriends[ToxCoreState](@NotNull tox: ToxCore[ToxCoreState], count: Int): ToxFriendNumber = {
+  protected def addFriends(@NotNull tox: ToxCore, count: Int): ToxFriendNumber = {
     if (count < 1) {
       throw new IllegalArgumentException("Cannot add less than 1 friend: " + count)
     }
@@ -36,7 +36,7 @@ trait ToxTestMixin extends ToxExceptionChecks {
   }
 
   @throws[ToxBootstrapException]
-  def bootstrap[ToxCoreState](useIPv6: Boolean, udpEnabled: Boolean, @NotNull tox: ToxCore[ToxCoreState]): ToxCore[ToxCoreState] = {
+  def bootstrap(useIPv6: Boolean, udpEnabled: Boolean, @NotNull tox: ToxCore): ToxCore = {
     if (!udpEnabled) {
       tox.addTcpRelay(node.ipv4, node.tcpPort, node.dhtId)
     }

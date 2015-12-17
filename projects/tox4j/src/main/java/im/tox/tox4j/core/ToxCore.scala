@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull
  * should be stopped or stop using the instance before one thread invokes [[ToxCore.close]] on it, or appropriate
  * exception handlers should be installed in all threads.
  */
-trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
+trait ToxCore extends Closeable with ToxCoreEventSynth {
 
   /**
    * Store all information associated with the tox instance to a byte array.
@@ -52,7 +52,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    */
   @NotNull
   @throws[ToxNewException]
-  def load(@NotNull options: ToxOptions): ToxCore[ToxCoreState]
+  def load(@NotNull options: ToxOptions): ToxCore
 
   /**
    * Shut down the tox instance.
@@ -140,7 +140,7 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    *
    * This should be invoked every [[iterationInterval]] milliseconds.
    */
-  def iterate(state: ToxCoreState): ToxCoreState
+  def iterate[S](@NotNull handler: ToxCoreEventListener[S])(state: S): S
 
   /**
    * Copy the Tox Public Key (long term) from the Tox object.
@@ -521,12 +521,5 @@ trait ToxCore[ToxCoreState] extends Closeable with ToxCoreEventSynth {
    */
   @throws[ToxFriendCustomPacketException]
   def friendSendLosslessPacket(friendNumber: ToxFriendNumber, @NotNull data: ToxLosslessPacket): Unit
-
-  /**
-   * Register the core event handler.
-   *
-   * @param handler An event handler capable of handling all Tox events.
-   */
-  def callback(@NotNull handler: ToxCoreEventListener[ToxCoreState]): Unit
 
 }

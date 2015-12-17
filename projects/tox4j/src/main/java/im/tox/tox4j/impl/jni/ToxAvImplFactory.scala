@@ -6,12 +6,12 @@ import im.tox.tox4j.core.ToxCore
 object ToxAvImplFactory extends ToxAvFactory {
 
   @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.AsInstanceOf"))
-  private def make[ToxCoreState](tox: ToxCore[ToxCoreState]): ToxAv[ToxCoreState] = {
-    new ToxAvImpl[ToxCoreState](tox.asInstanceOf[ToxCoreImpl[ToxCoreState]])
+  private def make(tox: ToxCore): ToxAv = {
+    new ToxAvImpl(tox.asInstanceOf[ToxCoreImpl])
   }
 
-  def withToxAv[ToxCoreState, R](tox: ToxCore[ToxCoreState])(f: ToxAv[ToxCoreState] => R): R = {
-    withToxAv(make[ToxCoreState](tox))(f)
+  def withToxAv[R](tox: ToxCore)(f: ToxAv => R): R = {
+    withToxAv(make(tox))(f)
   }
 
 }

@@ -7,7 +7,7 @@ object ToxAvTestBase {
   final val enabled = {
     try {
       ToxCoreImplFactory.withToxUnit { tox =>
-        new ToxAvImpl[Unit](tox.asInstanceOf[ToxCoreImpl[Unit]]).close()
+        new ToxAvImpl(tox.asInstanceOf[ToxCoreImpl]).close()
         true
       }
     } catch {

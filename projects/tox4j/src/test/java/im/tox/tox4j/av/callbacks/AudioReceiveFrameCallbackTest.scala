@@ -69,7 +69,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
-    private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore[State], av: ToxAv[State], state0: State): State = {
+    private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore, av: ToxAv, state0: State): State = {
       val state = state0.modify(_ + frameSize * framesPerIteration)
 
       for (t <- state0.get until state.get by frameSize) {

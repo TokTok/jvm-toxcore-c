@@ -34,7 +34,7 @@ final case class ToxClientState(
 
 object ToxClientState {
 
-  type Task[S] = (ToxCore[S], ToxAv[S], S) => S
+  type Task[S] = (ToxCore, ToxAv, S) => S
 
   def friend(friendNumber: ToxFriendNumber): Lens[ToxClientState, Friend] = Lens.lensu[ToxClientState, Friend](
     (state, friend) => state.copy(friends = state.friends + (friendNumber -> friend)),

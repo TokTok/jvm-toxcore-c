@@ -12,7 +12,7 @@ final class FriendRequestCallbackTest extends AliceBobTest {
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
-    override def setup(tox: ToxCore[ChatState])(state: ChatState): ChatState = {
+    override def setup(tox: ToxCore)(state: ChatState): ChatState = {
       tox.deleteFriend(AliceBobTestBase.FriendNumber)
       if (isAlice) {
         tox.addFriend(expectedFriendAddress, ToxFriendRequestMessage.fromString(s"Hey this is $selfName").get)

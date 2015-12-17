@@ -4,6 +4,7 @@ import im.tox.core.network.Port
 import im.tox.core.random.RandomCore
 import im.tox.tox4j.TestConstants.Iterations
 import im.tox.tox4j.core._
+import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter
 import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{ProxyOptions, ToxOptions}
@@ -15,6 +16,7 @@ import org.scalatest.FunSuite
 final class ToxCoreTest extends FunSuite with ToxTestMixin {
 
   val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
+  val eventListener = new ToxCoreEventAdapter[Unit]
 
   test("ToxNew") {
     withToxUnit(ToxOptions()) { _ => }
@@ -85,7 +87,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   }
 
   test("Iteration") {
-    withToxUnit(_.iterate(()))
+    withToxUnit(_.iterate(eventListener)(()))
   }
 
   test("GetPublicKey") {

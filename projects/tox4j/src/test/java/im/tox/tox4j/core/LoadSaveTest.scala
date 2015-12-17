@@ -13,8 +13,8 @@ import scala.annotation.tailrec
 final class LoadSaveTest extends FunSuite {
 
   private trait Check {
-    def change(tox: ToxCore[Unit]): Boolean
-    def check(tox: ToxCore[Unit]): Unit
+    def change(tox: ToxCore): Boolean
+    def check(tox: ToxCore): Unit
   }
 
   @tailrec
@@ -36,7 +36,7 @@ final class LoadSaveTest extends FunSuite {
     testLoadSave(new Check() {
       private var expected = ToxNickname.unsafeFromValue(null)
 
-      override def change(tox: ToxCore[Unit]): Boolean = {
+      override def change(tox: ToxCore): Boolean = {
         expected =
           if (expected.value == null) {
             ToxNickname.fromString("").get
@@ -47,7 +47,7 @@ final class LoadSaveTest extends FunSuite {
         expected.value.length < ToxCoreConstants.MaxNameLength
       }
 
-      override def check(tox: ToxCore[Unit]): Unit = {
+      override def check(tox: ToxCore): Unit = {
         assert(tox.getName.value sameElements expected.value)
       }
     })
@@ -57,7 +57,7 @@ final class LoadSaveTest extends FunSuite {
     testLoadSave(new Check() {
       private var expected = ToxStatusMessage.unsafeFromValue(null)
 
-      override def change(tox: ToxCore[Unit]): Boolean = {
+      override def change(tox: ToxCore): Boolean = {
         if (expected.value == null) {
           expected = ToxStatusMessage.fromString("").get
         } else {
@@ -67,7 +67,7 @@ final class LoadSaveTest extends FunSuite {
         expected.value.length < ToxCoreConstants.MaxNameLength
       }
 
-      override def check(tox: ToxCore[Unit]): Unit = {
+      override def check(tox: ToxCore): Unit = {
         assert(tox.getStatusMessage.value sameElements expected.value)
       }
     })
@@ -77,12 +77,12 @@ final class LoadSaveTest extends FunSuite {
     testLoadSave(new Check() {
       private var expected = ToxUserStatus.values()
 
-      override def change(tox: ToxCore[Unit]): Boolean = {
+      override def change(tox: ToxCore): Boolean = {
         tox.setStatus(expected.head)
         expected.length > 1
       }
 
-      override def check(tox: ToxCore[Unit]): Unit = {
+      override def check(tox: ToxCore): Unit = {
         assert(tox.getStatus == expected.head)
         expected = expected.tail
       }
@@ -93,13 +93,13 @@ final class LoadSaveTest extends FunSuite {
     testLoadSave(new Check() {
       private var expected = -1
 
-      override def change(tox: ToxCore[Unit]): Boolean = {
+      override def change(tox: ToxCore): Boolean = {
         expected += 1
         tox.setNospam(expected)
         expected < 100
       }
 
-      override def check(tox: ToxCore[Unit]): Unit = {
+      override def check(tox: ToxCore): Unit = {
         assert(tox.getNospam == expected)
       }
     })
@@ -109,7 +109,7 @@ final class LoadSaveTest extends FunSuite {
     testLoadSave(new Check() {
       private var expected = ToxFriendNumber.fromInt(1).get
 
-      override def change(tox: ToxCore[Unit]): Boolean = {
+      override def change(tox: ToxCore): Boolean = {
         withToxUnit { toxFriend =>
           expected = tox.addFriend(
             toxFriend.getAddress,
@@ -119,7 +119,7 @@ final class LoadSaveTest extends FunSuite {
         false
       }
 
-      override def check(tox: ToxCore[Unit]): Unit = {
+      override def check(tox: ToxCore): Unit = {
         assert(tox.getFriendNumbers.length == 1)
         assert(tox.getFriendNumbers(0) == expected)
       }

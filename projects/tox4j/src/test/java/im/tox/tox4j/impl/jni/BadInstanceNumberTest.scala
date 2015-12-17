@@ -13,7 +13,7 @@ import org.scalatest.prop.PropertyChecks
 final class BadInstanceNumberTest extends FunSuite with PropertyChecks {
 
   private def callWithInstanceNumber(instanceNumber: Int): Unit = {
-    val tox = new ToxCoreImpl[Unit](ToxOptions())
+    val tox = new ToxCoreImpl(ToxOptions())
 
     val field = tox.getClass.getDeclaredField("instanceNumber")
     field.setAccessible(true)

@@ -32,7 +32,7 @@ object DhtNodeSelector extends Assertions {
   }
 
   private def tryBootstrap(
-    withTox: (Boolean, Boolean) => (ToxCore[Unit] => Option[DhtNode]) => Option[DhtNode],
+    withTox: (Boolean, Boolean) => (ToxCore => Option[DhtNode]) => Option[DhtNode],
     node: DhtNode,
     udpEnabled: Boolean
   ): Option[DhtNode] = {
@@ -42,7 +42,6 @@ object DhtNodeSelector extends Assertions {
 
     withTox(true, udpEnabled) { tox =>
       val status = new ConnectedListener
-      tox.callback(status)
       if (!udpEnabled) {
         tox.addTcpRelay(node.ipv4, port, node.dhtId)
       }
@@ -50,7 +49,7 @@ object DhtNodeSelector extends Assertions {
 
       // Try bootstrapping for 10 seconds.
       (0 to 10000 / tox.iterationInterval) find { _ =>
-        tox.iterate(())
+        tox.iterate(status)(())
         Thread.sleep(tox.iterationInterval)
         status.isConnected
       } match {
@@ -64,7 +63,7 @@ object DhtNodeSelector extends Assertions {
     }
   }
 
-  private def findNode(withTox: (Boolean, Boolean) => (ToxCore[Unit] => Option[DhtNode]) => Option[DhtNode]): DhtNode = {
+  private def findNode(withTox: (Boolean, Boolean) => (ToxCore => Option[DhtNode]) => Option[DhtNode]): DhtNode = {
     DhtNodeSelector.selectedNode match {
       case Some(node) => node
       case None =>

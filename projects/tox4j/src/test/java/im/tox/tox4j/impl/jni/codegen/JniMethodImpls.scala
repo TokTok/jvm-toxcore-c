@@ -67,12 +67,12 @@ object JniMethodImpls extends CodeGenerator {
 
   writeCode("ToxAv/generated/impls.h") {
     Comment(classOf[ToxAvJni].getName) +:
-      generateNativeCode[ToxAv[_]](classOf[ToxAvJni])
+      generateNativeCode[ToxAv](classOf[ToxAvJni])
   }
 
   writeCode("ToxCore/generated/impls.h") {
     Comment(classOf[ToxCoreJni].getName) +:
-      generateNativeCode[ToxCore[_]](classOf[ToxCoreJni])
+      generateNativeCode[ToxCore](classOf[ToxCoreJni])
   }
 
 }

@@ -27,19 +27,19 @@ abstract class AliceBobTest extends AliceBobTestBase with Timeouts {
     udpEnabled: Boolean,
     proxyOptions: ProxyOptions = ProxyOptions.None
   )(
-    f: ToxCore[ChatState] => Unit
+    f: ToxCore => Unit
   ): Unit = {
-    ToxCoreImplFactory.withToxS[ChatState, Unit](ipv6Enabled, udpEnabled, proxyOptions) { tox =>
+    ToxCoreImplFactory.withToxS[Unit](ipv6Enabled, udpEnabled, proxyOptions) { tox =>
       bootstrap(ipv6Enabled, udpEnabled, tox)
       f(tox)
     }
   }
 
-  private def withToxAv(tox: ToxCore[ChatState])(f: ToxAv[ChatState] => Unit): Unit = {
+  private def withToxAv(tox: ToxCore)(f: ToxAv => Unit): Unit = {
     ToxAvImplFactory.withToxAv(tox)(f)
   }
 
-  private def runAliceBobTest_Direct(withTox: => (ToxCore[ChatState] => Unit) => Unit): Unit = {
+  private def runAliceBobTest_Direct(withTox: => (ToxCore => Unit) => Unit): Unit = {
     failAfter(Timeout) {
       runAliceBobTest(
         withTox,
@@ -67,7 +67,7 @@ abstract class AliceBobTest extends AliceBobTestBase with Timeouts {
     assume(enableUdp)
     assume(enableIpv4)
     try {
-      runAliceBobTest_Direct(ToxCoreImplFactory.withToxS[ChatState, Unit](ipv6Enabled = false, udpEnabled = true))
+      runAliceBobTest_Direct(ToxCoreImplFactory.withToxS(ipv6Enabled = false, udpEnabled = true))
     } catch {
       case e: TestFailedDueToTimeoutException if ignoreTimeout =>
         cancel(s"Test timed out after $Timeout", e)

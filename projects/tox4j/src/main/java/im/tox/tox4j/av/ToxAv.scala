@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull
  * closing of ToxAv instance, all active calls will be forcibly terminated without
  * notifying peers.
  */
-trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
+trait ToxAv extends Closeable with ToxAvEventSynth {
 
   /**
    * Start new A/V session. There can only be only one session per Tox instance.
@@ -38,7 +38,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    * @return the new A/V session.
    */
   @throws[ToxavNewException]
-  def create(tox: ToxCore[ToxCoreState]): ToxAv[ToxCoreState]
+  def create(tox: ToxCore): ToxAv
 
   /**
    * Releases all resources associated with the A/V session.
@@ -59,7 +59,7 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
    * [[iterationInterval]] milliseconds. It is best called in the separate
    * thread from [[ToxCore.iterate]].
    */
-  def iterate(state: ToxCoreState): ToxCoreState
+  def iterate[S](@NotNull handler: ToxAvEventListener[S])(state: S): S
 
   /**
    * Call a friend. This will start ringing the friend.
@@ -156,12 +156,5 @@ trait ToxAv[ToxCoreState] extends Closeable with ToxAvEventSynth {
     width: Int, height: Int,
     @NotNull y: Array[Byte], @NotNull u: Array[Byte], @NotNull v: Array[Byte]
   ): Unit
-
-  /**
-   * Set the A/V event handler.
-   *
-   * @param handler An event handler capable of handling all Tox A/V events.
-   */
-  def callback(@NotNull handler: ToxAvEventListener[ToxCoreState]): Unit
 
 }

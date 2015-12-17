@@ -2,12 +2,14 @@ package im.tox.client
 
 import java.io.PrintWriter
 
+import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
 
 final case class ToxClient(
-    tox: ToxCore[ToxClientState],
-    av: ToxAv[ToxClientState],
+    tox: ToxCore,
+    av: ToxAv,
+    handler: ToxEventListener[ToxClientState],
     state: ToxClientState
 ) {
 

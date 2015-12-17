@@ -12,7 +12,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
-    override def setup(tox: ToxCore[ChatState])(state: ChatState): ChatState = {
+    override def setup(tox: ToxCore)(state: ChatState): ChatState = {
       if (isAlice) {
         state.set("This is a file for Bob".getBytes)
       } else {

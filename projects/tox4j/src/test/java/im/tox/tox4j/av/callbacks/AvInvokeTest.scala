@@ -22,31 +22,30 @@ import scala.util.Random
 
 final class AvInvokeTest extends FunSuite with PropertyChecks {
 
-  final class TestEventListener extends ToxAvEventListener[Event] {
-    private def setEvent(event: Event)(state: Event): Event = {
-      assert(state == null)
-      event
+  final class TestEventListener extends ToxAvEventListener[Option[Event]] {
+    private def setEvent(event: Event)(state: Option[Event]): Option[Event] = {
+      assert(state.isEmpty)
+      Some(event)
     }
 
     // scalastyle:off line.size.limit
-    override def audioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate)(state: Event): Event = setEvent(AudioReceiveFrame(friendNumber, pcm, channels, samplingRate))(state)
-    override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: Event): Event = setEvent(BitRateStatus(friendNumber, audioBitRate, videoBitRate))(state)
-    override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: Event): Event = setEvent(Call(friendNumber, audioEnabled, videoEnabled))(state)
-    override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: Event): Event = setEvent(CallState(friendNumber, callState.asScala.toSet))(state)
-    override def videoReceiveFrame(friendNumber: ToxFriendNumber, width: Int, height: Int, y: Array[Byte], u: Array[Byte], v: Array[Byte], yStride: Int, uStride: Int, vStride: Int)(state: Event): Event = setEvent(VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride))(state)
+    override def audioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate)(state: Option[Event]): Option[Event] = setEvent(AudioReceiveFrame(friendNumber, pcm, channels, samplingRate))(state)
+    override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: Option[Event]): Option[Event] = setEvent(BitRateStatus(friendNumber, audioBitRate, videoBitRate))(state)
+    override def call(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean)(state: Option[Event]): Option[Event] = setEvent(Call(friendNumber, audioEnabled, videoEnabled))(state)
+    override def callState(friendNumber: ToxFriendNumber, callState: util.Collection[ToxavFriendCallState])(state: Option[Event]): Option[Event] = setEvent(CallState(friendNumber, callState.asScala.toSet))(state)
+    override def videoReceiveFrame(friendNumber: ToxFriendNumber, width: Int, height: Int, y: Array[Byte], u: Array[Byte], v: Array[Byte], yStride: Int, uStride: Int, vStride: Int)(state: Option[Event]): Option[Event] = setEvent(VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride))(state)
     // scalastyle:on line.size.limit
   }
 
-  def callbackTest(invoke: ToxAvImpl[Event] => Unit, expected: Event): Unit = {
-    val tox = new ToxCoreImpl[Event](ToxOptions())
-    val toxav = new ToxAvImpl[Event](tox)
+  def callbackTest(invoke: ToxAvEventSynth => Unit, expected: Event): Unit = {
+    val tox = new ToxCoreImpl(ToxOptions())
+    val toxav = new ToxAvImpl(tox)
 
     try {
-      val listener = new TestEventListener
-      toxav.callback(listener)
       invoke(toxav)
-      val event = toxav.iterate(null)
-      assert(event == expected)
+      val listener = new TestEventListener
+      val event = toxav.iterate(listener)(None)
+      assert(event.contains(expected))
     } finally {
       toxav.close()
       tox.close()

@@ -50,7 +50,7 @@ case object TestClient extends App {
     "Quake" -> "Bring it on, noobs! *dies by rocket*"
   )
 
-  private def runTasks(tox: ToxCore[ToxClientState], av: ToxAv[ToxClientState])(state: ToxClientState): ToxClientState = {
+  private def runTasks(tox: ToxCore, av: ToxAv)(state: ToxClientState): ToxClientState = {
     if (state.tasks.isEmpty) {
       state
     } else {
@@ -76,8 +76,8 @@ case object TestClient extends App {
         for (client <- clients0) yield {
           client.copy(
             state = client.state
-            |> client.tox.iterate
-            |> client.av.iterate
+            |> client.tox.iterate(client.handler)
+            |> client.av.iterate(client.handler)
             |> runTasks(client.tox, client.av)
             |> ProfileManager.saveOnChange(client.tox, client.state.profile)
           )
@@ -104,7 +104,7 @@ case object TestClient extends App {
     val defaults = List.fill(c.count - predefined.length)(ToxOptions())
     logger.info(s"Additional default toxes: ${defaults.length}")
 
-    ToxCoreImplFactory.withToxN[ToxClientState, Unit](predefined ++ defaults) { toxes =>
+    ToxCoreImplFactory.withToxN[Unit](predefined ++ defaults) { toxes =>
       (c.address, c.key) match {
         case (Some(address), Some(key)) =>
           logger.info(s"Bootstrapping all toxes to $address:${c.bootstrapPort.value}")
@@ -113,7 +113,7 @@ case object TestClient extends App {
       }
 
       logger.info("Initialising AV sessions")
-      ToxAvImplFactory.withToxAvN[ToxClientState, Unit](toxes) { avs =>
+      ToxAvImplFactory.withToxAvN[Unit](toxes) { avs =>
         logger.info("Initialising event listeners and client states")
         val clients = {
           val clientInfos = avs.zip(Stream.continually(Random.shuffle(names)).flatten).zipWithIndex
@@ -127,8 +127,6 @@ case object TestClient extends App {
               ),
               new LoggingEventListener(id)
             )
-            tox.callback(handler)
-            av.callback(handler)
 
             // Update the profile with the new name.
             val profile = ProfileManager.loadProfile(id, tox)
@@ -141,7 +139,7 @@ case object TestClient extends App {
 
             // Save it again, changing the name/status message and updating the file format.
             ProfileManager.saveProfile(tox, profile)
-            ToxClient(tox, av, ToxClientState(
+            ToxClient(tox, av, handler, ToxClientState(
               tox.getAddress,
               tox.getDhtId,
               tox.getUdpPort,

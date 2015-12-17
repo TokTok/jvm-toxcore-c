@@ -14,7 +14,7 @@ final class FilePauseResumeWithControlTest extends FilePauseResumeTestBase {
       friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       fileId: ToxFileId,
-      tox: ToxCore[ChatState]
+      tox: ToxCore
     )(state: State): State = {
       debug("send resume control")
       if (isBob) {
@@ -33,7 +33,7 @@ final class FilePauseResumeWithControlTest extends FilePauseResumeTestBase {
       friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       bobOffset: Long,
-      tox: ToxCore[ChatState]
+      tox: ToxCore
     )(state: State): State = {
       debug(s"sending control RESUME for $bobSentFileNumber")
       tox.fileControl(friendNumber, bobSentFileNumber, ToxFileControl.RESUME)

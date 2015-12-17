@@ -4,7 +4,7 @@ import im.tox.tox4j.core.SmallNat._
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.{ToxFriendNumber, ToxFriendRequestMessage}
 import im.tox.tox4j.core.enums.ToxConnection
-import im.tox.tox4j.impl.jni.{ToxCoreImpl, ToxCoreImplFactory}
+import im.tox.tox4j.impl.jni.ToxCoreImpl
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.withToxUnit
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FlatSpec
@@ -33,26 +33,26 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
 
   "iterate" should "not be stopped by exceptions" in {
     withToxUnit(fatalErrors = false) { tox =>
-      tox.callback(new ToxCoreEventListener[Unit] {
+      val eventListener = new ToxCoreEventListener[Unit] {
         override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
           throw new RuntimeException("This exception is expected; ignore it")
         }
-      })
-      tox.asInstanceOf[ToxCoreImpl[Unit]].invokeSelfConnectionStatus(ToxConnection.NONE)
-      tox.iterate(())
+      }
+      tox.asInstanceOf[ToxCoreImpl].invokeSelfConnectionStatus(ToxConnection.NONE)
+      tox.iterate(eventListener)(())
     }
   }
 
   it should "be stopped by fatal VM errors" in {
     withToxUnit(fatalErrors = false) { tox =>
-      tox.callback(new ToxCoreEventListener[Unit] {
+      val eventListener = new ToxCoreEventListener[Unit] {
         override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
           throw new StackOverflowError
         }
-      })
-      tox.asInstanceOf[ToxCoreImpl[Unit]].invokeSelfConnectionStatus(ToxConnection.NONE)
+      }
+      tox.asInstanceOf[ToxCoreImpl].invokeSelfConnectionStatus(ToxConnection.NONE)
       intercept[StackOverflowError] {
-        tox.iterate(())
+        tox.iterate(eventListener)(())
       }
     }
   }
@@ -60,7 +60,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
   "onClose callbacks" should "have been called after close" in {
     var called = false
     withToxUnit { tox =>
-      tox.asInstanceOf[ToxCoreImpl[Unit]].addOnCloseCallback { () =>
+      tox.asInstanceOf[ToxCoreImpl].addOnCloseCallback { () =>
         called = true
       }
     }
@@ -70,7 +70,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
   they should "not be called before close" in {
     var called = false
     withToxUnit { tox =>
-      tox.asInstanceOf[ToxCoreImpl[Unit]].addOnCloseCallback { () =>
+      tox.asInstanceOf[ToxCoreImpl].addOnCloseCallback { () =>
         called = true
       }
       assert(!called)
@@ -80,7 +80,7 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
   they should "not be called if they were unregistered" in {
     var called = false
     withToxUnit { tox =>
-      val toxImpl = tox.asInstanceOf[ToxCoreImpl[Unit]]
+      val toxImpl = tox.asInstanceOf[ToxCoreImpl]
       val id = toxImpl.addOnCloseCallback { () =>
         called = true
       }

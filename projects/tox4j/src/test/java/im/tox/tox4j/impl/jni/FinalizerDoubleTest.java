@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.scalatest.junit.JUnitSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.runtime.BoxedUnit;
 
 /**
  * This test is just here to check whether calling {@link ToxCoreImpl#finalize} twice causes a
@@ -53,7 +52,7 @@ public class FinalizerDoubleTest extends JUnitSuite {
   @Test
   @SuppressWarnings("FinalizeCalledExplicitly")
   public void testFinalizeTwice() {
-    ToxCoreImpl<BoxedUnit> tox = new ToxCoreImpl<>(OPTIONS);
+    ToxCoreImpl tox = new ToxCoreImpl(OPTIONS);
 
     tox.finalize();
     tox.finalize();
@@ -62,7 +61,7 @@ public class FinalizerDoubleTest extends JUnitSuite {
   @Test(expected = IllegalStateException.class)
   @SuppressWarnings("FinalizeCalledExplicitly")
   public void testCloseAfterFinalize() {
-    ToxCoreImpl<BoxedUnit> tox = new ToxCoreImpl<>(OPTIONS);
+    ToxCoreImpl tox = new ToxCoreImpl(OPTIONS);
     tox.finalize();
     tox.close();
   }
@@ -70,7 +69,7 @@ public class FinalizerDoubleTest extends JUnitSuite {
   @Test(expected = IllegalStateException.class)
   @SuppressWarnings("FinalizeCalledExplicitly")
   public void testAnyMethodAfterFinalize() {
-    ToxCoreImpl<BoxedUnit> tox = new ToxCoreImpl<>(OPTIONS);
+    ToxCoreImpl tox = new ToxCoreImpl(OPTIONS);
     tox.finalize();
     tox.iterationInterval();
   }

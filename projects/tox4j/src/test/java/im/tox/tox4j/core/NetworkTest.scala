@@ -6,7 +6,6 @@ import im.tox.tox4j.TestConstants.Timeout
 import im.tox.tox4j._
 import im.tox.tox4j.core.NetworkTest.logger
 import im.tox.tox4j.core.data.ToxPublicKey
-import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{withToxUnit, withToxes}
 import org.scalatest.FlatSpec
 import org.scalatest.concurrent.Timeouts
@@ -34,9 +33,8 @@ final class NetworkTest extends FlatSpec with Timeouts {
       tox.bootstrap(ip, port, dhtId)
 
       val status = new ConnectedListener
-      tox.callback(status)
       while (!status.isConnected) {
-        tox.iterate(())
+        tox.iterate(status)(())
         Thread.sleep(tox.iterationInterval)
       }
 
@@ -83,7 +81,7 @@ final class NetworkTest extends FlatSpec with Timeouts {
         val start = System.currentTimeMillis
 
         while (!toxes.isAllConnected) {
-          toxes.iterate(())
+          toxes.iterate()
           Thread.sleep(toxes.iterationInterval)
         }
 
@@ -103,7 +101,7 @@ final class NetworkTest extends FlatSpec with Timeouts {
         val start = System.currentTimeMillis
 
         while (!toxes.isAnyConnected) {
-          toxes.iterate(())
+          toxes.iterate()
           try {
             Thread.sleep(toxes.iterationInterval)
           } catch {

@@ -1,6 +1,5 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.CoreInvokeTest._
 import im.tox.tox4j.core.callbacks.InvokeTest.ByteArray
 import im.tox.tox4j.core.data._
@@ -18,40 +17,39 @@ import scala.util.Random
 
 final class CoreInvokeTest extends FunSuite with PropertyChecks {
 
-  final class TestEventListener extends ToxCoreEventListener[Event] {
-    private def setEvent(event: Event)(state: Event): Event = {
-      assert(state == null)
-      event
+  final class TestEventListener extends ToxCoreEventListener[Option[Event]] {
+    private def setEvent(event: Event)(state: Option[Event]): Option[Event] = {
+      assert(state.isEmpty)
+      Some(event)
     }
 
     // scalastyle:off line.size.limit
-    override def friendTyping(friendNumber: ToxFriendNumber, isTyping: Boolean)(state: Event): Event = setEvent(FriendTyping(friendNumber, isTyping))(state)
-    override def friendStatusMessage(friendNumber: ToxFriendNumber, message: ToxStatusMessage)(state: Event): Event = setEvent(FriendStatusMessage(friendNumber, message.value))(state)
-    override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: Event): Event = setEvent(FileChunkRequest(friendNumber, fileNumber, position, length))(state)
-    override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: Event): Event = setEvent(FileRecvChunk(friendNumber, fileNumber, position, data))(state)
-    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: Event): Event = setEvent(FriendConnectionStatus(friendNumber, connectionStatus))(state)
-    override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: Event): Event = setEvent(FriendRequest(publicKey.value, timeDelta, message.value))(state)
-    override def friendLossyPacket(friendNumber: ToxFriendNumber, data: ToxLossyPacket)(state: Event): Event = setEvent(FriendLossyPacket(friendNumber, data.value))(state)
-    override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: Event): Event = setEvent(FriendStatus(friendNumber, status))(state)
-    override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Event): Event = setEvent(SelfConnectionStatus(connectionStatus))(state)
-    override def friendReadReceipt(friendNumber: ToxFriendNumber, messageId: Int)(state: Event): Event = setEvent(FriendReadReceipt(friendNumber, messageId))(state)
-    override def friendName(friendNumber: ToxFriendNumber, name: ToxNickname)(state: Event): Event = setEvent(FriendName(friendNumber, name.value))(state)
-    override def friendLosslessPacket(friendNumber: ToxFriendNumber, data: ToxLosslessPacket)(state: Event): Event = setEvent(FriendLosslessPacket(friendNumber, data.value))(state)
-    override def friendMessage(friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: Event): Event = setEvent(FriendMessage(friendNumber, messageType, timeDelta, message.value))(state)
-    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: Event): Event = setEvent(FileRecv(friendNumber, fileNumber, kind, fileSize, filename.value))(state)
-    override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: Event): Event = setEvent(FileRecvControl(friendNumber, fileNumber, control))(state)
+    override def friendTyping(friendNumber: ToxFriendNumber, isTyping: Boolean)(state: Option[Event]): Option[Event] = setEvent(FriendTyping(friendNumber, isTyping))(state)
+    override def friendStatusMessage(friendNumber: ToxFriendNumber, message: ToxStatusMessage)(state: Option[Event]): Option[Event] = setEvent(FriendStatusMessage(friendNumber, message.value))(state)
+    override def fileChunkRequest(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, length: Int)(state: Option[Event]): Option[Event] = setEvent(FileChunkRequest(friendNumber, fileNumber, position, length))(state)
+    override def fileRecvChunk(friendNumber: ToxFriendNumber, fileNumber: Int, position: Long, data: Array[Byte])(state: Option[Event]): Option[Event] = setEvent(FileRecvChunk(friendNumber, fileNumber, position, data))(state)
+    override def friendConnectionStatus(friendNumber: ToxFriendNumber, connectionStatus: ToxConnection)(state: Option[Event]): Option[Event] = setEvent(FriendConnectionStatus(friendNumber, connectionStatus))(state)
+    override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: Option[Event]): Option[Event] = setEvent(FriendRequest(publicKey.value, timeDelta, message.value))(state)
+    override def friendLossyPacket(friendNumber: ToxFriendNumber, data: ToxLossyPacket)(state: Option[Event]): Option[Event] = setEvent(FriendLossyPacket(friendNumber, data.value))(state)
+    override def friendStatus(friendNumber: ToxFriendNumber, status: ToxUserStatus)(state: Option[Event]): Option[Event] = setEvent(FriendStatus(friendNumber, status))(state)
+    override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Option[Event]): Option[Event] = setEvent(SelfConnectionStatus(connectionStatus))(state)
+    override def friendReadReceipt(friendNumber: ToxFriendNumber, messageId: Int)(state: Option[Event]): Option[Event] = setEvent(FriendReadReceipt(friendNumber, messageId))(state)
+    override def friendName(friendNumber: ToxFriendNumber, name: ToxNickname)(state: Option[Event]): Option[Event] = setEvent(FriendName(friendNumber, name.value))(state)
+    override def friendLosslessPacket(friendNumber: ToxFriendNumber, data: ToxLosslessPacket)(state: Option[Event]): Option[Event] = setEvent(FriendLosslessPacket(friendNumber, data.value))(state)
+    override def friendMessage(friendNumber: ToxFriendNumber, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: Option[Event]): Option[Event] = setEvent(FriendMessage(friendNumber, messageType, timeDelta, message.value))(state)
+    override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: Option[Event]): Option[Event] = setEvent(FileRecv(friendNumber, fileNumber, kind, fileSize, filename.value))(state)
+    override def fileRecvControl(friendNumber: ToxFriendNumber, fileNumber: Int, control: ToxFileControl)(state: Option[Event]): Option[Event] = setEvent(FileRecvControl(friendNumber, fileNumber, control))(state)
     // scalastyle:on line.size.limit
   }
 
-  def callbackTest(invoke: ToxCoreImpl[Event] => Unit, expected: Event): Unit = {
-    val tox = new ToxCoreImpl[Event](ToxOptions())
+  def callbackTest(invoke: ToxCoreEventSynth => Unit, expected: Event): Unit = {
+    val tox = new ToxCoreImpl(ToxOptions())
 
     try {
-      val listener = new TestEventListener
-      tox.callback(listener)
       invoke(tox)
-      val event = tox.iterate(null)
-      assert(event == expected)
+      val listener = new TestEventListener
+      val event = tox.iterate(listener)(None)
+      assert(event.contains(expected))
     } finally {
       tox.close()
     }

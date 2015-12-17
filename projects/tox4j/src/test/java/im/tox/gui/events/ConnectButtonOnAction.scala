@@ -65,7 +65,7 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
 
   private def connect(): Unit = {
     try {
-      toxGui.tox = new ToxCoreImpl[Unit](toxOptions)
+      toxGui.tox = new ToxCoreImpl(toxOptions)
 
       for (friendNumber <- toxGui.tox.getFriendNumbers) {
         toxGui.friendListModel.add(
@@ -75,13 +75,12 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
       }
 
       toxGui.selfPublicKey.setText(readablePublicKey(toxGui.tox.getAddress.value))
-      toxGui.tox.callback(toxGui.toxEvents)
 
       toxGui.eventLoop = new Thread(new Runnable() {
         @tailrec
         override def run(): Unit = {
           Thread.sleep(toxGui.tox.iterationInterval)
-          toxGui.tox.iterate(())
+          toxGui.tox.iterate(toxGui.toxEvents)(())
           run()
         }
       })

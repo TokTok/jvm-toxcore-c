@@ -16,8 +16,8 @@ object AliceBobTestBase {
   val FriendNumber = ToxFriendNumber.fromInt(10).get
 
   final case class Chatter[T](
-    tox: ToxCore[ChatStateT[T]],
-    av: ToxAv[ChatStateT[T]],
+    tox: ToxCore,
+    av: ToxAv,
     client: ChatClientT[T],
     state: ChatStateT[T]
   )
@@ -46,7 +46,7 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
   private def mainLoop(clients: Seq[Chatter[State]]): Unit = {
     val nextState = clients.map {
       case Chatter(tox, av, client, state) =>
-        Chatter[State](tox, av, client, state |> tox.iterate |> (_.runTasks(tox, av)))
+        Chatter[State](tox, av, client, state |> tox.iterate(client) |> (_.runTasks(tox, av)))
     }
 
     val interval = (nextState.map(_.tox.iterationInterval) ++ nextState.map(_.av.iterationInterval)).min
@@ -58,8 +58,8 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
   }
 
   protected def runAliceBobTest(
-    withTox: (ToxCore[ChatState] => Unit) => Unit,
-    withToxAv: ToxCore[ChatState] => (ToxAv[ChatState] => Unit) => Unit
+    withTox: (ToxCore => Unit) => Unit,
+    withToxAv: ToxCore => (ToxAv => Unit) => Unit
   ): Unit = {
     val method = getTopLevelMethod(Thread.currentThread.getStackTrace)
     logger.info(s"[${Thread.currentThread.getId}] --- ${getClass.getSimpleName}.$method")
@@ -81,9 +81,6 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
 
             aliceChat.expectedFriendAddress = bob.getAddress
             bobChat.expectedFriendAddress = alice.getAddress
-
-            alice.callback(aliceChat)
-            bob.callback(bobChat)
 
             val aliceState = aliceChat.setup(alice)(ChatStateT[State](initialState))
             val bobState = bobChat.setup(bob)(ChatStateT[State](initialState))

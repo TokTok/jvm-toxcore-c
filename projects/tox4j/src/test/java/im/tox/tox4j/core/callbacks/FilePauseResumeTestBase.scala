@@ -41,13 +41,13 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       fileId: ToxFileId,
-      tox: ToxCore[ChatState]
+      tox: ToxCore
     )(state: State): State
     protected def addFileRecvTask(
       friendNumber: ToxFriendNumber,
       bobSentFileNumber: Int,
       bobOffset: Long,
-      tox: ToxCore[ChatState]
+      tox: ToxCore
     )(state: State): State
 
     override def friendConnectionStatus(
