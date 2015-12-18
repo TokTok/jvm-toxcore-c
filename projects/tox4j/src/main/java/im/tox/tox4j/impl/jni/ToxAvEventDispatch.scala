@@ -2,7 +2,8 @@ package im.tox.tox4j.impl.jni
 
 import java.util
 
-import com.google.protobuf.ByteString
+import com.google.protobuf.{ByteString, InvalidProtocolBufferException}
+import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks._
 import im.tox.tox4j.av.data._
@@ -10,8 +11,11 @@ import im.tox.tox4j.av.enums.ToxavFriendCallState
 import im.tox.tox4j.av.proto._
 import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.Nullable
+import org.slf4j.LoggerFactory
 
 object ToxAvEventDispatch {
+
+  private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   def convert(kind: CallState.Kind): ToxavFriendCallState = {
     kind match {
@@ -140,8 +144,14 @@ object ToxAvEventDispatch {
     if (eventData.isEmpty || eventData(0) == 0) {
       state
     } else {
-      val events = AvEvents.parseFrom(eventData)
-      dispatchEvents(handler, events)(state)
+      try {
+        val events = AvEvents.parseFrom(eventData)
+        dispatchEvents(handler, events)(state)
+      } catch {
+        case e: InvalidProtocolBufferException =>
+          logger.error("Received invalid data: " + eventData.deep)
+          throw e
+      }
     }
   }
 
