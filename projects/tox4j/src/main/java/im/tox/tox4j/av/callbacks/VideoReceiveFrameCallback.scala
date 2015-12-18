@@ -39,5 +39,10 @@ trait VideoReceiveFrameCallback[ToxCoreState] {
    * as an optimisation. If this method does not return [[None]], the arrays in
    * the [[Some]] are passed to [[videoReceiveFrame]] as y, u, and v.
    */
-  def videoFrameCachedYUV(width: Width, height: Height): Option[(Array[Byte], Array[Byte], Array[Byte])] = None
+  def videoFrameCachedYUV(
+    height: Height,
+    yStride: Int,
+    uStride: Int,
+    vStride: Int
+  ): Option[(Array[Byte], Array[Byte], Array[Byte])] = None
 }

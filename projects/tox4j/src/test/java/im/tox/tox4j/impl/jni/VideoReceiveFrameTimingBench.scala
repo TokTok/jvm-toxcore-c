@@ -30,7 +30,12 @@ final class VideoReceiveFrameTimingBench extends TimingReport {
         Array.ofDim[Byte](width * height / 4)
       ))
 
-      override def videoFrameCachedYUV(width: Width, height: Height): Option[(Array[Byte], Array[Byte], Array[Byte])] = {
+      override def videoFrameCachedYUV(
+        height: Height,
+        yStride: Int,
+        uStride: Int,
+        vStride: Int
+      ): Option[(Array[Byte], Array[Byte], Array[Byte])] = {
         cache
       }
     }

@@ -6,7 +6,7 @@ import im.tox.tox4j.core.ToxCore
 
 final class IterateMemoryBench extends MemoryReport {
 
-  memory of classOf[ToxCore] in {
+  memory.of[ToxCore] {
 
     measure method "iterate" in {
       usingTox(iterations1k) in {

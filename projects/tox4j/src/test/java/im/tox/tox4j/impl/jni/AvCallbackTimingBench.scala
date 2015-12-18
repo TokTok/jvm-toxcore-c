@@ -19,26 +19,9 @@ final class AvCallbackTimingBench extends TimingReport {
 
   val friendNumber = ToxFriendNumber.fromInt(1).get
 
-  object EventListener extends ToxAvEventAdapter[Int] with Serializable {
-    override def audioReceiveFrame(
-      friendNumber: ToxFriendNumber,
-      pcm: Array[Short],
-      channels: AudioChannels,
-      samplingRate: SamplingRate
-    )(count: Int): Int = {
-      assert(friendNumber == AvCallbackTimingBench.this.friendNumber)
-      assert(pcm.length == AvCallbackTimingBench.this.pcm.length)
-      assert(channels == AvCallbackTimingBench.this.channels)
-      assert(samplingRate == AvCallbackTimingBench.this.samplingRate)
-      count + 1
-    }
-  }
+  object EventListener extends ToxAvEventAdapter[Unit] with Serializable
 
-  def getInstanceNumber(av: ToxAv): Int = {
-    av.asInstanceOf[ToxAvImpl].instanceNumber
-  }
-
-  timing of "AudioReceiveFrame" in {
+  timing of s"AudioReceiveFrame (${pcm.length} samples)" in {
 
     val invokeAll: (((Int, ToxAv)) => Unit) = {
       case (frames, toxAv) =>
@@ -48,28 +31,29 @@ final class AvCallbackTimingBench extends TimingReport {
         }
     }
 
-    val invokeAllJni: (((Int, Int)) => Unit) = {
-      case (frames, instanceNumber) =>
-        // Invoke all the events beforehand.
-        (0 until frames) foreach { _ =>
-          ToxAvJni.invokeAudioReceiveFrame(instanceNumber, friendNumber.value, pcm, channels.value, samplingRate.value)
-        }
-    }
-
     measure method "ToxAv.iterate" in {
-      usingToxAv(range("frames")(1000)) setUp invokeAll in {
-        case (frames, toxAv) =>
+      usingToxAv(range("frames")(10000)) setUp invokeAll in {
+        case (frames, av) =>
           // Then fetch and process them in the timed section.
-          val count = toxAv.iterate(EventListener)(0)
-          assert(count == frames)
+          av.iterate(EventListener)(())
       }
     }
 
     measure method "ToxAvJni.toxAvIterate" in {
-      using(range("frames")(1000), toxAvInstance.map(getInstanceNumber)) setUp invokeAllJni in {
-        case (frames, instanceNumber) =>
+      usingToxAv(range("frames")(10000)) setUp invokeAll in {
+        case (frames, av: ToxAvImpl) =>
           // Then fetch them in the timed section.
-          ToxAvJni.toxavIterate(instanceNumber)
+          ToxAvJni.toxavIterate(av.instanceNumber, Array.empty)
+      }
+    }
+
+    measure method "ToxAvJni.toxAvIterate (cached)" in {
+      var cache = Array.empty[Byte]
+
+      usingToxAv(range("frames")(10000)) setUp invokeAll in {
+        case (frames, av: ToxAvImpl) =>
+          // Then fetch them in the timed section.
+          cache = ToxAvJni.toxavIterate(av.instanceNumber, cache)
       }
     }
 

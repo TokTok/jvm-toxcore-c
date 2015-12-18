@@ -34,7 +34,7 @@ import scala.util.Random
  * confidence usually gives no better insight. Lower levels may turn out to be very flaky and hinder effective
  * regression testing.
  */
-abstract class ToxBenchBase extends Bench.OfflineRegressionReport {
+private[bench] abstract class ToxBenchBase extends Bench.OfflineRegressionReport {
 
   protected def confidence = Confidence.normal
 

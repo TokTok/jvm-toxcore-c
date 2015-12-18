@@ -110,7 +110,7 @@ object ToxAvEventDispatch {
       case (state, VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride)) =>
         val w = Width.unsafeFromInt(width)
         val h = Height.unsafeFromInt(height)
-        val (yArray, uArray, vArray) = convert(handler.videoFrameCachedYUV(w, h), y, u, v)
+        val (yArray, uArray, vArray) = convert(handler.videoFrameCachedYUV(h, yStride, uStride, vStride), y, u, v)
 
         handler.videoReceiveFrame(
           ToxFriendNumber.unsafeFromInt(friendNumber),
@@ -137,11 +137,11 @@ object ToxAvEventDispatch {
 
   @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
   def dispatch[S](handler: ToxAvEventListener[S], @Nullable eventData: Array[Byte])(state: S): S = {
-    if (eventData != null) { // scalastyle:ignore null
+    if (eventData.isEmpty || eventData(0) == 0) {
+      state
+    } else {
       val events = AvEvents.parseFrom(eventData)
       dispatchEvents(handler, events)(state)
-    } else {
-      state
     }
   }
 

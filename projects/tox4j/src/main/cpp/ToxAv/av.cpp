@@ -19,25 +19,47 @@ TOX_METHOD (jint, IterationInterval,
 /*
  * Class:     im_tox_tox4j_impl_ToxAvJni
  * Method:    toxavIterate
- * Signature: (I)[B
+ * Signature: (I[B)[B
  */
 TOX_METHOD (jbyteArray, Iterate,
-  jint instanceNumber)
+  jint instanceNumber, jbyteArray data)
 {
+  tox4j_assert (data != nullptr);
+
   return instances.with_instance (env, instanceNumber,
-    [=] (ToxAV *av, Events &events) -> jbyteArray
+    [=] (ToxAV *av, Events &events) mutable -> jbyteArray
       {
         LogEntry log_entry (instanceNumber, toxav_iterate, av);
 
         log_entry.print_result (toxav_iterate, av);
-        if (events.ByteSize () == 0)
-          return nullptr;
 
-        std::vector<char> buffer (events.ByteSize ());
-        events.SerializeToArray (buffer.data (), buffer.size ());
+        // Java array length.
+        jsize dataLength = env->GetArrayLength (data);
+
+        // No data => data[0] = 0.
+        if (events.ByteSize () == 0)
+          {
+            if (dataLength != 0)
+              {
+                jbyte empty = 0;
+                env->SetByteArrayRegion (data, 0, 1, &empty);
+              }
+            return data;
+          }
+
+        // Array too small => allocate new array.
+        if (events.ByteSize () > dataLength)
+          data = env->NewByteArray (events.ByteSize ());
+
+        // Serialise events to the Java array.
+        void *dataPointer = env->GetPrimitiveArrayCritical (data, nullptr);
+        events.SerializeToArray (dataPointer, events.ByteSize ());
+        env->ReleasePrimitiveArrayCritical (data, dataPointer, JNI_COMMIT);
+
+        // Clear the events list.
         events.Clear ();
 
-        return toJavaArray (env, buffer);
+        return data;
       }
   );
 }

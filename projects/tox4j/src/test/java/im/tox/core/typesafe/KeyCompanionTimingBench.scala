@@ -4,7 +4,7 @@ import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.bench.ToxBenchBase._
 import org.scalacheck.{Arbitrary, Gen}
 
-abstract class KeyCompanionBench[T <: AnyVal, S <: Security] extends TimingReport {
+abstract class KeyCompanionTimingBench[T <: AnyVal, S <: Security] extends TimingReport {
 
   protected def companion: KeyCompanion[T, S]
   implicit protected def arbT: Arbitrary[T]
