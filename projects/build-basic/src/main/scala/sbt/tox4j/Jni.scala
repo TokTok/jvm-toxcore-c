@@ -169,6 +169,9 @@ object Jni extends OptionalPlugin {
       nativeTarget := (target in Compile).value / "cpp",
       managedNativeSource := nativeTarget.value / "source",
 
+      watchSources ++= (nativeSource in Compile).value.***.get,
+      watchSources ++= (nativeSource in Test).value.***.get,
+
       // Put the linked library in here.
       binPath := nativeTarget.value / "bin",
 

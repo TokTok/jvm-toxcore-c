@@ -168,7 +168,7 @@ object CMakeGenerator {
       if (source.getName != "main.cpp" && source.getName != "mock_jni.cpp") {
         val testName = FilenameUtils.removeExtension(source.getName)
         lines += s"add_executable($testName main.cpp mock_jni.cpp $source)"
-        lines += s"add_test($testName $testName)"
+        lines += s"add_test($testName $testName --gtest_color=yes)"
       }
     }
 
