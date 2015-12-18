@@ -31,32 +31,6 @@ final class ToxCoreTest extends FlatSpec with PropertyChecks {
     }
   }
 
-  "iterate" should "not be stopped by exceptions" in {
-    withToxUnit(fatalErrors = false) { tox =>
-      val eventListener = new ToxCoreEventListener[Unit] {
-        override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
-          throw new RuntimeException("This exception is expected; ignore it")
-        }
-      }
-      tox.asInstanceOf[ToxCoreImpl].invokeSelfConnectionStatus(ToxConnection.NONE)
-      tox.iterate(eventListener)(())
-    }
-  }
-
-  it should "be stopped by fatal VM errors" in {
-    withToxUnit(fatalErrors = false) { tox =>
-      val eventListener = new ToxCoreEventListener[Unit] {
-        override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Unit): Unit = {
-          throw new StackOverflowError
-        }
-      }
-      tox.asInstanceOf[ToxCoreImpl].invokeSelfConnectionStatus(ToxConnection.NONE)
-      intercept[StackOverflowError] {
-        tox.iterate(eventListener)(())
-      }
-    }
-  }
-
   "onClose callbacks" should "have been called after close" in {
     var called = false
     withToxUnit { tox =>

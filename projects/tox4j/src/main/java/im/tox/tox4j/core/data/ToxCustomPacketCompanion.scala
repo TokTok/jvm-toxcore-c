@@ -14,7 +14,7 @@ abstract class ToxCustomPacketCompanion[T <: AnyVal](
 
   require(MinPacketId <= MaxPacketId)
 
-  override def validate: Validator = super.validate { value =>
+  override protected final def validate: Validator = super.validate { value =>
     if (value.isEmpty) {
       Some(CoreError.InvalidFormat("Empty custom packet"))
     } else {

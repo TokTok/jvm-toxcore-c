@@ -49,10 +49,6 @@ object ToxCoreImplFactory extends ToxCoreFactory {
     withToxUnit(ToxOptions(ipv6Enabled, udpEnabled))(f)
   }
 
-  def withToxUnit[R](fatalErrors: Boolean)(f: ToxCore => R): R = {
-    withToxUnit(ToxOptions(fatalErrors = fatalErrors))(f)
-  }
-
   def withToxUnit[R](saveData: SaveDataOptions)(f: ToxCore => R): R = {
     withToxUnit(new ToxOptions(saveData = saveData))(f)
   }

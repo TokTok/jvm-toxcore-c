@@ -4,10 +4,6 @@ import im.tox.tox4j.av.data.{AudioChannels, SamplingRate}
 import im.tox.tox4j.core.data.ToxFriendNumber
 import org.jetbrains.annotations.NotNull
 
-object AudioReceiveFrameCallback {
-  private val emptyArray = Array[Short]()
-}
-
 /**
  * Called when an audio frame is received.
  */

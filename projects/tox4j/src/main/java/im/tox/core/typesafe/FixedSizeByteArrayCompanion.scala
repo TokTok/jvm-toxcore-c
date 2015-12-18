@@ -3,7 +3,7 @@ package im.tox.core.typesafe
 import scodec.codecs._
 
 abstract class FixedSizeByteArrayCompanion[T <: AnyVal, S <: Security](
-    val Size: Int,
+    final val Size: Int,
     toValue: T => Array[Byte]
 ) extends ByteArrayCompanion[T, S](bytes(Size), toValue) {
 

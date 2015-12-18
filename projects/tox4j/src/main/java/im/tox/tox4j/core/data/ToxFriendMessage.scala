@@ -13,7 +13,7 @@ case object ToxFriendMessage extends VariableSizeByteArrayCompanion[ToxFriendMes
   _.value
 ) {
 
-  override def validate: Validator = super.validate { value =>
+  override protected def validate: Validator = super.validate { value =>
     if (value.isEmpty) {
       Some(CoreError.InvalidFormat("Empty friend message"))
     } else {

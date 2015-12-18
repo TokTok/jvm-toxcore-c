@@ -126,10 +126,12 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
   test("CallState") {
     assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, callState: Set[ToxavFriendCallState]) =>
-      callbackTest(
-        _.invokeCallState(friendNumber, util.EnumSet.copyOf(callState.asJavaCollection)),
-        CallState(friendNumber, callState)
-      )
+      whenever(callState.nonEmpty) {
+        callbackTest(
+          _.invokeCallState(friendNumber, util.EnumSet.copyOf(callState.asJavaCollection)),
+          CallState(friendNumber, callState)
+        )
+      }
     }
   }
 

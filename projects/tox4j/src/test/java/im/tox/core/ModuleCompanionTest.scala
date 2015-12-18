@@ -16,8 +16,8 @@ abstract class ModuleCompanionTest[T, S <: Security](module: ModuleCompanion[T, 
 
   def genInvalidBits: Option[Gen[BitVector]] = None
 
-  implicit def arbT: Arbitrary[T]
-  implicit val arbBitVector: Arbitrary[BitVector] = Arbitrary(arbitrary[Array[Byte]].map(BitVector.view))
+  implicit protected def arbT: Arbitrary[T]
+  implicit protected val arbBitVector: Arbitrary[BitVector] = Arbitrary(arbitrary[Array[Byte]].map(BitVector.view))
 
   protected def testSerialisation(value: T): Unit = {
     val decoded = module

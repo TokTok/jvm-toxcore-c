@@ -7,7 +7,7 @@ abstract class VariableSizeByteArrayCompanion[T <: AnyVal](
     toValue: T => Array[Byte]
 ) extends ByteArrayCompanion[T, Security.Sensitive](variableSizeBytes(uint16, bytes), toValue) {
 
-  override def validate: Validator = super.validate { value =>
+  override protected def validate: Validator = super.validate { value =>
     Validator.require(value.length <= MaxSize, s"Invalid length: ${value.length} > $MaxSize")
   }
 
