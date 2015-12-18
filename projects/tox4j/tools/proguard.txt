@@ -10,7 +10,7 @@
   public *;
 }
 
--keep public class **Exception$Code extends java.lang.Enum {
+-keep public class im.tox.** extends java.lang.Enum {
   public *;
 }
 
