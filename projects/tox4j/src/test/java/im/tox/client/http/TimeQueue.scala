@@ -15,7 +15,7 @@ final class TimeQueue(val maxSize: Int, queue: mutable.Queue[Long] = new mutable
    * Reference implementation.
    */
   def averageRef: Int = {
-    if (queue.isEmpty) {
+    if (queue.length < 2) {
       0
     } else {
       val times = queue.zip(queue.tail).map { case (prev, next) => (next - prev).toInt }
@@ -27,7 +27,7 @@ final class TimeQueue(val maxSize: Int, queue: mutable.Queue[Long] = new mutable
    * Optimised implementation.
    */
   def averageOpt: Int = {
-    if (queue.isEmpty) {
+    if (queue.length < 2) {
       0
     } else {
       var sum = 0

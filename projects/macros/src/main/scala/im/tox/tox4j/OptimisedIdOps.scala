@@ -37,6 +37,7 @@ object OptimisedIdOps {
   @compileTimeOnly("OptimisedIdOps was not optimised away")
   implicit def toOptimisedIdOps[A](a: A): OptimisedIdOps[A] = {
     // $COVERAGE-OFF$
+    // This is not measured by coverage, because it shouldn't be possible to call it.
     throw new RuntimeException(s"$OptimisedIdOps was not optimised away")
     // $COVERAGE-ON$
   }
@@ -82,7 +83,12 @@ object OptimisedIdOps {
           q"$ident($unwrappedSelf)"
 
         case wrappedFunction =>
+          // $COVERAGE-OFF$
+          // This is not measured by coverage, because if it were tested, it would mean we can't
+          // optimise something, and then we should just implement it. Currently it is unknown
+          // what we can't optimise, so we wait for something to turn up.
           c.warning(wrappedFunction.pos, "Could not optimise |>: " + showRaw(wrappedFunction))
+          // $COVERAGE-ON$
           q"$wrappedFunction($unwrappedSelf)"
       }
     }
