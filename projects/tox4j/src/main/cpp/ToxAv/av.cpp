@@ -33,27 +33,17 @@ TOX_METHOD (jbyteArray, Iterate,
 
         log_entry.print_result (toxav_iterate, av);
 
-        // Java array length.
-        jsize dataLength = env->GetArrayLength (data);
-
-        // No data => data[0] = 0.
-        if (events.ByteSize () == 0)
-          {
-            if (dataLength != 0)
-              {
-                jbyte empty = 0;
-                env->SetByteArrayRegion (data, 0, 1, &empty);
-              }
-            return data;
-          }
-
         // Array too small => allocate new array.
-        if (events.ByteSize () > dataLength)
-          data = env->NewByteArray (events.ByteSize ());
+        if (events.ByteSize () > env->GetArrayLength (data))
+          data = env->NewByteArray (events.ByteSize () + sizeof(uint32_t));
+
+        void *const dataPointer = env->GetPrimitiveArrayCritical (data, nullptr);
+        uint8_t *bytes = static_cast<uint8_t *> (dataPointer);
+        bytes = to_bytes (bytes, static_cast<uint32_t> (events.ByteSize ()));
 
         // Serialise events to the Java array.
-        void *dataPointer = env->GetPrimitiveArrayCritical (data, nullptr);
-        events.SerializeToArray (dataPointer, events.ByteSize ());
+        events.SerializeToArray (bytes, events.ByteSize ());
+
         env->ReleasePrimitiveArrayCritical (data, dataPointer, JNI_COMMIT);
 
         // Clear the events list.

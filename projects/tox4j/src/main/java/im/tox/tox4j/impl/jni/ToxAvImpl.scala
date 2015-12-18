@@ -27,7 +27,7 @@ private object ToxAvImpl {
 @throws[ToxavNewException]("If there was already an A/V session.")
 final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
 
-  private[this] var eventData = Array.empty[Byte] // scalastyle:ignore var.field
+  private[this] var eventData = Array.ofDim[Byte](Integer.SIZE / java.lang.Byte.SIZE) // scalastyle:ignore var.field
   private[this] val onClose = tox.addOnCloseCallback(close)
 
   private[jni] val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)

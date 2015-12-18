@@ -4,11 +4,23 @@
 #include <string>
 
 template<typename OutputIterator>
-static OutputIterator
+OutputIterator
+to_bytes (OutputIterator output, uint32_t value)
+{
+  *output++ = (value >> (8 * 3)) & 0xff;
+  *output++ = (value >> (8 * 2)) & 0xff;
+  *output++ = (value >> (8 * 1)) & 0xff;
+  *output++ = (value >> (8 * 0)) & 0xff;
+  return output;
+}
+
+
+template<typename OutputIterator>
+OutputIterator
 to_bytes (OutputIterator output, int16_t value)
 {
-  *output++ = value >> 8;
-  *output++ = value & 0xff;
+  *output++ = (value >> (8 * 1)) & 0xff;
+  *output++ = (value >> (8 * 0)) & 0xff;
   return output;
 }
 

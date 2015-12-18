@@ -21,9 +21,9 @@ import scalaz.Lens
 final class AudioVideoEventListener(id: Int)
     extends IdLogging(id) with ToxEventListener[ToxClientState] with Say {
 
-  private val audioBitRate = BitRate.fromInt(8).get
-  private val audioLength = AudioLength.Length60
-  private val audioSamplingRate = SamplingRate.Rate8k
+  private val audioBitRate = BitRate.fromInt(320).get
+  private val audioLength = AudioLength.Length40
+  private val audioSamplingRate = SamplingRate.Rate48k
   private val audioFrameSize = (audioLength.value.toMillis * audioSamplingRate.value / 1000).toInt
   private val audioFramesPerIteration = 1
 
@@ -220,7 +220,8 @@ final class AudioVideoEventListener(id: Int)
       logInfo(s"Stopping $target sending")
       lens.set(state, None)
     } else {
-      lens.set(state, Some(0))
+      // If the frame number was already set, leave it be, otherwise set it to 0.
+      lens.mod(_.orElse(Some(0)), state)
     }
   }
 

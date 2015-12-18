@@ -30,7 +30,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
     val bitRate = BitRate.fromInt(320).get
     val audioLength = AudioLength.Length40
-    val samplingRate = SamplingRate.Rate8k
+    val samplingRate = SamplingRate.Rate48k
     val frameSize = SampleCount(audioLength, samplingRate).value
     val framesPerIteration = 2
 
