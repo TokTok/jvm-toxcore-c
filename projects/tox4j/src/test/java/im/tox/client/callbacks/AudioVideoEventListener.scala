@@ -21,8 +21,8 @@ import scalaz.Lens
 final class AudioVideoEventListener(id: Int)
     extends IdLogging(id) with ToxEventListener[ToxClientState] with Say {
 
-  private val audioBitRate = BitRate.fromInt(320).get
-  private val audioLength = AudioLength.Length40
+  private val audioBitRate = BitRate.fromInt(8).get
+  private val audioLength = AudioLength.Length60
   private val audioSamplingRate = SamplingRate.Rate48k
   private val audioFrameSize = (audioLength.value.toMillis * audioSamplingRate.value / 1000).toInt
   private val audioFramesPerIteration = 1
