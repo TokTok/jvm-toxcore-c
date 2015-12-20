@@ -87,7 +87,7 @@ sub must_popen {
    open my $fh, '-|', @_
       or die "Could not exec '@_': $!";
    my @result = <$fh>;
-   chomp for @result;
+   s/[\r\n]*//g for @result;
    @result
 }
 

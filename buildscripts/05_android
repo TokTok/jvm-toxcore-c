@@ -1,0 +1,69 @@
+#!/usr/bin/env perl
+
+use strict;
+use utf8;
+use lib 'buildscripts';
+
+use BuildScript;
+my $C = require C;
+
+
+##############################################################################
+#
+# :: Run TokTok Android tests.
+#
+##############################################################################
+
+
+my %ABI = (
+   'arm-linux-androideabi' => ['emulator', 'armeabi-v7a', 'armeabi-v7a'],
+   #'aarch64-linux-android' => ['emulator64-arm', 'armeabi-v7a', 'arm64-v8a'],
+   #'i686-linux-android'    => ['emulator', 'x86', 'x86'],
+);
+
+
+my $emulator_pid = 0;
+END {
+   kill 2, $emulator_pid if $emulator_pid;
+}
+
+my $abi = $ABI{$C->TARGET};
+# Do nothing if the ABI is not supported or this is not an Android build.
+if ($abi) {
+   my ($abi_emulator, $abi_name, $abi_native_name) = @$abi;
+
+   my $native_lib_dir = "projects/toktok/src/main/libs/$abi_native_name";
+
+   my $native_lib_dst = "$native_lib_dir/libtox4j.so";
+   my $native_lib_src = "projects/tox4j/target/cpp/bin/libtox4j.so";
+   if (not -f $native_lib_dst and -f $native_lib_src) {
+      print "Copying native library from $native_lib_src to $native_lib_dst\n";
+      must_system "cp", "-a", $native_lib_src, $native_lib_dst;
+   }
+
+   my ($adb_state) = must_popen "adb", "get-state";
+   if ($adb_state ne "device") {
+      must_system "echo no | android create avd --force -n test-$abi_native_name -t android-19 --abi $abi_name";
+      if (not ($emulator_pid = fork)) {
+         exec $abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window";
+      }
+      print "Waiting for device to be online\n";
+      must_system "adb", "wait-for-device";
+      print "Device online; waiting 2 minutes for boot animation to stop\n";
+      for (0 .. 120) {
+         my ($bootanim) = must_popen "adb", "shell", "getprop", "init.svc.bootanim";
+         print "Boot animation $bootanim (after $_ seconds)\r";
+         last if $bootanim eq "stopped";
+         sleep 1;
+      }
+   }
+   print "\nUnlocking screen\n";
+   must_system "adb", "shell", "input", "keyevent", "82";
+
+   pushd {
+      must_system "adb", "logcat", "-c";
+      system "sbt", "clean", "android:test";
+      must_system "adb", "logcat", "-d"
+         if $?;
+   } "projects/toktok";
+}

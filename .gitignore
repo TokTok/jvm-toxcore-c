@@ -11,8 +11,9 @@
 # Generated startup scripts for main classes.
 /projects/*/bin
 
-# Local user settings for SBT.
+# Local user settings for SBT and Java.
 /projects/*/local.sbt
+/projects/*/local.properties
 
 # Android NDK.
 /toolchains
@@ -20,6 +21,9 @@
 
 # IDEA meta files.
 .idea
+*.iml
+*.ipr
+*.iws
 
 # Temporary editor files.
 *.swp
@@ -33,3 +37,10 @@ config.log
 
 # Debug log from toxcore.
 libtoxcore.log
+
+# Gradle temporary directory.
+.gradle
+/proguard-sbt.txt
+
+# Java runtime support for disassembly.
+hsdis-*.*

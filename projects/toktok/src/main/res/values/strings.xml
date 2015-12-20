@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">TokTok</string>
+
+
+    <string name="menu_friends">Friends</string>
+    <string name="menu_chats">Chats</string>
+    <string name="menu_call_log">Call Log</string>
+    <string name="menu_profile">Profile</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_voice_call">Voice Call</string>
+    <string name="menu_share_contact">Share Contact</string>
+    <string name="menu_save_photo_contact">Save Contact Photo</string>
+
+    <string name="friend_call_voice">Make a Voice Call</string>
+    <string name="friend_call_video">Make a Video Call</string>
+    <string name="friend_message">Send a message</string>
+    <string name="friend_options">Friend Options</string>
+    <string name="friend_options_color">Edit Friend Color</string>
+    <string name="friend_options_edit_alias">Edit Friend Alias</string>
+    <string name="friend_options_delete">Delete Friend</string>
+    <string name="friend_options_block">Block Friend</string>
+
+</resources>

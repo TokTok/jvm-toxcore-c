@@ -1,10 +1,20 @@
-language: scala
+language: android
 sudo: false
 
 addons:
   apt:
     sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5']
     packages: ['clang-3.5', 'p7zip-full']
+
+android:
+  components:
+    - android-23
+    - platform-tools
+    - extra-android-support
+    - extra-android-m2repository
+    #- sys-img-aarch64-android-23
+    - sys-img-armeabi-v7a-android-19
+    #- sys-img-x86-android-23
 
 cache:
   directories:
@@ -34,10 +44,12 @@ install:
 script:
   # Build/install step.
   - buildscripts/04_build || (cat projects/tox4j/config.log && false)
+  - mkdir -p /tmp/android-travis
+  - buildscripts/05_android
   # Upload artifacts if the build was not a test build. Test builds instrument
   # the code to gather coverage information. We don't want that instrumentation
   # to end up in production builds.
-  - if [ -z "$TEST_GOAL" ]; then buildscripts/05_upload; fi
+  - if [ -z "$TEST_GOAL" ]; then buildscripts/06_upload; fi
 
 before_cache:
   # Hack to make sbt-coveralls work with our non-standard directory layout.

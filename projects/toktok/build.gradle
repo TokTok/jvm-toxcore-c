@@ -1,0 +1,75 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.3.0'
+        classpath 'jp.leafytree.gradle:gradle-android-scala-plugin:1.4'
+    }
+}
+apply plugin: 'com.android.application'
+apply plugin: 'jp.leafytree.android-scala'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+    //maven {
+    //    url "https://oss.sonatype.org/content/repositories/snapshots"
+    //}
+}
+
+android {
+    compileSdkVersion 'android-23'
+    buildToolsVersion '23.0.1'
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 23
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+      abortOnError false
+    }
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.11.7'
+
+    // android support libraries
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.android.support:cardview-v7:23.1.1'
+    compile 'com.android.support:palette-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+
+    // db library
+    compile 'io.realm:realm-android:0.86.0'
+    // tab bar library
+    compile 'com.jpardogo.materialtabstrip:library:1.1.0'
+    // sticky header of the recycler views
+    compile 'com.tonicartos:superslim:0.4.13'
+    // circular images support
+    compile 'de.hdodenhof:circleimageview:1.3.0'
+    // image loading library
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    // ripple effect support for the older
+    compile 'com.balysv:material-ripple:1.0.2'
+
+    //compile 'org.slf4j:slf4j-android:1.7.13'
+    //compile 'im.tox:tox4j_2.11:0.1-SNAPSHOT'
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="drawerTextColor">@style/drawer_text_light</item>
+        <item name="drawerImageColor">@style/drawer_image_light</item>
+        <item name="itemTitleTextColor">@style/item_text_color_light</item>
+        <item name="itemHeaderTextColor">@style/item_header_text_color_light</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="AppTheme">
+        <item name="drawerTextColor">@style/drawer_text_dark</item>
+        <item name="drawerImageColor">@style/drawer_image_dark</item>
+        <item name="itemTitleTextColor">@style/item_text_color_dark</item>
+        <item name="itemHeaderTextColor">@style/item_header_text_color_dark</item>
+    </style>
+
+</resources>

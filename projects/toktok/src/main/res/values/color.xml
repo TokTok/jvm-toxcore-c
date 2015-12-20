@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Basic colors -->
+
+    <item name="white" type="color">#FFFFFF</item>
+    <item name="lighter_grey" type="color">#F5F5F5</item>
+    <item name="light_grey" type="color">#E0E0E0</item>
+    <item name="grey" type="color">#9E9E9E</item>
+    <item name="dark_grey" type="color">#424242</item>
+    <item name="black" type="color">#000000</item>
+
+    <!-- App background colors -->
+
+    <item name="base_color_light" type="color">#FAFAFA</item>
+    <item name="base_color_dark" type="color">#232228</item>
+
+    <!-- Toolbar colors -->
+
+    <item name="base_color_dark_toolbar" type="color">#2B2A30</item>
+
+    <!-- Text colors -->
+
+    <item name="soft_black" type="color">#212121</item>
+    <item name="secondary_text_color" type="color">#727272</item>
+
+    <!-- Transparent colors -->
+
+    <item name="transparent_white" type="color">#20FFFFFF</item>
+    <item name="fifth_transparent_white" type="color">#70FFFFFF</item>
+    <item name="almost_white" type="color">#B0FFFFFF</item>
+    <item name="transparent_black" type="color">#20000000</item>
+    <item name="fifth_transparent_black" type="color">#70000000</item>
+
+</resources>
