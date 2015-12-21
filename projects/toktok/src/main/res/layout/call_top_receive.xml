@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_centerVertical="true"
+    android:layout_centerHorizontal="true"
+    android:layout_height="wrap_content">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/call_img"
+        android:transitionName="profilePhoto"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/call_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/call_img"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:shadowColor="@color/textDarkColor"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:textColor="@color/textWhiteColor"
+        android:textSize="28sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/call_friend"
+        android:layout_centerHorizontal="true"
+        android:shadowColor="@color/textDarkColor"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="2"
+        android:text="@string/call_is_calling"
+        android:textColor="@color/textWhiteColor"
+        android:textSize="16sp" />
+
+</RelativeLayout>

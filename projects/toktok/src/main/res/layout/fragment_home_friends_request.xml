@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:textSize="16dp"
+        android:fontFamily="sans-serif-light"
+        android:layout_centerVertical="true"
+        android:textColor="@color/textDarkColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gloria Matthews" />
+
+    <ImageButton
+        android:backgroundTint="@color/cardBoardBackground"
+        android:id="@+id/home_frieds_requests_decline"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_content_clear"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ImageButton
+        android:backgroundTint="@color/cardBoardBackground"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_done_black_24dp"
+        android:tint="@color/statusOnline"
+        android:layout_toLeftOf="@id/home_frieds_requests_decline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

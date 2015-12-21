@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:background="@drawable/ripple"
+    android:clickable="true"
+    android:layout_width="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/new_message_item"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="56dp"
+        android:paddingRight="16dp"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/new_message_item_img"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="16dp" />
+
+        <View
+            android:id="@+id/new_message_item_status"
+            android:layout_width="15dp"
+            android:layout_gravity="center"
+            android:layout_centerVertical="true"
+            android:layout_height="15dp"
+            android:backgroundTint="#2ECC71"
+            android:layout_marginRight="20dp"
+            android:layout_toRightOf="@id/new_message_item_img"
+            android:background="@drawable/status_circle" />
+
+        <TextView
+            android:id="@+id/new_message_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:fontFamily="sans-serif-light"
+            android:textSize="18sp"
+            android:textColor="@color/textDarkColor"
+            android:layout_toRightOf="@id/new_message_item_status"
+            android:layout_centerInParent="true" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

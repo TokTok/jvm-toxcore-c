@@ -1,25 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="im.tox.toktok">
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-sdk android:minSdkVersion="19" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <application
-        android:theme="@style/AppTheme"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:hardwareAccelerated="true"
+        android:theme="@style/AppTheme">
         <activity
-            android:name=".app.activities.Main"
+            android:name=".app.MainActivityHolder"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".app.activities.Settings" android:label="Settings"/>
-        <activity android:name=".app.activities.ContactDetails" android:theme="@style/Theme.Transparent" android:label="ContactDetails"/>
+        <activity
+            android:name=".app.new_message.NewMessageActivity"
+            android:label="New Message"
+            android:windowSoftInputMode="adjustPan|adjustNothing|stateHidden"
+            android:parentActivityName=".app.MainActivityHolder">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".app.MainActivityHolder" />
+        </activity>
+        <activity
+            android:name=".app.contacts.FileSendActivity"
+            android:label="File Send">
+        </activity>
+        <activity
+            android:name=".app.message_activity.MessageActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:label="Message"></activity>
+        <activity
+            android:name=".app.message_activity.MessageRecallActivity"
+            android:label="Recall Messages"
+            android:parentActivityName=".app.message_activity.MessageActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".app.message_activity.MessageActivity" />
+        </activity>
+        <activity
+            android:name=".app.message_activity.MessageGroupContacts"
+            android:label="Contacts List"
+            android:parentActivityName=".app.message_activity.MessageActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".app.message_activity.MessageActivity" />
+        </activity>
+        <activity
+            android:name=".app.call.CallActivity"
+            android:label="Voice Call"></activity>
+        <activity
+            android:name=".app.video_call.VideoCallActivity"
+            android:label="Video Call"></activity>
+
+        <activity
+            android:name=".app.profile.RejectedCallMessages"
+            android:label="RejectedMessages"></activity>
+
     </application>
 
 </manifest>

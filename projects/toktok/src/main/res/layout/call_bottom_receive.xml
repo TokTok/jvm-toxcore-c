@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/sliding_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        sothree:umanoDragView="@+id/top"
+        sothree:umanoPanelHeight="32dp"
+        sothree:umanoShadowHeight="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <im.tox.toktok.app.call.CallSliderAnswer
+                android:id="@+id/call_answer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:paddingLeft="40dp"
+                android:paddingRight="40dp" />
+
+            <im.tox.toktok.app.call.CallSliderDecline
+                android:id="@+id/call_decline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:paddingLeft="40dp"
+                android:paddingRight="40dp" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@id/top"
+            android:layout_width="match_parent"
+            android:clickable="true"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/call_message_bottom_bar"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:background="#20000000"
+                android:gravity="center"
+                android:text="@string/call_reject_with_message"
+                android:textColor="@color/textWhiteColor" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/call_messages_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="never"
+                android:paddingBottom="48dp"
+                android:paddingTop="32dp" />
+
+            <EditText
+                android:id="@+id/call_message_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="#ffffff"
+                android:fontFamily="sans-serif-light"
+                android:maxLines="3"
+                android:paddingBottom="10dp"
+                android:paddingLeft="30dp"
+                android:paddingRight="30dp"
+                android:paddingTop="10dp"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+</LinearLayout>

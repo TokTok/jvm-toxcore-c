@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:textColor="#ffffff"
+        android:textSize="18sp"
+        android:id="@+id/call_item_message"
+        android:layout_width="match_parent"
+        android:padding="16dp"
+        android:gravity="center"
+        android:layout_height="match_parent" />
+
+    <View
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_width="match_parent"
+        android:background="#50ffffff"
+        android:layout_height="1dp" />
+
+</LinearLayout>

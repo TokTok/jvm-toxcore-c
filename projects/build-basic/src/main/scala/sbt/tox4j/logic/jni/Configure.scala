@@ -1,6 +1,6 @@
 package sbt.tox4j.logic.jni
 
-import java.io.{File, IOException, PrintWriter}
+import java.io.{File, FileOutputStream, IOException, PrintWriter}
 
 import org.apache.commons.io.{FilenameUtils, IOUtils}
 
@@ -9,17 +9,20 @@ import scala.collection.JavaConverters._
 object Configure {
 
   object configLog extends AnyRef with sbt.ProcessLogger {
-    val logFile = new PrintWriter("config.log")
+    // Unbuffered output stream.
+    val logFile = {
+      val target = new File("target")
+      target.mkdir()
+      new PrintWriter(new FileOutputStream(new File(target, "config.log")))
+    }
 
     def buffer[T](f: => T): T = f
 
     def error(s: => String): Unit = {
       logFile.println("[error] " + s)
-      logFile.flush()
     }
     def info(s: => String): Unit = {
       logFile.println("[info] " + s)
-      logFile.flush()
     }
   }
 

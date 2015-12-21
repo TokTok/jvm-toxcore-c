@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<im.tox.toktok.app.view.widgets.LayoutOnTop xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:background="@color/black"
-    android:layout_height="match_parent">
-
-</im.tox.toktok.app.view.widgets.LayoutOnTop>

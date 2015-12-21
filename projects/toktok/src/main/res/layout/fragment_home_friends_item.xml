@@ -1,30 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/home_friends_base"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="56dp"
-    android:layout_marginStart="56dp"
-    android:padding="@dimen/spacing_small"
-    android:orientation="horizontal"
-    android:clickable="true"
-    android:background="?android:attr/selectableItemBackground"
-    android:layout_marginTop="@dimen/spacing_small"
-    android:layout_marginBottom="@dimen/spacing_small">
+    android:background="@drawable/background_ripple"
+    android:clickable="true">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/item_photo"
-        android:layout_width="@dimen/circular_image_size"
-        android:layout_height="@dimen/circular_image_size"
-        android:layout_marginEnd="@dimen/spacing_normal"
-        android:layout_marginRight="@dimen/spacing_normal" />
+    <RelativeLayout
+        android:id="@+id/home_item_info"
+        android:paddingLeft="56dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/item_title"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/home_friends_img"
+            style="@style/SmallUserImage"
+            android:layout_marginRight="20dp" />
+
+        <ImageView
+            android:id="@+id/home_friends_status"
+            style="@style/CircleUserStatus"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/home_friends_img"
+            android:src="@drawable/status_circle"
+            android:tint="@color/statusOnline" />
+
+        <TextView
+            android:id="@+id/home_friends_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/home_friends_status"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/textDarkColor"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/home_friends_expanded_area"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        style="?itemTitleTextColor"
-        android:textSize="@dimen/font_large" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/home_item_info"
+        android:layout_marginRight="20dp"
+        android:visibility="gone">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/home_friends_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="Call"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/home_friends_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="Message"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</RelativeLayout>

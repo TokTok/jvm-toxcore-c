@@ -1,35 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Basic colors -->
+    <item name="homeColorToolbar" type="color">#1565C0</item>
+    <item name="homeColorStatusBar" type="color">#0D47A1</item>
+    <item name="homeColorTabSelected" type="color">#424242</item>
+    <item name="homeColorTab" type="color">#BDBDBD</item>
 
-    <item name="white" type="color">#FFFFFF</item>
-    <item name="lighter_grey" type="color">#F5F5F5</item>
-    <item name="light_grey" type="color">#E0E0E0</item>
-    <item name="grey" type="color">#9E9E9E</item>
-    <item name="dark_grey" type="color">#424242</item>
-    <item name="black" type="color">#000000</item>
+    <item name="backgroundColor" type="color">#EEEEEE</item>
+    <item name="cardBoardBackground" type="color">#FAFAFA</item>
 
-    <!-- App background colors -->
+    <item name="basicFABColor" type="color">#FAFAFA</item>
+    <item name="basicFABTint" type="color">#424242</item>
 
-    <item name="base_color_light" type="color">#FAFAFA</item>
-    <item name="base_color_dark" type="color">#232228</item>
+    <item name="statusOnline" type="color">#2ECC71</item>
+    <item name="statusBusy" type="color">#F8E71C</item>
+    <item name="statusAway" type="color">#9B9B9B</item>
 
-    <!-- Toolbar colors -->
+    <item name="drawerBackgroundSelected" type="color">#E9E9E9</item>
+    <item name="drawerTint" type="color">@color/textDarkColor</item>
+    <item name="drawerTextColor" type="color">#616161</item>
 
-    <item name="base_color_dark_toolbar" type="color">#2B2A30</item>
+    <item name="recyclerViewHeaderBackground" type="color">#E0E0E0</item>
 
-    <!-- Text colors -->
+    <item name="textDarkColor" type="color">#212121</item>
+    <item name="textLightColor" type="color">#757575</item>
+    <item name="textWhiteColor" type="color">#FFFFFF</item>
 
-    <item name="soft_black" type="color">#212121</item>
-    <item name="secondary_text_color" type="color">#727272</item>
+    <item name="dividerColor" type="color">#E0E0E0</item>
 
-    <!-- Transparent colors -->
+    <item name="contactsTransparentBar" type="color">#40000000</item>
 
-    <item name="transparent_white" type="color">#20FFFFFF</item>
-    <item name="fifth_transparent_white" type="color">#70FFFFFF</item>
-    <item name="almost_white" type="color">#B0FFFFFF</item>
-    <item name="transparent_black" type="color">#20000000</item>
-    <item name="fifth_transparent_black" type="color">#70000000</item>
+    <item name="colorAccent" type="color">#9E9E9E</item>
+
+    <item name="simpleDialogIcon" type="color">#7D7D7D</item>
+    <item name="simpleDialogIconButton" type="color">#546E7A</item>
+    <item name="simpleDialogIconButtonDisable" type="color">#78909C</item>
+    <item name="simpleDialogTextButton" type="color">#ECEFF1</item>
+    <item name="simpleDialogTextButtonDisable" type="color">#B0BEC5</item>
+    <item name="simpleDialogBackground" type="color">#3E4651</item>
+
+    <item name="simpleDialogIconButtonAssets" type="color">#ffffff</item>
+
+    <item name="callTopColor" type="color">#90D8D8D8</item>
+    <item name="callItemDivider" type="color">#40FFFFFF</item>
+    <item name="callButtonColor" type="color">#F6234E</item>
+
+    <item name="snackBarColor" type="color">#E0E0E0</item>
 
 </resources>

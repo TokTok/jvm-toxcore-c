@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_gravity="fill_vertical"
+<LinearLayout
+    android:id="@+id/home_friends_layout"
+    android:layout_height="fill_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:clipToPadding="false"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:id="@+id/home_friends_recycler"
+        style="@style/RecyclerView" />
 
-</RelativeLayout>
+</LinearLayout>

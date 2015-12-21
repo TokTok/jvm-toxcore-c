@@ -1,23 +1,100 @@
 <resources>
     <string name="app_name">TokTok</string>
+    <string name="new_message">Add friends to Conversation</string>
+    <string name="action_settings">Settings</string>
+    <string name="search_hint">Search for your friends</string>
 
 
-    <string name="menu_friends">Friends</string>
-    <string name="menu_chats">Chats</string>
-    <string name="menu_call_log">Call Log</string>
-    <string name="menu_profile">Profile</string>
-    <string name="menu_settings">Settings</string>
-    <string name="menu_voice_call">Voice Call</string>
-    <string name="menu_share_contact">Share Contact</string>
-    <string name="menu_save_photo_contact">Save Contact Photo</string>
+    <string name="home_tabs_chats">Chats</string>
+    <string name="home_tabs_friends">Friends</string>
 
-    <string name="friend_call_voice">Make a Voice Call</string>
-    <string name="friend_call_video">Make a Video Call</string>
-    <string name="friend_message">Send a message</string>
-    <string name="friend_options">Friend Options</string>
-    <string name="friend_options_color">Edit Friend Color</string>
-    <string name="friend_options_edit_alias">Edit Friend Alias</string>
-    <string name="friend_options_delete">Delete Friend</string>
-    <string name="friend_options_block">Block Friend</string>
+    <string name="user_name">André Almeida</string>
+
+    <!-- Drawer -->
+    <string name="drawer_chats">Chats</string>
+    <string name="drawer_profile">Profile</string>
+    <string name="drawer_settings">Settings</string>
+
+    <string name="drawer_connection_connecting">Connecting to Tox</string>
+    <string name="drawer_connection_connected">Connected to Tox</string>
+    <string name="drawer_connection_not_available">Unavailable</string>
+
+    <!-- Menu -->
+
+    <string name="menu_search">Search</string>
+    <string name="menu_add_friend">Add Friend</string>
+
+    <!-- Contacts -->
+    <string name="contact_voice_call">Voice Call</string>
+    <string name="contact_video_call">Video Call</string>
+    <string name="contact_message">Message</string>
+    <string name="contact_save_photo">Save Profile Photo</string>
+    <string name="contact_files">Files send by</string>
+    <string name="contact_block">Block friend</string>
+    <string name="contact_delete">Delete friend</string>
+    <string name="contact_settings">Friend Settings</string>
+    <string name="contact_choose_color">Choose friend color</string>
+    <string name="contact_edit_alias">Edit friend alias</string>
+    <string name="contact_popup_edit_contact_color">Edit friend color</string>
+    <string name="contact_popup_edit_alias">Edit alias</string>
+    <string name="contact_popup_delete_friend">Delete friend ?</string>
+    <string name="contact_save_photo_snackbar">Profile photo saved</string>
+    <string name="contact_blocked">Friend Blocked</string>
+
+
+    <!-- New Message -->
+    <string name="new_message_selected_friends">Selected Friends</string>
+    <string name="new_message_title">Add friends to conversation</string>
+    <string name="new_message_attachments">Add to the conversation</string>
+
+    <!-- Message -->
+
+    <string name="message_hint_group">Message Group</string>
+    <string name="message_hint_single">Message </string>
+    <string name="message_group_contacts">Group Members</string>
+    <string name="message_snackbar_friend_muted">Friend Muted</string>
+    <string name="message_snackbar_group_muted">Group Muted</string>
+
+    <!-- Attachments-->
+
+    <string name="attachment_image">Image from the gallery</string>
+    <string name="attachment_camera">Take a picture</string>
+    <string name="attachment_camera_movie">Make a movie</string>
+    <string name="attachment_record_sound">Record a sound</string>
+    <string name="attachment_location">Your Location</string>
+
+    <!-- Dialog -->
+
+    <string name="dialog_adding_new_friends">Adding a new friend</string>
+    <string name="dialog_edit_user_status">Edit your status</string>
+    <string name="dialog_share">Share your Tox ID</string>
+    <string name="dialog_delete_conversion">Delete Conversation?</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_qrcode">QrCode</string>
+    <string name="dialog_android_share">Android Share</string>
+    <string name="dialog_status_online">Online</string>
+    <string name="dialog_status_away">Away</string>
+    <string name="dialog_status_busy">Busy</string>
+    <string name="dialog_delete_friend">Remove </string>
+    <string name="dialog_delete_friend_end">from your friends list? </string>
+    <string name="dialog_change_color">Change </string>
+    <string name="dialog_change_color_end">color</string>
+    <string name="dialog_leave_group">Leave the group</string>
+    <string name="dialog_edit_group_name">Edit the group name</string>
+
+
+    <!-- Other -->
+    <string name="action_mode_selected_single">Selected Conversation</string>
+    <string name="action_mode_selected_multi">Selected Conversations</string>
+    <string name="files_send_title">Files send by</string>
+    <string name="call_is_calling">is calling you</string>
+    <string name="call_input_message">Message</string>
+    <string name="call_reject_with_message">Reject with message</string>
+    <string name="call_answer">ANSWER</string>
+    <string name="call_decline">DECLINE</string>
+
+    <string name="home_search">Search for something</string>
+
 
 </resources>

@@ -43,7 +43,7 @@ install:
 
 script:
   # Build/install step.
-  - buildscripts/04_build || (cat projects/tox4j/config.log && false)
+  - buildscripts/04_build || (cat projects/tox4j/target/config.log && false)
   - mkdir -p /tmp/android-travis
   - buildscripts/05_android
   # Upload artifacts if the build was not a test build. Test builds instrument

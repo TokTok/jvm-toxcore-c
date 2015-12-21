@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+
+    <View
+        android:background="@drawable/call_line"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginRight="57dp"
+        android:layout_alignBottom="@+id/call_slider_img"
+        android:layout_alignEnd="@+id/call_slider_img"/>
+
+    <TextView
+        android:id="@+id/call_slider_text"
+        android:text="@string/call_answer"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:alpha="0"
+        android:textColor="@color/textWhiteColor"
+        android:singleLine="true"
+        android:layout_alignBottom="@id/call_slider_img"
+        android:layout_alignEnd="@id/call_slider_img"
+        android:layout_height="match_parent" />
+
+
+    <ImageView
+        android:id="@id/call_slider_img"
+        android:src="@drawable/call_answer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true" />
+
+
+
+</RelativeLayout>
