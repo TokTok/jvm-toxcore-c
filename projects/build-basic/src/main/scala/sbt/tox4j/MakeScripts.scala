@@ -3,9 +3,7 @@ package sbt.tox4j
 import sbt.Keys._
 import sbt._
 
-object MakeScripts extends AutoPlugin {
-
-  override def trigger: PluginTrigger = allRequirements
+object MakeScripts extends OptionalPlugin {
 
   object Keys {
     val makeScripts = TaskKey[Unit]("makeScripts")
@@ -45,7 +43,7 @@ object MakeScripts extends AutoPlugin {
     }
   }
 
-  override val projectSettings: Seq[Setting[_]] = {
+  override val moduleSettings: Seq[Setting[_]] = {
     makeScripts <<= (
       baseDirectory,
       javaOptions in Test,

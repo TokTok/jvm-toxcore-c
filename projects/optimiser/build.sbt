@@ -14,6 +14,8 @@ libraryDependencies ++= Seq(
 ) map (_ % Test)
 
 // Enable the plugins we want.
-sbt.tox4j.lint.Checkstyle.moduleSettings
-sbt.tox4j.lint.Scalastyle.moduleSettings
-sbt.tox4j.CodeFormat.projectSettings
+import sbt.tox4j._
+import sbt.tox4j.lint._
+Checkstyle.moduleSettings
+Scalastyle.moduleSettings
+CodeFormat.moduleSettings

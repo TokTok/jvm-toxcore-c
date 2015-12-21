@@ -14,13 +14,14 @@ object OptionOrNull extends WartTraverser {
 
   val errorMessage = "Option#orNull is disabled"
 
-  def apply(u: WartUniverse): u.universe.Traverser = {
-    import u.universe._
+  private final case class Checker[U <: WartUniverse](u: U) {
 
-    val optionSymbol = rootMirror.staticClass(classOf[Option[_]].getName)
-    val OrNullName = TermName("orNull")
+    final class Make extends u.universe.Traverser {
 
-    new u.Traverser {
+      import u.universe._
+
+      val optionSymbol = rootMirror.staticClass(classOf[Option[_]].getName)
+      val OrNullName = TermName("orNull")
 
       override def traverse(tree: Tree): Unit = {
         tree match {
@@ -37,6 +38,12 @@ object OptionOrNull extends WartTraverser {
       }
 
     }
+
+  }
+
+  def apply(u: WartUniverse): u.universe.Traverser = {
+    val factory = Checker[u.type](u)
+    new factory.Make
   }
 
 }

@@ -15,16 +15,31 @@ object EqualsNone extends WartTraverser {
 
   val errorMessage = "Avoid comparing with None; use .isEmpty or .isDefined, instead. Use `eq` if you are sure."
 
-  def apply(u: WartUniverse): u.universe.Traverser = {
-    import u.universe._
+  private final case class Checker[U <: WartUniverse](u: U) {
 
-    val NoneType = rootMirror.typeOf[scala.None.type]
-    val equalityOperators = Seq(
-      TermName("==").encodedName,
-      TermName("!=").encodedName
-    )
+    final class Make extends u.universe.Traverser {
 
-    new u.Traverser {
+      import u.universe._
+
+      val NoneType = rootMirror.typeOf[scala.None.type]
+      val equalityOperators = Seq(
+        TermName("==").encodedName,
+        TermName("!=").encodedName
+      )
+
+      /**
+       * Checks whether the operator is == or != and the argument is scala.None.
+       * If these conditions hold, this function flags the None as an error.
+       *
+       * @param operator The method name.
+       * @param none The expression used either as argument to the operator method or
+       *             as the source on which the method is invoked.
+       */
+      private def errorIfNoneCompare(operator: Name, none: Tree): Unit = {
+        if (equalityOperators.contains(operator) && none.tpe =:= NoneType) {
+          u.error(none.pos, errorMessage)
+        }
+      }
 
       override def traverse(tree: Tree): Unit = {
         tree match {
@@ -38,20 +53,13 @@ object EqualsNone extends WartTraverser {
         super.traverse(tree)
       }
 
-      /**
-       * Checks whether the operator is == or != and the argument is scala.None.
-       * If these conditions hold, this function flags the None as an error.
-       *
-       * @param operator The method name.
-       * @param none The expression used either as argument to the operator method or
-       *             as the source on which the method is invoked.
-       */
-      def errorIfNoneCompare(operator: u.universe.Name, none: u.universe.Tree): Unit = {
-        if (equalityOperators.contains(operator) && none.tpe =:= NoneType) {
-          u.error(none.pos, errorMessage)
-        }
-      }
     }
+
+  }
+
+  def apply(u: WartUniverse): u.universe.Traverser = {
+    val factory = Checker[u.type](u)
+    new factory.Make
   }
 
 }

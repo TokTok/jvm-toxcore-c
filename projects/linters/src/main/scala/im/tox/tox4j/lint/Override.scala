@@ -24,53 +24,52 @@ object Override extends WartTraverser {
   def errorMessage(name: String): String = "Implementations of abstract methods must have the 'override' modifier: " + name
   def warningOverloads(name: String): String = "Overloaded versions exist; cannot decide whether it needs 'override': " + name
 
-  /**
-   * Returns whether the method needs the 'override' qualifier.
-   *
-   * @param method The current method under analysis.
-   * @param baseClasses The list of direct or indirect base classes.
-   */
-  private def needsOverride(u: WartUniverse)(method: u.universe.DefDef, baseClasses: Set[u.universe.Type]): Boolean = {
-    import u.universe._
+  private final case class Checker[U <: WartUniverse](u: U) {
 
-    !isSynthetic(u)(method) &&
-      method.name != termNames.CONSTRUCTOR &&
-      method.name != TermName("$init$") &&
-      method.name != TermName("isDefinedAt") &&
-      !method.mods.hasFlag(Flag.OVERRIDE) &&
-      !method.mods.hasFlag(Flag.CASEACCESSOR) &&
-      baseClasses.exists { base =>
-        val baseSymbol = base.decl(method.name)
-        if (baseSymbol.alternatives.length > 1) {
-          u.warning(method.pos, warningOverloads(method.name.toString))
-          false
+    final class Make extends u.universe.Traverser {
+
+      import u.universe._
+
+      /**
+       * Returns whether the method needs the 'override' qualifier.
+       *
+       * @param method The current method under analysis.
+       * @param baseClasses The list of direct or indirect base classes.
+       */
+      private def needsOverride(method: DefDef, baseClasses: Set[Type]): Boolean = {
+        !isSynthetic(u)(method) &&
+          method.name != termNames.CONSTRUCTOR &&
+          method.name != TermName("$init$") &&
+          method.name != TermName("isDefinedAt") &&
+          !method.mods.hasFlag(Flag.OVERRIDE) &&
+          !method.mods.hasFlag(Flag.CASEACCESSOR) &&
+          baseClasses.exists { base =>
+            val baseSymbol = base.decl(method.name)
+            if (baseSymbol.alternatives.length > 1) {
+              u.warning(method.pos, warningOverloads(method.name.toString))
+              false
+            } else {
+              baseSymbol != NoSymbol
+            }
+          }
+      }
+
+      /**
+       * Recursively find all base types of a set of types.
+       *
+       * @param types A set of types.
+       * @return The original types plus all their base types.
+       */
+      @tailrec
+      private def recursiveBaseClasses(types: Set[Type]): Set[Type] = {
+        val baseTypes = types.flatMap(tpe => tpe.baseClasses.map(base => tpe.baseType(base)))
+        if (baseTypes.subsetOf(types)) {
+          // No more types to find.
+          types
         } else {
-          baseSymbol != NoSymbol
+          recursiveBaseClasses(types ++ baseTypes)
         }
       }
-  }
-
-  /**
-   * Recursively find all base types of a set of types.
-   *
-   * @param types A set of types.
-   * @return The original types plus all their base types.
-   */
-  @tailrec
-  private def recursiveBaseClasses(u: WartUniverse)(types: Set[u.universe.Type]): Set[u.universe.Type] = {
-    val baseTypes = types.flatMap(tpe => tpe.baseClasses.map(base => tpe.baseType(base)))
-    if (baseTypes.subsetOf(types)) {
-      // No more types to find.
-      types
-    } else {
-      recursiveBaseClasses(u)(types ++ baseTypes)
-    }
-  }
-
-  def apply(u: WartUniverse): u.universe.Traverser = {
-    import u.universe._
-
-    new u.Traverser {
 
       var baseClasses: Set[Type] = Set.empty // scalastyle:ignore var.field
 
@@ -79,10 +78,10 @@ object Override extends WartTraverser {
           case classDef @ ClassDef(mods, name, tparams, Template(parents, self, body)) =>
             // We're entering a new (inner) class, so save the old baseClasses and restore after traverse.
             val oldBaseClasses = baseClasses
-            baseClasses = recursiveBaseClasses(u)(parents.map(_.tpe).toSet)
+            baseClasses = recursiveBaseClasses(parents.map(_.tpe).toSet)
             super.traverse(tree)
             baseClasses = oldBaseClasses
-          case method: DefDef if needsOverride(u)(method, baseClasses) =>
+          case method: DefDef if needsOverride(method, baseClasses) =>
             u.error(method.pos, errorMessage(method.name.toString))
             super.traverse(tree)
           case _ =>
@@ -91,6 +90,12 @@ object Override extends WartTraverser {
       }
 
     }
+
+  }
+
+  def apply(u: WartUniverse): u.universe.Traverser = {
+    val factory = Checker[u.type](u)
+    new factory.Make
   }
 
 }

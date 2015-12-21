@@ -10,8 +10,8 @@ import scoverage.ScoverageSbtPlugin.ScoverageKeys._
 
 // Build plugins.
 Assembly.moduleSettings
-Benchmarking.projectSettings
-CodeFormat.projectSettings
+Benchmarking.moduleSettings
+CodeFormat.moduleSettings
 Jni.moduleSettings
 ProtobufJni.moduleSettings
 
@@ -88,7 +88,6 @@ scalaSource in Test    := (javaSource in Test   ).value
 
 // Lint plugins.
 Checkstyle.moduleSettings
-Findbugs.moduleSettings
 Foursquare.moduleSettings
 Scalastyle.moduleSettings
 
@@ -96,7 +95,7 @@ Scalastyle.moduleSettings
 WartRemoverOverrides.moduleSettings
 
 // TODO(iphydf): Require less test coverage for now, until ToxAv is tested.
-Coverage.projectSettings
+Coverage.moduleSettings
 coverageMinimum := 60
 coverageExcludedPackages := "(" + coverageExcludedPackages.value + ")|im\\.tox\\.core\\..*"
 

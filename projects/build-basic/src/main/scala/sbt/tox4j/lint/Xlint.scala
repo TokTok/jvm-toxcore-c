@@ -1,15 +1,13 @@
 package sbt.tox4j.lint
 
 import sbt.Keys._
-import sbt.{AutoPlugin, PluginTrigger}
+import sbt.tox4j.OptionalPlugin
 
-object Xlint extends AutoPlugin {
+object Xlint extends OptionalPlugin {
+  object Keys
 
-  override def trigger: PluginTrigger = allRequirements
-
-  override val projectSettings = Seq(
+  override val moduleSettings = Seq(
     scalacOptions ++= Seq("-Xlint", "-unchecked", "-feature", "-deprecation"),
     javacOptions ++= Seq("-Xlint:deprecation", "-Xlint:unchecked")
   )
-
 }

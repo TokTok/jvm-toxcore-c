@@ -10,12 +10,10 @@ object Assembly extends OptionalPlugin {
   object Keys {
 
     // settings
-
     val assemblyPath = settingKey[File]("Output directory for standalone binaries")
     val assemblyCache = settingKey[File]("Cache directory extracted classes")
 
     // tasks
-
     val assembly = taskKey[Unit]("Generates standalone binaries")
 
   }

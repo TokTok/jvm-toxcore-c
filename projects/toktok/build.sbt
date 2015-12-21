@@ -5,8 +5,7 @@ scalaVersion := "2.11.7"
 
 import sbt.tox4j._
 import sbt.tox4j.lint._
-
-CodeFormat.projectSettings
+CodeFormat.moduleSettings
 Scalastyle.moduleSettings
 Findbugs.moduleSettings
 
@@ -75,7 +74,7 @@ proguardCache ++= Seq(
 )
 
 if (sys.env.contains("PROTIFY")) {
-  protifySettings
+  new Def.SettingList(protifySettings)
 } else {
   sys.props("maximum.inlined.code.length") = "8"
 

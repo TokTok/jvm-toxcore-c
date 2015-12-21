@@ -1,18 +1,15 @@
 package sbt.tox4j
 
 import com.typesafe.sbt.SbtScalariform.{ScalariformKeys, scalariformSettings}
-import sbt.{AutoPlugin, PluginTrigger}
 
 import scalariform.formatter.preferences._
 
-object CodeFormat extends AutoPlugin {
+object CodeFormat extends OptionalPlugin {
+  object Keys
 
-  override def trigger: PluginTrigger = allRequirements
-
-  override val projectSettings = scalariformSettings ++ Seq(
+  override val moduleSettings = scalariformSettings ++ Seq(
     ScalariformKeys.preferences := ScalariformKeys.preferences.value
       .setPreference(AlignSingleLineCaseStatements, true)
       .setPreference(DoubleIndentClassDeclaration, true)
   )
-
 }

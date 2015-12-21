@@ -11,7 +11,6 @@ resolvers += "Tox4j snapshots" at "https://tox4j.github.io/repositories/snapshot
 // Code style.
 addSbtPlugin("com.etsy" % "sbt-checkstyle-plugin" % "0.5.3")
 addSbtPlugin("org.scalastyle" % "scalastyle-sbt-plugin" % "0.8.0")
-addSbtPlugin("de.johoop" % "findbugs4sbt" % "1.4.0")
 
 // Code formatting.
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
