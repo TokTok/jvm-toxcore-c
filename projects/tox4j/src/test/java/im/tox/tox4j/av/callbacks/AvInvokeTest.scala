@@ -2,7 +2,6 @@ package im.tox.tox4j.av.callbacks
 
 import java.util
 
-import im.tox.tox4j.ToxAvTestBase
 import im.tox.tox4j.av.callbacks.AvInvokeTest._
 import im.tox.tox4j.av.data._
 import im.tox.tox4j.av.enums.ToxavFriendCallState
@@ -88,8 +87,16 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
     ))
   }
 
+  test("Max friend number") {
+    val friendNumber = ToxFriendNumber.unsafeFromInt(Int.MaxValue)
+    val pcm = Array.fill(100)(1234.toShort)
+    callbackTest(
+      _.invokeAudioReceiveFrame(friendNumber, pcm, AudioChannels.Mono, SamplingRate.Rate24k),
+      AudioReceiveFrame(friendNumber, pcm, AudioChannels.Mono, SamplingRate.Rate24k)
+    )
+  }
+
   test("AudioReceiveFrame") {
-    assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, pcm: Array[Short], samplingRate: SamplingRate) =>
       val channels =
         pcm.length match {
@@ -104,7 +111,6 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("BitRateStatus") {
-    assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate) =>
       callbackTest(
         _.invokeBitRateStatus(friendNumber, audioBitRate, videoBitRate),
@@ -114,7 +120,6 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("Call") {
-    assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean) =>
       callbackTest(
         _.invokeCall(friendNumber, audioEnabled, videoEnabled),
@@ -124,7 +129,6 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("CallState") {
-    assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, callState: Set[ToxavFriendCallState]) =>
       whenever(callState.nonEmpty) {
         callbackTest(
@@ -136,22 +140,19 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("VideoReceiveFrame") {
-    assume(ToxAvTestBase.enabled)
     forAll { (friendNumber: ToxFriendNumber, width: Width, height: Height, yStride: SmallNat, uStride: SmallNat, vStride: SmallNat) =>
       val w = width.value
       val h = height.value
-      whenever(w > 0 && h > 0) {
-        val y = Array.ofDim[Byte]((w max yStride) * h)
-        val u = Array.ofDim[Byte](((w / 2) max Math.abs(uStride)) * (h / 2))
-        val v = Array.ofDim[Byte](((w / 2) max Math.abs(vStride)) * (h / 2))
-        random.nextBytes(y)
-        random.nextBytes(u)
-        random.nextBytes(v)
-        callbackTest(
-          _.invokeVideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride),
-          VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride)
-        )
-      }
+      val y = Array.ofDim[Byte]((w max yStride) * h)
+      val u = Array.ofDim[Byte](((w / 2) max Math.abs(uStride)) * (h / 2))
+      val v = Array.ofDim[Byte](((w / 2) max Math.abs(vStride)) * (h / 2))
+      random.nextBytes(y)
+      random.nextBytes(u)
+      random.nextBytes(v)
+      callbackTest(
+        _.invokeVideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride),
+        VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride)
+      )
     }
   }
 

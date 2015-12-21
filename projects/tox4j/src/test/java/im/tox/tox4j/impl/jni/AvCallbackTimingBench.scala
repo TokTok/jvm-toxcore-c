@@ -43,17 +43,7 @@ final class AvCallbackTimingBench extends TimingReport {
       usingToxAv(range("frames")(10000)) setUp invokeAll in {
         case (frames, av: ToxAvImpl) =>
           // Then fetch them in the timed section.
-          ToxAvJni.toxavIterate(av.instanceNumber, Array.empty)
-      }
-    }
-
-    measure method "ToxAvJni.toxAvIterate (cached)" in {
-      var cache = Array.empty[Byte]
-
-      usingToxAv(range("frames")(10000)) setUp invokeAll in {
-        case (frames, av: ToxAvImpl) =>
-          // Then fetch them in the timed section.
-          cache = ToxAvJni.toxavIterate(av.instanceNumber, cache)
+          ToxAvJni.toxavIterate(av.instanceNumber)
       }
     }
 

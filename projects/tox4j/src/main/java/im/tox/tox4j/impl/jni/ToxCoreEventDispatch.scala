@@ -229,11 +229,11 @@ object ToxCoreEventDispatch {
 
   @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
   def dispatch[S](handler: ToxCoreEventListener[S], @Nullable eventData: Array[Byte])(state: S): S = {
-    if (eventData != null) { // scalastyle:ignore null
+    if (eventData == null) { // scalastyle:ignore null
+      state
+    } else {
       val events = CoreEvents.parseFrom(eventData)
       dispatchEvents(handler, events)(state)
-    } else {
-      state
     }
   }
 

@@ -2,6 +2,7 @@ package im.tox.tox4j.impl.jni;
 
 import im.tox.tox4j.av.exceptions.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"checkstyle:emptylineseparator", "checkstyle:linelength"})
 public final class ToxAvJni {
@@ -14,8 +15,8 @@ public final class ToxAvJni {
   static native void toxavKill(int instanceNumber);
   static native void toxavFinalize(int instanceNumber);
   static native int toxavIterationInterval(int instanceNumber);
-  @NotNull
-  static native byte[] toxavIterate(int instanceNumber, @NotNull byte[] eventData);
+  @Nullable
+  static native byte[] toxavIterate(int instanceNumber);
   static native void toxavCall(int instanceNumber, int friendNumber, int audioBitRate, int videoBitRate) throws ToxavCallException;
   static native void toxavAnswer(int instanceNumber, int friendNumber, int audioBitRate, int videoBitRate) throws ToxavAnswerException;
   static native void toxavCallControl(int instanceNumber, int friendNumber, int control) throws ToxavCallControlException;

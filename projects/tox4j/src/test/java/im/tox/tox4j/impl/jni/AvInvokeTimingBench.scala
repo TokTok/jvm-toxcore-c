@@ -23,7 +23,7 @@ final class AvInvokeTimingBench extends TimingReport {
     measure method "invokeAudioReceiveFrame" in {
       usingToxAv(range("frames")(10000)) tearDown {
         case (frames, av: ToxAvImpl) =>
-          ToxAvJni.toxavIterate(av.instanceNumber, Array.empty)
+          ToxAvJni.toxavIterate(av.instanceNumber)
       } in {
         case (frames, av) =>
           (0 until frames) foreach { _ =>

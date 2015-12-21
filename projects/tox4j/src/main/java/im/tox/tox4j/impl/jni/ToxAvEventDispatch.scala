@@ -1,9 +1,8 @@
 package im.tox.tox4j.impl.jni
 
-import java.nio.ByteBuffer
 import java.util
 
-import com.google.protobuf.{CodedInputStream, ByteString, InvalidProtocolBufferException}
+import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks._
@@ -151,22 +150,13 @@ object ToxAvEventDispatch {
       | eventData(3) << (8 * 0))
   }
 
+  @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
   def dispatch[S](handler: ToxAvEventListener[S], @Nullable eventData: Array[Byte])(state: S): S = {
-    val length = decodeInt32(eventData)
-
-    if (length == 0) {
+    if (eventData == null) { // scalastyle:ignore null
       state
     } else {
-      try {
-        val buffer = ByteBuffer.wrap(eventData, IntBytes, length)
-        assert(buffer.hasArray)
-        val events = AvEvents.parseFrom(CodedInputStream.newInstance(buffer))
-        dispatchEvents(handler, events)(state)
-      } catch {
-        case e: InvalidProtocolBufferException =>
-          logger.error("Received invalid data: " + eventData.deep)
-          throw e
-      }
+      val events = AvEvents.parseFrom(eventData)
+      dispatchEvents(handler, events)(state)
     }
   }
 

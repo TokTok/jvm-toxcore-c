@@ -20,6 +20,6 @@ abstract class TextImageGenerator(rows: String*) extends VideoGenerator {
 
   override def width: Width = Width.fromInt(rows.head.length).get
   override def height: Height = Height.fromInt(rows.size).get
-  override def length: Int = sys.env.get("TRAVIS").map(_ => 8).getOrElse(64)
+  override def length: Int = sys.env.get("TRAVIS").map(_ => 4).getOrElse(64)
 
 }

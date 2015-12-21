@@ -27,7 +27,6 @@ private object ToxAvImpl {
 @throws[ToxavNewException]("If there was already an A/V session.")
 final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
 
-  private[this] var eventData = Array.ofDim[Byte](Integer.SIZE / java.lang.Byte.SIZE) // scalastyle:ignore var.field
   private[this] val onClose = tox.addOnCloseCallback(close)
 
   private[jni] val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)
@@ -58,8 +57,7 @@ final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
   }
 
   override def iterate[S](@NotNull handler: ToxAvEventListener[S])(state: S): S = {
-    eventData = ToxAvJni.toxavIterate(instanceNumber, eventData)
-    ToxAvEventDispatch.dispatch(handler, eventData)(state)
+    ToxAvEventDispatch.dispatch(handler, ToxAvJni.toxavIterate(instanceNumber))(state)
   }
 
   override def iterationInterval: Int =
