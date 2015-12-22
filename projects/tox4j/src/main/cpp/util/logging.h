@@ -53,7 +53,7 @@ struct formatter
     : text_ (std::move (fmt.text_))
   { }
 
-  explicit formatter (std::vector<char> &&text)
+  explicit formatter (std::vector<char> text)
     : text_ (std::move (text))
   { }
 
@@ -73,7 +73,6 @@ format (char const (&fmt)[N], Args const &...args)
 
   return formatter (std::move (text));
 }
-
 
 template<std::size_t N>
 std::ostream &

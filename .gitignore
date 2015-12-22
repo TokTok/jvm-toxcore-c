@@ -2,10 +2,13 @@
 /.web
 
 # SBT compiled build system.
+/projects/project/project
 /projects/*/project/project
+/projects/project/target
 /projects/*/project/target
 
 # SBT output directory.
+/projects/target
 /projects/*/target
 
 # Generated startup scripts for main classes.
@@ -40,6 +43,8 @@ libtoxcore.log
 
 # Gradle temporary directory.
 .gradle
+
+# Generated proguard configuration.
 /proguard-sbt.txt
 
 # Java runtime support for disassembly.

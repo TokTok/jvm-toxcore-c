@@ -54,10 +54,10 @@ sub install_dependency {
    local $ENV{CPPFLAGS} = undef;
    local $ENV{LDFLAGS} = undef;
 
-   # Apply patch if one exists.
-   my $patch = "projects/tox4j/android/$repo.patch";
+   local $ENV{CC} = "$toolchain/bin/$TARGET-clang";
+   local $ENV{CXX} = "$toolchain/bin/$TARGET-clang++";
 
-   git_install $state, $patch, $C->JOBS, $baseurl, $repo, $branch, @flags;
+   git_install $state, $C->JOBS, $baseurl, $repo, $branch, @flags;
 }
 
 

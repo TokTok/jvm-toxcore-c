@@ -132,10 +132,13 @@ object VideoGenerators extends Assertions {
       Color.blue
     )
 
-    def get(t: Int): Color = values(t / 5 % values.length)
+    val FramesPerColor = 4
+    val VideoLength = Colors.values.length * Colors.FramesPerColor
+
+    def get(t: Int): Color = values(t / FramesPerColor % values.length)
   }
 
-  final case class Colors(width: Width, height: Height, length: Int = Colors.values.length * 5) extends RgbVideoGenerator {
+  final case class Colors(width: Width, height: Height, length: Int = Colors.VideoLength) extends RgbVideoGenerator {
     def resize(width: Width, height: Height): VideoGenerator = copy(width, height)
 
     def rgb(t: Int, y: Int, x: Int): Int = Colors.get(t).getRGB

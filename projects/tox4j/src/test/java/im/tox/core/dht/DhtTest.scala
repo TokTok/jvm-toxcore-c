@@ -10,6 +10,7 @@ import im.tox.core.crypto.KeyPairTest._
 import im.tox.core.crypto._
 import im.tox.core.dht.DhtTest._
 import im.tox.core.dht.distance.XorDistance
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -23,7 +24,7 @@ object DhtTest {
 
   val AllowPartitions = true
   val MaxClosestNodes = 2
-  val ExtraNodeCount = 4
+  val ExtraNodeCount = 2
 
   def genDht(maxClosestNodes: Int = Dht.Options().maxClosestNodes): Gen[Dht] = {
     Arbitrary.arbitrary[KeyPair].map { keyPair =>
@@ -49,29 +50,30 @@ final class DhtTest extends FunSuite with PropertyChecks {
     }
   }
 
+  def edgeTransformer(rootGraph: DotRootGraph): EdgeTransformer[PublicKey, DiEdge] = { edge =>
+    edge.edge match {
+      case DiEdge(from, to) =>
+        Some((
+          rootGraph,
+          DotEdgeStmt(
+            NodeId(from.toString),
+            NodeId(to.toString),
+            List(DotAttr(Id("label"), Id('"' + XorDistance(from.value, to.value).toHexString + '"')))
+          )
+        ))
+    }
+  }
+
+  def graphToDot(graph: Graph[PublicKey, DiEdge]): Unit = {
+    val root = DotRootGraph(directed = true, id = Some(Id("G")))
+    val dot = graph2DotExport(graph).toDot(root, edgeTransformer(root))
+    Files.write(dot, new File("graph.dot"), Charset.forName("UTF-8"))
+    new ProcessBuilder("dot", "-Tpng", "graph.dot", "-o", "graph.png").inheritIO().start().waitFor()
+  }
+
   test("prevent partitioning") {
-    def edgeTransformer(rootGraph: DotRootGraph): EdgeTransformer[PublicKey, DiEdge] = { edge =>
-      edge.edge match {
-        case DiEdge(from, to) =>
-          Some((
-            rootGraph,
-            DotEdgeStmt(
-              NodeId(from.toString),
-              NodeId(to.toString),
-              List(DotAttr(Id("label"), Id('"' + XorDistance(from.value, to.value).toHexString + '"')))
-            )
-          ))
-      }
-    }
-
-    def graphToDot(graph: Graph[PublicKey, DiEdge]): Unit = {
-      val root = DotRootGraph(directed = true, id = Some(Id("G")))
-      val dot = graph.toDot(root, edgeTransformer(root))
-      Files.write(dot, new File("graph.dot"), Charset.forName("UTF-8"))
-      new ProcessBuilder("dot", "-Tpng", "graph.dot", "-o", "graph.png").inheritIO().start().waitFor()
-    }
-
-    forAll { (emptyDhts: Set[Dht]) =>
+    forAll(arbitrary[Set[Dht]].map(s => s.take(s.size % 13))) { emptyDhts =>
+      logger.debug(s"Running with ${emptyDhts.size} DHT nodes")
       val dhts =
         for {
           dht <- emptyDhts.toSeq
@@ -113,6 +115,7 @@ final class DhtTest extends FunSuite with PropertyChecks {
           assert(graph.isConnected)
         }
       }
+      logger.debug(s"Success for ${emptyDhts.size} nodes")
     }
   }
 

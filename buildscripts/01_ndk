@@ -19,32 +19,34 @@ my $C = require C;
 
 
 my @common = qw(
-   */build
-   */sources/android/cpufeatures
-   */prebuilt/linux-x86_64
-   */prebuilt/darwin-x86_64
+   build
+   sources/android/cpufeatures
+   prebuilt/linux-x86_64
+   prebuilt/darwin-x86_64
+   toolchains/llvm-3.6
 );
 
 my %NDK_FILES = (
    'aarch64-linux-android' => [@common, qw(
-      */platforms/android-21
-      */prebuilt/android-arm64
-      */sources/cxx-stl/gnu-libstdc++/4.9/include
-      */sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a
-      */toolchains/aarch64-linux-android-4.9
+      platforms/android-21/arch-arm64
+      prebuilt/android-arm64
+      sources/cxx-stl/gnu-libstdc++/4.9/include
+      sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a
+      toolchains/aarch64-linux-android-4.9
    )],
    'arm-linux-androideabi' => [@common, qw(
-      */platforms/android-9
-      */sources/cxx-stl/gnu-libstdc++/4.8/include
-      */sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi*
-      */toolchains/arm-linux-androideabi-clang3.6
+      platforms/android-9
+      sources/cxx-stl/gnu-libstdc++/4.8/include
+      sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi*
+      toolchains/arm-linux-androideabi-4.8
+      toolchains/arm-linux-androideabi-clang3.6
    )],
    'i686-linux-android' => [@common, qw(
-      */platforms/android-9
-      */sources/cxx-stl/gnu-libstdc++/4.8/include
-      */sources/cxx-stl/gnu-libstdc++/4.8/libs/x86
-      */toolchains/x86-4.8
-      */toolchains/x86-clang3.6
+      platforms/android-9
+      sources/cxx-stl/gnu-libstdc++/4.8/include
+      sources/cxx-stl/gnu-libstdc++/4.8/libs/x86
+      toolchains/x86-4.8
+      toolchains/x86-clang3.6
    )],
 );
 
@@ -71,7 +73,8 @@ if ($C->HOST ne $C->TARGET) {
 
    print "Extracting $NDK_PACKAGE...\n";
    my @lines = eval {
-      must_popen "7z", "x", $NDK_PACKAGE, map { "-ir!$_" } @{ $NDK_FILES{$C->TARGET} }
+      my @files = map { "$NDK_DIR/$_" } @{ $NDK_FILES{$C->TARGET} };
+      must_popen "7z", "x", $NDK_PACKAGE, map { "-ir!$_" } @files
    };
 
    if ($@ =~ /No such file or directory/) {
@@ -86,6 +89,9 @@ if ($C->HOST ne $C->TARGET) {
    print "Extracted: $extracted\n";
    print "Skipped: $skipped\n";
    print "$_\n" for @rest;
+
+   # Just so sources/cxx-stl/stlport/../gabi++ works.
+   must_system "mkdir", "$NDK_DIR/sources/cxx-stl/stlport";
 
    must_system "mv", (abs_path $NDK_DIR), $C->NDK_HOME;
 }

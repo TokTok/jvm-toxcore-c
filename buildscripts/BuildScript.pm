@@ -84,6 +84,11 @@ sub must_system {
 }
 
 sub must_popen {
+   if ($_[0] eq "-q") {
+      shift;
+   } else {
+      show \@_;
+   }
    open my $fh, '-|', @_
       or die "Could not exec '@_': $!";
    my @result = <$fh>;
@@ -100,7 +105,10 @@ sub must_popen {
 
 
 sub git_install {
-   my ($state, $patch, $jobs, $baseurl, $repo, $branch, @flags) = @_;
+   my ($state, $jobs, $baseurl, $repo, $branch, @flags) = @_;
+
+   # Apply patch if one exists.
+   my $patch = "buildscripts/patches/$repo.patch";
 
    $patch = abs_path $patch;
 
@@ -139,7 +147,13 @@ sub git_install {
          print "LDFLAGS  = $ENV{LDFLAGS}\n";
 
          # Run configure in the vpath build directory.
-         must_system "../configure", @flags;
+         eval {
+            must_system "../configure", @flags;
+         };
+         if ($@) {
+            must_system "cat", "config.log";
+            die $@;
+         }
 
          # Then build and install.
          must_system "make", "-j$jobs";

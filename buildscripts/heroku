@@ -2,22 +2,25 @@
 
 set -x
 
-export PROGUARD=1
+export TEST_GOAL=proguard
 export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64
 export PATH=$CACHE_DIR/usr/bin:$PATH
 
 buildscripts/00_dependencies_host
 
+export CC=$CACHE_DIR/usr/bin/clang
+export CXX=$CACHE_DIR/usr/bin/clang++
+
 # If the above setup step did its job, start the build.
-if which sbt && which clang && which cmake; then
+if which sbt && which clang; then
   buildscripts/04_build
 fi
 
 # Copy the native library and the final minified jar to cache.
 mkdir -p $CACHE_DIR/binaries
 
-if [ -d projects/tox4j/target ]; then
-  mv projects/tox4j/target/cpp/bin/* $CACHE_DIR/binaries
+if [ -d projects/tox4j/target/x86_64-linux ]; then
+  mv projects/tox4j/target/x86_64-linux/*.so $CACHE_DIR/binaries
   mv projects/tox4j/target/scala-2.11/proguard/tox4j_2.11-0.1-SNAPSHOT.jar $CACHE_DIR/binaries
 fi
 

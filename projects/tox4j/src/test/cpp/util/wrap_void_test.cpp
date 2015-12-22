@@ -3,7 +3,7 @@
 #include "util/logging.h"
 #include <gtest/gtest.h>
 
-#include "../mock_jni.h"
+#include <memory>
 
 
 static std::unique_ptr<int>

@@ -17,6 +17,12 @@ my $C = require C;
 ##############################################################################
 
 
+my %STL = (
+   'arm-linux-androideabi' => 'gnustl',
+   'aarch64-linux-android' => 'gnustl',
+   'i686-linux-android'    => 'gnustl',
+);
+
 my %TOOLCHAIN = (
    'arm-linux-androideabi' => 'arm-linux-androideabi',
    'aarch64-linux-android' => 'aarch64-linux-android',
@@ -41,6 +47,7 @@ if ($C->HOST ne $C->TARGET) {
    # Install a standalone Android NDK toolchain.
    must_system (
       $C->NDK_HOME . "/build/tools/make-standalone-toolchain.sh",
+      "--stl=$STL{$C->TARGET}",
       "--ndk-dir=" . $C->NDK_HOME,
       "--toolchain=$TOOLCHAIN{$C->TARGET}-clang3.6",
       "--install-dir=$toolchain",

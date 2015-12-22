@@ -1,5 +1,6 @@
 organization  := "im.tox"
 name          := "optimiser"
+scalaVersion  := "2.11.7"
 
 sbtPlugin := true
 
@@ -12,10 +13,3 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.0-M14"
 ) map (_ % Test)
-
-// Enable the plugins we want.
-import sbt.tox4j._
-import sbt.tox4j.lint._
-Checkstyle.moduleSettings
-Scalastyle.moduleSettings
-CodeFormat.moduleSettings

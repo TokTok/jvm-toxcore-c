@@ -12,9 +12,5 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.0-M14"
 ) map (_ % Test)
 
-// Enable the plugins we want.
-import sbt.tox4j._
-import sbt.tox4j.lint._
-Checkstyle.moduleSettings
-Scalastyle.moduleSettings
-CodeFormat.moduleSettings
+import im.tox.sbt.lint.Scalastyle
+Scalastyle.projectSettings

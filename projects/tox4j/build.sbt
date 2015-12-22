@@ -3,18 +3,6 @@ organization  := "im.tox"
 name          := "tox4j"
 scalaVersion  := "2.11.7"
 
-// Enable the plugins we want.
-import sbt.tox4j._
-import sbt.tox4j.lint._
-import scoverage.ScoverageSbtPlugin.ScoverageKeys._
-
-// Build plugins.
-Assembly.moduleSettings
-Benchmarking.moduleSettings
-CodeFormat.moduleSettings
-Jni.moduleSettings
-ProtobufJni.moduleSettings
-
 
 /******************************************************************************
  * Dependencies
@@ -24,16 +12,12 @@ ProtobufJni.moduleSettings
 // Snapshot and linter repository.
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-// Tox4j support libraries.
-resolvers += "Tox4j snapshots" at "https://tox4j.github.io/repositories/snapshots/"
-
 // Build dependencies.
 libraryDependencies ++= Seq(
   "codes.reactive" %% "scala-time-threeten" % "0.3.0-SNAPSHOT",
   "com.google.guava" % "guava" % "18.0",
   "com.intellij" % "annotations" % "12.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-  "im.tox" %% "macros" % version.value,
   "org.scalaz" %% "scalaz-core" % "7.2.0-M1",
   "org.scalaz.stream" %% "scalaz-stream" % "0.8",
   "org.scodec" %% "scodec-core" % "1.8.3"
@@ -56,23 +40,17 @@ libraryDependencies ++= Seq(
 // Add ScalaMeter as test framework.
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
-// JNI.
-import sbt.tox4j.Jni.Keys._
+// Native dependencies.
+import im.tox.sbt.NativeCompilePlugin.Keys.nativeLink
+inConfig(Test)(Keys.compile <<= Keys.compile.dependsOn(nativeLink in NativeTest))
 
-packageDependencies ++= Seq(
-  "protobuf",
-  "libtoxcore",
-  "libtoxav",
+nativeLibraryDependencies ++= Seq(
+  "protobuf" % "protobuf" % "3.0.0-beta-1",
+  "libtoxcore" % "libtoxcore" % "0.0.0",
+  "libtoxav" % "libtoxav" % "0.0.0",
   // Required, since toxav's pkg-config files are incomplete:
-  "libsodium",
-  "vpx"
-)
-
-// TODO: infer this (easy).
-jniSourceFiles in Compile ++= Seq(
-  managedNativeSource.value / "Av.pb.cc",
-  managedNativeSource.value / "Core.pb.cc",
-  managedNativeSource.value / "ProtoLog.pb.cc"
+  "libsodium" % "libsodium" % "1.0.7",
+  "vpx" % "vpx" % "1.5.0"
 )
 
 
@@ -81,33 +59,22 @@ jniSourceFiles in Compile ++= Seq(
  ******************************************************************************/
 
 
-// Mixed project.
-compileOrder := CompileOrder.Mixed
-scalaSource in Compile := (javaSource in Compile).value
-scalaSource in Test    := (javaSource in Test   ).value
-
-// Lint plugins.
-Checkstyle.moduleSettings
-Foursquare.moduleSettings
-Scalastyle.moduleSettings
-
-// Local overrides for linters.
-WartRemoverOverrides.moduleSettings
-
 // TODO(iphydf): Require less test coverage for now, until ToxAv is tested.
-Coverage.moduleSettings
-coverageMinimum := 60
-coverageExcludedPackages := "(" + coverageExcludedPackages.value + ")|im\\.tox\\.core\\..*"
+import scoverage.ScoverageSbtPlugin.ScoverageKeys._
+coverageMinimum := 70
 
-// Tox4j-specific style checkers.
-addCompilerPlugin("im.tox" %% "linters" % "0.1-SNAPSHOT")
+import im.tox.sbt.lint.Scalastyle
+Scalastyle.projectSettings
 
 // Override Scalastyle configuration for test.
 scalastyleConfigUrl in Test := None
 scalastyleConfig in Test := (scalaSource in Test).value / "scalastyle-config.xml"
 
-scalacOptions ++= Seq("-Yinline-warnings", "-target:jvm-1.7")
-javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
+// Mixed project.
+compileOrder := CompileOrder.Mixed
+scalaSource in Compile := (javaSource in Compile).value
+scalaSource in Test    := (javaSource in Test   ).value
+
 
 /******************************************************************************
  * Proguard configuration.

@@ -1,2 +1,5 @@
-import sbt.tox4j.logic.jni.Platform._
-jniSettings(Android("aarch64-linux-android"))
+import im.tox.sbt.NativeCompilePlugin.Keys._
+
+enablePlugins(AndroidNdkPlugin)
+
+crossPlatform := "aarch64-linux-android"

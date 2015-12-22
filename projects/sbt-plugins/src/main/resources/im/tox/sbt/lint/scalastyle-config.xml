@@ -1,0 +1,270 @@
+<scalastyle>
+  <name>Scalastyle standard configuration</name>
+
+  Check the number of lines in a file
+  <check level="error" class="org.scalastyle.file.FileLengthChecker" enabled="true">
+    <parameters>
+      <parameter name="maxFileLength">800</parameter>
+    </parameters>
+  </check>
+
+  Check the number of characters in a line
+  <check level="error" class="org.scalastyle.file.FileLineLengthChecker" enabled="true">
+    <parameters>
+      <parameter name="maxLineLength">160</parameter>
+      <parameter name="tabSize">4</parameter>
+    </parameters>
+  </check>
+
+  Check that there are no tabs in a file
+  <check level="error" class="org.scalastyle.file.FileTabChecker" enabled="true"/>
+
+  Check the first lines of each file matches the text
+  XXX: Disabled because we don't use file headers.
+  <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="false"/>
+
+  Checks that lines are indented by a multiple of the tab size
+  XXX: Disabled because we use scalariform on compile.
+  <check level="error" class="org.scalastyle.file.IndentationChecker" enabled="false"/>
+
+  Checks that a file ends with a newline character
+  <check level="error" class="org.scalastyle.file.NewLineAtEofChecker" enabled="true"/>
+
+  Checks that a file does not end with a newline character
+  XXX: Disabled because it's the opposite of the one above.
+  <check level="error" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"/>
+
+  Checks that a regular expression cannot be matched, if found reports this
+  <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+    <parameters>
+      <parameter name="regex"><![CDATA[ println]]></parameter>
+    </parameters>
+  </check>
+
+  Check that there is no trailing whitespace at the end of lines
+  <check level="error" class="org.scalastyle.file.WhitespaceEndOfLineChecker" enabled="true"/>
+
+  Checks that block imports are not used.
+  XXX: Disabled because block imports decrease verbosity.
+  <check level="error" class="org.scalastyle.scalariform.BlockImportChecker" enabled="false"/>
+
+  Check that class names match a regular expression
+  <check level="error" class="org.scalastyle.scalariform.ClassNamesChecker" enabled="true">
+    <parameters>
+      <parameter name="regex"><![CDATA[[A-Z][A-Za-z]*]]></parameter>
+    </parameters>
+  </check>
+
+  Checks that type parameter to a class matches a regular expression
+  <check level="error" class="org.scalastyle.scalariform.ClassTypeParameterChecker" enabled="true">
+    <parameters>
+      <parameter name="regex"><![CDATA[[A-Z][A-Za-z]*]]></parameter>
+    </parameters>
+  </check>
+
+  Check that classes and objects do not define equals without overriding equals(java.lang.Object).
+  <check level="error" class="org.scalastyle.scalariform.CovariantEqualsChecker" enabled="true"/>
+
+  Checks that the cyclomatic complexity of a method does exceed a value
+  <check level="error" class="org.scalastyle.scalariform.CyclomaticComplexityChecker" enabled="true">
+    <parameters>
+      <parameter name="maximum">10</parameter>
+    </parameters>
+  </check>
+
+  Checks that Java @Deprecated is not used, Scala @deprecated should be used instead
+  <check level="error" class="org.scalastyle.scalariform.DeprecatedJavaChecker" enabled="true"/>
+
+  Disallow space after certain token(s)
+  <check level="error" class="org.scalastyle.scalariform.DisallowSpaceAfterTokenChecker" enabled="true"/>
+
+  Disallow space before certain token(s)
+  <check level="error" class="org.scalastyle.scalariform.DisallowSpaceBeforeTokenChecker" enabled="true"/>
+
+  If a class/trait has no members, the braces are unnecessary
+  <check level="error" class="org.scalastyle.scalariform.EmptyClassChecker" enabled="true"/>
+
+  Ensure single space after certain token(s)
+  <check level="error" class="org.scalastyle.scalariform.EnsureSingleSpaceAfterTokenChecker" enabled="true"/>
+
+  Ensure single space before certain token(s)
+  <check level="error" class="org.scalastyle.scalariform.EnsureSingleSpaceBeforeTokenChecker" enabled="true"/>
+
+  Check that if a class implements either equals or hashCode, it should implement the other
+  <check level="error" class="org.scalastyle.scalariform.EqualsHashCodeChecker" enabled="true"/>
+
+  Check that field names match a regular expression
+  XXX: Disabled due to https://github.com/scalastyle/scalastyle/issues/149.
+  <check level="error" class="org.scalastyle.scalariform.FieldNamesChecker" enabled="false">
+    <parameters>
+      <parameter name="regex"><![CDATA[[a-z][A-Za-z]*]]></parameter>
+    </parameters>
+  </check>
+
+  Checks that braces are used in for comprehensions.
+  XXX: Disabled due to https://github.com/scalastyle/scalastyle/issues/142.
+  <check level="error" class="org.scalastyle.scalariform.ForBraceChecker" enabled="false"/>
+
+  Checks that if statements have braces
+  <check level="error" class="org.scalastyle.scalariform.IfBraceChecker" enabled="true">
+    <parameters>
+      <parameter name="singleLineAllowed">true</parameter>
+      <parameter name="doubleLineAllowed">false</parameter>
+    </parameters>
+  </check>
+
+  Check that a class does not import certain classes
+  <check level="error" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
+    <parameters>
+      <parameter name="illegalImports">android._,sun._,java.awt._</parameter>
+    </parameters>
+  </check>
+
+  Checks that imports are grouped together, not throughout the file
+  XXX: Disabled because it breaks path-dependent type imports.
+  <check level="error" class="org.scalastyle.scalariform.ImportGroupingChecker" enabled="false"/>
+
+  Checks that a case statement pattern match is not lower case, as this can cause confusion.
+  XXX: Disabled because it makes suggestions (add :Any or use ``) that don't apply in many cases.
+  <check level="error" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" enabled="false"/>
+
+  Checks for use of magic numbers
+  <check level="error" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="true">
+    <parameters>
+      <parameter name="ignore">-1,0,1,2,3</parameter>
+    </parameters>
+  </check>
+
+  Checks that methods do not exceed a maximum length
+  <check level="error" class="org.scalastyle.scalariform.MethodLengthChecker" enabled="true">
+    <parameters>
+      <parameter name="maxLength">50</parameter>
+    </parameters>
+  </check>
+
+  Check that method names match a regular expression
+  <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">
+    <parameters>
+      <parameter name="regex"><![CDATA[^([a-z][A-Za-z0-9]*(_=)?|\+=|-=)$]]></parameter>
+    </parameters>
+  </check>
+
+  Checks that a string literal does not appear multiple times
+  XXX: Disabled because of false positives on interpolated strings (e.g. s"$foo $bar $cow" containing " " twice).
+  <check level="error" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="false"/>
+
+  Check that classes and objects do not define the clone() method
+  <check level="error" class="org.scalastyle.scalariform.NoCloneChecker" enabled="true"/>
+
+  Check that classes and objects do not define the finalize() method
+  <check level="error" class="org.scalastyle.scalariform.NoFinalizeChecker" enabled="true"/>
+
+  No whitespace after left bracket ‘[’
+  <check level="error" class="org.scalastyle.scalariform.NoWhitespaceBeforeLeftBracketChecker" enabled="true"/>
+
+  No whitespace before left bracket ‘[’
+  <check level="error" class="org.scalastyle.scalariform.NoWhitespaceAfterLeftBracketChecker" enabled="true"/>
+
+  Some editors are unfriendly to non ascii characters.
+  <check level="error" class="org.scalastyle.scalariform.NonASCIICharacterChecker" enabled="true"/>
+
+  Checks that the code does not have ??? operators.
+  <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"/>
+
+  Check that null is not used
+  // XXX: Disabled because it's already checked by WartRemover.
+  <check level="error" class="org.scalastyle.scalariform.NullChecker" enabled="false"/>
+
+  Check that a class / trait / object does not have too many methods
+  <check level="error" class="org.scalastyle.scalariform.NumberOfMethodsInTypeChecker" enabled="true">
+    <parameters>
+      <parameter name="maxMethods">60</parameter>
+    </parameters>
+  </check>
+
+  Checks that there are not too many types declared in a file
+  <check level="error" class="org.scalastyle.scalariform.NumberOfTypesChecker" enabled="true">
+    <parameters>
+      <parameter name="maxTypes">30</parameter>
+    </parameters>
+  </check>
+
+  Check that object names match a regular expression
+  <check level="error" class="org.scalastyle.scalariform.ObjectNamesChecker" enabled="true">
+    <parameters>
+      <parameter name="regex"><![CDATA[[A-Z][A-Za-z]*]]></parameter>
+    </parameters>
+  </check>
+
+  Check that package object names match a regular expression
+  <check level="error" class="org.scalastyle.scalariform.PackageObjectNamesChecker" enabled="true">
+    <parameters>
+      <parameter name="regex"><![CDATA[^[a-z][A-Za-z0-9]*$]]></parameter>
+    </parameters>
+  </check>
+
+  Maximum number of parameters for a method
+  <check level="error" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
+    <parameters>
+      <parameter name="maxParameters">10</parameter>
+    </parameters>
+  </check>
+
+  Use a : Unit = for procedure declarations
+  XXX: Disabled due to https://github.com/scalastyle/scalastyle/issues/145.
+  <check level="error" class="org.scalastyle.scalariform.ProcedureDeclarationChecker" enabled="false"/>
+
+  Check that a method has an explicit return type, it is not inferred
+  <check level="error" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="true"/>
+
+  Checks that if expressions are not redundant, i.e. easily replaced by a variant of the condition
+  <check level="error" class="org.scalastyle.scalariform.RedundantIfChecker" enabled="true"/>
+
+  Check that return is not used
+  <check level="error" class="org.scalastyle.scalariform.ReturnChecker" enabled="true"/>
+
+  Checks that the ScalaDoc on documentable members is well-formed
+  XXX: Disabled due to https://github.com/scalastyle/scalastyle/issues/160
+  <check level="error" class="org.scalastyle.scalariform.ScalaDocChecker" enabled="false"/>
+
+  Boolean expression can be simplified
+  <check level="error" class="org.scalastyle.scalariform.SimplifyBooleanExpressionChecker" enabled="true"/>
+
+  Checks a space after the start of the comment.
+  <check level="error" class="org.scalastyle.scalariform.SpaceAfterCommentStartChecker" enabled="true"/>
+
+  Check that the plus sign is followed by a space
+  <check level="error" class="org.scalastyle.scalariform.SpacesAfterPlusChecker" enabled="true"/>
+
+  Check that the plus sign is preceded by a space
+  <check level="error" class="org.scalastyle.scalariform.SpacesBeforePlusChecker" enabled="true"/>
+
+  Check that structural types are not used.
+  <check level="error" class="org.scalastyle.scalariform.StructuralTypeChecker" enabled="true"/>
+
+  Checks that a regular expression cannot be matched in a token, if found reports this
+  <check level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true"/>
+
+  Avoid wildcard imports
+  XXX: Disabled because IDEA produces them.
+  <check level="error" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="false"/>
+
+  Checks that if a long literal is used, then an uppercase L is used
+  <check level="error" class="org.scalastyle.scalariform.UppercaseLChecker" enabled="true"/>
+
+  Checks that classes and objects do not define mutable fields
+  <check level="error" class="org.scalastyle.scalariform.VarFieldChecker" enabled="true"/>
+
+  Checks that functions do not define mutable variables
+  <check level="error" class="org.scalastyle.scalariform.VarLocalChecker" enabled="true"/>
+
+  Checks that while is not used
+  <check level="error" class="org.scalastyle.scalariform.WhileChecker" enabled="true"/>
+
+  Check that XML literals are not used
+  <check level="error" class="org.scalastyle.scalariform.XmlLiteralChecker" enabled="true"/>
+
+  Checks that braces are used in for comprehensions. This is the corrected version.
+  <check level="error" class="org.scalastyle.scalariform.tox4j.ForBraceChecker" enabled="true"/>
+
+</scalastyle>

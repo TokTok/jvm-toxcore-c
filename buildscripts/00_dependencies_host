@@ -15,25 +15,10 @@ my @dependencies = do 'buildscripts/dependencies.pl';
 
 ##############################################################################
 #
-# :: Install external dependencies (host platform).
+# :: Install C++ toolchain.
 #
 ##############################################################################
 
-
-sub install_dependency {
-   my ($baseurl, $repo, $branch, @flags) = @_;
-
-   unshift @flags, "--prefix=" . $C->PREFIX;
-
-   @flags = flatten_flags $C->HOST, @flags;
-   my $state = \%{ $C->STATE->{$C->HOST} };
-
-   git_install $state, undef, $C->JOBS, $baseurl, $repo, $branch, @flags;
-}
-
-
-# Install external dependencies from git.
-install_dependency @$_ for @dependencies;
 
 system "java", "-version";
 die "No java installed" if $?;
@@ -53,13 +38,15 @@ if ($?) {
 set -e -x
 
 SBT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
+
+exec </dev/null
 exec java \$SBT_OPTS -jar $BINDIR/sbt-launch.jar "\$@"
 EOF
 
    chmod 0755, "$BINDIR/sbt";
 }
 
-my @clangs = ("clang", "clang-3.6", "clang-3.7");
+my @clangs = ("clang", "clang-3.6", "clang-3.7", "clang-3.8");
 if (not grep { system $_, "--version"; not $? } @clangs) {
    print "No clang installed; fetching one now\n";
 
@@ -75,18 +62,25 @@ if (not grep { system $_, "--version"; not $? } @clangs) {
    };
 }
 
-system "cmake", "--version";
-if ($?) {
-   print "No cmake installed; fetching one now\n";
 
-   tempd {
-      my $TARNAME = "cmake-3.4.1-Linux-x86_64";
-      system "wget", "https://cmake.org/files/v3.4/$TARNAME.tar.gz";
-      system "tar", "zxf", "$TARNAME.tar.gz";
-      pushd {
-         for (<*>) {
-            system "cp", "-a", $_, $C->PREFIX;
-         }
-      } $TARNAME;
-   };
+##############################################################################
+#
+# :: Install external dependencies (host platform).
+#
+##############################################################################
+
+
+sub install_dependency {
+   my ($baseurl, $repo, $branch, @flags) = @_;
+
+   unshift @flags, "--prefix=" . $C->PREFIX;
+
+   @flags = flatten_flags $C->HOST, @flags;
+   my $state = \%{ $C->STATE->{$C->HOST} };
+
+   git_install $state, $C->JOBS, $baseurl, $repo, $branch, @flags;
 }
+
+
+# Install external dependencies from git.
+install_dependency @$_ for @dependencies;

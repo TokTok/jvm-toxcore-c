@@ -1,2 +1,5 @@
-import sbt.tox4j.logic.jni.Platform._
-jniSettings(Android("i686-linux-android"))
+import im.tox.sbt.NativeCompilePlugin.Keys._
+
+enablePlugins(AndroidNdkPlugin)
+
+crossPlatform := "i686-linux-android"

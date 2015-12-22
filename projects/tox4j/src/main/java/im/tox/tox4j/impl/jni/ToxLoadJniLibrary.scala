@@ -13,18 +13,19 @@ import scala.sys.process._
 object ToxLoadJniLibrary {
 
   /**
-   * Set this to false to disable downloading native libraries from the web.
+   * Set this to true to enable downloading native libraries from the web.
    *
    * On mobile devices, for example, we may not want to download large
    * amounts of data and instead prefer to fail. The libraries on github are
    * non-stripped (debug) versions, so for mobile devices, they are a
    * bad fallback.
    */
-  var webFallbackEnabled = true // scalastyle:ignore var.field
+  var webFallbackEnabled = false // scalastyle:ignore var.field
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private val RepoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
+
   private val AlreadyLoaded = "Native Library (.+) already loaded in another classloader".r
   private val NotFoundDalvik = "Couldn't load .+ from loader .+ findLibrary returned null".r
   private val NotFoundJvm = "no .+ in java.library.path".r

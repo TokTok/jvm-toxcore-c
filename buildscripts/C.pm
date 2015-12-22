@@ -77,8 +77,15 @@ sub STATE { $STATE }
 my $PREFIX = PREFIX;
 $ENV{PATH} = "$PREFIX/bin:$ENV{PATH}";
 $ENV{PKG_CONFIG_PATH} = "$PREFIX/lib/pkgconfig";
-$ENV{CPPFLAGS} = "-I$PREFIX/include -isystem $PREFIX/include";
+$ENV{CPPFLAGS} = "-I$PREFIX/include -isystem$PREFIX/include";
 $ENV{LDFLAGS} = "-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib";
+
+# Compile everything with clang.
+$ENV{CC} = "clang";
+$ENV{CXX} = "clang++";
+
+# Enable optimisation on dependencies.
+$ENV{CFLAGS} = $ENV{CXXFLAGS} = "-O3";
 
 
 __PACKAGE__

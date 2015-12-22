@@ -1,0 +1,26 @@
+diff --git a/configure.ac b/configure.ac
+index 42605ae..764a219 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -160,7 +160,7 @@ case "$target_os" in
+     ;;
+   *)
+     # Need to link against rt on Solaris
+-    AC_SEARCH_LIBS([sched_yield], [rt], [], [AC_MSG_FAILURE([sched_yield was not found on your system])])
++    #AC_SEARCH_LIBS([sched_yield], [rt], [], [AC_MSG_FAILURE([sched_yield was not found on your system])])
+     ;;
+ esac
+ 
+diff --git a/src/Makefile.am b/src/Makefile.am
+index b7d6409..1fb55d6 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -626,7 +626,7 @@ protoc_outputs =                                                  \
+   google/protobuf/util/json_format_proto3.pb.cc                   \
+   google/protobuf/util/json_format_proto3.pb.h
+ 
+-BUILT_SOURCES = $(protoc_outputs)
++#BUILT_SOURCES = $(protoc_outputs)
+ 
+ if USE_EXTERNAL_PROTOC
+ 
