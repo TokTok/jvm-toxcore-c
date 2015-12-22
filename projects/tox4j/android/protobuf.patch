@@ -1,8 +1,8 @@
 diff --git a/src/Makefile.am b/src/Makefile.am
-index 5b28579..6fa4d35 100644
+index b7d6409..1fb55d6 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -597,7 +597,7 @@ protoc_outputs =                                                  \
+@@ -626,7 +626,7 @@ protoc_outputs =                                                  \
    google/protobuf/util/json_format_proto3.pb.cc                   \
    google/protobuf/util/json_format_proto3.pb.h
  
