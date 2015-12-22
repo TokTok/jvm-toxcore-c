@@ -15,8 +15,7 @@ my $C = require C;
 ##############################################################################
 
 
-my $PLATFORM = 'android-19';
-#my $PLATFORM = 'android-23';
+my $PLATFORM = "android-19";
 
 my %ABI = (
    # Target triple                                      Emulator binary   Emulator ABI   NDK ABI
@@ -31,23 +30,46 @@ END {
    kill 2, $emulator_pid if $emulator_pid;
 }
 
+sub same_file_kind {
+   my ($a, $b) = @_;
+
+   my $a_kind = (must_popen "file", $a)[0] =~ /\Q$a\E: (.*)/;
+   my $b_kind = (must_popen "file", $b)[0] =~ /\Q$b\E: (.*)/;
+
+   $a_kind eq $b_kind
+}
+
+sub should_copy {
+   my ($src, $dst) = @_;
+
+   -f $src and not -f $dst or same_file_kind $src, $dst
+}
+
 my $abi = $ABI{$C->TARGET};
 # Do nothing if the ABI is not supported or this is not an Android build.
 if ($abi) {
    my ($abi_emulator, $abi_name, $abi_native_name) = @$abi;
 
+   must_system "git", "clone", "http://github.com/iphydf/toktok", "projects/toktok"
+      unless -e "projects/toktok";
+
    my $native_lib_dir = "projects/toktok/src/main/libs/$abi_native_name";
 
    my $native_lib_dst = "$native_lib_dir/libtox4j.so";
    my $native_lib_src = "projects/tox4j/target/cpp/bin/libtox4j.so";
-   if (not -f $native_lib_dst and -f $native_lib_src) {
+   if (should_copy $native_lib_src, $native_lib_dst) {
       print "Copying native library from $native_lib_src to $native_lib_dst\n";
       must_system "cp", "-a", $native_lib_src, $native_lib_dst;
    }
 
    my ($adb_state) = must_popen "adb", "get-state";
    if ($adb_state ne "device") {
-      must_system "echo no | android create avd --force -n test-$abi_native_name -t $PLATFORM --abi $abi_name";
+      my @targets = must_popen "android", "list", "targets", "-c";
+      my ($target) = grep { $_ eq $PLATFORM } @targets;
+      $target ||= $targets[-1];
+      print "Available targets: @targets, selecting $target\n";
+
+      must_system "echo no | android create avd --force -n test-$abi_native_name -t $target --abi $abi_name";
       if (not ($emulator_pid = fork)) {
          exec $abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window";
       }
@@ -67,7 +89,9 @@ if ($abi) {
    pushd {
       must_system "adb", "logcat", "-c";
       system "sbt", "clean", "android:test";
-      must_system "adb", "logcat", "-d"
-         if $?;
+      if ($?) {
+         must_system "adb", "logcat", "-d";
+         die "Android tests failed";
+      }
    } "projects/toktok";
 }

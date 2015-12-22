@@ -1,7 +1,8 @@
 export CACHE_DIR ?= $(HOME)/cache
 
 install:
-	TEST_GOAL= buildscripts/04_build
+	buildscripts/04_build
+	buildscripts/05_android
 
 check:
 	TEST_GOAL=coverage buildscripts/04_build

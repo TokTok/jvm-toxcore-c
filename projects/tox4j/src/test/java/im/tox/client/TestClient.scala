@@ -127,10 +127,12 @@ case object TestClient extends App {
               new LoggingEventListener(id)
             )
 
-            // Update the profile with the new name.
+            // Update the profile with the new name and status message.
             val profile = ProfileManager.loadProfile(id, tox)
-              .withName(name)
-              .withStatusMessage(statusMessage)
+              .copy(
+                name = name,
+                statusMessage = statusMessage
+              )
 
             // Set the name/status message in the tox instance.
             tox.setName(ToxNickname.fromString(name).get)

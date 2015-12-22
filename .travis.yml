@@ -13,7 +13,7 @@ android:
     - extra-android-support
     - extra-android-m2repository
     #- sys-img-aarch64-android-23
-    - sys-img-armeabi-v7a-android-19
+    #- sys-img-armeabi-v7a-android-19
     #- sys-img-x86-android-23
 
 cache:
@@ -40,7 +40,6 @@ install:
   # Set-up step.
   - export NDK_HOME=$HOME/android-ndk
   - make setup
-  - git clone http://github.com/iphydf/toktok projects/toktok
 
 script:
   # Build/install step.
