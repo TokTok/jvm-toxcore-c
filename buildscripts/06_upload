@@ -23,9 +23,10 @@ my $M2DIR = "$ENV{HOME}/.m2/repository/im";
 my $REPODIR = 'repositories/snapshots/im';
 my $GITHUB_KEY = $C->GITHUB_KEY;
 
-
-#if ($GITHUB_KEY and -d $M2DIR and $C->GOAL eq 'coverage') {
-if ($GITHUB_KEY and -d $M2DIR) {
+# Upload artifacts if the build was not a test build. Test builds instrument
+# the code to gather coverage information. We don't want that instrumentation
+# to end up in production builds.
+if ($GITHUB_KEY and -d $M2DIR and not $C->TEST_GOAL) {
    my $repo = "tox4j.github.io";
    print "Publishing artifacts to $repo...\n";
 
