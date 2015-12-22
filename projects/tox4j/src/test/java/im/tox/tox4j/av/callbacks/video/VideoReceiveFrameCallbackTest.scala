@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.callbacks.video
 
-import java.io.{DataOutputStream, File, FileOutputStream}
+import java.awt.Color
 import java.util
 
 import im.tox.tox4j.av.ToxAv
@@ -11,44 +11,23 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
-import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 
 final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
 
-  private val video = VideoGenerators.default
-
   /**
-   * The time to wait for the next frame. Increase this if you need more time
-   * to look at the displayed images.
+   * How much of the sent data must be received for the test to pass.
    */
-  private val frameDelay = 0
+  private val minCompletionRatio = 0.8
+
+  private val video = VideoGenerators.default
 
   private val bitRate = BitRate.fromInt(1).get
 
-  /**
-   * Base directory for sent frame capture. The files can be used to replay a
-   * session in case of bugs.
-   */
-  private val capturePath = Some(new File("capture/videoSendFrame")).filter(_.isDirectory)
-  capturePath.foreach(_.listFiles.foreach(_.delete()))
-
   override def maxParticipantCount: Int = 2
 
-  type S = Int
+  final case class S(t: Int = 0, received: List[Color] = Nil)
 
-  object Handler extends EventListener(0) {
-
-    private val displayImage = {
-      if (sys.env.contains("TRAVIS")) {
-        None
-      } else {
-        if (video.size <= 100 * 40) {
-          Some(ConsoleVideoDisplay(video.width, video.height))
-        } else {
-          Some(GuiVideoDisplay(video.width, video.height))
-        }
-      }
-    }
+  object Handler extends EventListener(S()) {
 
     override def friendConnectionStatus(
       friendNumber: ToxFriendNumber,
@@ -61,7 +40,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       } else {
         // Call id+1.
         state.addTask { (tox, av, state) =>
-          debug(state, s"Ringing ${state.id(friendNumber)}")
+          debug(state, s"Ringing ${state.id(friendNumber)} to send ${video.length} frames")
           av.call(friendNumber, BitRate.Disabled, bitRate)
           state
         }
@@ -82,43 +61,19 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     }
 
     private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore, av: ToxAv, state0: State): State = {
-      val state = state0.modify(_ + 1)
+      val state = state0.modify(s => s.copy(t = s.t + 1))
 
-      val (generationTime, (y, u, v)) = timed {
-        video.yuv(state0.get)
-      }
+      val (y, u, v) = video.yuv(state0.get.t)
       assert(y.length == video.size)
       assert(u.length == video.size / 4)
       assert(v.length == video.size / 4)
 
-      val displayTime = timed {
-        displayImage.foreach { display =>
-          display.displaySent(state0.get, y, u, v)
-        }
-      }
-      val sendTime = timed {
-        av.videoSendFrame(friendNumber, video.width.value, video.height.value, y, u, v)
-      }
+      av.videoSendFrame(friendNumber, video.width.value, video.height.value, y, u, v)
 
-      capturePath.foreach { capturePath =>
-        val out = new DataOutputStream(new FileOutputStream(new File(capturePath, f"${state0.get}%03d.dump")))
-        out.writeInt(video.width.value)
-        out.writeInt(video.height.value)
-        out.write(y)
-        out.write(u)
-        out.write(v)
-        out.close()
-      }
-
-      debug(
-        state,
-        s"Sent frame ${state0.get}: generationTime=${generationTime}ms, displayTime=${displayTime}ms, sendTime=${sendTime}ms"
-      )
-
-      if (state.get >= video.length) {
+      if (state.get.t >= video.length) {
         state.finish
       } else {
-        state.addTask(frameDelay)(sendFrame(friendNumber))
+        state.addTask(sendFrame(friendNumber))
       }
     }
 
@@ -127,26 +82,52 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       state.addTask(sendFrame(friendNumber))
     }
 
+    private def approximatelyEqual(color1: Color)(color2: Color): Boolean = {
+      val rgb1 = color1.getRGBColorComponents(Array.ofDim(3)).map(c => Math.round(c * 32))
+      val rgb2 = color2.getRGBColorComponents(Array.ofDim(3)).map(c => Math.round(c * 32))
+      (rgb1, rgb2).zipped.forall(_ == _)
+    }
+
+    private def average(plane: Array[Byte]): Int = {
+      plane.map(_ & 0xff).sum / plane.length
+    }
+
     override def videoReceiveFrame(
       friendNumber: ToxFriendNumber,
       width: Width, height: Height,
       y: Array[Byte], u: Array[Byte], v: Array[Byte],
       yStride: Int, uStride: Int, vStride: Int
     )(state0: State): State = {
-      val state = state0.modify(_ + 1)
+      val rgbPlanar = VideoConversions.YUVtoRGB(width.value, height.value, y, u, v, yStride, uStride, vStride)
 
-      val times =
-        for {
-          displayImage <- displayImage
-          (parseTime, displayTime) <- displayImage.displayReceived(state0.get, y, u, v, yStride, uStride, vStride)
-        } yield {
-          s", parseTime=${parseTime}ms, displayTime=${displayTime}ms"
+      val averageR = average(rgbPlanar._1)
+      val averageG = average(rgbPlanar._2)
+      val averageB = average(rgbPlanar._3)
+
+      val receivedColor = new Color(averageR, averageG, averageB)
+
+      val state = state0.modify(s => s.copy(
+        t = s.t + 1,
+        received = receivedColor :: s.received
+      ))
+
+      assert(state.get.t <= video.length)
+
+      debug(state, s"Received frame ${state0.get.t}")
+
+      if (state.get.t >= video.length * minCompletionRatio) {
+        val received = state.get.received.distinct
+        val expected = VideoGenerators.Colors.values
+
+        // All received in expected.
+        assert(received.forall { c => expected.exists(approximatelyEqual(c)) })
+
+        if (state.get.t >= video.length) {
+          // All expected in received. Only checked if every sent frame was received.
+          debug(state, s"Received all ${video.length} frames")
+          assert(expected.forall { c => received.exists(approximatelyEqual(c)) })
         }
 
-      debug(state, s"Received frame ${state0.get}: $width, $height, strides=($yStride, $uStride, $vStride)${times.getOrElse("")}")
-
-      if (state.get >= video.length) {
-        displayImage.foreach(_.close())
         state.finish
       } else {
         state

@@ -80,6 +80,13 @@ object AudioGenerators {
     }
   }
 
+  final case class Sawtooth(frequency: Double) extends AudioGenerator {
+    def length(samplingRate: SamplingRate): Int = samplingRate.value * 16
+    def sample(samplingRate: SamplingRate, t: Int): Int = {
+      (Oscillator.Sine.osc(samplingRate, t, frequency, 1) * Short.MaxValue).toShort
+    }
+  }
+
   // https://www.youtube.com/watch?v=S7dg0X1LskI
   case object SongOfStorms extends AudioGenerator {
 

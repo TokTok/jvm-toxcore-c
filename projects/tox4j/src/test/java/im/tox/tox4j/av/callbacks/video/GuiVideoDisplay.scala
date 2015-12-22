@@ -83,7 +83,7 @@ final case class GuiVideoDisplay(width: Width, height: Height) extends RgbVideoD
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  override protected lazy val canvas: Try[UI] = Try(new GuiVideoDisplay.UI(width, height))
+  override protected val canvas: Try[UI] = Try(new GuiVideoDisplay.UI(width, height))
 
   override protected def parse(r: Array[Byte], g: Array[Byte], b: Array[Byte]): ImageIcon = {
     val image = newImage(width, height)

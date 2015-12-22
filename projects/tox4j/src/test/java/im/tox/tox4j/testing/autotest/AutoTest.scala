@@ -96,7 +96,7 @@ final case class AutoTest(
     val (delayed, runnable) = state.tasks.partition(_._1 >= 0)
     logger.trace(s"Running tasks: ${runnable.size} runnable, ${delayed.size} delayed")
 
-    runnable.foldRight(state.updateTasks(interval, delayed)) { (task, state) =>
+    runnable.foldRight(state.updateTasks(interval max 1, delayed)) { (task, state) =>
       assert(task._1 <= 0)
       task._2(tox, av, state)
     }
@@ -105,7 +105,7 @@ final case class AutoTest(
   @tailrec
   private def mainLoop[S](clients: List[Participant[S]], iteration: Int = 0): List[S] = {
     val interval = (clients.map(_.tox.iterationInterval) ++ clients.map(_.av.iterationInterval)).min
-    assert(interval > 0)
+    assert(interval >= 0)
 
     val (iterationTime, nextClients) = timed {
       clients.map {

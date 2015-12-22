@@ -73,7 +73,7 @@ abstract class AutoTestSuite extends FunSuite with Timeouts {
     logger.debug(s"[${state.id}] $message")
   }
 
-  test("UDP") {
+  def run(ipv6Enabled: Boolean = true, udpEnabled: Boolean = true): Unit = {
     failAfter(TestConstants.Timeout) {
       val participantCount =
         if (maxParticipantCount == 2) {
@@ -81,8 +81,10 @@ abstract class AutoTestSuite extends FunSuite with Timeouts {
         } else {
           new Random().nextInt(maxParticipantCount - 2) + 2
         }
-      AutoTest(ToxCoreImplFactory, ToxAvImplFactory).run(participantCount, ToxOptions(), Handler)
+      AutoTest(ToxCoreImplFactory, ToxAvImplFactory).run(participantCount, ToxOptions(ipv6Enabled, udpEnabled), Handler)
     }
   }
+
+  test("UDP")(run(ipv6Enabled = true, udpEnabled = true))
 
 }
