@@ -12,3 +12,17 @@ buildscripts/00_dependencies_host
 if which sbt && which clang && which cmake; then
   buildscripts/04_build
 fi
+
+# Copy the native library and the final minified jar to cache.
+mkdir -p $CACHE_DIR/binaries
+
+if [ -d projects/tox4j/target ]; then
+  mv projects/tox4j/target/cpp/bin/* $CACHE_DIR/binaries
+  mv projects/tox4j/target/scala-2.11/proguard/tox4j_2.11-0.1-SNAPSHOT.jar $CACHE_DIR/binaries
+fi
+
+# Copy them back if they were updated.
+cp $CACHE_DIR/binaries/* .
+
+# Delete everything else.
+rm -rf */
