@@ -19,7 +19,7 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
    */
   private val minCompletionRatio = 0.8
 
-  private val video = VideoGenerators.default
+  private val video = VideoGenerators.Colors(VideoGenerators.DefaultWidth, VideoGenerators.DefaultHeight)
 
   private val bitRate = BitRate.fromInt(1).get
 

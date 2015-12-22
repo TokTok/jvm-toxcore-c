@@ -79,7 +79,6 @@ case object TestClient extends App {
             |> client.tox.iterate(client.handler)
             |> client.av.iterate(client.handler)
             |> runTasks(client.tox, client.av)
-            |> ProfileManager.saveOnChange(client.tox, client.state.profile)
           )
         }
 
@@ -137,8 +136,6 @@ case object TestClient extends App {
             tox.setName(ToxNickname.fromString(name).get)
             tox.setStatusMessage(ToxStatusMessage.fromString(statusMessage).get)
 
-            // Save it again, changing the name/status message and updating the file format.
-            ProfileManager.saveProfile(tox, profile)
             ToxClient(tox, av, handler, ToxClientState(
               tox.getAddress,
               tox.getDhtId,

@@ -42,9 +42,11 @@ message JniLogEntry {
   // TODO(iphydf): Infer out parameters from constness and log them anyway.
   repeated Value arguments = 3;
 
+  // Return value of the called function.
   Value result = 4;
 
-  // Exact point in time (seconds and microseconds)
+  // Exact point in time (seconds and nanoseconds) when the function
+  // began processing.
   Timestamp timestamp = 5;
 
   // Time spent inside the actual native function in nanoseconds. This does

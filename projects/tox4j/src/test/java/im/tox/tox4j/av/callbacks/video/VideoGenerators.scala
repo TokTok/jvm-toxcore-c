@@ -196,8 +196,7 @@ object VideoGenerators extends Assertions {
     "smiley" -> { (w, h, _) => VideoGenerator.resizeNearestNeighbour(w, h, Smiley) }
   )
 
-  // val default = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
+  val default = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
   // val default = XorGradient(DefaultWidth, DefaultHeight)
-  val default = Colors(DefaultWidth, DefaultHeight)
 
 }

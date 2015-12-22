@@ -81,6 +81,7 @@ tox4j_video_receive_frame_cb (uint32_t friend_number,
   msg->set_friend_number (friend_number);
   msg->set_width (width);
   msg->set_height (height);
+
   msg->set_y (y, std::max<std::size_t> (width    , std::abs (ystride)) * height);
   msg->set_u (u, std::max<std::size_t> (width / 2, std::abs (ustride)) * (height / 2));
   msg->set_v (v, std::max<std::size_t> (width / 2, std::abs (vstride)) * (height / 2));

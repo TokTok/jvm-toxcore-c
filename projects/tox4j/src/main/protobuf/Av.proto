@@ -1,12 +1,12 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package im.tox.tox4j.av.proto;
 
 
 message Call {
-  required int32  friend_number     = 1;
-  required bool   audio_enabled     = 2;
-  required bool   video_enabled     = 3;
+  int32         friend_number     = 1;
+  bool          audio_enabled     = 2;
+  bool          video_enabled     = 3;
 }
 
 message CallState {
@@ -19,40 +19,40 @@ message CallState {
     ACCEPTING_V  = 5;
   }
 
-  required uint32  friend_number    = 1;
-  repeated Kind    call_state       = 2;
+  uint32        friend_number    = 1;
+  repeated Kind call_state       = 2;
 }
 
 message BitRateStatus {
-  required uint32  friend_number    = 1;
-  required uint32  audio_bit_rate   = 2;
-  required uint32  video_bit_rate   = 3;
+  uint32        friend_number    = 1;
+  uint32        audio_bit_rate   = 2;
+  uint32        video_bit_rate   = 3;
 }
 
 message AudioReceiveFrame {
-  required uint32  friend_number    = 1;
-  required bytes   pcm              = 2;
-  required uint32  channels         = 3;
-  required uint32  sampling_rate    = 4;
+  uint32        friend_number    = 1;
+  bytes         pcm              = 2;
+  uint32        channels         = 3;
+  uint32        sampling_rate    = 4;
 }
 
 message VideoReceiveFrame {
-  required uint32  friend_number    = 1;
-  required uint32  width            = 2;
-  required uint32  height           = 3;
-  required bytes   y                = 4;
-  required bytes   u                = 5;
-  required bytes   v                = 6;
-  required int32   y_stride         = 7;
-  required int32   u_stride         = 8;
-  required int32   v_stride         = 9;
+  uint32        friend_number    = 1;
+  uint32        width            = 2;
+  uint32        height           = 3;
+  bytes         y                = 4;
+  bytes         u                = 5;
+  bytes         v                = 6;
+  int32         y_stride         = 7;
+  int32         u_stride         = 8;
+  int32         v_stride         = 9;
 }
 
 
 message AvEvents {
-  repeated Call                   call                = 1;
-  repeated CallState              call_state          = 2;
-  repeated BitRateStatus          bit_rate_status     = 3;
-  repeated AudioReceiveFrame      audio_receive_frame = 4;
-  repeated VideoReceiveFrame      video_receive_frame = 5;
+  repeated Call               call                = 1;
+  repeated CallState          call_state          = 2;
+  repeated BitRateStatus      bit_rate_status     = 3;
+  repeated AudioReceiveFrame  audio_receive_frame = 4;
+  repeated VideoReceiveFrame  video_receive_frame = 5;
 }
