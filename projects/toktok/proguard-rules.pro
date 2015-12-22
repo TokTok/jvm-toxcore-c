@@ -1,7 +1,0 @@
--keep class io.realm.annotations.RealmModule
--keep @io.realm.annotations.RealmModule class *
--dontwarn javax.**
--dontwarn io.realm.**
--dontwarn com.squareup.picasso.**
--dontwarn scala.**
--dontwarn com.tonicartos:superslim.**

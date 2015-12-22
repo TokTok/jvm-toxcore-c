@@ -40,6 +40,7 @@ install:
   # Set-up step.
   - export NDK_HOME=$HOME/android-ndk
   - make setup
+  - git clone http://github.com/iphydf/toktok projects/toktok
 
 script:
   # Build/install step.

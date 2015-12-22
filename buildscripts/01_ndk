@@ -22,6 +22,7 @@ my @common = qw(
    */build
    */sources/android/cpufeatures
    */prebuilt/linux-x86_64
+   */prebuilt/darwin-x86_64
 );
 
 my %NDK_FILES = (
@@ -42,6 +43,7 @@ my %NDK_FILES = (
       */platforms/android-9
       */sources/cxx-stl/gnu-libstdc++/4.8/include
       */sources/cxx-stl/gnu-libstdc++/4.8/libs/x86
+      */toolchains/x86-4.8
       */toolchains/x86-clang3.6
    )],
 );
@@ -69,7 +71,7 @@ if ($C->HOST ne $C->TARGET) {
 
    print "Extracting $NDK_PACKAGE...\n";
    my @lines = eval {
-      my @lines = must_popen "7z", "x", $NDK_PACKAGE, map { "-ir!$_" } @{ $NDK_FILES{$C->TARGET} };
+      must_popen "7z", "x", $NDK_PACKAGE, map { "-ir!$_" } @{ $NDK_FILES{$C->TARGET} }
    };
 
    if ($@ =~ /No such file or directory/) {

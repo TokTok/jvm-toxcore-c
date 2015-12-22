@@ -168,7 +168,7 @@ my @modules = (
    [0, ['build-extra'],       'macros', @COMMANDS],
    [1, ['linters', 'macros'], 'tox4j', @COMMANDS, @PROGUARD], # only tox4j is platform-dependent (1)
 );
-if ($C->TARGET =~ /android/) {
+if ($C->TARGET =~ /android/ and -e 'projects/toktok') {
    push @modules, (
       [0, ['tox4j'],          'toktok', 'android:package'],
    );
