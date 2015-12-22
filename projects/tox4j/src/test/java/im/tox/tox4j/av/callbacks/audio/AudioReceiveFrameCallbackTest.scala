@@ -29,12 +29,13 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
   object Handler extends EventListener(0) {
 
     val bitRate = BitRate.fromInt(320).get
-    val audioLength = AudioLength.Length40
+    val audioPerFrame = AudioLength.Length40
     val samplingRate = SamplingRate.Rate48k
-    val frameSize = SampleCount(audioLength, samplingRate).value
+    val frameSize = SampleCount(audioPerFrame, samplingRate).value
     val framesPerIteration = 2
 
     val audio = AudioGenerators.default
+    val audioLength = sys.env.get("TRAVIS").map(_ => samplingRate.value).getOrElse(audio.length(samplingRate))
     val playback = new AudioPlayback(samplingRate)
     val displayWave = !sys.env.contains("TRAVIS")
 
@@ -73,17 +74,17 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       val state = state0.modify(_ + frameSize * framesPerIteration)
 
       for (t <- state0.get until state.get by frameSize) {
-        val pcm = audio.nextFrame16(audioLength, samplingRate, t)
+        val pcm = audio.nextFrame16(audioPerFrame, samplingRate, t)
         av.audioSendFrame(
           friendNumber,
           pcm,
-          SampleCount(audioLength, samplingRate),
+          SampleCount(audioPerFrame, samplingRate),
           AudioChannels.Mono,
           samplingRate
         )
       }
 
-      if (state.get >= audio.length(samplingRate)) {
+      if (state.get >= audioLength) {
         state.finish
       } else {
         state.addTask(sendFrame(friendNumber))
@@ -105,7 +106,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     }
 
     def waitForPlayback(length: Int)(state: State): State = {
-      if (!playback.done(audio.length(samplingRate))) {
+      if (!playback.done(length)) {
         state.addTask { (tox, av, state) =>
           waitForPlayback(length)(state)
         }
@@ -139,7 +140,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     private def playFrames(queue: ArrayBlockingQueue[Option[(Int, Array[Short])]]): Unit = {
       queue.take() match {
         case Some((t, receivedPcm)) =>
-          val expectedPcm = audio.nextFrame16(audioLength, samplingRate, t)
+          val expectedPcm = audio.nextFrame16(audioPerFrame, samplingRate, t)
 
           assert(receivedPcm.length == expectedPcm.length)
 
@@ -166,7 +167,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
     private lazy val frameBuffer = {
       // Make the queue large enough to hold half the audio frames.
-      val queue = new ArrayBlockingQueue[Option[(Int, Array[Short])]](audio.length(samplingRate) / frameSize / 2)
+      val queue = new ArrayBlockingQueue[Option[(Int, Array[Short])]](audioLength / frameSize / 2)
 
       // Start a thread to consume the frames.
       Future(playFrames(queue)).start

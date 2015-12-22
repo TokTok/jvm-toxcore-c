@@ -15,10 +15,14 @@ my $C = require C;
 ##############################################################################
 
 
+my $PLATFORM = 'android-19';
+#my $PLATFORM = 'android-23';
+
 my %ABI = (
-   'arm-linux-androideabi' => ['emulator', 'armeabi-v7a', 'armeabi-v7a'],
-   #'aarch64-linux-android' => ['emulator64-arm', 'armeabi-v7a', 'arm64-v8a'],
-   #'i686-linux-android'    => ['emulator', 'x86', 'x86'],
+   # Target triple                                      Emulator binary   Emulator ABI   NDK ABI
+   'arm-linux-androideabi' =>                         ['emulator',       'armeabi-v7a', 'armeabi-v7a'],
+   'aarch64-linux-android' => ($ENV{TRAVIS} ? undef : ['emulator64-arm', 'armeabi-v7a', 'arm64-v8a']),
+   'i686-linux-android'    => ($ENV{TRAVIS} ? undef : ['emulator',       'x86',         'x86']),
 );
 
 
@@ -43,7 +47,7 @@ if ($abi) {
 
    my ($adb_state) = must_popen "adb", "get-state";
    if ($adb_state ne "device") {
-      must_system "echo no | android create avd --force -n test-$abi_native_name -t android-19 --abi $abi_name";
+      must_system "echo no | android create avd --force -n test-$abi_native_name -t $PLATFORM --abi $abi_name";
       if (not ($emulator_pid = fork)) {
          exec $abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window";
       }

@@ -170,7 +170,7 @@ my @modules = (
 );
 if ($C->TARGET =~ /android/) {
    push @modules, (
-      [0, ['tox4j'],          'toktok', @COMMANDS],
+      [0, ['tox4j'],          'toktok', 'android:package'],
    );
 }
 
