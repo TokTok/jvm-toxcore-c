@@ -25,7 +25,9 @@ object ToxLoadJniLibrary {
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
   private val RepoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
-  private val ErrorRegex = "Native Library (.+) already loaded in another classloader".r
+  private val AlreadyLoaded = "Native Library (.+) already loaded in another classloader".r
+  private val NotFoundDalvik = "Couldn't load .+ from loader .+ findLibrary returned null".r
+  private val NotFoundJvm = "no .+ in java.library.path".r
 
   private val target = {
     val osName =
@@ -102,16 +104,18 @@ object ToxLoadJniLibrary {
     } catch {
       case exn: UnsatisfiedLinkError =>
         exn.getMessage match {
-          case ErrorRegex(location) =>
+          case AlreadyLoaded(location) =>
             logger.warn(s"${exn.getMessage} copying file and loading again")
             loadFromSystem(new File(location))
-          case _ =>
+          case NotFoundDalvik() | NotFoundJvm() =>
             logger.warn(s"Library '$name' not found: ${exn.getMessage}")
             if (webFallbackEnabled) {
               loadFromWeb(name)
             } else {
               logger.error(s"Could not load native library '$name' and web download disabled")
             }
+          case _ =>
+            throw exn
         }
     }
   }

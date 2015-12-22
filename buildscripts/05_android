@@ -15,6 +15,9 @@ my $C = require C;
 ##############################################################################
 
 
+# Run adb logcat -d on test failure.
+my $LOGCAT_ON_FAILURE = 0;
+
 my $PLATFORM = "android-19";
 
 my %ABI = (
@@ -36,7 +39,7 @@ sub same_file_kind {
    my $a_kind = (must_popen "file", $a)[0] =~ /\Q$a\E: (.*)/;
    my $b_kind = (must_popen "file", $b)[0] =~ /\Q$b\E: (.*)/;
 
-   $a_kind eq $b_kind
+   -f $a and -f $b and $a_kind eq $b_kind
 }
 
 sub should_copy {
@@ -88,10 +91,14 @@ if ($abi) {
 
    pushd {
       must_system "adb", "logcat", "-c";
-      system "sbt", "clean", "android:test";
-      if ($?) {
-         must_system "adb", "logcat", "-d";
-         die "Android tests failed";
+      if ($LOGCAT_ON_FAILURE) {
+         system "sbt", "clean", "android:test";
+         if ($?) {
+            must_system "adb", "logcat", "-d";
+            die "Android tests failed";
+         }
+      } else {
+         must_system "sbt", "clean", "android:test";
       }
    } "projects/toktok";
 }
