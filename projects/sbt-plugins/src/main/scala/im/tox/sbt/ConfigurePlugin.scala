@@ -25,8 +25,10 @@ object ConfigurePlugin extends AutoPlugin {
   import Configurations._
 
   object Keys {
-    val cc = settingKey[NativeCompiler]("C compiler.")
-    val cxx = settingKey[NativeCompiler]("C++ compiler.")
+    val cc1 = settingKey[NativeCompiler]("C compiler (primary).")
+    val cc2 = settingKey[NativeCompiler]("C compiler (fallback).")
+    val cxx1 = settingKey[NativeCompiler]("C++ compiler (primary).")
+    val cxx2 = settingKey[NativeCompiler]("C++ compiler (fallback).")
 
     val stdlib = taskKey[Stdlib]("Standard library to use")
     val jniIncludeFlags = taskKey[Seq[String]]("Common C/C++ compiler flags for JNI includes (jni.h/jni_md.h).")
@@ -68,8 +70,10 @@ object ConfigurePlugin extends AutoPlugin {
   }
 
   val globalConfig = Seq(
-    cc := NativeCompiler("c", sys.env.getOrElse("CC", "clang")),
-    cxx := NativeCompiler("cpp", sys.env.getOrElse("CXX", "clang++")),
+    cc1 := NativeCompiler("c", sys.env.getOrElse("CC", "clang")),
+    cc2 := NativeCompiler("c", "gcc"),
+    cxx1 := NativeCompiler("cpp", sys.env.getOrElse("CXX", "clang++")),
+    cxx2 := NativeCompiler("cpp", "g++"),
 
     jniIncludeFlags := Seq(
       "-I" + (jdkHome / "include"),
@@ -83,17 +87,17 @@ object ConfigurePlugin extends AutoPlugin {
     cFeatureFlags := Nil,
     cxxFeatureFlags := Nil,
 
-    commonEnvFlags := Configure.tryCompile(streams.value.log, cxx.value, getEnvFlags("CPPFLAGS")),
-    cEnvFlags := Configure.tryCompile(streams.value.log, cxx.value, getEnvFlags("CFLAGS")),
-    cxxEnvFlags := Configure.tryCompile(streams.value.log, cxx.value, getEnvFlags("CXXFLAGS")),
-    ldEnvFlags := Configure.tryCompile(streams.value.log, cxx.value, getEnvFlags("LDFLAGS")),
+    commonEnvFlags := Configure.tryCompile(streams.value.log, cxx1.value, getEnvFlags("CPPFLAGS")),
+    cEnvFlags := Configure.tryCompile(streams.value.log, cxx1.value, getEnvFlags("CFLAGS")),
+    cxxEnvFlags := Configure.tryCompile(streams.value.log, cxx1.value, getEnvFlags("CXXFLAGS")),
+    ldEnvFlags := Configure.tryCompile(streams.value.log, cxx1.value, getEnvFlags("LDFLAGS")),
 
     stdlib := {
-      val libcxx = Configure.tryCompile(streams.value.log, cxx.value, Seq("-stdlib=libc++"))
+      val libcxx = Configure.tryCompile(streams.value.log, cxx1.value, Seq("-stdlib=libc++"))
       if (libcxx.nonEmpty) {
         Stdlib(libcxx)
       } else {
-        val libstdcxx = Configure.tryCompile(streams.value.log, cxx.value, Seq("-stdlib=libstdc++"))
+        val libstdcxx = Configure.tryCompile(streams.value.log, cxx1.value, Seq("-stdlib=libstdc++"))
         Stdlib(libstdcxx)
       }
     },
@@ -101,44 +105,44 @@ object ConfigurePlugin extends AutoPlugin {
     cxxConfigFlags <++= stdlib map { _.flags },
     ldConfigFlags <++= stdlib map { _.flags },
 
-    // Optimisations.
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-O3")),
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-ggdb3")),
+    // Optimisations and debugging.
+    // commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-O3")),
+    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-ggdb3")),
 
     // Colourful error messages.
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-Wall")),
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-Wextra")),
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-pedantic")),
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-fcolor-diagnostics")),
+    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-Wall")),
+    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-Wextra")),
+    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-pedantic")),
+    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-fcolor-diagnostics")),
 
     // Needed for shared libraries on some platforms.
-    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-fPIC")),
+    commonConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-fPIC")),
 
     // Error on undefined references in shared object.
-    ldConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-Wl,-z,defs")),
+    ldConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-Wl,-z,defs")),
 
     // Link librt if possible (because then it is required).
-    ldConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-lrt")),
+    ldConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-lrt")),
 
     // No RTTI and no exceptions.
-    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-fno-exceptions")),
-    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-fno-rtti")),
-    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-DGOOGLE_PROTOBUF_NO_RTTI")),
-    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, Seq("-DGTEST_HAS_RTTI=0")),
+    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-fno-exceptions")),
+    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-fno-rtti")),
+    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-DGOOGLE_PROTOBUF_NO_RTTI")),
+    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, Seq("-DGTEST_HAS_RTTI=0")),
 
-    cConfigFlags ++= Configure.tryCompile(streams.value.log, cc.value,
+    cConfigFlags ++= Configure.tryCompile(streams.value.log, cc1.value,
       Seq("-std=gnu99"),
       Seq("-std=c99")),
 
-    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value,
+    cxxConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value,
       Seq("-std=c++14"),
       Seq("-std=c++1y")),
 
-    cxxFeatureFlags ++= Configure.tryCompileIncludes(streams.value.log, cxx.value, cxxConfigFlags.value ++ ldConfigFlags.value,
+    cxxFeatureFlags ++= Configure.tryCompileIncludes(streams.value.log, cxx1.value, cxxConfigFlags.value ++ ldConfigFlags.value,
       Seq("stdio.h"), "using ::gets;", "-DHAVE_GETS"),
-    cxxFeatureFlags ++= Configure.tryCompileIncludes(streams.value.log, cxx.value, cxxConfigFlags.value ++ ldConfigFlags.value,
+    cxxFeatureFlags ++= Configure.tryCompileIncludes(streams.value.log, cxx1.value, cxxConfigFlags.value ++ ldConfigFlags.value,
       Seq("memory"), "using std::make_unique;", "-DHAVE_MAKE_UNIQUE"),
-    cxxFeatureFlags ++= Configure.tryCompileIncludes(streams.value.log, cxx.value, cxxConfigFlags.value ++ ldConfigFlags.value,
+    cxxFeatureFlags ++= Configure.tryCompileIncludes(streams.value.log, cxx1.value, cxxConfigFlags.value ++ ldConfigFlags.value,
       Seq("string"), "using std::to_string;", "-DHAVE_TO_STRING"),
 
     cxxFeatureFlags += "-includecpp14compat.h"

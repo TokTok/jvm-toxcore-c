@@ -11,13 +11,14 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
+import im.tox.tox4j.testing.autotest.AutoTestSuite.timed
 
 final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
 
   /**
    * How much of the sent data must be received for the test to pass.
    */
-  private val minCompletionRatio = 0.8
+  private val minCompletionRatio = 0.7
 
   private val video = VideoGenerators.Colors(VideoGenerators.DefaultWidth, VideoGenerators.DefaultHeight)
 
@@ -68,7 +69,10 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       assert(u.length == video.size / 4)
       assert(v.length == video.size / 4)
 
-      av.videoSendFrame(friendNumber, video.width.value, video.height.value, y, u, v)
+      val time = timed {
+        av.videoSendFrame(friendNumber, video.width.value, video.height.value, y, u, v)
+      }
+      debug(state, s"Sent frame ${state.get.t} of ${video.length} ($time ms)")
 
       if (state.get.t >= video.length) {
         state.finish
@@ -98,7 +102,9 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       y: Array[Byte], u: Array[Byte], v: Array[Byte],
       yStride: Int, uStride: Int, vStride: Int
     )(state0: State): State = {
-      val rgbPlanar = VideoConversions.YUVtoRGB(width.value, height.value, y, u, v, yStride, uStride, vStride)
+      val (conversionTime, rgbPlanar) = timed {
+        VideoConversions.YUVtoRGB(width.value, height.value, y, u, v, yStride, uStride, vStride)
+      }
 
       val averageR = average(rgbPlanar._1)
       val averageG = average(rgbPlanar._2)
@@ -113,23 +119,29 @@ final class VideoReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
       assert(state.get.t <= video.length)
 
-      debug(state, s"Received frame ${state0.get.t}")
+      val minReceived = (video.length * minCompletionRatio).toInt
+      val receivedMessage = s"Received frame ${state.get.t} of (minimum) $minReceived (YUVtoRGB: $conversionTime ms)"
+      if (state.get.t >= minReceived) {
+        val assertionTime: Int = timed {
+          val received = state.get.received.distinct
+          val expected = VideoGenerators.Colors.values
 
-      if (state.get.t >= video.length * minCompletionRatio) {
-        val received = state.get.received.distinct
-        val expected = VideoGenerators.Colors.values
+          // All received in expected.
+          assert(received.forall { c => expected.exists(approximatelyEqual(c)) })
 
-        // All received in expected.
-        assert(received.forall { c => expected.exists(approximatelyEqual(c)) })
-
-        if (state.get.t >= video.length) {
-          // All expected in received. Only checked if every sent frame was received.
-          debug(state, s"Received all ${video.length} frames")
-          assert(expected.forall { c => received.exists(approximatelyEqual(c)) })
+          if (state.get.t >= video.length) {
+            // All expected in received. Only checked if every sent frame was received.
+            debug(state, s"Received all ${video.length} frames")
+            assert(expected.forall { c => received.exists(approximatelyEqual(c)) }): Unit
+          }
         }
+
+        debug(state, receivedMessage + s" (assertion time: $assertionTime ms)")
 
         state.finish
       } else {
+        debug(state, receivedMessage)
+
         state
       }
     }

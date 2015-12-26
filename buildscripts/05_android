@@ -16,15 +16,15 @@ my $C = require C;
 
 
 # Run adb logcat -d on test failure.
-my $LOGCAT_ON_FAILURE = 0;
+my $LOGCAT_ON_FAILURE = 1;
 
 my $PLATFORM = "android-19";
 
 my %ABI = (
-   # Target triple                                      Emulator binary   Emulator ABI   NDK ABI
-   'arm-linux-androideabi' =>                         ['emulator',       'armeabi-v7a', 'armeabi-v7a'],
-   'aarch64-linux-android' => ($ENV{TRAVIS} ? undef : ['emulator64-arm', 'armeabi-v7a', 'arm64-v8a']),
-   'i686-linux-android'    => ($ENV{TRAVIS} ? undef : ['emulator',       'x86',         'x86']),
+   # Target triple                                     Emulator binary            Image ABI      NDK ABI
+   'arm-linux-androideabi' =>                         ['emulator',                'armeabi-v7a', 'armeabi-v7a'],
+   'aarch64-linux-android' =>                         ['emulator64-ranchu-arm64', 'armeabi-v7a', 'arm64-v8a'],
+   'i686-linux-android'    => ($ENV{TRAVIS} ? undef : ['emulator',                'x86',         'x86']),
 );
 
 
@@ -61,17 +61,21 @@ if ($abi) {
 
       must_system "echo no | android create avd --force -n test-$abi_native_name -t $target --abi $abi_name";
       if (not ($emulator_pid = fork)) {
-         exec $abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window";
+         print "Changing directory to $ENV{ANDROID_HOME}/tools\n";
+         chdir "$ENV{ANDROID_HOME}/tools";
+         my @args = ($abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window");
+         BuildScript::show \@args;
+         exec @args;
       }
       print "Waiting for device to be online\n";
       must_system "adb", "wait-for-device";
-      print "Device online; waiting 2 minutes for boot animation to stop\n";
-      for (0 .. 120) {
-         my ($bootanim) = must_popen -q => "adb", "shell", "getprop", "init.svc.bootanim";
-         print "Boot animation $bootanim (after $_ seconds)\r";
-         last if $bootanim eq "stopped";
-         sleep 1;
-      }
+#      print "Device online; waiting 2 minutes for boot animation to stop\n";
+#      for (0 .. 120) {
+#         my ($bootanim) = must_popen -q => "adb", "shell", "getprop", "init.svc.bootanim";
+#         print "Boot animation $bootanim (after $_ seconds)\r";
+#         last if $bootanim eq "stopped";
+#         sleep 1;
+#      }
    }
    print "\nUnlocking screen\n";
    must_system "adb", "shell", "input", "keyevent", "82";

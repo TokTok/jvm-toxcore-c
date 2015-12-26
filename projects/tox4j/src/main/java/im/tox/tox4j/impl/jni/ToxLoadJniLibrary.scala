@@ -65,15 +65,19 @@ object ToxLoadJniLibrary {
     }
   }
 
+  private def webUrl(name: String): URL = {
+    val libraryName = System.mapLibraryName(name)
+    new URL(s"$RepoUrl/$target/$libraryName")
+  }
+
   /**
    * Downloads a native library from [[RepoUrl]]/[[target]] and loads it into the current [[ClassLoader]].
    *
    * @param name Base name of the library. E.g. for libtox4j.so, this is "tox4j".
    */
-  def loadFromWeb(name: String): Unit = {
+  def loadFromWeb(name: String, url: URL): Unit = {
     val libraryName = System.mapLibraryName(name)
     withTempFile(name, libraryName) { libraryFile =>
-      val url = new URL(s"$RepoUrl/$target/$libraryName")
       logger.info(s"Downloading $url to $libraryFile")
       val start = System.currentTimeMillis()
       url #> libraryFile !!
@@ -110,10 +114,14 @@ object ToxLoadJniLibrary {
             loadFromSystem(new File(location))
           case NotFoundDalvik() | NotFoundJvm() =>
             logger.warn(s"Library '$name' not found: ${exn.getMessage}")
+            val url = webUrl(name)
             if (webFallbackEnabled) {
-              loadFromWeb(name)
+              loadFromWeb(name, url)
             } else {
-              logger.error(s"Could not load native library '$name' and web download disabled")
+              logger.error(
+                s"Could not load native library '$name' and web download disabled " +
+                  s"(or we would have downloaded it from $url)."
+              )
             }
           case _ =>
             throw exn

@@ -17,7 +17,9 @@ my $C = require C;
 
 # Hack to make sbt-coveralls work with our non-standard directory layout.
 must_system 'ln -s $PWD/.git projects/';
-#must_system 'ln -s $PWD/projects/tox4j/src/main/java/* $PWD/projects/tox4j/';
+for (qw/linters macros sbt-plugins tox4j/) {
+   must_system "cp -r \$PWD/projects/$_/src/main/*/* \$PWD/projects/";
+}
 
 if ($C->TEST_GOAL eq "coverage" and -f "projects/tox4j/target/scala-2.11/coverage-report/cobertura.xml") {
    pushd {

@@ -85,7 +85,7 @@ $ENV{CC} = "clang";
 $ENV{CXX} = "clang++";
 
 # Enable optimisation on dependencies.
-$ENV{CFLAGS} = $ENV{CXXFLAGS} = "-O3";
+#$ENV{CFLAGS} = $ENV{CXXFLAGS} = "-O3";
 
 
 __PACKAGE__

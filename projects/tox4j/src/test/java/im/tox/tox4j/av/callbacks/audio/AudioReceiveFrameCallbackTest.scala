@@ -31,14 +31,15 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
      */
     private val minCompletionRatio = 0.8
 
+    private val audioFrequency = 220
+    private val audio = AudioGenerators.Sawtooth(audioFrequency)
+
     private val bitRate = BitRate.fromInt(320).get
     private val audioPerFrame = AudioLength.Length60
     private val samplingRate = SamplingRate.Rate8k
     private val frameSize = SampleCount(audioPerFrame, samplingRate).value
+    private val windowSize = audio.length(samplingRate) / frameSize / 4
     private val framesPerIteration = 2
-
-    private val audioFrequency = 220
-    private val audio = AudioGenerators.Sawtooth(audioFrequency)
 
     override def friendConnectionStatus(
       friendNumber: ToxFriendNumber,
@@ -120,8 +121,8 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
         }
       }
 
-      val derivative = binarised.zip(binarised.tail).map {
-        case (n0, n1) => (n1 - n0).toShort
+      val derivative = (binarised, binarised.tail).zipped.map {
+        (n0, n1) => (n1 - n0).toShort
       }
 
       val vibrations = derivative.count(_ != 0)
@@ -130,7 +131,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
 
       val state = state0.modify(s => s.copy(
         t = s.t + pcm.length,
-        frequencies = frequency :: s.frequencies
+        frequencies = (frequency :: s.frequencies).take(windowSize)
       ))
 
       val averageFrequency = state.get.frequencies.sum / state.get.frequencies.length

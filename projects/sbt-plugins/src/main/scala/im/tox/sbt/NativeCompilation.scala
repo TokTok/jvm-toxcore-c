@@ -25,8 +25,8 @@ object NativeCompilation {
       command !! log
     } catch {
       case NonFatal(e) =>
-        log.error("Error while executing: " + command.mkString(" "))
-        sys.exit(1)
+        log.error(s"Error ($e) while executing: " + command.mkString(" "))
+        throw e
     }
   }
 
@@ -35,7 +35,8 @@ object NativeCompilation {
     sourceDirectories: Seq[File],
     objectDirectory: File
   )(
-    compiler: NativeCompiler,
+    compiler1: NativeCompiler,
+    compiler2: NativeCompiler,
     flags: Seq[String]
   )(
     sourceFile: File
@@ -54,15 +55,24 @@ object NativeCompilation {
       sourceFile.getPath
     ) ++ flags
 
-    runCompiler(log, compiler, arguments)
+    try {
+      runCompiler(log, compiler1, arguments)
+    } catch {
+      case NonFatal(e) =>
+        val argumentsFallback = arguments.filterNot { flag =>
+          // GCC doesn't understand these.
+          flag == "-fcolor-diagnostics" || flag.startsWith("-stdlib=")
+        }
+        runCompiler(log, compiler2, argumentsFallback)
+    }
 
     objectFile
   }
 
   def compileSources(
     log: Logger,
-    cc: NativeCompiler, cflags: Seq[String],
-    cxx: NativeCompiler, cxxflags: Seq[String],
+    cc1: NativeCompiler, cc2: NativeCompiler, cflags: Seq[String],
+    cxx1: NativeCompiler, cxx2: NativeCompiler, cxxflags: Seq[String],
     sourceDirectories: Seq[File],
     objectDirectory: File,
     sources: Seq[File]
@@ -79,8 +89,8 @@ object NativeCompilation {
       objectDirectory
     ) _
 
-    val ccObjects = sources.filter(ccFileFilter.accept).map(compileWith(cc, cflags))
-    val cxxObjects = sources.filter(cxxFileFilter.accept).map(compileWith(cxx, cxxflags))
+    val ccObjects = sources.filter(ccFileFilter.accept).map(compileWith(cc1, cc2, cflags))
+    val cxxObjects = sources.filter(cxxFileFilter.accept).map(compileWith(cxx1, cxx2, cxxflags))
     (ccObjects ++ cxxObjects).joinWith(_.join)
   }
 

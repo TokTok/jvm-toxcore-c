@@ -10,7 +10,8 @@ import sbt._
 object AndroidNdkPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = noTrigger
-  override def requires: Plugins = NativeCompilePlugin && PkgConfigPlugin // Load after PkgConfigPlugin so we can remove pthread.
+  // Load after PkgConfigPlugin so we can remove -lpthread and -L flags.
+  override def requires: Plugins = NativeCompilePlugin && PkgConfigPlugin
 
   object Keys {
     val ndkHome = settingKey[File]("Android NDK home.")
@@ -18,14 +19,6 @@ object AndroidNdkPlugin extends AutoPlugin {
   }
 
   import Keys._
-
-  def abiName(crossPlatform: String): String = {
-    crossPlatform match {
-      case "aarch64-linux-android" => "arm64-v8a"
-      case "arm-linux-androideabi" => "armeabi-v7a"
-      case "i686-linux-android"    => "x86"
-    }
-  }
 
   val androidSettings = Seq(
     // Hack to make "publishLocal" build the native library. Since tests don't run when building for Android,
@@ -35,8 +28,10 @@ object AndroidNdkPlugin extends AutoPlugin {
     ndkHome := sys.env.get("ANDROID_NDK_HOME").map(file).filter(_.exists).getOrElse(file(sys.env("HOME")) / "android-ndk"),
     toolchainHome := baseDirectory.value.getParentFile.getParentFile / "toolchains" / crossPlatform.value,
 
-    cc := cc.value.copy(program = (toolchainHome.value / "bin" / (crossPlatform.value + "-clang")).getPath),
-    cxx := cxx.value.copy(program = (toolchainHome.value / "bin" / (crossPlatform.value + "-clang++")).getPath),
+    cc1 := cc1.value.copy(program = (toolchainHome.value / "bin" / (crossPlatform.value + "-clang")).getPath),
+    cc2 := cc1.value.copy(program = (toolchainHome.value / "bin" / (crossPlatform.value + "-gcc")).getPath),
+    cxx1 := cxx1.value.copy(program = (toolchainHome.value / "bin" / (crossPlatform.value + "-clang++")).getPath),
+    cxx2 := cxx1.value.copy(program = (toolchainHome.value / "bin" / (crossPlatform.value + "-g++")).getPath),
 
     // Ignore all flags from the environment variables.
     commonEnvFlags := Nil,
@@ -48,6 +43,9 @@ object AndroidNdkPlugin extends AutoPlugin {
 
     pkgConfigPath := (toolchainHome.value / "sysroot" / "usr" / "lib" / "pkgconfig").getPath,
     jniIncludeFlags := Nil,
+
+    commonEnvFlags += "--sysroot=" + (toolchainHome.value / "sysroot").getPath,
+    ldEnvFlags += "--sysroot=" + (toolchainHome.value / "sysroot").getPath,
 
     ldConfigFlags += "-Wl,-z,defs",
     ldConfigFlags += "-latomic",

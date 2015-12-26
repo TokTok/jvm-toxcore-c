@@ -50,6 +50,7 @@ my @common = (
       (only_on qr/android/, '--with-protoc=protoc'),
       (only_on qr/arm-linux-androideabi/,
          'LDFLAGS=-latomic', # For __atomic_fetch_add_4.
+         'CXXFLAGS=-O0', # Disable optimisation to avoid relocation error.
       ),
    ],
 )
