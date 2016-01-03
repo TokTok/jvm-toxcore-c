@@ -27,7 +27,8 @@ sub HOST { $Config{myarchname} }
 sub TARGET { $ENV{TARGET} || HOST }
 
 sub NDK_HOME {
-   my ($ndk_home) = grep { -f } (
+   my ($ndk_home) = grep { -d } (
+      $ENV{ANDROID_NDK_HOME},
       $ENV{NDK_HOME},
       "$ENV{HOME}/android-ndk-r10e",
       "$ENV{HOME}/android-ndk",

@@ -2,27 +2,46 @@
 
 set -e -x
 
+cd tox4j
+
+# set up the toolchain dir
+mkdir -p toolchains/$TARGET
+export TOOLCHAIN=$(pwd)/toolchains/$TARGET
+
+# prepare android ndk toolchain
+"$ANDROID_NDK_HOME/build/tools/make-standalone-toolchain.sh" \
+  --ndk-dir="$ANDROID_NDK_HOME" \
+  --toolchain=$NDK_TOOLCHAIN-clang3.6 \
+  --install-dir=$TOOLCHAIN \
+  --platform=$PLATFORM
+
+# add toolchain to path (along with protobuf)
+export PATH="$TOOLCHAIN/bin:$WORKSPACE/protobuf_native/bin:$PATH"
+ln -s "$TOOLCHAIN/bin/clang++" "$TOOLCHAIN/bin/clang++-3.6"
+ln -s "$TOOLCHAIN/bin/clang" "$TOOLCHAIN/bin/clang-3.6"
+
 # Add java home and java path for jni
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 export PATH=$JAVA_HOME/bin:$PATH
 
-buildscripts/02_toolchain
 
-TOOLCHAIN="$PWD/toolchains/$TARGET"
+# remove pthreads from the pgkconfigs (not in android)
+for file in ../toxcore/lib/pkgconfig/*.pc; do
+  sed -i "/^prefix=/s|.*|prefix=$TOOLCHAIN/sysroot/usr/|" $file
+  sed -i "s|-lpthread||" $file
+done
 
-# add toolchain to path (along with protobuf)
-export PATH="$TOOLCHAIN/bin:$WORKSPACE/protobuf_native/bin:$PATH"
+export PKG_CONFIG_PATH="$TOOLCHAIN/sysroot/usr/lib/pkgconfig"
 
 # move precompiled libs to the toolchain
-cp -r toxcore/* $TOOLCHAIN/sysroot/usr/
+cp -r ../toxcore/* $TOOLCHAIN/sysroot/usr/
 
-cd tox4j
 
 export SBT="sbt -Dsbt.log.noformat=true"
 buildscripts/04_build
 
 # Copy artifacts
-cp projects/tox4j/target/cpp/bin/*.so $WORKSPACE/artifacts/
+cp projects/tox4j/target/$TARGET/*.so $WORKSPACE/artifacts/
 cp projects/tox4j/target/scala-2.11/*.jar $WORKSPACE/artifacts/
 
 # Strip the .so to save space
