@@ -38,7 +38,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
     private val audioPerFrame = AudioLength.Length60
     private val samplingRate = SamplingRate.Rate8k
     private val frameSize = SampleCount(audioPerFrame, samplingRate).value
-    private val windowSize = audio.length(samplingRate) / frameSize / 4
+    private val windowSize = audio.length(samplingRate) / frameSize / 2
     private val framesPerIteration = 2
 
     override def friendConnectionStatus(
@@ -135,7 +135,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       ))
 
       val averageFrequency = state.get.frequencies.sum / state.get.frequencies.length
-      debug(state, s"Received audio frame: ${state.get.t} / ${audio.length(samplingRate)} (f~=$averageFrequency)")
+      debug(state, s"Received audio frame: ${state.get.t} / ${audio.length(samplingRate)} (f~=$averageFrequency (last ${state.get.frequencies.length} frames))")
       assert(channels == AudioChannels.Mono)
       assert(samplingRate == this.samplingRate)
 

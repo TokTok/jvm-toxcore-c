@@ -93,7 +93,7 @@ object NativeCompilePlugin extends AutoPlugin {
   val compilation = Seq(
     nativeCompile <<= Def.taskDyn {
       NativeCompilation.compileSources(
-        streams.value.log,
+        streams.value.log, streams.value.cacheDirectory / "native",
         cc1.value, cc2.value, cFlags.value,
         cxx1.value, cxx2.value, cxxFlags.value,
         cppSource.value +: managedSourceDirectories.value,

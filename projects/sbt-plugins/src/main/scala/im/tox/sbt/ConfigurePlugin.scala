@@ -25,10 +25,10 @@ object ConfigurePlugin extends AutoPlugin {
   import Configurations._
 
   object Keys {
-    val cc1 = settingKey[NativeCompiler]("C compiler (primary).")
-    val cc2 = settingKey[NativeCompiler]("C compiler (fallback).")
-    val cxx1 = settingKey[NativeCompiler]("C++ compiler (primary).")
-    val cxx2 = settingKey[NativeCompiler]("C++ compiler (fallback).")
+    val cc1 = taskKey[NativeCompiler]("C compiler (primary).")
+    val cc2 = taskKey[NativeCompiler]("C compiler (fallback).")
+    val cxx1 = taskKey[NativeCompiler]("C++ compiler (primary).")
+    val cxx2 = taskKey[NativeCompiler]("C++ compiler (fallback).")
 
     val stdlib = taskKey[Stdlib]("Standard library to use")
     val jniIncludeFlags = taskKey[Seq[String]]("Common C/C++ compiler flags for JNI includes (jni.h/jni_md.h).")
@@ -70,9 +70,19 @@ object ConfigurePlugin extends AutoPlugin {
   }
 
   val globalConfig = Seq(
-    cc1 := NativeCompiler("c", sys.env.getOrElse("CC", "clang")),
+    cc1 := Configure.findCompiler(streams.value.log, "c",
+      sys.env.getOrElse("CC", "clang"),
+      "clang-3.8",
+      "clang-3.7",
+      "clang-3.6",
+      "clang-3.5"),
     cc2 := NativeCompiler("c", "gcc"),
-    cxx1 := NativeCompiler("cpp", sys.env.getOrElse("CXX", "clang++")),
+    cxx1 := Configure.findCompiler(streams.value.log, "cpp",
+      sys.env.getOrElse("CXX", "clang++"),
+      "clang++-3.8",
+      "clang++-3.7",
+      "clang++-3.6",
+      "clang++-3.5"),
     cxx2 := NativeCompiler("cpp", "g++"),
 
     jniIncludeFlags := Seq(
@@ -94,7 +104,7 @@ object ConfigurePlugin extends AutoPlugin {
 
     stdlib := {
       val libcxx = Configure.tryCompile(streams.value.log, cxx1.value, Seq("-stdlib=libc++"))
-      if (libcxx.nonEmpty) {
+      if (false && libcxx.nonEmpty) {
         Stdlib(libcxx)
       } else {
         val libstdcxx = Configure.tryCompile(streams.value.log, cxx1.value, Seq("-stdlib=libstdc++"))

@@ -82,8 +82,8 @@ $ENV{CPPFLAGS} = "-I$PREFIX/include -isystem$PREFIX/include";
 $ENV{LDFLAGS} = "-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib";
 
 # Compile everything with clang.
-$ENV{CC} = "clang";
-$ENV{CXX} = "clang++";
+($ENV{CC}) = grep { `which $_` } qw/clang clang-3.8 clang-3.7 clang-3.6/;
+($ENV{CXX}) = grep { `which $_` } qw/clang++ clang++-3.8 clang++-3.7 clang++-3.6/;
 
 # Enable optimisation on dependencies.
 #$ENV{CFLAGS} = $ENV{CXXFLAGS} = "-O3";

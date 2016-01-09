@@ -60,4 +60,10 @@ object Configure {
     }.getOrElse(Nil)
   }
 
+  def findCompiler(log: Logger, language: String, candidates: String*): NativeCompiler = {
+    candidates.map(NativeCompiler(language, _)).find { candidate =>
+      tryCompile(log, candidate, Seq("-w")).nonEmpty
+    }.getOrElse(sys.error("Could not find native compiler. Candidates: " + candidates.mkString(", ")))
+  }
+
 }

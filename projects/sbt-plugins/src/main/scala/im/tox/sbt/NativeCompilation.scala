@@ -30,17 +30,16 @@ object NativeCompilation {
     }
   }
 
-  private def compileSource(
+  private def doCompile(
     log: Logger,
     sourceDirectories: Seq[File],
-    objectDirectory: File
-  )(
+    objectDirectory: File,
     compiler1: NativeCompiler,
     compiler2: NativeCompiler,
     flags: Seq[String]
   )(
     sourceFile: File
-  ): Def.Initialize[Task[File]] = Def.task {
+  ): File = {
     val relativeFile = sourceDirectories.flatMap(_.relativize(sourceFile)).headOption match {
       case None           => file(sourceFile.getName)
       case Some(relative) => relative
@@ -69,8 +68,29 @@ object NativeCompilation {
     objectFile
   }
 
-  def compileSources(
+  private def compileSource(
     log: Logger,
+    cacheDirectory: File,
+    sourceDirectories: Seq[File],
+    objectDirectory: File
+  )(
+    compiler1: NativeCompiler,
+    compiler2: NativeCompiler,
+    flags: Seq[String]
+  )(
+    sourceFile: File
+  ): Def.Initialize[Task[File]] = Def.task {
+    FileFunction.cached(
+      cacheDirectory / sourceFile.getName,
+      inStyle = FilesInfo.lastModified,
+      outStyle = FilesInfo.exists
+    ) { inputs =>
+        Set(doCompile(log, sourceDirectories, objectDirectory, compiler1, compiler2, flags)(inputs.head))
+      }(Set(sourceFile)).head
+  }
+
+  def compileSources(
+    log: Logger, cacheDirectory: File,
     cc1: NativeCompiler, cc2: NativeCompiler, cflags: Seq[String],
     cxx1: NativeCompiler, cxx2: NativeCompiler, cxxflags: Seq[String],
     sourceDirectories: Seq[File],
@@ -84,7 +104,7 @@ object NativeCompilation {
     }
 
     val compileWith = compileSource(
-      log,
+      log, cacheDirectory,
       sourceDirectories,
       objectDirectory
     ) _
@@ -103,19 +123,25 @@ object NativeCompilation {
     if (nativeObjects.isEmpty) {
       None
     } else {
-      val log = streams.log
-      log.info(s"Linking shared library $nativeLibraryOutput")
-      log.info(s"LDFLAGS = $ldflags")
-
-      val arguments = Seq(
-        "-shared",
-        "-o", nativeLibraryOutput.getPath
-      ) ++ nativeObjects.map(_.getPath) ++ ldflags
-
-      runCompiler(log, linker, arguments)
-
       JavaLibraryPath.addLibraryPath(nativeLibraryOutput.getParent)
-      Some(nativeLibraryOutput)
+
+      FileFunction.cached(
+        streams.cacheDirectory / nativeLibraryOutput.getName,
+        inStyle = FilesInfo.hash,
+        outStyle = FilesInfo.exists
+      ) { nativeObjects =>
+          val log = streams.log
+          log.info(s"Linking shared library $nativeLibraryOutput")
+          log.info(s"LDFLAGS = $ldflags")
+
+          val arguments = Seq(
+            "-shared",
+            "-o", nativeLibraryOutput.getPath
+          ) ++ nativeObjects.map(_.getPath) ++ ldflags
+
+          runCompiler(log, linker, arguments)
+          Set(nativeLibraryOutput)
+        }(nativeObjects.toSet).headOption
     }
   }
 
@@ -129,17 +155,23 @@ object NativeCompilation {
     if (nativeObjects.isEmpty) {
       None
     } else {
-      val log = streams.log
-      log.info(s"Linking program $nativeProgramOutput")
-      log.info(s"LDFLAGS = $ldflags")
+      FileFunction.cached(
+        streams.cacheDirectory / nativeProgramOutput.getName,
+        inStyle = FilesInfo.hash,
+        outStyle = FilesInfo.exists
+      ) { nativeObjects =>
 
-      val arguments = Seq(
-        "-o", nativeProgramOutput.getPath
-      ) ++ nativeObjects.map(_.getPath) ++ ldflags
+          val log = streams.log
+          log.info(s"Linking program $nativeProgramOutput")
+          log.info(s"LDFLAGS = $ldflags")
 
-      runCompiler(log, linker, arguments)
+          val arguments = Seq(
+            "-o", nativeProgramOutput.getPath
+          ) ++ nativeObjects.map(_.getPath) ++ ldflags
 
-      Some(nativeProgramOutput)
+          runCompiler(log, linker, arguments)
+          Set(nativeProgramOutput)
+        }(nativeObjects.toSet).headOption
     }
   }
 
