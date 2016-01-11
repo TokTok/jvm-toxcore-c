@@ -2,6 +2,7 @@ package im.tox.sbt
 
 import im.tox.sbt.ConfigurePlugin.Configurations._
 import im.tox.sbt.ConfigurePlugin.Keys._
+import im.tox.sbt.ConfigurePlugin.NativeCompilationSettings
 import sbt.Keys._
 import sbt._
 
@@ -94,8 +95,8 @@ object NativeCompilePlugin extends AutoPlugin {
     nativeCompile <<= Def.taskDyn {
       NativeCompilation.compileSources(
         streams.value.log, streams.value.cacheDirectory / "native",
-        cc1.value, cc2.value, cFlags.value,
-        cxx1.value, cxx2.value, cxxFlags.value,
+        NativeCompilationSettings(cc1.value, cc2.value, cFlags.value),
+        NativeCompilationSettings(cxx1.value, cxx2.value, cxxFlags.value),
         cppSource.value +: managedSourceDirectories.value,
         objectDirectory.value,
         sources.value

@@ -2,7 +2,7 @@ package im.tox.sbt
 
 import java.io.{File, PrintWriter}
 
-import im.tox.sbt.ConfigurePlugin.NativeCompiler
+import im.tox.sbt.ConfigurePlugin.{Language, NativeCompiler}
 import org.apache.commons.io.FilenameUtils
 import sbt._
 
@@ -30,8 +30,14 @@ object Configure {
     }
   }
 
-  private def tryCompileCode(log: Logger, compiler: NativeCompiler, includes: Seq[String], code: String, flags: String*): Seq[String] = {
-    val sourceFile = File.createTempFile("conftest", "." + compiler.suffix)
+  private def tryCompileCode[L <: Language](
+    log: Logger,
+    compiler: NativeCompiler[L],
+    includes: Seq[String],
+    code: String,
+    flags: String*
+  ): Seq[String] = {
+    val sourceFile = File.createTempFile("conftest", "." + compiler.language.suffix)
     val outputFile = file(FilenameUtils.removeExtension(sourceFile.getPath))
     try {
       writeSource(sourceFile, includes, code)
@@ -47,20 +53,35 @@ object Configure {
     }
   }
 
-  def tryCompileIncludes(log: Logger, compiler: NativeCompiler, extraFlags: Seq[String], includes: Seq[String], code: String, flags: String*): Seq[String] = {
+  def tryCompileIncludes[L <: Language](
+    log: Logger,
+    compiler: NativeCompiler[L],
+    extraFlags: Seq[String],
+    includes: Seq[String],
+    code: String,
+    flags: String*
+  ): Seq[String] = {
     tryCompileCode(log, compiler, includes, code, flags ++ extraFlags: _*) match {
       case Nil => Nil
       case _   => flags
     }
   }
 
-  def tryCompile(log: Logger, compiler: NativeCompiler, flags: Seq[String]*): Seq[String] = {
+  def tryCompile[L <: Language](
+    log: Logger,
+    compiler: NativeCompiler[L],
+    flags: Seq[String]*
+  ): Seq[String] = {
     flags.find { flags =>
       tryCompileCode(log, compiler, Nil, "", flags: _*).nonEmpty
     }.getOrElse(Nil)
   }
 
-  def findCompiler(log: Logger, language: String, candidates: String*): NativeCompiler = {
+  def findCompiler[L <: Language](
+    log: Logger,
+    language: L,
+    candidates: String*
+  ): NativeCompiler[L] = {
     candidates.map(NativeCompiler(language, _)).find { candidate =>
       tryCompile(log, candidate, Seq("-w")).nonEmpty
     }.getOrElse(sys.error("Could not find native compiler. Candidates: " + candidates.mkString(", ")))

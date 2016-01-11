@@ -1,6 +1,6 @@
 package im.tox.sbt
 
-import im.tox.sbt.ConfigurePlugin.NativeCompiler
+import im.tox.sbt.ConfigurePlugin.{Cxx, NativeCompilationSettings, C, NativeCompiler}
 import org.apache.commons.io.FilenameUtils
 import sbt.Keys.TaskStreams
 import sbt._
@@ -17,7 +17,7 @@ object NativeCompilation {
   val sourceFileFilter = ccFileFilter | cxxFileFilter
   val headerFileFilter = "*.h" | "*.hh" | "*.hpp"
 
-  private def runCompiler(log: Logger, compiler: NativeCompiler, arguments: Seq[String]): String = {
+  private def runCompiler(log: Logger, compiler: NativeCompiler[_], arguments: Seq[String]): String = {
     val command = compiler.program +: arguments
     log.debug(command.mkString(" "))
 
@@ -34,9 +34,7 @@ object NativeCompilation {
     log: Logger,
     sourceDirectories: Seq[File],
     objectDirectory: File,
-    compiler1: NativeCompiler,
-    compiler2: NativeCompiler,
-    flags: Seq[String]
+    settings: NativeCompilationSettings[_]
   )(
     sourceFile: File
   ): File = {
@@ -52,17 +50,17 @@ object NativeCompilation {
       "-c",
       "-o", objectFile.getPath,
       sourceFile.getPath
-    ) ++ flags
+    ) ++ settings.flags
 
     try {
-      runCompiler(log, compiler1, arguments)
+      runCompiler(log, settings.compiler1, arguments)
     } catch {
       case NonFatal(e) =>
         val argumentsFallback = arguments.filterNot { flag =>
           // GCC doesn't understand these.
           flag == "-fcolor-diagnostics" || flag.startsWith("-stdlib=")
         }
-        runCompiler(log, compiler2, argumentsFallback)
+        runCompiler(log, settings.compiler2, argumentsFallback)
     }
 
     objectFile
@@ -74,9 +72,7 @@ object NativeCompilation {
     sourceDirectories: Seq[File],
     objectDirectory: File
   )(
-    compiler1: NativeCompiler,
-    compiler2: NativeCompiler,
-    flags: Seq[String]
+    settings: NativeCompilationSettings[_]
   )(
     sourceFile: File
   ): Def.Initialize[Task[File]] = Def.task {
@@ -85,22 +81,22 @@ object NativeCompilation {
       inStyle = FilesInfo.lastModified,
       outStyle = FilesInfo.exists
     ) { inputs =>
-        Set(doCompile(log, sourceDirectories, objectDirectory, compiler1, compiler2, flags)(inputs.head))
+        Set(doCompile(log, sourceDirectories, objectDirectory, settings)(inputs.head))
       }(Set(sourceFile)).head
   }
 
   def compileSources(
     log: Logger, cacheDirectory: File,
-    cc1: NativeCompiler, cc2: NativeCompiler, cflags: Seq[String],
-    cxx1: NativeCompiler, cxx2: NativeCompiler, cxxflags: Seq[String],
+    cc: NativeCompilationSettings[C.type],
+    cxx: NativeCompilationSettings[Cxx.type],
     sourceDirectories: Seq[File],
     objectDirectory: File,
     sources: Seq[File]
   ): Def.Initialize[Task[Seq[File]]] = {
     if (sources.nonEmpty) {
       log.info(s"Compiling ${sources.length} C/C++ sources")
-      log.info(s"CFLAGS   = $cflags")
-      log.info(s"CXXFLAGS = $cxxflags")
+      log.info(s"CFLAGS   = ${cc.flags}")
+      log.info(s"CXXFLAGS = ${cxx.flags}")
     }
 
     val compileWith = compileSource(
@@ -109,14 +105,14 @@ object NativeCompilation {
       objectDirectory
     ) _
 
-    val ccObjects = sources.filter(ccFileFilter.accept).map(compileWith(cc1, cc2, cflags))
-    val cxxObjects = sources.filter(cxxFileFilter.accept).map(compileWith(cxx1, cxx2, cxxflags))
+    val ccObjects = sources.filter(ccFileFilter.accept).map(compileWith(cc))
+    val cxxObjects = sources.filter(cxxFileFilter.accept).map(compileWith(cxx))
     (ccObjects ++ cxxObjects).joinWith(_.join)
   }
 
   def linkSharedLibrary(
     streams: TaskStreams,
-    linker: NativeCompiler, ldflags: Seq[String],
+    linker: NativeCompiler[_], ldflags: Seq[String],
     nativeObjects: Seq[File],
     nativeLibraryOutput: File
   ): Option[File] = {
@@ -147,7 +143,7 @@ object NativeCompilation {
 
   def linkProgram(
     streams: TaskStreams,
-    linker: NativeCompiler, ldflags: Seq[String],
+    linker: NativeCompiler[_], ldflags: Seq[String],
     nativeObjects: Seq[File],
     nativeLibraryOutput: Option[File],
     nativeProgramOutput: File

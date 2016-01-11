@@ -9,8 +9,18 @@ object ConfigurePlugin extends AutoPlugin {
   override def trigger: PluginTrigger = allRequirements
   override def requires: Plugins = IvyPlugin
 
+  sealed trait Language { def suffix: String }
+  case object C extends Language { def suffix: String = "c" }
+  case object Cxx extends Language { def suffix: String = "cpp" }
+
   final case class Stdlib(flags: Seq[String])
-  final case class NativeCompiler(suffix: String, program: String)
+  final case class NativeCompiler[L <: Language](language: L, program: String)
+
+  final case class NativeCompilationSettings[L <: Language](
+    compiler1: NativeCompiler[L],
+    compiler2: NativeCompiler[L],
+    flags: Seq[String]
+  )
 
   object autoImport {
     val NativeCompile = Configurations.NativeCompile
@@ -25,10 +35,10 @@ object ConfigurePlugin extends AutoPlugin {
   import Configurations._
 
   object Keys {
-    val cc1 = taskKey[NativeCompiler]("C compiler (primary).")
-    val cc2 = taskKey[NativeCompiler]("C compiler (fallback).")
-    val cxx1 = taskKey[NativeCompiler]("C++ compiler (primary).")
-    val cxx2 = taskKey[NativeCompiler]("C++ compiler (fallback).")
+    val cc1 = taskKey[NativeCompiler[C.type]]("C compiler (primary).")
+    val cc2 = taskKey[NativeCompiler[C.type]]("C compiler (fallback).")
+    val cxx1 = taskKey[NativeCompiler[Cxx.type]]("C++ compiler (primary).")
+    val cxx2 = taskKey[NativeCompiler[Cxx.type]]("C++ compiler (fallback).")
 
     val stdlib = taskKey[Stdlib]("Standard library to use")
     val jniIncludeFlags = taskKey[Seq[String]]("Common C/C++ compiler flags for JNI includes (jni.h/jni_md.h).")
@@ -70,20 +80,20 @@ object ConfigurePlugin extends AutoPlugin {
   }
 
   val globalConfig = Seq(
-    cc1 := Configure.findCompiler(streams.value.log, "c",
+    cc1 := Configure.findCompiler(streams.value.log, C,
       sys.env.getOrElse("CC", "clang"),
       "clang-3.8",
       "clang-3.7",
       "clang-3.6",
       "clang-3.5"),
-    cc2 := NativeCompiler("c", "gcc"),
-    cxx1 := Configure.findCompiler(streams.value.log, "cpp",
+    cc2 := NativeCompiler(C, "gcc"),
+    cxx1 := Configure.findCompiler(streams.value.log, Cxx,
       sys.env.getOrElse("CXX", "clang++"),
       "clang++-3.8",
       "clang++-3.7",
       "clang++-3.6",
       "clang++-3.5"),
-    cxx2 := NativeCompiler("cpp", "g++"),
+    cxx2 := NativeCompiler(Cxx, "g++"),
 
     jniIncludeFlags := Seq(
       "-I" + (jdkHome / "include"),
@@ -104,7 +114,7 @@ object ConfigurePlugin extends AutoPlugin {
 
     stdlib := {
       val libcxx = Configure.tryCompile(streams.value.log, cxx1.value, Seq("-stdlib=libc++"))
-      if (false && libcxx.nonEmpty) {
+      if (libcxx.nonEmpty) {
         Stdlib(libcxx)
       } else {
         val libstdcxx = Configure.tryCompile(streams.value.log, cxx1.value, Seq("-stdlib=libstdc++"))
