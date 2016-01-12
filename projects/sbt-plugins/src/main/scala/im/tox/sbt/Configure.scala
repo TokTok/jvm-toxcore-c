@@ -41,7 +41,7 @@ object Configure {
     val outputFile = file(FilenameUtils.removeExtension(sourceFile.getPath))
     try {
       writeSource(sourceFile, includes, code)
-      val command = Seq(compiler.program, "-o", outputFile.getPath, sourceFile.getPath) ++ flags
+      val command = Seq(compiler.program, "-o", outputFile.getPath, sourceFile.getPath) ++ compiler.flags ++ flags
       log.debug(command.mkString(" "))
       command !! log
       flags

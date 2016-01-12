@@ -14,7 +14,7 @@ object ConfigurePlugin extends AutoPlugin {
   case object Cxx extends Language { def suffix: String = "cpp" }
 
   final case class Stdlib(flags: Seq[String])
-  final case class NativeCompiler[L <: Language](language: L, program: String)
+  final case class NativeCompiler[L <: Language](language: L, program: String, flags: String*)
 
   final case class NativeCompilationSettings[L <: Language](
     compiler1: NativeCompiler[L],

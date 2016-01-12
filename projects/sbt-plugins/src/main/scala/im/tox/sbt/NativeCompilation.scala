@@ -18,7 +18,7 @@ object NativeCompilation {
   val headerFileFilter = "*.h" | "*.hh" | "*.hpp"
 
   private def runCompiler(log: Logger, compiler: NativeCompiler[_], arguments: Seq[String]): String = {
-    val command = compiler.program +: arguments
+    val command = compiler.program +: (compiler.flags ++ arguments)
     log.debug(command.mkString(" "))
 
     try {
@@ -27,6 +27,19 @@ object NativeCompilation {
       case NonFatal(e) =>
         log.error(s"Error ($e) while executing: " + command.mkString(" "))
         throw e
+    }
+  }
+
+  private def runCompilers(log: Logger, settings: NativeCompilationSettings[_], arguments: Seq[String]): String = {
+    try {
+      runCompiler(log, settings.compiler1, arguments)
+    } catch {
+      case NonFatal(e) =>
+        val argumentsFallback = arguments.filterNot { flag =>
+          // GCC doesn't understand these.
+          flag == "-fcolor-diagnostics" || flag.startsWith("-stdlib=")
+        }
+        runCompiler(log, settings.compiler2, argumentsFallback)
     }
   }
 
@@ -52,16 +65,7 @@ object NativeCompilation {
       sourceFile.getPath
     ) ++ settings.flags
 
-    try {
-      runCompiler(log, settings.compiler1, arguments)
-    } catch {
-      case NonFatal(e) =>
-        val argumentsFallback = arguments.filterNot { flag =>
-          // GCC doesn't understand these.
-          flag == "-fcolor-diagnostics" || flag.startsWith("-stdlib=")
-        }
-        runCompiler(log, settings.compiler2, argumentsFallback)
-    }
+    runCompilers(log, settings, arguments)
 
     objectFile
   }
