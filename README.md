@@ -3,8 +3,7 @@
 Combined repository for several Tox4j projects. These can be found in the
 `projects` directory and currently include:
 
-- build-basic: A collection of SBT plugins used by all Tox4j projects.
-- build-extra: Additional SBT plugins that require a specific version of Scala.
+- sbt-plugins: A collection of SBT plugins used by all Tox4j projects.
 - linters: Extra WartRemover linters with knowledge of our standards.
 - macros: Macros used by the tox4j project. These need to be compiled separately.
 - optimiser: An experimental Java byte code optimiser.
@@ -34,24 +33,8 @@ Requests and the reviewer will guide you through the process.
 
 ### Java
 
-* sbt
-* com.google.protobuf : protobuf-java : 2.6.1
-* com.trueaccord.scalapb : scalapb-runtime
-* See [build.sbt](build.sbt) for more dependencies.
-
-Protobuf support libraries are pulled in by sbt, to be the exact same version
-as protoc. protoc needs to be on $PATH for this to work correctly.
-
-### Tox4j commons
-
-The tox4j build requires the following common packages to be installed:
-
-* im.tox:build-basic
-* im.tox:build-extra
-* im.tox:linters
-
-These can be found in the toplevel directory of this repository and installed
-using `sbt publishLocal`.
+Required Java libraries are downloaded automatically by sbt, which needs to be
+installed.
 
 ### Native code
 
@@ -60,19 +43,43 @@ using `sbt publishLocal`.
   * We require the latest git version of these libraries, so you will need to build them yourself.
 * CMake (>= 2.8.7)
   * Debian/Ubuntu: cmake
-* protobuf (The version used in development is currently 2.6.1, other versions might work as well)
-  * Debian/Ubuntu: protobuf-compiler, libprotobuf-dev
-* Clang 3.5 (older versions of clang segfault. G++ support is untested, the build script enforces clang-3.5 for now. If you do not have clang 3.5 installed, your build may fail.)
+* protobuf 3.0.0
+  * Debian/Ubuntu: You need to build this from source.
+* Clang 3.5 or newer (older versions of clang segfault. G++ support is untested, the build script enforces clang-3.5 for now. If you do not have clang 3.5 installed, your build may fail.)
   * Debian/Ubuntu: clang-3.5
 
 ## Building
 
-Build and install toxcore and toxav. Run the sbt console with ```sbt```, and
-then use ```compile``` to build, ```test``` to run unit tests (these are a lot
-of tests with high timeouts, might take 40minutes or longer), and
-```package``` to create a jar and the needed native library.
+- Build and install toxcore and toxav.
+- Change directory to `projects`.
+- Run the sbt console with `sbt`.
+
+Now you can use `compile` to build, `test` to run unit tests (these are a lot of
+tests with high timeouts, might take 10 minutes or longer), and `package` to
+create a jar and the native library.
 
 ### Developing on Mac OS X
 
 Getting the required tools for development on OS X is very easy. If you have
-XCode installed, you will already be ready to compile the C++ part of tox4j,
+XCode installed, you will already be able to compile the C++ part of tox4j,
+
+### Importing in IDEA
+
+To import the project in IDEA, launch IDEA and:
+
+- On the "Welcome to IntelliJ IDEA" screen, select "Import Project".
+- Select the directory tox4j/projects (projects subdirectory of this git repository).
+- Press "OK".
+- Select "Import project from external model".
+- Select "SBT".
+- Press "Next".
+- Select "Use auto-import", "Download sources and docs", and "Download SBT sources and docs".
+- Create and select a JDK if you don't have one, yet.
+- Press "Finish".
+
+Now you need to wait while IDEA builds the project info from the SBT project.
+When it is done, it shows a list of modules, all are selected. Leave them
+selected and press "OK". After IDEA opens, it will say "Unregistered VCS root
+detected". Press "Add root" so you can use git from IDEA. If you have the
+protobuf extension installed, you can register the proto files with that as
+well (another notification will show for that).
