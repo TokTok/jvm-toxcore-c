@@ -1,0 +1,77 @@
+package im.tox.core.dht.packets
+
+import im.tox.core.ModuleCompanionTest
+import im.tox.core.crypto.CryptoCoreTest._
+import im.tox.core.crypto.NonceTest._
+import im.tox.core.crypto.PlainTextTest._
+import im.tox.core.crypto._
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.{Arbitrary, Gen}
+
+import scalaz.\/-
+
+object DhtEncryptedPacketTest {
+
+  implicit val arbDhtEncryptedPacketWithSecretKey: Arbitrary[(DhtEncryptedPacket[PlainText], SecretKey)] =
+    Arbitrary(
+      Gen.zip(
+        arbitrary[KeyPair],
+        arbitrary[Nonce],
+        arbitrary[PlainText]
+      ).map {
+        case (keyPair, nonce, payload) =>
+          val encryptedPacket = DhtEncryptedPacket.Make(PlainText).encrypt(
+            keyPair.publicKey,
+            keyPair,
+            nonce,
+            payload
+          )
+          (encryptedPacket, keyPair.secretKey)
+      }
+    )
+
+}
+
+final class DhtEncryptedPacketTest extends ModuleCompanionTest(DhtEncryptedPacket.Make(PlainText)) {
+
+  override val arbT =
+    Arbitrary(DhtEncryptedPacketTest.arbDhtEncryptedPacketWithSecretKey.arbitrary.map(_._1))
+
+  test("encryption and decryption") {
+    forAll { (
+      senderKeyPair: KeyPair,
+      receiverKeyPair: KeyPair,
+      nonce: Nonce,
+      payload: PlainText
+    ) =>
+      val encrypted = DhtEncryptedPacket.Make(PlainText).encrypt(
+        receiverKeyPair.publicKey,
+        senderKeyPair,
+        nonce,
+        payload
+      )
+      val decryptedPayload = DhtEncryptedPacket.Make(PlainText).decrypt(encrypted, receiverKeyPair.secretKey)
+
+      assert(decryptedPayload == \/-(payload))
+    }
+  }
+
+  test("protocol overhead is constant 72 bytes") {
+    forAll { (
+      senderKeyPair: KeyPair,
+      nonce: Nonce,
+      payload: PlainText
+    ) =>
+      val encrypted = DhtEncryptedPacket.Make(PlainText).encrypt(
+        senderKeyPair.publicKey,
+        senderKeyPair,
+        nonce,
+        payload
+      )
+
+      val packet = DhtEncryptedPacket.Make(PlainText).toBytes(encrypted)
+      assert(packet.length - payload.data.length == 72)
+    }
+  }
+
+}

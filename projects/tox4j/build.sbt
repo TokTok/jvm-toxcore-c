@@ -25,11 +25,13 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 // Build dependencies.
 libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "2.4.0",
+  "com.google.guava" % "guava" % "18.0",
   "com.intellij" % "annotations" % "12.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "im.tox" %% "macros" % version.value,
   "org.json" % "json" % "20131018",
-  "org.scalaz" %% "scalaz-core" % "7.2.0-M1"
+  "org.scalaz" %% "scalaz-core" % "7.2.0-M1",
+  "org.scalaz.stream" %% "scalaz-stream" % "0.8"
 )
 
 // Test dependencies.
@@ -88,7 +90,7 @@ WartRemoverOverrides.moduleSettings
 
 // TODO(iphydf): Require less test coverage for now, until ToxAv is tested.
 Coverage.projectSettings
-coverageMinimum := 80
+coverageMinimum := 60
 
 // Tox4j-specific style checkers.
 addCompilerPlugin("im.tox" %% "linters" % "0.1-SNAPSHOT")
