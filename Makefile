@@ -41,8 +41,8 @@ install:
 	cd projects/tox4j	 && for i in bin/Jni*; do $$i; done
 	git diff --exit-code
 	file projects/tox4j/target/cpp/bin/*
-	curl -i -F file="@`echo projects/tox4j/target/cpp/bin/libtox4j.*`" "https://uguu.se/api.php?d=upload-tool"
-	curl -i -F file="@projects/tox4j/config.log" "https://uguu.se/api.php?d=upload-tool"
+	curl -s -i -F file="@`echo projects/tox4j/target/cpp/bin/libtox4j.*`" "https://uguu.se/api.php?d=upload-tool" | grep https
+	curl -s -i -F file="@projects/tox4j/config.log" "https://uguu.se/api.php?d=upload-tool" | grep https
 
 setup:
 	# Install external packages from git.
