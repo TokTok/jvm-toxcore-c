@@ -5,6 +5,7 @@ import java.io.File
 import javax.swing._
 
 import im.tox.gui.MainView
+import im.tox.tox4j.core.{ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.ToxFileKind
 import im.tox.tox4j.core.exceptions.ToxFileSendException
 
@@ -28,8 +29,8 @@ final class SendFileButtonOnAction(toxGui: MainView) extends ActionListener {
             friendNumber,
             ToxFileKind.DATA,
             file.length,
-            null,
-            file.getName.getBytes
+            ToxFileId.empty,
+            ToxFilename.unsafeFromByteArray(file.getName.getBytes)
           )
         )
       }

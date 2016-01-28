@@ -32,40 +32,41 @@ final class LoadSaveTest extends FunSuite {
 
   test("Name") {
     testLoadSave(new Check() {
-      private var expected: Array[Byte] = null
+      private var expected = ToxNickname.unsafeFromByteArray(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
-        if (expected == null) {
-          expected = Array.empty
-        } else {
-          expected = ToxCoreTestBase.randomBytes(expected.length + 1)
-        }
+        expected =
+          if (expected.value == null) {
+            ToxNickname.unsafeFromByteArray(Array.empty)
+          } else {
+            ToxNickname.unsafeFromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1))
+          }
         tox.setName(expected)
-        expected.length < ToxCoreConstants.MaxNameLength
+        expected.value.length < ToxCoreConstants.MaxNameLength
       }
 
       override def check(tox: ToxCore[Unit]): Unit = {
-        assert(tox.getName sameElements expected)
+        assert(tox.getName.value sameElements expected.value)
       }
     })
   }
 
   test("StatusMessage") {
     testLoadSave(new Check() {
-      private var expected: Array[Byte] = null
+      private var expected = ToxStatusMessage.unsafeFromByteArray(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
-        if (expected == null) {
-          expected = Array.empty
+        if (expected.value == null) {
+          expected = ToxStatusMessage.unsafeFromByteArray(Array.empty)
         } else {
-          expected = ToxCoreTestBase.randomBytes(expected.length + 1)
+          expected = ToxStatusMessage.unsafeFromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1))
         }
         tox.setStatusMessage(expected)
-        expected.length < ToxCoreConstants.MaxNameLength
+        expected.value.length < ToxCoreConstants.MaxNameLength
       }
 
       override def check(tox: ToxCore[Unit]): Unit = {
-        assert(tox.getStatusMessage sameElements expected)
+        assert(tox.getStatusMessage.value sameElements expected.value)
       }
     })
   }
@@ -108,7 +109,10 @@ final class LoadSaveTest extends FunSuite {
 
       override def change(tox: ToxCore[Unit]): Boolean = {
         withTox { toxFriend =>
-          expected = tox.addFriend(toxFriend.getAddress, "hello".getBytes)
+          expected = tox.addFriend(
+            toxFriend.getAddress,
+            ToxFriendRequestMessage.unsafeFromByteArray("hello".getBytes)
+          )
         }
         false
       }
@@ -169,8 +173,8 @@ final class LoadSaveTest extends FunSuite {
     withTox { tox1 =>
       val data = tox1.getSecretKey
       withTox(SaveDataOptions.SecretKey(data)) { tox2 =>
-        assert(tox1.getSecretKey sameElements tox2.getSecretKey)
-        assert(tox1.getPublicKey sameElements tox2.getPublicKey)
+        assert(tox1.getSecretKey.value sameElements tox2.getSecretKey.value)
+        assert(tox1.getPublicKey.value sameElements tox2.getPublicKey.value)
       }
     }
   }
@@ -179,8 +183,8 @@ final class LoadSaveTest extends FunSuite {
     withTox { tox1 =>
       val data = tox1.getSecretKey
       withTox(tox1.load(ToxOptions(saveData = SaveDataOptions.SecretKey(data)))) { tox2 =>
-        assert(tox1.getSecretKey sameElements tox2.getSecretKey)
-        assert(tox1.getPublicKey sameElements tox2.getPublicKey)
+        assert(tox1.getSecretKey.value sameElements tox2.getSecretKey.value)
+        assert(tox1.getPublicKey.value sameElements tox2.getPublicKey.value)
       }
     }
   }

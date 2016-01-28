@@ -1,7 +1,5 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.testing.{WrappedByteArray, WrappedShortArray}
-
 import scala.language.implicitConversions
 
 object InvokeTest {
@@ -31,14 +29,6 @@ object InvokeTest {
     }
   }
 
-  implicit def reWrapByteArray(array: WrappedByteArray): ByteArray = {
-    if (array == null) {
-      null
-    } else {
-      ByteArray(array.array)
-    }
-  }
-
   final case class ShortArray(private val array: Array[Short]) {
     override def equals(rhs: Any): Boolean = {
       rhs match {
@@ -61,14 +51,6 @@ object InvokeTest {
       null
     } else {
       ShortArray(array)
-    }
-  }
-
-  implicit def reWrapShortArray(array: WrappedShortArray): ShortArray = {
-    if (array == null) {
-      null
-    } else {
-      ShortArray(array.array)
     }
   }
 

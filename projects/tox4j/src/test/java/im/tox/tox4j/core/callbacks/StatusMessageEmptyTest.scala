@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.ToxStatusMessage
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 final class StatusMessageEmptyTest extends AliceBobTest {
@@ -9,16 +10,16 @@ final class StatusMessageEmptyTest extends AliceBobTest {
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
-    override def friendStatusMessage(friendNumber: Int, message: Array[Byte])(state: ChatState): ChatState = {
-      debug(s"friend changed status message to: ${new String(message)}")
+    override def friendStatusMessage(friendNumber: Int, message: ToxStatusMessage)(state: ChatState): ChatState = {
+      debug(s"friend changed status message to: ${new String(message.value)}")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       state.get match {
         case 0 =>
           val nextState = state.set(1)
-          assert(message.isEmpty)
+          assert(message.value.isEmpty)
           if (isAlice) {
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage("One".getBytes)
+              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray("One".getBytes))
               state
             }
           } else {
@@ -28,25 +29,25 @@ final class StatusMessageEmptyTest extends AliceBobTest {
         case 1 =>
           val nextState = state.set(2)
           if (isAlice) {
-            assert(new String(message) == "Two")
+            assert(new String(message.value) == "Two")
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage(Array.ofDim[Byte](0))
+              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.ofDim[Byte](0)))
               state
             }
           } else {
-            assert(new String(message) == "One")
+            assert(new String(message.value) == "One")
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage("Two".getBytes)
+              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray("Two".getBytes))
               state
             }
           }
 
         case 2 =>
           val nextState = state.finish
-          assert(message.isEmpty)
+          assert(message.value.isEmpty)
           if (isBob) {
             nextState.addTask { (tox, state) =>
-              tox.setStatusMessage(Array.ofDim[Byte](0))
+              tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.ofDim[Byte](0)))
               state
             }
           } else {

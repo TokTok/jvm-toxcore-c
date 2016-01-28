@@ -3,6 +3,7 @@ package im.tox.tox4j.core.callbacks
 import java.util.Random
 
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind}
+import im.tox.tox4j.core._
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 /**
@@ -21,7 +22,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
   override def initialState: State = ()
 
   private val fileData = new Array[Byte](13710)
-  private var aliceAddress = Array.ofDim[Byte](0)
+  private var aliceAddress = ToxFriendAddress.unsafeFromByteArray(Array.ofDim[Byte](0))
   new Random().nextBytes(fileData)
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new Alice(name, expectedFriendName)
@@ -29,15 +30,15 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
   final class Alice(name: String, expectedFriendName: String) extends ChatClient(name, expectedFriendName) {
 
     private var aliceOffset = 0L
-    private var fileId = Array.ofDim[Byte](0)
+    private var fileId = ToxFileId.empty
     private var aliceSentFileNumber = -1
     private var aliceShouldPause = -1
     private val receivedData = new Array[Byte](fileData.length)
     private var bobSentFileNumber = -1
     private var bobOffset = 0L
-    private var selfPublicKey = Array.ofDim[Byte](0)
+    private var selfPublicKey = ToxPublicKey.unsafeFromByteArray(Array.ofDim[Byte](0))
 
-    override def friendRequest(publicKey: Array[Byte], timeDelta: Int, message: Array[Byte])(state: ChatState): ChatState = {
+    override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: ChatState): ChatState = {
       assert(isAlice)
       state.addTask { (tox, state) =>
         debug("accept Bob's friend request")
@@ -54,8 +55,13 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           assert(friendNumber == AliceBobTestBase.FriendNumber)
           debug(s"initiate file sending to friend $friendNumber")
           state.addTask { (tox, state) =>
-            aliceSentFileNumber = tox.fileSend(friendNumber, ToxFileKind.DATA, fileData.length,
-              Array.ofDim[Byte](0), s"file for $expectedFriendName.png".getBytes)
+            aliceSentFileNumber = tox.fileSend(
+              friendNumber,
+              ToxFileKind.DATA,
+              fileData.length,
+              ToxFileId.empty,
+              ToxFilename.unsafeFromByteArray(s"file for $expectedFriendName.png".getBytes)
+            )
             fileId = tox.getFileFileId(friendNumber, aliceSentFileNumber)
             aliceAddress = tox.getAddress
             state
@@ -72,7 +78,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           debug("See alice go off-line")
           state.addTask { (tox, state) =>
             tox.deleteFriend(friendNumber)
-            tox.addFriend(aliceAddress, "Please add me back".getBytes)
+            tox.addFriend(aliceAddress, ToxFriendRequestMessage.unsafeFromByteArray("Please add me back".getBytes))
             state
           }
         }
@@ -113,12 +119,12 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       assert(isBob)
       debug(s"received file send request $fileNumber from friend number $friendNumber current offset $bobOffset")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(kind == ToxFileKind.DATA)
-      assert(new String(filename) == s"file for $name.png")
+      assert(new String(filename.value) == s"file for $name.png")
       bobSentFileNumber = fileNumber
       state.addTask { (tox, state) =>
         selfPublicKey = tox.getPublicKey

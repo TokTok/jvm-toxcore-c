@@ -3,9 +3,9 @@ package im.tox.tox4j.bench
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.picklers.Implicits._
+import im.tox.tox4j.core._
 import im.tox.tox4j.core.exceptions.ToxNewException
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants, ToxCoreFactory}
 import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl}
 import org.scalameter.api._
 
@@ -89,7 +89,7 @@ object PerformanceReportBase {
    * @param sz The number of Tox Addresses to generate.
    * @return A [[Seq]] of Tox Addresses in [[Byte]] arrays.
    */
-  def friendAddresses(sz: Int): Seq[Array[Byte]] = {
+  def friendAddresses(sz: Int): Seq[ToxFriendAddress] = {
     for (_ <- 0 until sz) yield {
       ToxCoreFactory.withTox(_.getAddress)
     }
@@ -102,14 +102,14 @@ object PerformanceReportBase {
    * @param sz The number of public keys to generate.
    * @return A [[Seq]] containing public keys in [[Byte]] arrays.
    */
-  def friendKeys(sz: Int): Seq[Array[Byte]] = {
+  def friendKeys(sz: Int): Seq[ToxPublicKey] = {
     for (_ <- 0 until sz) yield {
       val key = Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)
       // noinspection SideEffectsInMonadicTransformation
       random.nextBytes(key)
       // Key needs the last byte to be 0 or toxcore will complain about checksums.
       key(key.length - 1) = 0
-      key
+      ToxPublicKey.unsafeFromByteArray(key)
     }
   }
 
@@ -122,8 +122,8 @@ object PerformanceReportBase {
    */
   def makeToxWithFriends(friendCount: Int): ToxCore[Unit] = {
     val tox = ToxCoreFactory.make[Unit](toxOptions)
-    tox.setName(Array.ofDim(ToxCoreConstants.MaxNameLength))
-    tox.setStatusMessage(Array.ofDim(ToxCoreConstants.MaxStatusMessageLength))
+    tox.setName(ToxNickname.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxNameLength)))
+    tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.ofDim(ToxCoreConstants.MaxStatusMessageLength)))
     friendKeys(friendCount) foreach tox.addFriendNorequest
     tox
   }
@@ -249,7 +249,7 @@ object PerformanceReportBase {
    * @param tox The Tox instance to extract the friends from.
    * @return A pair containing the passed Tox instance and a random slice of the friend list.
    */
-  def toxAndFriendKeys(limit: Int)(tox: ToxCore[Unit]): (Seq[Array[Byte]], ToxCore[Unit]) = {
+  def toxAndFriendKeys(limit: Int)(tox: ToxCore[Unit]): (Seq[ToxPublicKey], ToxCore[Unit]) = {
     toxAndFriendNumbers(limit)(tox) match {
       case (friendList, _) => (friendList map tox.getFriendPublicKey, tox)
     }
@@ -266,7 +266,7 @@ object PerformanceReportBase {
     }
   }
 
-  val names = nameLengths.map(Array.ofDim[Byte])
-  val statusMessages = statusMessageLengths.map(Array.ofDim[Byte])
+  val names = nameLengths.map(Array.ofDim[Byte]).map(ToxNickname.unsafeFromByteArray)
+  val statusMessages = statusMessageLengths.map(Array.ofDim[Byte]).map(ToxStatusMessage.unsafeFromByteArray)
 
 }

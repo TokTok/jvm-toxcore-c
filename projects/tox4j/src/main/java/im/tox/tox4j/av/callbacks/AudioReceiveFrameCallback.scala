@@ -1,5 +1,6 @@
 package im.tox.tox4j.av.callbacks
 
+import im.tox.tox4j.av.{SamplingRate, AudioChannels}
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -13,6 +14,6 @@ trait AudioReceiveFrameCallback[ToxCoreState] {
    * @param samplingRate Sampling rate used in this frame.
    */
   def audioReceiveFrame(
-    friendNumber: Int, @NotNull pcm: Array[Short], channels: Int, samplingRate: Int
+    friendNumber: Int, @NotNull pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate
   )(state: ToxCoreState): ToxCoreState = state
 }

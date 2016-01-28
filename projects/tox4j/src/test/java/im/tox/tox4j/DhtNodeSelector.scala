@@ -17,7 +17,7 @@ object DhtNodeSelector extends Assertions {
   private def tryConnect(node: DhtNode) = {
     var socket: Socket = null
     try {
-      socket = new Socket(InetAddress.getByName(node.ipv4), node.udpPort)
+      socket = new Socket(InetAddress.getByName(node.ipv4), node.udpPort.value)
       assume(socket.getInputStream != null)
       Some(node)
     } catch {

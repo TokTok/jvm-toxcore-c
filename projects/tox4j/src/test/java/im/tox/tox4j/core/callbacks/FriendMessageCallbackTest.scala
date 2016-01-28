@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.ToxFriendMessage
 import im.tox.tox4j.core.enums.{ToxConnection, ToxMessageType}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -14,7 +15,8 @@ final class FriendMessageCallbackTest extends AliceBobTest {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         state.addTask { (tox, state) =>
-          tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, s"My name is $selfName".getBytes)
+          tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
+            ToxFriendMessage.unsafeFromByteArray(s"My name is $selfName".getBytes))
           state
         }
       } else {
@@ -26,15 +28,15 @@ final class FriendMessageCallbackTest extends AliceBobTest {
       friendNumber: Int,
       newType: ToxMessageType,
       timeDelta: Int,
-      message: Array[Byte]
+      message: ToxFriendMessage
     )(
       state: ChatState
     ): ChatState = {
-      debug("received a message: " + new String(message))
+      debug("received a message: " + new String(message.value))
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(newType == ToxMessageType.NORMAL)
       assert(timeDelta >= 0)
-      assert(new String(message) == s"My name is $expectedFriendName")
+      assert(new String(message.value) == s"My name is $expectedFriendName")
       state.finish
     }
   }

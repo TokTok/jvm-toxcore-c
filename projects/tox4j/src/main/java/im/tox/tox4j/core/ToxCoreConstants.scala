@@ -1,16 +1,18 @@
 package im.tox.tox4j.core
 
+import im.tox.tox4j.crypto.ToxCryptoConstants
+
 object ToxCoreConstants {
 
   /**
    * The size of a Tox Public Key in bytes.
    */
-  final val PublicKeySize = 32
+  val PublicKeySize = ToxCryptoConstants.PublicKeyLength
 
   /**
    * The size of a Tox Secret Key in bytes.
    */
-  final val SecretKeySize = 32
+  val SecretKeySize = ToxCryptoConstants.SecretKeyLength
 
   /**
    * The size of a Tox address in bytes. Tox addresses are in the format
@@ -20,67 +22,67 @@ object ToxCoreConstants {
    * byte is an XOR of all the odd bytes, the second byte is an XOR of all the
    * even bytes of the Public Key and nospam.
    */
-  final val AddressSize = PublicKeySize + 4 + 2
+  val AddressSize = PublicKeySize + 4 + 2
 
   /**
    * Maximum length of a nickname in bytes.
    */
-  final val MaxNameLength = 128
+  val MaxNameLength = 128
 
   /**
    * Maximum length of a status message in bytes.
    */
-  final val MaxStatusMessageLength = 1007
+  val MaxStatusMessageLength = 1007
 
   /**
    * Maximum length of a friend request message in bytes.
    */
-  final val MaxFriendRequestLength = 1016
+  val MaxFriendRequestLength = 1016
 
   /**
    * Maximum length of a single message after which it should be split.
    */
-  final val MaxMessageLength = 1372
+  val MaxMessageLength = 1372
 
   /**
    * Maximum size of custom packets. TODO: should be LENGTH?
    */
-  final val MaxCustomPacketSize = 1373
+  val MaxCustomPacketSize = 1373
 
   /**
    * Maximum file name length for file transfers.
    */
-  final val MaxFilenameLength = 255
+  val MaxFilenameLength = 255
 
   /**
    * Maximum hostname length. This is determined by calling `getconf HOST_NAME_MAX` on the console. The value
    * presented here is valid for most systems.
    */
-  final val MaxHostnameLength = 255
+  val MaxHostnameLength = 255
 
   /**
    * The number of bytes in a file id.
    */
-  final val FileIdLength = 32
+  val FileIdLength = ToxCryptoConstants.HashLength
 
   /**
    * Default port for HTTP proxies.
    */
-  final val DefaultProxyPort = 8080
+  val DefaultProxyPort = 8080
 
   /**
    * Default start port for Tox UDP sockets.
    */
-  final val DefaultStartPort = 33445
+  val DefaultStartPort = 33445
 
   /**
    * Default end port for Tox UDP sockets.
    */
-  final val DefaultEndPort = DefaultStartPort + 100
+  val DefaultEndPort = DefaultStartPort + 100
 
   /**
    * Default port for Tox TCP relays. A value of 0 means disabled.
    */
-  final val DefaultTcpPort = 0
+  val DefaultTcpPort = 0
 
 }

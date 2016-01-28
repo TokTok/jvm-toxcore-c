@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.ToxLosslessPacket
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -16,7 +17,7 @@ final class FriendLosslessPacketCallbackTest extends AliceBobTest {
         state.addTask { (tox, state) =>
           val packet = s"_My name is $selfName".getBytes
           packet(0) = 160.toByte
-          tox.friendSendLosslessPacket(friendNumber, packet)
+          tox.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.unsafeFromByteArray(packet))
           state
         }
       } else {
@@ -24,11 +25,11 @@ final class FriendLosslessPacketCallbackTest extends AliceBobTest {
       }
     }
 
-    override def friendLosslessPacket(friendNumber: Int, packet: Array[Byte])(state: ChatState): ChatState = {
-      val message = new String(packet, 1, packet.length - 1)
-      debug(s"received a lossless packet[id=${packet(0)}]: $message")
+    override def friendLosslessPacket(friendNumber: Int, packet: ToxLosslessPacket)(state: ChatState): ChatState = {
+      val message = new String(packet.value, 1, packet.value.length - 1)
+      debug(s"received a lossless packet[id=${packet.value(0)}]: $message")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
-      assert(packet(0) == 160.toByte)
+      assert(packet.value(0) == 160.toByte)
       assert(message == s"My name is $expectedFriendName")
       state.finish
     }

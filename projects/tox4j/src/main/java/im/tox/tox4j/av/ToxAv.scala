@@ -71,7 +71,7 @@ trait ToxAv[ToxCoreState] extends Closeable {
    * @param videoBitRate Video bit rate in Kb/sec. Set this to 0 to disable video sending.
    */
   @throws[ToxavCallException]
-  def call(friendNumber: Int, audioBitRate: Int, videoBitRate: Int): Unit
+  def call(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate): Unit
 
   /**
    * Accept an incoming call.
@@ -84,7 +84,7 @@ trait ToxAv[ToxCoreState] extends Closeable {
    * @param videoBitRate Video bit rate in Kb/sec. Set this to 0 to disable video sending.
    */
   @throws[ToxavAnswerException]
-  def answer(friendNumber: Int, audioBitRate: Int, videoBitRate: Int): Unit
+  def answer(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate): Unit
 
   /**
    * Sends a call control command to a friend.
@@ -105,7 +105,7 @@ trait ToxAv[ToxCoreState] extends Closeable {
    *                     Pass -1 to leave unchanged.
    */
   @throws[ToxavBitRateSetException]
-  def setBitRate(friendNumber: Int, audioBitRate: Int, videoBitRate: Int): Unit
+  def setBitRate(friendNumber: Int, audioBitRate: BitRate, videoBitRate: BitRate): Unit
 
   /**
    * Send an audio frame to a friend.
@@ -118,15 +118,21 @@ trait ToxAv[ToxCoreState] extends Closeable {
    *
    * @param friendNumber The friend number of the friend to which to send an audio frame.
    * @param pcm An array of audio samples. The size of this array must be sample_count * channels.
-   * @param sampleCount Number of samples in this frame. Valid numbers here are
+   * @param sampleCount Number of samples in this frame in milliseconds. Valid numbers here are
    * ((sample rate) * (audio length) / 1000), where audio length can be
    * 2.5, 5, 10, 20, 40 or 60 milliseconds.
    * @param channels Number of audio channels. Supported values are 1 and 2.
-   * @param samplingRate Audio sampling rate used in this frame. Valid sampling
+   * @param samplingRate Audio sampling rate used in this frame in Hz. Valid sampling
    * rates are 8000, 12000, 16000, 24000, or 48000.
    */
   @throws[ToxavSendFrameException]
-  def audioSendFrame(friendNumber: Int, @NotNull pcm: Array[Short], sampleCount: Int, channels: Int, samplingRate: Int): Unit
+  def audioSendFrame(
+    friendNumber: Int,
+    @NotNull pcm: Array[Short],
+    sampleCount: SampleCount,
+    channels: AudioChannels,
+    samplingRate: SamplingRate
+  ): Unit
 
   /**
    * Send a video frame to a friend.

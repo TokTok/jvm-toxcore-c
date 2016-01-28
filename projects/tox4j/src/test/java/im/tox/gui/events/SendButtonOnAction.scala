@@ -4,6 +4,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing._
 
 import im.tox.gui.MainView
+import im.tox.tox4j.core.ToxFriendMessage
 import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.core.exceptions.ToxFriendSendMessageException
 
@@ -17,10 +18,12 @@ final class SendButtonOnAction(toxGui: MainView) extends ActionListener {
       }
 
       if (toxGui.messageRadioButton.isSelected) {
-        toxGui.tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, toxGui.messageText.getText.getBytes)
+        toxGui.tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
+          ToxFriendMessage.unsafeFromByteArray(toxGui.messageText.getText.getBytes))
         toxGui.addMessage("Sent message to ", friendNumber + ": " + toxGui.messageText.getText)
       } else if (toxGui.actionRadioButton.isSelected) {
-        toxGui.tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, 0, toxGui.messageText.getText.getBytes)
+        toxGui.tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, 0,
+          ToxFriendMessage.unsafeFromByteArray(toxGui.messageText.getText.getBytes))
         toxGui.addMessage("Sent action to ", friendNumber + ": " + toxGui.messageText.getText)
       }
 

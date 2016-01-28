@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.{ToxFileId, ToxCore}
 import im.tox.tox4j.core.enums.ToxFileControl
 
 final class FilePauseResumeWithControlTest extends FilePauseResumeTestBase {
@@ -9,7 +9,12 @@ final class FilePauseResumeWithControlTest extends FilePauseResumeTestBase {
 
   final class Alice(name: String, expectedFriendName: String) extends super.Alice(name, expectedFriendName) {
 
-    protected override def addFriendMessageTask(friendNumber: Int, bobSentFileNumber: Int, fileId: Array[Byte], tox: ToxCore[ChatState]): Unit = {
+    protected override def addFriendMessageTask(
+      friendNumber: Int,
+      bobSentFileNumber: Int,
+      fileId: ToxFileId,
+      tox: ToxCore[ChatState]
+    ): Unit = {
       debug("send resume control")
       if (isBob) {
         tox.fileControl(friendNumber, bobSentFileNumber, ToxFileControl.RESUME)
@@ -20,7 +25,13 @@ final class FilePauseResumeWithControlTest extends FilePauseResumeTestBase {
       }
     }
 
-    protected override def addFileRecvTask(friendNumber: Int, fileNumber: Int, bobSentFileNumber: Int, bobOffset: Long, tox: ToxCore[ChatState]): Unit = {
+    protected override def addFileRecvTask(
+      friendNumber: Int,
+      fileNumber: Int,
+      bobSentFileNumber: Int,
+      bobOffset: Long,
+      tox: ToxCore[ChatState]
+    ): Unit = {
       debug(s"sending control RESUME for $fileNumber")
       tox.fileControl(friendNumber, fileNumber, ToxFileControl.RESUME)
     }

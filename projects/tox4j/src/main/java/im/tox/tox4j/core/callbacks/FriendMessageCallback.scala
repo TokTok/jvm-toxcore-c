@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.ToxFriendMessage
 import im.tox.tox4j.core.enums.ToxMessageType
 import org.jetbrains.annotations.NotNull
 
@@ -18,6 +19,6 @@ trait FriendMessageCallback[ToxCoreState] {
    * @param message The message data they sent.
    */
   def friendMessage(
-    friendNumber: Int, @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: Array[Byte]
+    friendNumber: Int, @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: ToxFriendMessage
   )(state: ToxCoreState): ToxCoreState = state
 }

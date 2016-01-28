@@ -1,8 +1,9 @@
 import com.typesafe.scalalogging.Logger
-import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.core.network.Port
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.options.ToxOptions
+import im.tox.tox4j.core._
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 import org.slf4j.LoggerFactory
 
@@ -18,7 +19,7 @@ object TestClient extends App {
     str.toString()
   }
 
-  private def parsePublicKey(id: String): Array[Byte] = {
+  private def parsePublicKey(id: String): ToxPublicKey = {
     val publicKey = Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)
 
     for (i <- 0 until ToxCoreConstants.PublicKeySize) {
@@ -27,7 +28,7 @@ object TestClient extends App {
         fromHexDigit(id.charAt(i * 2 + 1))
       ).toByte
     }
-    publicKey
+    ToxPublicKey.unsafeFromByteArray(publicKey)
   }
 
   private def fromHexDigit(c: Char): Byte = {
@@ -63,12 +64,12 @@ object TestClient extends App {
         val tox = new ToxCoreImpl[Unit](new ToxOptions(true, bootstrap.isEmpty))
 
         tox.callback(new TestEventListener(id))
-        logger.info(s"[$id] Key: ${readablePublicKey(tox.getPublicKey)}")
+        logger.info(s"[$id] Key: ${readablePublicKey(tox.getPublicKey.value)}")
 
         bootstrap match {
           case Some((host, port, key)) =>
             logger.info(s"[$id] Bootstrapping to $host:$port")
-            tox.bootstrap(host, port, parsePublicKey(key))
+            tox.bootstrap(host, Port.unsafeFromInt(port), parsePublicKey(key))
           case None =>
         }
         tox
@@ -97,24 +98,24 @@ object TestClient extends App {
       logger.info(s"[$id] selfConnectionStatus($connectionStatus)")
     }
 
-    override def friendName(friendNumber: Int, name: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] friendName($friendNumber, ${new String(name)})")
+    override def friendName(friendNumber: Int, name: ToxNickname)(state: Unit): Unit = {
+      logger.info(s"[$id] friendName($friendNumber, ${new String(name.value)})")
     }
 
-    override def friendMessage(friendNumber: Int, messageType: ToxMessageType, timeDelta: Int, message: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] friendMessage($friendNumber, $timeDelta, ${new String(message)})")
+    override def friendMessage(friendNumber: Int, messageType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: Unit): Unit = {
+      logger.info(s"[$id] friendMessage($friendNumber, $timeDelta, ${new String(message.value)})")
     }
 
-    override def friendLossyPacket(friendNumber: Int, data: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] friendLossyPacket($friendNumber, ${new String(data)})")
+    override def friendLossyPacket(friendNumber: Int, data: ToxLossyPacket)(state: Unit): Unit = {
+      logger.info(s"[$id] friendLossyPacket($friendNumber, ${new String(data.value)})")
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] fileRecv($friendNumber, $fileNumber, $kind, $fileSize, ${new String(filename)}})")
+    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: Unit): Unit = {
+      logger.info(s"[$id] fileRecv($friendNumber, $fileNumber, $kind, $fileSize, ${new String(filename.value)}})")
     }
 
-    override def friendRequest(publicKey: Array[Byte], timeDelta: Int, message: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] friendRequest($publicKey, $timeDelta, ${new String(message)})")
+    override def friendRequest(publicKey: ToxPublicKey, timeDelta: Int, message: ToxFriendRequestMessage)(state: Unit): Unit = {
+      logger.info(s"[$id] friendRequest($publicKey, $timeDelta, ${new String(message.value)})")
     }
 
     override def fileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int)(state: Unit): Unit = {
@@ -125,8 +126,8 @@ object TestClient extends App {
       logger.info(s"[$id] fileRecvChunk($friendNumber, $fileNumber, $position, ${new String(data)})")
     }
 
-    override def friendLosslessPacket(friendNumber: Int, data: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] friendLosslessPacket($friendNumber, ${new String(data)})")
+    override def friendLosslessPacket(friendNumber: Int, data: ToxLosslessPacket)(state: Unit): Unit = {
+      logger.info(s"[$id] friendLosslessPacket($friendNumber, ${new String(data.value)})")
     }
 
     override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: Unit): Unit = {
@@ -137,8 +138,8 @@ object TestClient extends App {
       logger.info(s"[$id] fileRecvControl($friendNumber, $fileNumber, $control)")
     }
 
-    override def friendStatusMessage(friendNumber: Int, message: Array[Byte])(state: Unit): Unit = {
-      logger.info(s"[$id] friendStatusMessage($friendNumber, ${new String(message)})")
+    override def friendStatusMessage(friendNumber: Int, message: ToxStatusMessage)(state: Unit): Unit = {
+      logger.info(s"[$id] friendStatusMessage($friendNumber, ${new String(message.value)})")
     }
 
     override def friendReadReceipt(friendNumber: Int, messageId: Int)(state: Unit): Unit = {

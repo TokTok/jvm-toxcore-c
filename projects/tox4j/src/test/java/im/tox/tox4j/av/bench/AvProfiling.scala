@@ -1,5 +1,6 @@
 package im.tox.tox4j.av.bench
 
+import im.tox.tox4j.av.{SamplingRate, AudioChannels}
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl}
 
@@ -18,8 +19,8 @@ object AvProfiling extends App {
     pcm(i) = random.nextInt().toShort
   }
 
-  val channels = 1
-  val samplingRate = 1
+  val channels = AudioChannels.Mono
+  val samplingRate = SamplingRate.Rate8k
 
   while (true) {
     toxAv.invokeAudioReceiveFrame(friendNumber, pcm, channels, samplingRate)

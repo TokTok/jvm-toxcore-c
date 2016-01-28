@@ -3,12 +3,13 @@ package im.tox.tox4j.core.bench
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
+import im.tox.tox4j.core.{ToxNickname, ToxPublicKey, ToxCore, ToxCoreConstants}
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 
 final class CoreCallbackTimingBench extends TimingReport {
 
-  val publicKey = Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)
+  val publicKey = ToxPublicKey.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize))
+  val nickname = ToxNickname.unsafeFromByteArray(Array.ofDim[Byte](ToxNickname.MaxSize))
   val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
 
   def invokePerformance(method: String, f: ToxCoreImpl[Unit] => Unit): Unit = {
@@ -32,7 +33,7 @@ final class CoreCallbackTimingBench extends TimingReport {
     tox.invokeFriendLosslessPacket(1, data)
     tox.invokeFriendLossyPacket(1, data)
     tox.invokeFriendMessage(1, ToxMessageType.NORMAL, 2, data)
-    tox.invokeFriendName(1, data)
+    tox.invokeFriendName(1, nickname)
     tox.invokeFriendReadReceipt(1, 2)
     tox.invokeFriendRequest(publicKey, 1, data)
     tox.invokeFriendStatus(1, ToxUserStatus.AWAY)
@@ -88,7 +89,7 @@ final class CoreCallbackTimingBench extends TimingReport {
     invokePerformance("invokeFriendLosslessPacket", _.invokeFriendLosslessPacket(1, data))
     invokePerformance("invokeFriendLossyPacket", _.invokeFriendLossyPacket(1, data))
     invokePerformance("invokeFriendMessage", _.invokeFriendMessage(1, ToxMessageType.NORMAL, 2, data))
-    invokePerformance("invokeFriendName", _.invokeFriendName(1, data))
+    invokePerformance("invokeFriendName", _.invokeFriendName(1, nickname))
     invokePerformance("invokeFriendReadReceipt", _.invokeFriendReadReceipt(1, 2))
     invokePerformance("invokeFriendRequest", _.invokeFriendRequest(publicKey, 1, data))
     invokePerformance("invokeFriendStatus", _.invokeFriendStatus(1, ToxUserStatus.AWAY))

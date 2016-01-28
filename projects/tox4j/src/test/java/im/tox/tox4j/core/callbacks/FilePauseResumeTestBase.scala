@@ -4,7 +4,7 @@ import java.util.Random
 
 import im.tox.tox4j.TestConstants
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind, ToxMessageType}
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
+import im.tox.tox4j.core._
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 /**
@@ -28,7 +28,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
   protected var aliceSentFileNumber = -1
   private var aliceOffset = 0L
   protected var aliceShouldPause = -1
-  private var fileId = Array.ofDim[Byte](0)
+  private var fileId = ToxFileId.empty
   private val receivedData = new Array[Byte](fileData.length)
   private var bobSentFileNumber = -1
   private var bobOffset = 0L
@@ -36,7 +36,7 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
 
   abstract class Alice(name: String, expectedFriendName: String) extends ChatClient(name, expectedFriendName) {
 
-    protected def addFriendMessageTask(friendNumber: Int, bobSentFileNumber: Int, fileId: Array[Byte], tox: ToxCore[ChatState]): Unit
+    protected def addFriendMessageTask(friendNumber: Int, bobSentFileNumber: Int, fileId: ToxFileId, tox: ToxCore[ChatState]): Unit
     protected def addFileRecvTask(friendNumber: Int, fileNumber: Int, bobSentFileNumber: Int, bobOffset: Long, tox: ToxCore[ChatState]): Unit
 
     override def friendConnectionStatus(friendNumber: Int, connection: ToxConnection)(state: ChatState): ChatState = {
@@ -46,8 +46,13 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
           debug(s"initiate file sending to friend $friendNumber")
           assert(friendNumber == AliceBobTestBase.FriendNumber)
           state.addTask { (tox, state) =>
-            aliceSentFileNumber = tox.fileSend(friendNumber, ToxFileKind.DATA, fileData.length,
-              Array.ofDim[Byte](0), ("file for " + expectedFriendName + ".png").getBytes)
+            aliceSentFileNumber = tox.fileSend(
+              friendNumber,
+              ToxFileKind.DATA,
+              fileData.length,
+              ToxFileId.empty,
+              ToxFilename.unsafeFromByteArray(("file for " + expectedFriendName + ".png").getBytes)
+            )
             fileId = tox.getFileFileId(friendNumber, aliceSentFileNumber)
             state
           }
@@ -63,12 +68,12 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       assert(isBob)
       debug(s"received file send request $fileNumber from friend number $friendNumber current offset $bobOffset")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(kind == ToxFileKind.DATA)
-      assert(new String(filename) == s"file for $name.png")
+      assert(new String(filename.value) == s"file for $name.png")
       bobSentFileNumber = fileNumber
       state.addTask { (tox, state) =>
         addFileRecvTask(friendNumber, fileNumber, bobSentFileNumber, bobOffset, tox)
@@ -119,7 +124,8 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
         } else if (control == ToxFileControl.PAUSE) {
           state.addTask { (tox, state) =>
             aliceShouldPause = 0
-            tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, "Please resume the file transfer".getBytes)
+            tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
+              ToxFriendMessage.unsafeFromByteArray("Please resume the file transfer".getBytes))
             state
           }
         } else {
@@ -130,7 +136,8 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
           debug("see alice pause file transmission")
           state.addTask { (tox, state) =>
             debug("request to resume file transmission")
-            tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, "Please resume the file transfer".getBytes)
+            tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0,
+              ToxFriendMessage.unsafeFromByteArray("Please resume the file transfer".getBytes))
             state
           }
         } else {
@@ -162,9 +169,9 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
       }
     }
 
-    override def friendMessage(friendNumber: Int, newType: ToxMessageType, timeDelta: Int, message: Array[Byte])(state: ChatState): ChatState = {
-      debug(s"received a message: ${new String(message)}")
-      assert(new String(message) == "Please resume the file transfer")
+    override def friendMessage(friendNumber: Int, newType: ToxMessageType, timeDelta: Int, message: ToxFriendMessage)(state: ChatState): ChatState = {
+      debug(s"received a message: ${new String(message.value)}")
+      assert(new String(message.value) == "Please resume the file transfer")
       state.addTask { (tox, state) =>
         addFriendMessageTask(friendNumber, bobSentFileNumber, fileId, tox)
         state

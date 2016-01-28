@@ -2,6 +2,7 @@ package im.tox.tox4j.core.callbacks
 
 import java.util.Random
 
+import im.tox.tox4j.core.{ToxFileId, ToxFilename}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -38,8 +39,8 @@ final class FileTransferTest extends AliceBobTest {
             friendNumber,
             ToxFileKind.DATA,
             fileData.length,
-            Array.ofDim[Byte](0),
-            s"file for $expectedFriendName.png".getBytes
+            ToxFileId.empty,
+            ToxFilename.unsafeFromByteArray(s"file for $expectedFriendName.png".getBytes)
           )
           state.set(state.get.copy(sentFileNumber = sentFileNumber))
         }
@@ -48,14 +49,14 @@ final class FileTransferTest extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       debug(s"received file send request $fileNumber from friend number $friendNumber")
       assert(isBob)
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(fileNumber == (0 | 0x10000))
       assert(kind == ToxFileKind.DATA)
       assert(fileSize == fileData.length)
-      assert(new String(filename) == s"file for $name.png")
+      assert(new String(filename.value) == s"file for $name.png")
       state.addTask { (tox, state) =>
         debug("sending control RESUME for " + fileNumber)
         tox.fileControl(friendNumber, fileNumber, ToxFileControl.RESUME)

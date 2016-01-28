@@ -74,7 +74,7 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
         )
       }
 
-      toxGui.selfPublicKey.setText(readablePublicKey(toxGui.tox.getAddress))
+      toxGui.selfPublicKey.setText(readablePublicKey(toxGui.tox.getAddress.value))
       toxGui.tox.callback(toxGui.toxEvents)
 
       toxGui.eventLoop = new Thread(new Runnable() {

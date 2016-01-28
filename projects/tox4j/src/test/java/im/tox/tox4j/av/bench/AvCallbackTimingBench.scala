@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.bench
 
-import im.tox.tox4j.av.ToxAv
+import im.tox.tox4j.av.{SamplingRate, AudioChannels, ToxAv}
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.ToxCoreConstants
@@ -34,7 +34,7 @@ final class AvCallbackTimingBench extends TimingReport {
       usingToxAv(iterations1k, pcm) in {
         case (sz, pcm: Array[Short], toxAv: ToxAvImpl[Unit]) =>
           (0 until sz) foreach { _ =>
-            toxAv.invokeAudioReceiveFrame(1, pcm, 1, 1)
+            toxAv.invokeAudioReceiveFrame(1, pcm, AudioChannels.Mono, SamplingRate.Rate8k)
             toxAv.iterate(())
           }
       }

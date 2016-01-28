@@ -1,9 +1,9 @@
 package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.core._
 import im.tox.tox4j.core.callbacks.ToxEventAdapter
 import im.tox.tox4j.core.enums.ToxConnection
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
 import im.tox.tox4j.exceptions.ToxException
 import org.slf4j.LoggerFactory
 
@@ -79,8 +79,10 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
     logger.info(s"[${Thread.currentThread.getId}] $selfName: $message")
   }
 
-  var expectedFriendAddress: Array[Byte] = null
-  protected def expectedFriendPublicKey: Array[Byte] = expectedFriendAddress.slice(0, ToxCoreConstants.PublicKeySize)
+  var expectedFriendAddress: ToxFriendAddress = ToxFriendAddress.unsafeFromByteArray(null)
+  protected def expectedFriendPublicKey: ToxPublicKey = {
+    ToxPublicKey.unsafeFromByteArray(expectedFriendAddress.value.slice(0, ToxPublicKey.Size))
+  }
 
   protected def isAlice = selfName == "Alice"
   protected def isBob = selfName == "Bob"

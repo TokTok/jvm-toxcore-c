@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.ToxStatusMessage
 import org.jetbrains.annotations.NotNull
 
 /**
@@ -11,6 +12,6 @@ trait FriendStatusMessageCallback[ToxCoreState] {
    * @param message The new status message.
    */
   def friendStatusMessage(
-    friendNumber: Int, @NotNull message: Array[Byte]
+    friendNumber: Int, @NotNull message: ToxStatusMessage
   )(state: ToxCoreState): ToxCoreState = state
 }

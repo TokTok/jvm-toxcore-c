@@ -1,9 +1,9 @@
 package im.tox.tox4j.crypto
 
 import im.tox.core.random.RandomCore
+import im.tox.tox4j.crypto.ToxCryptoTest.{EncryptedData, Salt}
 import im.tox.tox4j.crypto.exceptions.{ToxDecryptionException, ToxEncryptionException, ToxKeyDerivationException}
-import im.tox.tox4j.testing.WrappedByteArray.Conversions._
-import im.tox.tox4j.testing.{NonEmptyByteArray, ToxTestMixin, WrappedByteArray}
+import im.tox.tox4j.testing.ToxTestMixin
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.WordSpec
@@ -12,15 +12,12 @@ import org.scalatest.prop.PropertyChecks
 import scala.language.implicitConversions
 import scala.util.Random
 
+object ToxCryptoTest {
+  private final case class Salt(data: Seq[Byte]) extends AnyVal
+  private final case class EncryptedData(data: Seq[Byte]) extends AnyVal
+}
+
 abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec with PropertyChecks with ToxTestMixin {
-
-  private final class Salt(data: Array[Byte]) extends WrappedByteArray(data) {
-    require(data.length == ToxCryptoConstants.SaltLength)
-  }
-
-  private final class EncryptedData(data: Array[Byte]) extends WrappedByteArray(data) {
-    require(data.length > ToxCryptoConstants.EncryptionExtraLength)
-  }
 
   private val random = new Random
 
@@ -31,7 +28,7 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
     })
 
   private implicit val arbEncryptedData: Arbitrary[EncryptedData] =
-    Arbitrary(Gen.zip(arbitrary[Array[Byte]], arbitrary[NonEmptyByteArray]).map {
+    Arbitrary(Gen.zip(arbitrary[Array[Byte]], Gen.nonEmptyContainerOf[Array, Byte](arbitrary[Byte])).map {
       case (passphrase, data) =>
         val passKey = toxCrypto.deriveKeyFromPass(passphrase)
         new EncryptedData(toxCrypto.encrypt(data, passKey))
@@ -78,22 +75,26 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
 
     "produce high entropy results (> 0.7)" in {
       val passKey = toxCrypto.deriveKeyFromPass(Array.ofDim(0))
-      forAll { (data: NonEmptyByteArray) =>
-        assert(RandomCore.entropy(toxCrypto.encrypt(data, passKey)) > 0.7)
+      forAll { (data: Array[Byte]) =>
+        whenever(data.nonEmpty) {
+          assert(RandomCore.entropy(toxCrypto.encrypt(data, passKey)) > 0.7)
+        }
       }
     }
 
     "produce different data each time with the same PassKey" in {
-      forAll { (data: NonEmptyByteArray, passKey: toxCrypto.PassKey) =>
-        val encrypted1 = toxCrypto.encrypt(data, passKey)
-        val encrypted2 = toxCrypto.encrypt(data, passKey)
-        assert(encrypted1.deep != encrypted2.deep)
+      forAll { (data: Array[Byte], passKey: toxCrypto.PassKey) =>
+        whenever(data.nonEmpty) {
+          val encrypted1 = toxCrypto.encrypt(data, passKey)
+          val encrypted2 = toxCrypto.encrypt(data, passKey)
+          assert(encrypted1.deep != encrypted2.deep)
+        }
       }
     }
 
     "produce different encrypted data with a different PassKey" in {
-      forAll { (data: NonEmptyByteArray, passKey1: toxCrypto.PassKey, passKey2: toxCrypto.PassKey) =>
-        whenever(!toxCrypto.passKeyEquals(passKey1, passKey2)) {
+      forAll { (data: Array[Byte], passKey1: toxCrypto.PassKey, passKey2: toxCrypto.PassKey) =>
+        whenever(data.nonEmpty && !toxCrypto.passKeyEquals(passKey1, passKey2)) {
           assert(toxCrypto.encrypt(data, passKey1).deep != toxCrypto.encrypt(data, passKey2).deep)
         }
       }
@@ -110,7 +111,7 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
   "isDataEncrypted" should {
     "identify encrypted data as such" in {
       forAll { (data: EncryptedData) =>
-        assert(toxCrypto.isDataEncrypted(data))
+        assert(toxCrypto.isDataEncrypted(data.data.toArray))
       }
     }
 
@@ -142,17 +143,17 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
 
     "produce the same key given the same salt" in {
       forAll { (passphrase: Array[Byte], salt: Salt) =>
-        val key1 = toxCrypto.deriveKeyWithSalt(passphrase, salt)
-        val key2 = toxCrypto.deriveKeyWithSalt(passphrase, salt)
+        val key1 = toxCrypto.deriveKeyWithSalt(passphrase, salt.data.toArray)
+        val key2 = toxCrypto.deriveKeyWithSalt(passphrase, salt.data.toArray)
         assert(toxCrypto.passKeyEquals(key1, key2))
       }
     }
 
     "produce a different key given a different salt" in {
       forAll { (passphrase: Array[Byte], salt1: Salt, salt2: Salt) =>
-        whenever(salt1.deep != salt2.deep) {
-          val key1 = toxCrypto.deriveKeyWithSalt(passphrase, salt1)
-          val key2 = toxCrypto.deriveKeyWithSalt(passphrase, salt2)
+        whenever(salt1 != salt2) {
+          val key1 = toxCrypto.deriveKeyWithSalt(passphrase, salt1.data.toArray)
+          val key2 = toxCrypto.deriveKeyWithSalt(passphrase, salt2.data.toArray)
           assert(!toxCrypto.passKeyEquals(key1, key2))
         }
       }
@@ -186,31 +187,35 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
     }
 
     "succeed with the same PassKey" in {
-      forAll { (data: NonEmptyByteArray, passKey: toxCrypto.PassKey) =>
-        val encrypted = toxCrypto.encrypt(data, passKey)
-        val decrypted = toxCrypto.decrypt(encrypted, passKey)
-        assert(data.deep == decrypted.deep)
+      forAll { (data: Array[Byte], passKey: toxCrypto.PassKey) =>
+        whenever(data.nonEmpty) {
+          val encrypted = toxCrypto.encrypt(data, passKey)
+          val decrypted = toxCrypto.decrypt(encrypted, passKey)
+          assert(data.deep == decrypted.deep)
+        }
       }
     }
 
     "succeed with the same passphrase and salt" in {
-      forAll { (data: NonEmptyByteArray, passphrase: Array[Byte]) =>
-        val passKey1 = toxCrypto.deriveKeyFromPass(passphrase)
-        val encrypted = toxCrypto.encrypt(data, passKey1)
-        val salt = toxCrypto.getSalt(encrypted)
+      forAll { (data: Array[Byte], passphrase: Array[Byte]) =>
+        whenever(data.nonEmpty) {
+          val passKey1 = toxCrypto.deriveKeyFromPass(passphrase)
+          val encrypted = toxCrypto.encrypt(data, passKey1)
+          val salt = toxCrypto.getSalt(encrypted)
 
-        val passKey2 = toxCrypto.deriveKeyWithSalt(passphrase, salt)
-        val decrypted = toxCrypto.decrypt(encrypted, passKey2)
+          val passKey2 = toxCrypto.deriveKeyWithSalt(passphrase, salt)
+          val decrypted = toxCrypto.decrypt(encrypted, passKey2)
 
-        assert(data.deep == decrypted.deep)
+          assert(data.deep == decrypted.deep)
+        }
       }
     }
 
     s"fail with $FAILED for the same passphrase but different salt" in {
-      forAll { (data: NonEmptyByteArray, passphrase: Array[Byte], salt1: Salt, salt2: Salt) =>
-        whenever(salt1.deep != salt2.deep) {
-          val passKey1 = toxCrypto.deriveKeyWithSalt(passphrase, salt1)
-          val passKey2 = toxCrypto.deriveKeyWithSalt(passphrase, salt2)
+      forAll { (data: Array[Byte], passphrase: Array[Byte], salt1: Salt, salt2: Salt) =>
+        whenever(data.nonEmpty && salt1 != salt2) {
+          val passKey1 = toxCrypto.deriveKeyWithSalt(passphrase, salt1.data.toArray)
+          val passKey2 = toxCrypto.deriveKeyWithSalt(passphrase, salt2.data.toArray)
           val encrypted = toxCrypto.encrypt(data, passKey1)
           intercept(FAILED) {
             toxCrypto.decrypt(encrypted, passKey2)
@@ -220,8 +225,8 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
     }
 
     s"fail with $FAILED for a different PassKey" in {
-      forAll { (data: NonEmptyByteArray, passKey1: toxCrypto.PassKey, passKey2: toxCrypto.PassKey) =>
-        whenever(!toxCrypto.passKeyEquals(passKey1, passKey2)) {
+      forAll { (data: Array[Byte], passKey1: toxCrypto.PassKey, passKey2: toxCrypto.PassKey) =>
+        whenever(data.nonEmpty && !toxCrypto.passKeyEquals(passKey1, passKey2)) {
           val encrypted = toxCrypto.encrypt(data, passKey1)
           intercept(FAILED) {
             toxCrypto.decrypt(encrypted, passKey2)

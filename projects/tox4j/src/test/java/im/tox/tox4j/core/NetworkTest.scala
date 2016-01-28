@@ -1,5 +1,6 @@
 package im.tox.tox4j.core
 
+import im.tox.core.network.Port
 import im.tox.tox4j.DhtNodeSelector.node
 import im.tox.tox4j.TestConstants.Timeout
 import im.tox.tox4j._
@@ -19,7 +20,7 @@ object NetworkTest {
 
 final class NetworkTest extends FlatSpec with Timeouts {
 
-  private def testBootstrap(ipv6Enabled: Boolean, udpEnabled: Boolean, ip: String, port: Int, dhtId: Array[Byte]): Unit = {
+  private def testBootstrap(ipv6Enabled: Boolean, udpEnabled: Boolean, ip: String, port: Port, dhtId: ToxPublicKey): Unit = {
     val action = s"bootstrap to remote node on $ip:$port with ${if (udpEnabled) "UDP" else "TCP"}${if (ipv6Enabled) 6 else 4}"
 
     withTox(ipv6Enabled, udpEnabled) { tox =>

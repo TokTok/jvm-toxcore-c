@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.options
 
-import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.enums.ToxSavedataType
+import im.tox.tox4j.core.{ToxSecretKey, ToxSecretKey$, ToxCore}
 
 /**
  * Base type for all save data kinds.
@@ -15,7 +15,7 @@ sealed trait SaveDataOptions {
   /**
    * Serialised save data. The format depends on [[kind]].
    */
-  def data: Seq[Byte]
+  def data: Array[Byte]
 }
 
 /**
@@ -28,14 +28,14 @@ object SaveDataOptions {
    */
   case object None extends SaveDataOptions {
     override def kind: ToxSavedataType = ToxSavedataType.NONE
-    override def data: Seq[Byte] = Nil
+    override def data: Array[Byte] = Array.empty
   }
 
   /**
    * Full save data containing friend list, last seen DHT nodes, name, and all other information
    * contained within a Tox instance.
    */
-  final case class ToxSave(data: Seq[Byte]) extends SaveDataOptions {
+  final case class ToxSave(data: Array[Byte]) extends SaveDataOptions {
     override def kind: ToxSavedataType = ToxSavedataType.TOX_SAVE
   }
 
@@ -44,8 +44,9 @@ object SaveDataOptions {
    * secret key, the friend list, name, and noSpam value is sufficient to restore the observable
    * behaviour of a Tox instance without the full save data in [[ToxSave]].
    */
-  final case class SecretKey(data: Seq[Byte]) extends SaveDataOptions {
+  final case class SecretKey(key: ToxSecretKey) extends SaveDataOptions {
     override def kind: ToxSavedataType = ToxSavedataType.SECRET_KEY
+    override def data: Array[Byte] = key.value
   }
 
 }

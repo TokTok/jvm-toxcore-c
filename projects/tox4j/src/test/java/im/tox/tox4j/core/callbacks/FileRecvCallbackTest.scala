@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.callbacks
 
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileKind}
-import im.tox.tox4j.core.{ToxCore, ToxCoreConstants}
+import im.tox.tox4j.core.{ToxFileId, ToxFilename, ToxCore, ToxCoreConstants}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 final class FileRecvCallbackTest extends AliceBobTest {
@@ -24,7 +24,13 @@ final class FileRecvCallbackTest extends AliceBobTest {
       if (connectionStatus != ToxConnection.NONE) {
         assert(friendNumber == AliceBobTestBase.FriendNumber)
         state.addTask { (tox, state) =>
-          tox.fileSend(friendNumber, ToxFileKind.DATA, state.get.length, Array.ofDim[Byte](0), s"file for $expectedFriendName.png".getBytes)
+          tox.fileSend(
+            friendNumber,
+            ToxFileKind.DATA,
+            state.get.length,
+            ToxFileId.empty,
+            ToxFilename.unsafeFromByteArray(s"file for $expectedFriendName.png".getBytes)
+          )
           state
         }
       } else {
@@ -32,7 +38,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
       }
     }
 
-    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte])(state: ChatState): ChatState = {
+    override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
       debug("received file send request " + fileNumber + " from friend number " + friendNumber)
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(fileNumber == (0 | 0x10000))
@@ -42,11 +48,11 @@ final class FileRecvCallbackTest extends AliceBobTest {
       } else {
         assert(fileSize == "This is a file for Bob".length)
       }
-      assert(new String(filename) == s"file for $selfName.png")
+      assert(new String(filename.value) == s"file for $selfName.png")
       state.addTask { (tox, state) =>
         val fileId = tox.getFileFileId(friendNumber, fileNumber)
-        assert(fileId != null)
-        assert(fileId.length == ToxCoreConstants.FileIdLength)
+        assert(fileId.value != null)
+        assert(fileId.value.length == ToxCoreConstants.FileIdLength)
         state.finish
       }
     }

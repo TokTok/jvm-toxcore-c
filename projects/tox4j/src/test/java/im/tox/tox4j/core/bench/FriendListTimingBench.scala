@@ -2,7 +2,7 @@ package im.tox.tox4j.core.bench
 
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.{Confidence, TimingReport}
-import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.core.{ToxFriendRequestMessage, ToxCore}
 import org.scalameter.Gen
 import org.scalameter.picklers.Implicits._
 
@@ -11,7 +11,7 @@ final class FriendListTimingBench extends TimingReport {
   /**
    * Deletes all but 1 friends.
    */
-  private def clearFriendList(pair: (Seq[Array[Byte]], ToxCore[Unit])): Unit = {
+  private def clearFriendList(pair: (_, ToxCore[Unit])): Unit = {
     val tox = pair._2
     tox.getFriendList.tail foreach tox.deleteFriend
   }
@@ -31,7 +31,7 @@ final class FriendListTimingBench extends TimingReport {
     measure method "addFriend" in {
       using(friends(100) map friendAddresses, toxInstance.cached) tearDown clearFriendList in {
         case (friendList, tox) =>
-          friendList foreach (tox.addFriend(_, Array.ofDim(1)))
+          friendList foreach (tox.addFriend(_, ToxFriendRequestMessage.unsafeFromByteArray(Array.ofDim(1))))
       }
     }
 

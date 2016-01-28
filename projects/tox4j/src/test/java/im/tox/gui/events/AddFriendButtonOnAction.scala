@@ -5,7 +5,7 @@ import javax.swing._
 
 import im.tox.gui.MainView
 import im.tox.tox4j.ToxCoreTestBase.parsePublicKey
-import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.tox4j.core._
 import im.tox.tox4j.core.exceptions.ToxFriendAddException
 
 final class AddFriendButtonOnAction(toxGui: MainView) extends ActionListener {
@@ -16,12 +16,18 @@ final class AddFriendButtonOnAction(toxGui: MainView) extends ActionListener {
 
       val friendNumber =
         if (toxGui.friendRequest.getText.isEmpty) {
-          toxGui.tox.addFriendNorequest(publicKey)
+          toxGui.tox.addFriendNorequest(ToxPublicKey.unsafeFromByteArray(publicKey))
         } else {
-          toxGui.tox.addFriend(publicKey, toxGui.friendRequest.getText.getBytes)
+          toxGui.tox.addFriend(
+            ToxFriendAddress.unsafeFromByteArray(publicKey),
+            ToxFriendRequestMessage.unsafeFromByteArray(toxGui.friendRequest.getText.getBytes)
+          )
         }
 
-      toxGui.friendListModel.add(friendNumber, publicKey.slice(0, ToxCoreConstants.PublicKeySize))
+      toxGui.friendListModel.add(
+        friendNumber,
+        ToxPublicKey.unsafeFromByteArray(publicKey.slice(0, ToxCoreConstants.PublicKeySize))
+      )
       toxGui.addMessage("Added friend number ", friendNumber)
       toxGui.save()
     } catch {

@@ -4,6 +4,7 @@ import javax.swing._
 
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
+import im.tox.tox4j.core._
 import org.jetbrains.annotations.NotNull
 
 // scalastyle:off line.size.limit
@@ -26,7 +27,7 @@ final class InvokeLaterToxEventListener[ToxCoreState](underlying: ToxEventListen
     invokeLater(underlying.fileRecvControl(friendNumber, fileNumber, control))(state)
   }
 
-  override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, @NotNull filename: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, @NotNull filename: ToxFilename)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.fileRecv(friendNumber, fileNumber, kind, fileSize, filename))(state)
   }
 
@@ -42,23 +43,23 @@ final class InvokeLaterToxEventListener[ToxCoreState](underlying: ToxEventListen
     invokeLater(underlying.friendConnectionStatus(friendNumber, connectionStatus))(state)
   }
 
-  override def friendLosslessPacket(friendNumber: Int, @NotNull data: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendLosslessPacket(friendNumber: Int, @NotNull data: ToxLosslessPacket)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendLosslessPacket(friendNumber, data))(state)
   }
 
-  override def friendLossyPacket(friendNumber: Int, @NotNull data: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendLossyPacket(friendNumber: Int, @NotNull data: ToxLossyPacket)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendLossyPacket(friendNumber, data))(state)
   }
 
-  override def friendMessage(friendNumber: Int, @NotNull `type`: ToxMessageType, timeDelta: Int, @NotNull message: Array[Byte])(state: ToxCoreState): ToxCoreState = {
-    invokeLater(underlying.friendMessage(friendNumber, `type`, timeDelta, message))(state)
+  override def friendMessage(friendNumber: Int, @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: ToxFriendMessage)(state: ToxCoreState): ToxCoreState = {
+    invokeLater(underlying.friendMessage(friendNumber, messageType, timeDelta, message))(state)
   }
 
-  override def friendName(friendNumber: Int, @NotNull name: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendName(friendNumber: Int, @NotNull name: ToxNickname)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendName(friendNumber, name))(state)
   }
 
-  override def friendRequest(@NotNull publicKey: Array[Byte], timeDelta: Int, @NotNull message: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendRequest(@NotNull publicKey: ToxPublicKey, timeDelta: Int, @NotNull message: ToxFriendRequestMessage)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendRequest(publicKey, timeDelta, message))(state)
   }
 
@@ -66,7 +67,7 @@ final class InvokeLaterToxEventListener[ToxCoreState](underlying: ToxEventListen
     invokeLater(underlying.friendStatus(friendNumber, status))(state)
   }
 
-  override def friendStatusMessage(friendNumber: Int, @NotNull message: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendStatusMessage(friendNumber: Int, @NotNull message: ToxStatusMessage)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendStatusMessage(friendNumber, message))(state)
   }
 
