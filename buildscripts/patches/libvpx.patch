@@ -1,14 +1,13 @@
 diff --git a/build/make/configure.sh b/build/make/configure.sh
-index 98248b0..cbd672f 100644
+index d888268..bc1d38b 100644
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
-@@ -875,90 +875,6 @@ process_common_toolchain() {
+@@ -875,89 +875,6 @@ process_common_toolchain() {
  
        asm_conversion_cmd="cat"
  
 -      case ${tgt_cc} in
 -        gcc)
--          CROSS=${CROSS:-arm-none-linux-gnueabi-}
 -          link_with_cc=gcc
 -          setup_gnu_toolchain
 -          arch_int=${tgt_isa##armv}
@@ -93,7 +92,7 @@ index 98248b0..cbd672f 100644
        case ${tgt_os} in
          none*)
            disable_feature multithread
-@@ -967,9 +883,16 @@ EOF
+@@ -966,9 +883,16 @@ EOF
  
          android*)
            SDK_PATH=${sdk_path}
@@ -113,7 +112,7 @@ index 98248b0..cbd672f 100644
            CC=${TOOLCHAIN_PATH}gcc
            CXX=${TOOLCHAIN_PATH}g++
            AR=${TOOLCHAIN_PATH}ar
-@@ -992,9 +915,11 @@ EOF
+@@ -991,9 +915,11 @@ EOF
              add_ldflags "--sysroot=${alt_libc}"
            fi
  
@@ -128,14 +127,13 @@ index 98248b0..cbd672f 100644
  
            enable_feature pic
            soft_enable realtime_only
-@@ -1086,6 +1011,90 @@ EOF
+@@ -1085,6 +1011,89 @@ EOF
            fi
            ;;
        esac
 +
 +      case ${tgt_cc} in
 +        gcc)
-+          CROSS=${CROSS:-arm-none-linux-gnueabi-}
 +          link_with_cc=gcc
 +          setup_gnu_toolchain
 +          arch_int=${tgt_isa##armv}
@@ -219,9 +217,9 @@ index 98248b0..cbd672f 100644
        ;;
      mips*)
        link_with_cc=gcc
-@@ -1137,6 +1146,10 @@ EOF
+@@ -1136,6 +1145,10 @@ EOF
            LD=${LD:-${CROSS}gcc}
-           CROSS=${CROSS:-g}
+           CROSS=${CROSS-g}
            ;;
 +        android*)
 +          CROSS=${CROSS:-i686-linux-android-}
@@ -231,10 +229,10 @@ index 98248b0..cbd672f 100644
            disable_feature pic
            AS=${AS:-nasm}
 diff --git a/configure b/configure
-index f12779c..75fad4e 100755
+index 5fbd2d0..ed5fd12 100755
 --- a/configure
 +++ b/configure
-@@ -100,6 +100,7 @@ all_platforms="${all_platforms} armv6-linux-rvct"
+@@ -103,6 +103,7 @@ all_platforms="${all_platforms} armv6-linux-rvct"
  all_platforms="${all_platforms} armv6-linux-gcc"
  all_platforms="${all_platforms} armv6-none-rvct"
  all_platforms="${all_platforms} arm64-darwin-gcc"
