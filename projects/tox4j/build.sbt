@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "codes.reactive" %% "scala-time-threeten" % "0.3.0-SNAPSHOT",
   "com.google.guava" % "guava" % "18.0",
   "com.intellij" % "annotations" % "12.0",
+  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.21",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.scalaz" %% "scalaz-core" % "7.2.0-M1",
   "org.scalaz.stream" %% "scalaz-stream" % "0.8",

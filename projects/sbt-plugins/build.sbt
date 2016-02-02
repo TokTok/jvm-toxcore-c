@@ -15,7 +15,7 @@ addSbtPlugin("org.brianmckenna" % "sbt-wartremover" % "0.14")
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
 
 // Scala protobuf support.
-addSbtPlugin("com.trueaccord.scalapb" % "sbt-scalapb" % "0.5.15")
+addSbtPlugin("com.trueaccord.scalapb" % "sbt-scalapb" % "0.5.21")
 
 // Test coverage.
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.1.0")

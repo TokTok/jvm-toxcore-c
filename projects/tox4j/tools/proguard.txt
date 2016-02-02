@@ -47,7 +47,9 @@
 # Needs javax.annotation
 -dontwarn com.google.common.**
 -dontwarn com.thoughtworks.paranamer.**
--dontwarn org.apache.log4j.**
+-dontwarn io.netty.**
+-dontwarn okio.*
+-dontwarn org.apache.**
 -dontwarn org.fusesource.**
 -dontwarn org.jdom.xpath.*
 -dontwarn org.jfree.**

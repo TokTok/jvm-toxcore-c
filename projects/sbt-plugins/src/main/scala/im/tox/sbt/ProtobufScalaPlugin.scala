@@ -19,9 +19,10 @@ object ProtobufScalaPlugin extends AutoPlugin {
     javaSource <<= (sourceManaged in Compile),
     scalaSource <<= (sourceManaged in Compile),
 
-    version := "3.0.0-beta-1",
+    version := "3.0.0-beta-2",
     javaConversions := true,
-    flatPackage := true
+    flatPackage := true,
+    grpc := true
   ))
 
 }
