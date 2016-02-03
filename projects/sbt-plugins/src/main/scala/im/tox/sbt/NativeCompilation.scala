@@ -99,6 +99,8 @@ object NativeCompilation {
   ): Def.Initialize[Task[Seq[File]]] = {
     if (sources.nonEmpty) {
       log.info(s"Compiling ${sources.length} C/C++ sources")
+      log.info(s"CC       = ${cc.compiler1} (or ${cc.compiler2})")
+      log.info(s"CXX      = ${cxx.compiler1} (or ${cxx.compiler2})")
       log.info(s"CFLAGS   = ${cc.flags}")
       log.info(s"CXXFLAGS = ${cxx.flags}")
     }
