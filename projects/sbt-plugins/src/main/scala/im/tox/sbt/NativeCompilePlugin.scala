@@ -45,6 +45,8 @@ object NativeCompilePlugin extends AutoPlugin {
     sys.props("os.name") match {
       case "Linux"    => "linux"
       case "Mac OS X" => "darwin"
+      case osName if osName.startsWith("Windows") =>
+        "windows"
     }
   }
 
