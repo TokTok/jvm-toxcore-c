@@ -1,57 +1,58 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.enums.ToxConnection
-import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
+import im.tox.tox4j.testing.autotest.AutoTestSuite
 
-final class FriendTypingCallbackTest extends AliceBobTest {
+final class FriendTypingCallbackTest extends AutoTestSuite {
 
-  override type State = Boolean
-  override def initialState: State = true
+  type S = Map[Int, Boolean]
 
-  protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
+  object Handler extends EventListener(Map.empty) {
 
-    private def setTyping(state: ChatState)(friendNumber: Int, isTyping: Boolean): ChatState = {
-      state.addTask { (tox, av, state) =>
-        tox.setTyping(friendNumber, isTyping)
-        state
-      }
-    }
-
-    override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: ChatState): ChatState = {
-      super.friendConnectionStatus(friendNumber, connectionStatus)(state)
-      if (connectionStatus != ToxConnection.NONE && isAlice) {
-        setTyping(state)(friendNumber, isTyping = true)
-      } else {
-        state
-      }
-    }
-
-    override def friendTyping(friendNumber: Int, isTyping: Boolean)(state: ChatState): ChatState = {
-      if (state.get) {
-        assert(!isTyping)
-        state.set(false)
-      } else {
-        if (isTyping) {
-          debug("friend is now typing")
-        } else {
-          debug("friend stopped typing")
-        }
-        assert(friendNumber == AliceBobTestBase.FriendNumber)
-        if (isBob) {
-          if (isTyping) {
-            setTyping(state)(friendNumber, isTyping = true)
-          } else {
-            setTyping(state)(friendNumber, isTyping = false)
-              .finish
-          }
-        } else {
-          if (isTyping) {
-            setTyping(state)(friendNumber, isTyping = false)
-              .finish
-          } else {
+    override def friendTyping(friendNumber: Int, isTyping: Boolean)(state0: State): State = {
+      debug(state0, s"friend ${state0.id(friendNumber)} typing state: $isTyping")
+      val state = state0.modify(_ + (friendNumber -> isTyping))
+      state0.get.get(friendNumber) match {
+        case None =>
+          assert(!isTyping)
+          state.addTask { (tox, av, state) =>
+            if (state.id(friendNumber) == state.id + 1) {
+              debug(state, s"we start typing to ${state.id(friendNumber)}")
+              tox.setTyping(friendNumber, typing = true)
+            }
             state
           }
-        }
+
+        case Some(false) =>
+          assert(isTyping)
+          if (state.id(friendNumber) == state.id - 1) {
+            // id-1 started typing to us, now we also start typing to them.
+            state.addTask { (tox, av, state) =>
+              debug(state, s"we start typing back to ${state.id(friendNumber)}")
+              tox.setTyping(friendNumber, typing = true)
+              state
+            }
+          } else {
+            assert(state.id(friendNumber) == state.id + 1)
+            // id+1 started typing back, so we stop typing.
+            state.addTask { (tox, av, state) =>
+              debug(state, s"we stop typing to ${state.id(friendNumber)}")
+              tox.setTyping(friendNumber, typing = false)
+              state
+            }
+          }
+
+        case Some(true) =>
+          assert(!isTyping)
+          if (state.id(friendNumber) == state.id - 1) {
+            state.addTask { (tox, av, state) =>
+              debug(state, s"we also stop typing to ${state.id(friendNumber)}")
+              tox.setTyping(friendNumber, typing = false)
+              state.finish
+            }
+          } else {
+            assert(state.id(friendNumber) == state.id + 1)
+            state.finish
+          }
       }
     }
   }

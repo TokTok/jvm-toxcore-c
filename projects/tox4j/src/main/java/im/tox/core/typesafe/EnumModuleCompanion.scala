@@ -1,8 +1,7 @@
 package im.tox.core.typesafe
 
 import im.tox.core.ModuleCompanion
-import scodec.codecs._
-import scodec.{Codec, Attempt, Err}
+import scodec.{Attempt, Codec, Err}
 
 import scala.collection.immutable.TreeSet
 

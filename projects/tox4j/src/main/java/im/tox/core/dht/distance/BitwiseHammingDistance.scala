@@ -1,7 +1,6 @@
 package im.tox.core.dht.distance
 
 import im.tox.core.crypto.PublicKey
-import scodec.bits.BitVector
 
 import scala.annotation.tailrec
 

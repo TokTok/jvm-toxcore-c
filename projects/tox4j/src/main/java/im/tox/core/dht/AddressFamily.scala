@@ -2,12 +2,10 @@ package im.tox.core.dht
 
 import java.net.InetAddress
 
-import im.tox.core.ModuleCompanion
 import im.tox.core.typesafe.{EnumModuleCompanion, Security}
 import im.tox.tox4j.EnumerationMacros.sealedInstancesOf
 import scodec.bits.ByteVector
 import scodec.codecs._
-import scodec.{Attempt, Err}
 
 import scala.collection.immutable.TreeSet
 

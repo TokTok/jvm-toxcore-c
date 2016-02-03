@@ -6,8 +6,8 @@ import im.tox.core.network.PacketKind
 import im.tox.core.network.packets.ToxPacket
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scalaz.stream.udp.Packet
 import scalaz._
+import scalaz.stream.udp.Packet
 
 package object io {
 

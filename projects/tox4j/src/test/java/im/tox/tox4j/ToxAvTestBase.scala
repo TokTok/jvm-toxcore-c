@@ -1,13 +1,12 @@
 package im.tox.tox4j
 
-import im.tox.tox4j.core.ToxCoreFactory
-import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl}
+import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl, ToxCoreImplFactory}
 
 object ToxAvTestBase {
 
   final val enabled = {
     try {
-      ToxCoreFactory.withTox { tox =>
+      ToxCoreImplFactory.withToxUnit { tox =>
         new ToxAvImpl[Unit](tox.asInstanceOf[ToxCoreImpl[Unit]]).close()
         true
       }

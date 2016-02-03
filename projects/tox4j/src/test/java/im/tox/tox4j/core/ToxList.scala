@@ -8,7 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 
 final class ToxList[ToxCoreState](newTox: () => ToxCore[ToxCoreState], count: Int) {
 
-  private case class Instance(tox: ToxCore[ToxCoreState], var connected: ToxConnection)
+  private final case class Instance(tox: ToxCore[ToxCoreState], var connected: ToxConnection)
 
   private val toxes = {
     val temporary = new ArrayBuffer[ToxCore[ToxCoreState]]

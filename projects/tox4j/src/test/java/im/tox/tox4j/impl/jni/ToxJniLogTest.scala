@@ -1,6 +1,5 @@
 package im.tox.tox4j.impl.jni
 
-import im.tox.tox4j.core.ToxCoreFactory
 import im.tox.tox4j.impl.jni.proto.JniLog
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
@@ -18,7 +17,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     assert(ToxJniLog().entries.isEmpty)
     // Construct and destroy a Tox instance to cause something (tox_new) to be logged and the log
     // will be non-empty.
-    ToxCoreFactory.withTox { tox => }
+    ToxCoreImplFactory.withToxUnit { tox => }
     assert(ToxJniLog().entries.nonEmpty)
   }
 
@@ -28,7 +27,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     ToxJniLog.maxSize = 0
     assert(ToxJniLog.maxSize == 0)
     assert(ToxJniLog().entries.isEmpty)
-    ToxCoreFactory.withTox { tox => }
+    ToxCoreImplFactory.withToxUnit { tox => }
     assert(ToxJniLog().entries.isEmpty)
   }
 
@@ -38,10 +37,10 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     ToxJniLog.maxSize = TestMaxSize
     assert(ToxJniLog().entries.isEmpty)
 
-    ToxCoreFactory.withTox { tox => }
+    ToxCoreImplFactory.withToxUnit { tox => }
     val count1 = ToxJniLog().entries.size
 
-    ToxCoreFactory.withTox { tox => tox.friendExists(0) }
+    ToxCoreImplFactory.withToxUnit { tox => tox.friendExists(0) }
     val count2 = ToxJniLog().entries.size
 
     assert(count2 == count1 + 1)
@@ -80,7 +79,7 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
       val threads = for (_ <- 1 to threadCount) yield {
         new Thread {
           override def run(): Unit = {
-            ToxCoreFactory.withTox { tox =>
+            ToxCoreImplFactory.withToxUnit { tox =>
               for (_ <- 0 until iterations) {
                 tox.friendExists(0)
               }

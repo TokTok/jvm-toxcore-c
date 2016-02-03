@@ -5,7 +5,6 @@ import im.tox.core.dht.distance.XorDistance
 
 import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
-import scala.util.Random
 
 /**
  * Ordered set of [[NodeInfo]] objects. Always keeps the list of nodes closest

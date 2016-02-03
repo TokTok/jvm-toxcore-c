@@ -1,10 +1,10 @@
 package im.tox.tox4j.core
 
 import im.tox.tox4j.ToxCoreTestBase
-import im.tox.tox4j.core.ToxCoreFactory.withTox
 import im.tox.tox4j.core.data.{ToxFriendRequestMessage, ToxNickname, ToxStatusMessage}
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
+import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{withTox, withToxUnit}
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FunSuite
 
@@ -19,11 +19,11 @@ final class LoadSaveTest extends FunSuite {
 
   @tailrec
   private def testLoadSave(check: Check): Unit = {
-    val (continue, data) = withTox { tox =>
+    val (continue, data) = withToxUnit { tox =>
       (check.change(tox), tox.getSavedata)
     }
 
-    withTox(SaveDataOptions.ToxSave(data)) { tox =>
+    withToxUnit(SaveDataOptions.ToxSave(data)) { tox =>
       check.check(tox)
     }
 
@@ -110,7 +110,7 @@ final class LoadSaveTest extends FunSuite {
       private var expected: Int = 1
 
       override def change(tox: ToxCore[Unit]): Boolean = {
-        withTox { toxFriend =>
+        withToxUnit { toxFriend =>
           expected = tox.addFriend(
             toxFriend.getAddress,
             ToxFriendRequestMessage.fromString("hello").get
@@ -127,7 +127,7 @@ final class LoadSaveTest extends FunSuite {
   }
 
   test("SaveNotEmpty") {
-    withTox { tox =>
+    withToxUnit { tox =>
       val data = tox.getSavedata
       assert(data != null)
       assert(data.nonEmpty)
@@ -135,18 +135,18 @@ final class LoadSaveTest extends FunSuite {
   }
 
   test("SaveRepeatable") {
-    withTox { tox =>
+    withToxUnit { tox =>
       assert(tox.getSavedata sameElements tox.getSavedata)
     }
   }
 
   test("LoadSave1") {
-    withTox { tox =>
+    withToxUnit { tox =>
       val data = tox.getSavedata
-      val data1 = withTox(SaveDataOptions.ToxSave(data)) { tox1 =>
+      val data1 = withToxUnit(SaveDataOptions.ToxSave(data)) { tox1 =>
         tox1.getSavedata
       }
-      val data2 = withTox(SaveDataOptions.ToxSave(data)) { tox2 =>
+      val data2 = withToxUnit(SaveDataOptions.ToxSave(data)) { tox2 =>
         tox2.getSavedata
       }
       assert(data1 sameElements data2)
@@ -154,27 +154,27 @@ final class LoadSaveTest extends FunSuite {
   }
 
   test("LoadSave2") {
-    withTox { tox =>
+    withToxUnit { tox =>
       val data = tox.getSavedata
-      withTox(SaveDataOptions.ToxSave(data)) { tox1 =>
+      withToxUnit(SaveDataOptions.ToxSave(data)) { tox1 =>
         assert(tox1.getSavedata.length == data.length)
       }
     }
   }
 
   test("LoadSave3") {
-    withTox { tox =>
+    withToxUnit { tox =>
       val data = tox.getSavedata
-      withTox(SaveDataOptions.ToxSave(data)) { tox1 =>
+      withToxUnit(SaveDataOptions.ToxSave(data)) { tox1 =>
         assert(tox1.getSavedata sameElements data)
       }
     }
   }
 
   test("LoadSave4") {
-    withTox { tox1 =>
+    withToxUnit { tox1 =>
       val data = tox1.getSecretKey
-      withTox(SaveDataOptions.SecretKey(data)) { tox2 =>
+      withToxUnit(SaveDataOptions.SecretKey(data)) { tox2 =>
         assert(tox1.getSecretKey.value sameElements tox2.getSecretKey.value)
         assert(tox1.getPublicKey.value sameElements tox2.getPublicKey.value)
       }
@@ -182,7 +182,7 @@ final class LoadSaveTest extends FunSuite {
   }
 
   test("LoadSave5") {
-    withTox { tox1 =>
+    withToxUnit { tox1 =>
       val data = tox1.getSecretKey
       withTox(tox1.load(ToxOptions(saveData = SaveDataOptions.SecretKey(data)))) { tox2 =>
         assert(tox1.getSecretKey.value sameElements tox2.getSecretKey.value)

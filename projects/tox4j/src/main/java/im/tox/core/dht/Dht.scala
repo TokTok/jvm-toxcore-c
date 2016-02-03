@@ -1,11 +1,9 @@
 package im.tox.core.dht
 
 import com.typesafe.scalalogging.Logger
-import im.tox.core.Functional
 import im.tox.core.Functional.foldDisjunctionList
 import im.tox.core.crypto._
 import im.tox.core.dht.packets.dht.NodesRequestPacket
-import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.io.IO.TimerIdFactory
 import org.slf4j.LoggerFactory

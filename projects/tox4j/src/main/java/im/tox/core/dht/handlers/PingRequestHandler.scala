@@ -1,7 +1,7 @@
 package im.tox.core.dht.handlers
 
 import im.tox.core.dht.packets.dht.{PingPacket, PingRequestPacket, PingResponsePacket}
-import im.tox.core.dht.{PacketBuilder, Dht, NodeInfo}
+import im.tox.core.dht.{Dht, NodeInfo, PacketBuilder}
 import im.tox.core.error.CoreError
 import im.tox.core.io.IO
 import im.tox.core.network.PacketKind

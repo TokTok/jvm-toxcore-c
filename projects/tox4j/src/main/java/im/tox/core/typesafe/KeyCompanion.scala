@@ -1,6 +1,5 @@
 package im.tox.core.typesafe
 
-import im.tox.core.Functional
 import im.tox.core.Functional.foldDisjunctionList
 import im.tox.core.error.CoreError
 

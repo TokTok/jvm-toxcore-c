@@ -43,7 +43,7 @@ case object EventActor {
         actionSource.toSource.to(actionSink)
       }
     } yield {
-      logger.debug("Processed event")
+      logger.trace("Processed event")
     }
   }
 

@@ -68,14 +68,10 @@ object NetworkCore {
       }
 
     Thread.sleep(WaitingTime)
-    for {
-      () <- shutdownLoop
-        .merge(udpLoop)
-        .merge(timeLoop)
-        .merge(actionLoop)
-    } yield {
-      logger.debug("Boop")
-    }
+    shutdownLoop
+      .merge(udpLoop)
+      .merge(timeLoop)
+      .merge(actionLoop)
   }
 
 }

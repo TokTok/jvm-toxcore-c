@@ -57,7 +57,7 @@ case object UdpActor {
       for {
         _ <- udp.merge(sender, receiver)
       } yield {
-        logger.debug("Processed UDP event or performed UDP action")
+        logger.trace("Processed UDP event or performed UDP action")
       }
     }
   }

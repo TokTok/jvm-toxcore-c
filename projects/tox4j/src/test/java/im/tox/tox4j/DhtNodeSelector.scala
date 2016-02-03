@@ -4,7 +4,8 @@ import java.io.IOException
 import java.net.{InetAddress, Socket}
 
 import com.typesafe.scalalogging.Logger
-import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
+import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import org.scalatest.Assertions
 import org.slf4j.LoggerFactory
 
@@ -84,6 +85,6 @@ object DhtNodeSelector extends Assertions {
     }
   }
 
-  def node: DhtNode = findNode(ToxCoreFactory.withTox[Option[DhtNode]])
+  def node: DhtNode = findNode(ToxCoreImplFactory.withToxUnit[Option[DhtNode]])
 
 }

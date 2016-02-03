@@ -2,15 +2,16 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.core._
 import im.tox.tox4j.core.data.{ToxFriendAddress, ToxFriendRequestMessage}
+import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 
 final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
-  private val validAddress = ToxCoreFactory.withTox(_.getAddress)
+  private val validAddress = ToxCoreImplFactory.withToxUnit(_.getAddress)
 
   test("InvalidAddress1") {
     intercept[IllegalArgumentException] {
-      ToxCoreFactory.withTox(
+      ToxCoreImplFactory.withToxUnit(
         _.addFriend(
           ToxFriendAddress.unsafeFromValue(Array.ofDim(1)),
           ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
@@ -21,7 +22,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
 
   test("InvalidAddress2") {
     intercept[IllegalArgumentException] {
-      ToxCoreFactory.withTox(
+      ToxCoreImplFactory.withToxUnit(
         _.addFriend(
           ToxFriendAddress.unsafeFromValue(Array.ofDim(ToxCoreConstants.AddressSize - 1)),
           ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
@@ -32,7 +33,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
 
   test("InvalidAddress3") {
     intercept[IllegalArgumentException] {
-      ToxCoreFactory.withTox(
+      ToxCoreImplFactory.withToxUnit(
         _.addFriend(
           ToxFriendAddress.unsafeFromValue(Array.ofDim(ToxCoreConstants.AddressSize + 1)),
           ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
@@ -57,7 +58,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   }
 
   test("Not_TooLong1") {
-    ToxCoreFactory.withTox(
+    ToxCoreImplFactory.withToxUnit(
       _.addFriend(
         validAddress,
         ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength - 1)).get
@@ -66,7 +67,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   }
 
   test("Not_TooLong2") {
-    ToxCoreFactory.withTox(
+    ToxCoreImplFactory.withToxUnit(
       _.addFriend(
         validAddress,
         ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength)).get
@@ -125,7 +126,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
 
   test("SetNewNospam") {
     interceptWithTox(ToxFriendAddException.Code.SET_NEW_NOSPAM) { tox =>
-      ToxCoreFactory.withTox { friend =>
+      ToxCoreImplFactory.withToxUnit { friend =>
         friend.setNospam(12345678)
         tox.addFriend(friend.getAddress, ToxFriendRequestMessage.fromString("hello").get)
         friend.setNospam(87654321)

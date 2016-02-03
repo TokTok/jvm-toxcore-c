@@ -7,7 +7,7 @@ import im.tox.tox4j.core._
 import im.tox.tox4j.core.data.{ToxFriendAddress, ToxNickname, ToxPublicKey, ToxStatusMessage}
 import im.tox.tox4j.core.exceptions.ToxNewException
 import im.tox.tox4j.core.options.{SaveDataOptions, ToxOptions}
-import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl}
+import im.tox.tox4j.impl.jni.{ToxAvImpl, ToxCoreImpl, ToxCoreImplFactory}
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalameter.api._
 
@@ -93,7 +93,7 @@ object ToxBenchBase {
    */
   def friendAddresses(sz: Int): Seq[ToxFriendAddress] = {
     for (_ <- 0 until sz) yield {
-      ToxCoreFactory.withTox(_.getAddress)
+      ToxCoreImplFactory.withToxUnit(_.getAddress)
     }
   }
 
@@ -123,7 +123,7 @@ object ToxBenchBase {
    * @return A new [[ToxCore]] instance with a name, status message, and friendCount friends.
    */
   def makeToxWithFriends(friendCount: Int): ToxCore[Unit] = {
-    val tox = ToxCoreFactory(toxOptions)
+    val tox = ToxCoreImplFactory(toxOptions)
     tox.setName(ToxNickname.fromValue(Array.ofDim(ToxCoreConstants.MaxNameLength)).get)
     tox.setStatusMessage(ToxStatusMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxStatusMessageLength)).get)
     friendKeys(friendCount) foreach tox.addFriendNorequest

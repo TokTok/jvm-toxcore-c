@@ -12,7 +12,7 @@ import im.tox.gui.forms.MainViewBase
 import im.tox.gui.util.InvokeLaterToxEventListener
 import im.tox.tox4j.core.ToxCore
 import org.jetbrains.annotations.Nullable
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.LoggerFactory
 
 object MainView {
 

@@ -2,9 +2,10 @@ package im.tox.tox4j.testing
 
 import im.tox.core.error.CoreError
 import im.tox.tox4j.DhtNodeSelector._
+import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.exceptions.{ToxBootstrapException, ToxFriendAddException, ToxNewException}
-import im.tox.tox4j.core.{ToxCore, ToxCoreFactory}
 import im.tox.tox4j.exceptions.ToxException
+import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import org.jetbrains.annotations.NotNull
 import org.scalatest.Assertions
 
@@ -25,7 +26,7 @@ trait ToxTestMixin extends Assertions {
 
   protected def interceptWithTox[E <: Enum[E]](code: E)(f: ToxCore[Unit] => Unit) = {
     intercept(code) {
-      ToxCoreFactory.withTox { tox =>
+      ToxCoreImplFactory.withToxUnit { tox =>
         addFriends(tox, 1)
         f(tox)
       }
@@ -39,7 +40,7 @@ trait ToxTestMixin extends Assertions {
       throw new IllegalArgumentException("Cannot add less than 1 friend: " + count)
     }
     (0 until count).map { (i: Int) =>
-      ToxCoreFactory.withTox { friend =>
+      ToxCoreImplFactory.withToxUnit { friend =>
         tox.addFriendNorequest(friend.getPublicKey)
       }
     }.last
