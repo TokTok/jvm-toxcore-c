@@ -21,18 +21,21 @@ my %STL = (
    'arm-linux-androideabi' => 'gnustl',
    'aarch64-linux-android' => 'gnustl',
    'i686-linux-android'    => 'gnustl',
+   'x86_64-linux-android'  => 'gnustl',
 );
 
 my %TOOLCHAIN = (
    'arm-linux-androideabi' => 'arm-linux-androideabi',
    'aarch64-linux-android' => 'aarch64-linux-android',
    'i686-linux-android'    => 'x86',
+   'x86_64-linux-android'  => 'x86_64',
 );
 
 my %PLATFORM = (
    'arm-linux-androideabi' => 'android-9',
    'aarch64-linux-android' => 'android-21',
    'i686-linux-android'    => 'android-9',
+   'x86_64-linux-android'  => 'android-21',
 );
 
 
@@ -49,7 +52,7 @@ if ($C->HOST ne $C->TARGET) {
       $C->NDK_HOME . "/build/tools/make-standalone-toolchain.sh",
       "--stl=$STL{$C->TARGET}",
       "--ndk-dir=" . $C->NDK_HOME,
-      "--toolchain=$TOOLCHAIN{$C->TARGET}-clang3.6",
+      "--toolchain=$TOOLCHAIN{$C->TARGET}-clang",
       "--install-dir=$toolchain",
       "--platform=$PLATFORM{$C->TARGET}",
    );

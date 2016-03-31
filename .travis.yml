@@ -23,13 +23,14 @@ cache:
 env:
   matrix:
     # Test builds first, since they don't upload things.
-    - TEST_GOAL=coverage
-    - TEST_GOAL=performance
+    #- TEST_GOAL=coverage
+    #- TEST_GOAL=performance
     # Production builds after test builds so only tested artifacts are uploaded.
-    - TARGET=x86_64-linux
-    - TARGET=aarch64-linux-android
+    #- TARGET=x86_64-linux
+    #- TARGET=aarch64-linux-android
     - TARGET=arm-linux-androideabi
-    - TARGET=i686-linux-android
+    #- TARGET=i686-linux-android
+    #- TARGET=x86_64-linux-android
 
 matrix:
   fast_finish: true

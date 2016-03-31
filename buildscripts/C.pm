@@ -30,11 +30,11 @@ sub NDK_HOME {
    my ($ndk_home) = grep { -d } (
       $ENV{ANDROID_NDK_HOME},
       $ENV{NDK_HOME},
-      "$ENV{HOME}/android-ndk-r10e",
+      "$ENV{HOME}/android-ndk-r11b",
       "$ENV{HOME}/android-ndk",
-      "$ENV{HOME}/usr/android-ndk-r10e",
+      "$ENV{HOME}/usr/android-ndk-r11b",
       "$ENV{HOME}/usr/android-ndk",
-      "/opt/android-ndk-r10e",
+      "/opt/android-ndk-r11b",
       "/opt/android-ndk",
    );
    $ndk_home || $ENV{NDK_HOME} || "$ENV{HOME}/android-ndk"

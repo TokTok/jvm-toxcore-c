@@ -42,8 +42,8 @@ object PkgConfigPlugin extends AutoPlugin {
     pkgConfigCflags := pkgConfig(streams.value.log, nativeLibraryDependencies.value, pkgConfigPath.value, "cflags"),
     pkgConfigLibs := pkgConfig(streams.value.log, nativeLibraryDependencies.value, pkgConfigPath.value, "libs"),
 
-    commonConfigFlags <++= pkgConfigCflags,
-    ldConfigFlags <++= pkgConfigLibs
+    libCommonConfigFlags <++= pkgConfigCflags,
+    libLdConfigFlags <++= pkgConfigLibs
   )
 
   override def projectSettings: Seq[Setting[_]] =

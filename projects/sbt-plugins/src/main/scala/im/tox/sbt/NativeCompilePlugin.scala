@@ -87,7 +87,7 @@ object NativeCompilePlugin extends AutoPlugin {
     commonConfigFlags ++= sourceDirectories.value.map("-I" + _) ++ jniIncludeFlags.value,
 
     // Link with version script to avoid exporting unnecessary symbols.
-    ldConfigFlags ++= Configure.tryCompile(streams.value.log, cxx1.value, {
+    ldConfigFlags ++= Configure.tryCompile(streams.value.log, cxx.value, {
       val versionScript = (cppSource.value / ("lib" + name.value + ".ver")).getPath
       Seq(s"-Wl,--version-script,$versionScript")
     })
@@ -97,8 +97,8 @@ object NativeCompilePlugin extends AutoPlugin {
     nativeCompile <<= Def.taskDyn {
       NativeCompilation.compileSources(
         streams.value.log, streams.value.cacheDirectory / "native",
-        NativeCompilationSettings(cc1.value, cc2.value, cFlags.value),
-        NativeCompilationSettings(cxx1.value, cxx2.value, cxxFlags.value),
+        NativeCompilationSettings(cc.value, cFlags.value),
+        NativeCompilationSettings(cxx.value, cxxFlags.value),
         cppSource.value +: managedSourceDirectories.value,
         objectDirectory.value,
         sources.value
@@ -117,7 +117,7 @@ object NativeCompilePlugin extends AutoPlugin {
     nativeLink <<= Def.task {
       NativeCompilation.linkSharedLibrary(
         streams.value,
-        cxx1.value, ldConfigFlags.value ++ ldEnvFlags.value,
+        cxx.value, ldConfigFlags.value ++ ldEnvFlags.value ++ libLdConfigFlags.value,
         nativeCompile.value,
         nativeLibraryOutput.value
       )

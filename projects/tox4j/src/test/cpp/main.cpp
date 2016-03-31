@@ -1,7 +1,7 @@
 #include "util/logging.h"
 #include <gtest/gtest.h>
 
-#include <google/protobuf/stubs/common.h>
+// #include <google/protobuf/stubs/common.h>
 
 int
 main (int argc, char **argv)
@@ -14,7 +14,7 @@ main (int argc, char **argv)
   int result = RUN_ALL_TESTS ();
 
   google::ShutdownGoogleLogging ();
-  google::protobuf::ShutdownProtobufLibrary ();
+  // google::protobuf::ShutdownProtobufLibrary ();
 
   return result;
 }

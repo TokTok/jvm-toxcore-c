@@ -2,6 +2,11 @@ export CACHE_DIR ?= $(HOME)/cache
 
 default: install
 
+all:
+	$(MAKE) clean
+	$(MAKE) setup
+	$(MAKE) install
+
 setup:
 	buildscripts/00_dependencies_host
 	buildscripts/01_ndk

@@ -36,7 +36,7 @@ object NativeTestPlugin extends AutoPlugin {
 
     nativeLink <<= (
       streams,
-      cxx1, ldConfigFlags,
+      cxx, ldConfigFlags,
       nativeCompile,
       nativeLink in NativeCompile,
       nativeProgramOutput

@@ -21,45 +21,46 @@ my $C = require C;
 my @common = qw(
    build
    sources/android/cpufeatures
+   sources/cxx-stl/gnu-libstdc++/4.9/include
    prebuilt/linux-x86_64
    prebuilt/darwin-x86_64
-   toolchains/llvm-3.6
+   toolchains/llvm
 );
 
 my %NDK_FILES = (
    'aarch64-linux-android' => [@common, qw(
       platforms/android-21/arch-arm64
       prebuilt/android-arm64
-      sources/cxx-stl/gnu-libstdc++/4.9/include
       sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a
       toolchains/aarch64-linux-android-4.9
    )],
    'arm-linux-androideabi' => [@common, qw(
       platforms/android-9
-      sources/cxx-stl/gnu-libstdc++/4.8/include
-      sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi*
-      toolchains/arm-linux-androideabi-4.8
-      toolchains/arm-linux-androideabi-clang3.6
+      sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*
+      toolchains/arm-linux-androideabi-4.9
    )],
    'i686-linux-android' => [@common, qw(
       platforms/android-9
-      sources/cxx-stl/gnu-libstdc++/4.8/include
-      sources/cxx-stl/gnu-libstdc++/4.8/libs/x86
-      toolchains/x86-4.8
-      toolchains/x86-clang3.6
+      sources/cxx-stl/gnu-libstdc++/4.9/libs/x86
+      toolchains/x86-4.9
+   )],
+   'x86_64-linux-android' => [@common, qw(
+      platforms/android-21
+      sources/cxx-stl/gnu-libstdc++/4.9/libs/x86_64
+      toolchains/x86_64-4.9
    )],
 );
 
 
-my $NDK_DIR = "android-ndk-r10e";
-my $NDK_PACKAGE = "$NDK_DIR-$^O-x86_64.bin";
+my $NDK_DIR = "android-ndk-r11b";
+my $NDK_PACKAGE = "$NDK_DIR-$^O-x86_64.zip";
 
 if ($C->HOST ne $C->TARGET) {
    die "No NDK path set" unless defined $C->NDK_HOME;
 
    # Download NDK package if it wasn't downloaded, yet.
    if (not -f $NDK_PACKAGE) {
-      my $url = "http://dl.google.com/android/ndk/$NDK_PACKAGE";
+      my $url = "http://dl.google.com/android/repository/$NDK_PACKAGE";
       print "Downloading NDK package from $url\n";
       system "curl", "-s", $url, "-o", $NDK_PACKAGE;
       if ($?) {
@@ -80,7 +81,7 @@ if ($C->HOST ne $C->TARGET) {
    if ($@ =~ /No such file or directory/) {
       # 7z didn't exist, so just run the self-extracting archive.
       chmod 0700, $NDK_PACKAGE;
-      @lines = must_popen "./$NDK_PACKAGE";
+      @lines = must_popen "unzip", $NDK_PACKAGE;
    }
 
    my $extracted = grep { /^Extracting/ } @lines;
@@ -91,7 +92,7 @@ if ($C->HOST ne $C->TARGET) {
    print "$_\n" for @rest;
 
    # Just so sources/cxx-stl/stlport/../gabi++ works.
-   must_system "mkdir", "$NDK_DIR/sources/cxx-stl/stlport";
+   #must_system "mkdir", "$NDK_DIR/sources/cxx-stl/stlport";
 
    must_system "mv", (abs_path $NDK_DIR), $C->NDK_HOME;
 }

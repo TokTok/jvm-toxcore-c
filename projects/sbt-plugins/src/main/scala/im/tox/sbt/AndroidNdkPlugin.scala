@@ -37,10 +37,8 @@ object AndroidNdkPlugin extends AutoPlugin {
     ndkHome := sys.env.get("ANDROID_NDK_HOME").map(file).filter(_.exists).getOrElse(file(sys.env("HOME")) / "android-ndk"),
     toolchainHome := baseDirectory.value.getParentFile.getParentFile / "toolchains" / crossPlatform.value,
 
-    cc1 := nativeCompiler(C, "clang", toolchainHome.value, crossPlatform.value),
-    cc2 := nativeCompiler(C, "gcc", toolchainHome.value, crossPlatform.value),
-    cxx1 := nativeCompiler(Cxx, "clang++", toolchainHome.value, crossPlatform.value),
-    cxx2 := nativeCompiler(Cxx, "g++", toolchainHome.value, crossPlatform.value),
+    cc := nativeCompiler(C, "clang", toolchainHome.value, crossPlatform.value),
+    cxx := nativeCompiler(Cxx, "clang++", toolchainHome.value, crossPlatform.value),
 
     // Ignore all flags from the environment variables.
     commonEnvFlags := Nil,

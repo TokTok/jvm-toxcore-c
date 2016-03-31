@@ -23,13 +23,18 @@ my @dependencies = do 'buildscripts/dependencies.pl';
 system "java", "-version";
 die "No java installed" if $?;
 
+# Remove old sbt script.
+my $BINDIR = $C->PREFIX . "/bin";
+unlink "$BINDIR/sbt";
+
 system "which", "sbt";
 if ($?) {
-   my $BINDIR = $C->PREFIX . "/bin";
    make_path $BINDIR;
 
-   print "No sbt installed; fetching one now\n";
-   system "wget", "-O", "$BINDIR/sbt-launch.jar", "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar";
+   if (not -f "$BINDIR/sbt-launch.jar") {
+      print "No sbt installed; fetching one now\n";
+      must_system "curl", "-s", "-L", "-o", "$BINDIR/sbt-launch.jar", "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar";
+   }
    open my $fh, '>', "$BINDIR/sbt"
       or die "Could not open sbt script for writing: $!";
    print $fh <<EOF;
@@ -37,7 +42,7 @@ if ($?) {
 
 set -e -x
 
-SBT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
+SBT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m"
 
 exec </dev/null
 exec java \$SBT_OPTS -jar $BINDIR/sbt-launch.jar "\$@"
@@ -52,11 +57,11 @@ if (not grep { system $_, "--version"; not $? } @clangs) {
 
    tempd {
       my $TARNAME = "clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04";
-      system "wget", "http://llvm.org/releases/3.7.0/$TARNAME.tar.xz";
-      system "tar", "Jxf", "$TARNAME.tar.xz";
+      must_system "wget", "http://llvm.org/releases/3.7.0/$TARNAME.tar.xz";
+      must_system "tar", "Jxf", "$TARNAME.tar.xz";
       pushd {
          for (<*>) {
-            system "cp", "-a", $_, $C->PREFIX;
+            must_system "cp", "-a", $_, $C->PREFIX;
          }
       } $TARNAME;
    };

@@ -30,19 +30,6 @@ object NativeCompilation {
     }
   }
 
-  private def runCompilers(log: Logger, settings: NativeCompilationSettings[_], arguments: Seq[String]): String = {
-    try {
-      runCompiler(log, settings.compiler1, arguments)
-    } catch {
-      case NonFatal(e) =>
-        val argumentsFallback = arguments.filterNot { flag =>
-          // GCC doesn't understand these.
-          flag == "-fcolor-diagnostics" || flag.startsWith("-stdlib=")
-        }
-        runCompiler(log, settings.compiler2, argumentsFallback)
-    }
-  }
-
   private def doCompile(
     log: Logger,
     sourceDirectories: Seq[File],
@@ -65,7 +52,7 @@ object NativeCompilation {
       sourceFile.getPath
     ) ++ settings.flags
 
-    runCompilers(log, settings, arguments)
+    runCompiler(log, settings.compiler, arguments)
 
     objectFile
   }
@@ -99,8 +86,8 @@ object NativeCompilation {
   ): Def.Initialize[Task[Seq[File]]] = {
     if (sources.nonEmpty) {
       log.info(s"Compiling ${sources.length} C/C++ sources")
-      log.info(s"CC       = ${cc.compiler1} (or ${cc.compiler2})")
-      log.info(s"CXX      = ${cxx.compiler1} (or ${cxx.compiler2})")
+      log.info(s"CC       = ${cc.compiler}")
+      log.info(s"CXX      = ${cxx.compiler}")
       log.info(s"CFLAGS   = ${cc.flags}")
       log.info(s"CXXFLAGS = ${cxx.flags}")
     }
