@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 object DhtNodeSelector extends Assertions {
 
   private val logger = Logger(LoggerFactory.getLogger(this.getClass))
-  private var selectedNode: Option[DhtNode] = Some(ToxCoreTestBase.nodeCandidates(1))
+  private var selectedNode: Option[DhtNode] = Some(ToxCoreTestBase.nodeCandidates(0))
 
   private def tryConnect(node: DhtNode): Option[DhtNode] = {
     var socket: Socket = null

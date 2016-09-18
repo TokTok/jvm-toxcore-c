@@ -88,5 +88,15 @@ $ENV{LDFLAGS} = "-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib";
 # Enable optimisation on dependencies.
 #$ENV{CFLAGS} = $ENV{CXXFLAGS} = "-O3";
 
+if ($ARGV[0] eq "show-env") {
+   print <<EOF;
+PATH="$ENV{PATH}"
+PKG_CONFIG_PATH="$ENV{PKG_CONFIG_PATH}"
+CPPFLAGS="$ENV{CPPFLAGS}"
+LDFLAGS="$ENV{LDFLAGS}"
+CXX="$ENV{CXX}"
+CC="$ENV{CC}"
+EOF
+}
 
 __PACKAGE__

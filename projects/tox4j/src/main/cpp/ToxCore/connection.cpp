@@ -107,7 +107,7 @@ TOX_METHOD (jbyteArray, Iterate,
       {
         LogEntry log_entry (instanceNumber, tox_iterate, tox);
 
-        log_entry.print_result (tox_iterate, tox);
+        log_entry.print_result (tox_iterate, tox, &events);
         if (events.ByteSize () == 0)
           return nullptr;
 
