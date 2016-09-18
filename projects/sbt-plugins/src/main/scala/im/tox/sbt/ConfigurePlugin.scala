@@ -15,7 +15,7 @@ object ConfigurePlugin extends AutoPlugin {
 
   final case class NativeCompiler[L <: Language](language: L, program: String, flags: String*) {
     override def toString: String = {
-      language + ": " + (program +: flags).mkString(" ")
+      s"$language: " + (program +: flags).mkString(" ")
     }
   }
 
