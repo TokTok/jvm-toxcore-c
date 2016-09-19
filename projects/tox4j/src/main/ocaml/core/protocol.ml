@@ -1,3 +1,0 @@
-type t =
-  | UDP
-  | TCP
