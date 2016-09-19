@@ -22,11 +22,13 @@ namespace tox
     ::toxav_callback_##CB(av, callback); \
   }
 
+#if 0
   COMPAT_CB (audio_receive_frame)
   COMPAT_CB (video_receive_frame)
   COMPAT_CB (call)
   COMPAT_CB (call_state)
   COMPAT_CB (bit_rate_status)
+#endif
 
 #undef COMPAT_CB
 
