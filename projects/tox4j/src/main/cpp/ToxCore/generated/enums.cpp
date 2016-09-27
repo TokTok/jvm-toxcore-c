@@ -1,7 +1,5 @@
 #include "../ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 template<>
 jint
 Enum::ordinal<TOX_CONNECTION> (JNIEnv *env, TOX_CONNECTION valueOf)
@@ -232,5 +230,3 @@ print_arg<TOX_USER_STATUS> (protolog::Value &value, TOX_USER_STATUS const &arg)
     }
   value.set_v_string ("(TOX_USER_STATUS)" + std::to_string (arg));
 }
-
-#endif

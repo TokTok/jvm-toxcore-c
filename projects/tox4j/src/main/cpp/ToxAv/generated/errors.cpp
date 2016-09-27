@@ -1,7 +1,5 @@
 #include "../ToxAv.h"
 
-#ifdef TOXAV_VERSION_MAJOR
-
 HANDLE ("Answer", ANSWER)
 {
   switch (error)
@@ -85,5 +83,3 @@ HANDLE ("SendFrame", SEND_FRAME)
     }
   return unhandled ();
 }
-
-#endif

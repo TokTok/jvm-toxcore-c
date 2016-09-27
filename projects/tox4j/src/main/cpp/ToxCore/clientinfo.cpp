@@ -1,7 +1,5 @@
 #include "ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 using namespace core;
 
 
@@ -118,5 +116,3 @@ TOX_METHOD (void, SelfSetStatus,
   return instances.with_instance_noerr (env, instanceNumber,
     tox_self_set_status, Enum::valueOf<TOX_USER_STATUS> (env, status));
 }
-
-#endif

@@ -1,7 +1,5 @@
 #include "ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 using namespace core;
 
 
@@ -612,5 +610,3 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_invokeFriendReadRec
       }
   );
 }
-
-#endif

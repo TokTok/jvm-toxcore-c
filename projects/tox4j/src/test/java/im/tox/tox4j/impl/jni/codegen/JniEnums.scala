@@ -93,23 +93,19 @@ object JniEnums extends CodeGenerator {
   }
 
   writeCode("ToxAv/generated/enums.cpp") {
-    ifdef(
-      "../ToxAv.h",
-      "TOXAV_VERSION_MAJOR",
-      generateEnumConversions(ToxavCallControl.values),
+    Include("../ToxAv.h") +: (
+      generateEnumConversions(ToxavCallControl.values) ++
       generateEnumConversions(ToxavFriendCallState.values)
     )
   }
 
   writeCode("ToxCore/generated/enums.cpp") {
-    ifdef(
-      "../ToxCore.h",
-      "TOX_VERSION_MAJOR",
-      generateEnumConversions(ToxConnection.values),
-      generateEnumConversions(ToxFileControl.values),
-      generateEnumConversions(ToxMessageType.values),
-      generateEnumConversions(ToxProxyType.values),
-      generateEnumConversions(ToxSavedataType.values),
+    Include("../ToxCore.h") +: (
+      generateEnumConversions(ToxConnection.values) ++
+      generateEnumConversions(ToxFileControl.values) ++
+      generateEnumConversions(ToxMessageType.values) ++
+      generateEnumConversions(ToxProxyType.values) ++
+      generateEnumConversions(ToxSavedataType.values) ++
       generateEnumConversions(ToxUserStatus.values)
     )
   }

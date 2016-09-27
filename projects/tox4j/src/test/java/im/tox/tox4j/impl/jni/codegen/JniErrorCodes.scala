@@ -46,9 +46,7 @@ object JniErrorCodes extends CodeGenerator {
   }
 
   writeCode("ToxAv/generated/errors.cpp") {
-    ifdef(
-      "../ToxAv.h",
-      "TOXAV_VERSION_MAJOR",
+    Include("../ToxAv.h") +:
       Seq(
         generateErrorCode(ToxavAnswerException.Code.values),
         generateErrorCode(ToxavBitRateSetException.Code.values),
@@ -57,13 +55,10 @@ object JniErrorCodes extends CodeGenerator {
         generateErrorCode(ToxavNewException.Code.values),
         generateErrorCode(ToxavSendFrameException.Code.values)
       )
-    )
   }
 
   writeCode("ToxCore/generated/errors.cpp") {
-    ifdef(
-      "../ToxCore.h",
-      "TOX_VERSION_MAJOR",
+    Include("../ToxCore.h") +:
       Seq(
         generateErrorCode(ToxBootstrapException.Code.values),
         generateErrorCode(ToxFileControlException.Code.values),
@@ -82,19 +77,15 @@ object JniErrorCodes extends CodeGenerator {
         generateErrorCode(ToxSetInfoException.Code.values),
         generateErrorCode(ToxSetTypingException.Code.values)
       )
-    )
   }
 
   writeCode("ToxCrypto/generated/errors.cpp") {
-    ifdef(
-      "../ToxCrypto.h",
-      "TOX_DEFINED",
+    Include("../ToxCrypto.h") +:
       Seq(
         generateErrorCode(ToxDecryptionException.Code.values),
         generateErrorCode(ToxEncryptionException.Code.values),
         generateErrorCode(ToxKeyDerivationException.Code.values)
       )
-    )
   }
 
 }

@@ -1,7 +1,5 @@
 #include "ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 #include <algorithm>
 #include <vector>
 
@@ -133,5 +131,3 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_tox4jSetLogFilter
 
   jni_log.filter (std::move (filter_strings));
 }
-
-#endif

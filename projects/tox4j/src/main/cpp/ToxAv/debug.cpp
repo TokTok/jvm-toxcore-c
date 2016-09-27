@@ -1,7 +1,5 @@
 #include "ToxAv.h"
 
-#ifdef TOXAV_VERSION_MAJOR
-
 #include <algorithm>
 #include <vector>
 
@@ -38,5 +36,3 @@ print_arg<av::Events *> (protolog::Value &value, av::Events *const &events)
   else
     value.set_v_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");
 }
-
-#endif

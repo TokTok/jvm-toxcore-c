@@ -3,7 +3,6 @@
 #include "tox/common.h"
 #include <tox/toxav.h>
 
-#ifdef TOXAV_VERSION_MAJOR
 namespace tox
 {
   struct av_deleter
@@ -36,4 +35,3 @@ namespace tox
 #include "generated/av.h"
 #undef CALLBACK
 }
-#endif

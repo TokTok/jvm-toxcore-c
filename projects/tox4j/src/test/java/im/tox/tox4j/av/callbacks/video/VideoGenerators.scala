@@ -132,7 +132,7 @@ object VideoGenerators extends Assertions {
       Color.blue
     )
 
-    val FramesPerColor = 4
+    val FramesPerColor = 3
     val VideoLength = Colors.values.length * Colors.FramesPerColor
 
     def get(t: Int): Color = values(t / FramesPerColor % values.length)

@@ -1,7 +1,5 @@
 #include "ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 using namespace core;
 
 
@@ -119,5 +117,3 @@ TOX_METHOD (jbyteArray, Iterate,
       }
   );
 }
-
-#endif

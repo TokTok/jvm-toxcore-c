@@ -1,7 +1,5 @@
 #include "../ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 HANDLE ("Bootstrap", BOOTSTRAP)
 {
   switch (error)
@@ -215,5 +213,3 @@ HANDLE ("SetTyping", SET_TYPING)
     }
   return unhandled ();
 }
-
-#endif

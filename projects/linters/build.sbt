@@ -1,3 +1,4 @@
+// General settings.
 organization  := "im.tox"
 name          := "linters"
 scalaVersion  := "2.11.7"

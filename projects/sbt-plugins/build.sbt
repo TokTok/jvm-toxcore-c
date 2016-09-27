@@ -1,3 +1,4 @@
+// General settings.
 organization  := "im.tox"
 name          := "sbt-plugins"
 scalaVersion  := "2.10.6"

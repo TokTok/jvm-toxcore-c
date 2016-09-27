@@ -1,7 +1,5 @@
 #include "ToxAv.h"
 
-#ifdef TOXAV_VERSION_MAJOR
-
 using namespace av;
 
 /*
@@ -143,5 +141,3 @@ TOX_METHOD (void, VideoSendFrame,
     toxav_video_send_frame, friendNumber, width, height, yData, uData, vData
   );
 }
-
-#endif

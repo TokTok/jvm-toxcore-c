@@ -1,7 +1,5 @@
 #include "ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 using namespace core;
 
 
@@ -84,5 +82,3 @@ TOX_METHOD (jbyteArray, FileGetFileId,
     tox_file_get_file_id, friendNumber, fileNumber, file_id
   );
 }
-
-#endif

@@ -1,7 +1,5 @@
 #include "../ToxAv.h"
 
-#ifdef TOXAV_VERSION_MAJOR
-
 template<>
 jint
 Enum::ordinal<TOXAV_CALL_CONTROL> (JNIEnv *env, TOXAV_CALL_CONTROL valueOf)
@@ -100,5 +98,3 @@ print_arg<TOXAV_FRIEND_CALL_STATE> (protolog::Value &value, TOXAV_FRIEND_CALL_ST
     }
   value.set_v_string ("(TOXAV_FRIEND_CALL_STATE)" + std::to_string (arg));
 }
-
-#endif

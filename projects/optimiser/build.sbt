@@ -1,3 +1,4 @@
+// General settings.
 organization  := "im.tox"
 name          := "optimiser"
 scalaVersion  := "2.11.7"

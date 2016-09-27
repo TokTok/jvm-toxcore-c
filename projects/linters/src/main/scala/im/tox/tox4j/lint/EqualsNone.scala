@@ -15,7 +15,7 @@ object EqualsNone extends WartTraverser {
 
   val errorMessage = "Avoid comparing with None; use .isEmpty or .isDefined, instead. Use `eq` if you are sure."
 
-  private final case class Checker[U <: WartUniverse](u: U) {
+  private final case class Checker[WU <: WartUniverse](u: WU) {
 
     final class Make extends u.universe.Traverser {
 

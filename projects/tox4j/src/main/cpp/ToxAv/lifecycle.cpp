@@ -1,8 +1,6 @@
 #include "ToxAv.h"
 #include "../ToxCore/ToxCore.h"
 
-#ifdef TOXAV_VERSION_MAJOR
-
 using namespace av;
 
 
@@ -271,5 +269,3 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeVideoReceiveFra
       }
   );
 }
-
-#endif

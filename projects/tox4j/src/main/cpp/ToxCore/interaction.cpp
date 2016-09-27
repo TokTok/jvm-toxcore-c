@@ -1,7 +1,5 @@
 #include "ToxCore.h"
 
-#ifdef TOX_VERSION_MAJOR
-
 using namespace core;
 
 
@@ -34,5 +32,3 @@ TOX_METHOD (jint, FriendSendMessage,
     tox_friend_send_message, friendNumber, Enum::valueOf<TOX_MESSAGE_TYPE> (env, messageType), message_array.data (), message_array.size ()
   );
 }
-
-#endif

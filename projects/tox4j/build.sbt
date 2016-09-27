@@ -46,12 +46,12 @@ import im.tox.sbt.NativeCompilePlugin.Keys.nativeLink
 inConfig(Test)(Keys.compile <<= Keys.compile.dependsOn(nativeLink in NativeTest))
 
 nativeLibraryDependencies ++= Seq(
-  "protobuf" % "protobuf" % "3.0.0-beta-1",
-  "libtoxcore" % "libtoxcore" % "0.0.0",
-  "libtoxav" % "libtoxav" % "0.0.0",
+  "google" % "protobuf" % "3.0.0-beta-1",
+  "toktok" % "libtoxav" % "0.0.1",
+  "toktok" % "libtoxcore" % "0.0.1",
   // Required, since toxav's pkg-config files are incomplete:
-  "libsodium" % "libsodium" % "1.0.7",
-  "vpx" % "vpx" % "1.5.0"
+  "jedisct1" % "libsodium" % "1.0.7",
+  "webmproject" % "vpx" % "1.5.0"
 )
 
 
