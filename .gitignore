@@ -2,21 +2,18 @@
 /.web
 
 # SBT compiled build system.
-/projects/project/project
-/projects/*/project/project
-/projects/project/target
-/projects/*/project/target
+/project/project
+/project/target
 
 # SBT output directory.
-/projects/target
-/projects/*/target
+/target
 
 # Generated startup scripts for main classes.
-/projects/*/bin
+/bin
 
 # Local user settings for SBT and Java.
-/projects/*/local.sbt
-/projects/*/local.properties
+/local.sbt
+/local.properties
 
 # Android NDK.
 /toolchains

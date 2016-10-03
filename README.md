@@ -1,13 +1,8 @@
-# Tox4j
+# Tox4j (C backend)
 
-Combined repository for several Tox4j projects. These can be found in the
-`projects` directory and currently include:
-
-- sbt-plugins: A collection of SBT plugins used by all Tox4j projects.
-- linters: Extra WartRemover linters with knowledge of our standards.
-- macros: Macros used by the tox4j project. These need to be compiled separately.
-- optimiser: An experimental Java byte code optimiser.
-- tox4j: The core and high level client libraries.
+This repository contains the [c-toxcore](https://github.com/TokTok/c-toxcore)
+backed implementation of the generic backend-agnostic JVM
+[toxcore-api](https://github.com/TokTok/jvm-toxcore-api).
 
 
 ## Contributing
@@ -51,7 +46,6 @@ installed.
 ## Building
 
 - Build and install toxcore and toxav.
-- Change directory to `projects`.
 - Run the sbt console with `sbt`.
 
 Now you can use `compile` to build, `test` to run unit tests (these are a lot of
@@ -68,7 +62,7 @@ XCode installed, you will already be able to compile the C++ part of tox4j,
 To import the project in IDEA, launch IDEA and:
 
 - On the "Welcome to IntelliJ IDEA" screen, select "Import Project".
-- Select the directory tox4j/projects (projects subdirectory of this git repository).
+- Select the directory jvm-toxcore-c (this git repository).
 - Press "OK".
 - Select "Import project from external model".
 - Select "SBT".

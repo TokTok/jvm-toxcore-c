@@ -10,19 +10,14 @@ my $C = require C;
 
 ##############################################################################
 #
-# :: Upload artifacts to online file sharing service.
+# :: Submit coverage report to coveralls.
 #
 ##############################################################################
 
 
-# Hack to make sbt-coveralls work with our non-standard directory layout.
-must_system 'ln -s $PWD/.git projects/';
-for (qw/linters macros sbt-plugins tox4j/) {
-   must_system "cp -r \$PWD/projects/$_/src/main/*/* \$PWD/projects/";
-}
+# Hack to make sbt-coveralls work.
+must_system "cp -r \$PWD/src/main/*/* \$PWD/";
 
-if ($C->TEST_GOAL eq "coverage" and -f "projects/tox4j/target/scala-2.11/coverage-report/cobertura.xml") {
-   pushd {
-      must_system $C->SBT, "coverageAggregate", "coveralls";
-   } "projects";
+if ($C->TEST_GOAL eq "coverage" and -f "target/scala-2.11/coverage-report/cobertura.xml") {
+   must_system $C->SBT, "coveralls";
 }

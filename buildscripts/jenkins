@@ -41,8 +41,8 @@ export SBT="sbt -Dsbt.log.noformat=true"
 buildscripts/04_build
 
 # Copy artifacts
-cp projects/tox4j/target/$TARGET/*.so $WORKSPACE/artifacts/
-cp projects/tox4j/target/scala-2.11/*.jar $WORKSPACE/artifacts/
+cp target/$TARGET/*.so $WORKSPACE/artifacts/
+cp target/scala-2.11/*.jar $WORKSPACE/artifacts/
 
 # Strip the .so to save space
 $TARGET-strip -s $WORKSPACE/artifacts/*.so

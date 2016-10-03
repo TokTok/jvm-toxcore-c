@@ -40,13 +40,13 @@ my $abi = $ABI{$C->TARGET};
 if ($abi) {
    my ($abi_emulator, $abi_name, $abi_native_name) = @$abi;
 
-   must_system "git", "clone", "http://github.com/iphydf/toktok", "projects/toktok"
-      unless -e "projects/toktok";
+   must_system "git", "clone", "http://github.com/iphydf/toktok", "toktok"
+      unless -e "toktok";
 
-   my $native_lib_dir = "projects/toktok/src/main/libs/$abi_native_name";
+   my $native_lib_dir = "toktok/src/main/libs/$abi_native_name";
 
    my $native_lib_dst = "$native_lib_dir/libtox4j.so";
-   my $native_lib_src = "projects/tox4j/target/$TARGET/libtox4j.so";
+   my $native_lib_src = "target/$TARGET/libtox4j.so";
    if (-f $native_lib_src) {
       print "Copying native library from $native_lib_src to $native_lib_dst\n";
       must_system "cp", "-a", $native_lib_src, $native_lib_dst;
@@ -91,5 +91,5 @@ if ($abi) {
       } else {
          must_system "sbt", "clean", "android:test";
       }
-   } "projects/toktok";
+   } "toktok";
 }

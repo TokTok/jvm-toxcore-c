@@ -21,11 +21,11 @@ my $C = require C;
 
 {
    # Remove any left-over local.sbt.
-   my $local_sbt = 'projects/tox4j/local.sbt';
+   my $local_sbt = 'local.sbt';
    unlink $local_sbt;
 
    # Copy the target-specific SBT configuration if one exists.
-   my $local_sbt_config = "projects/tox4j/android/local.". $C->TARGET . ".sbt";
+   my $local_sbt_config = "buildscripts/android/local.". $C->TARGET . ".sbt";
    must_system "cp", $local_sbt_config, $local_sbt
       if -f $local_sbt_config;
 }
@@ -37,6 +37,7 @@ for ($C->TEST_GOAL || '') {
    /coverage/ and push @COMMANDS, (
       'coverage',
       'testOnly *Test',
+      'coverageReport',
    );
    /performance/ and push @COMMANDS, (
       'testOnly *TravisBenchSuite',
@@ -55,13 +56,8 @@ for ($C->TEST_GOAL || '') {
    );
 }
 
-
-pushd {
-   must_system $C->SBT, @COMMANDS;
-} 'projects';
-
+# Run SBT commands.
+must_system $C->SBT, @COMMANDS;
 
 # Update generated files.
-pushd {
-   must_system $_ for <bin/Jni*>;
-} 'projects/tox4j';
+must_system $_ for <bin/Jni*>;

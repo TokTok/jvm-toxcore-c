@@ -41,12 +41,9 @@ heroku-stop:
 	heroku maintenance:on; heroku scale web=0
 
 clean:
-	rm -rf projects/*/project/project
-	rm -rf projects/*/project/target
-	rm -rf projects/project/project
-	rm -rf projects/project/target
-	rm -rf projects/*/target
-	rm -rf projects/target
+	rm -rf project/project
+	rm -rf project/target
+	rm -rf target
 
 distclean: clean
 	rm -rf toolchains
