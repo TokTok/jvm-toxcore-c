@@ -105,7 +105,11 @@ TOX_METHOD (jbyteArray, Iterate,
       {
         LogEntry log_entry (instanceNumber, tox_iterate, tox);
 
+#if TOX_VERSION_IS_API_COMPATIBLE(0, 0, 1)
         log_entry.print_result (tox_iterate, tox, &events);
+#else
+        log_entry.print_result (tox_iterate, tox);
+#endif
         if (events.ByteSize () == 0)
           return nullptr;
 
