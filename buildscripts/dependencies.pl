@@ -25,7 +25,7 @@ my ($toxcore_user, $toxcore_repo) = split '/', $toxcore;
 # External dependencies.
 (
    ["https://github.com/yasm", "yasm", "master", @common],
-   ["https://chromium.googlesource.com/webm", "libvpx", "v1.5.0",
+   ["https://github.com/webmproject", "libvpx", "v1.6.0",
       '--disable-examples',
       '--disable-unit-tests',
       (not_on qr/^arm/, "--enable-pic"),
@@ -40,7 +40,7 @@ my ($toxcore_user, $toxcore_repo) = split '/', $toxcore;
       (only_on qr/i686-linux-android/   , '--target=x86-android-gcc'  ),
       (only_on qr/x86_64-linux-android/ , '--target=x86_64-android-gcc'  ),
    ],
-   ["git://git.xiph.org", "opus", "master", @common],
+   ["https://github.com/xiph", "opus", "master", @common],
    ["https://github.com/jedisct1", "libsodium", "stable", @common,
       '--enable-minimal',
       '--disable-pie',

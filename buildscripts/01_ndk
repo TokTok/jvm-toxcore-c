@@ -52,7 +52,7 @@ my %NDK_FILES = (
 );
 
 
-my $NDK_DIR = "android-ndk-r11b";
+my $NDK_DIR = "android-ndk-r12b";
 my $NDK_PACKAGE = "$NDK_DIR-$^O-x86_64.zip";
 
 if ($C->HOST ne $C->TARGET) {
@@ -79,8 +79,7 @@ if ($C->HOST ne $C->TARGET) {
    };
 
    if ($@ =~ /No such file or directory/) {
-      # 7z didn't exist, so just run the self-extracting archive.
-      chmod 0700, $NDK_PACKAGE;
+      # 7z didn't exist, so just unzip the whole archive.
       @lines = must_popen "unzip", $NDK_PACKAGE;
    }
 

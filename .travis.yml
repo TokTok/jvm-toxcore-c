@@ -1,4 +1,5 @@
-language: android
+language: scala
+scala: 2.11.7
 sudo: false
 
 addons:
@@ -10,16 +11,6 @@ addons:
       - clang-3.5
       - p7zip-full
 
-android:
-  components:
-    #- android-23
-    #- platform-tools
-    #- extra-android-support
-    #- extra-android-m2repository
-    #- sys-img-aarch64-android-23
-    #- sys-img-armeabi-v7a-android-19
-    #- sys-img-x86-android-23
-
 cache:
   directories:
     - $HOME/cache
@@ -30,11 +21,11 @@ env:
     - TEST_GOAL=coverage TOXCORE=toktok/c-toxcore
     - TEST_GOAL=performance TOXCORE=irungentoo/toxcore
     # Production builds after test builds so only tested artifacts are uploaded.
-    #- TARGET=x86_64-linux
-    #- TARGET=aarch64-linux-android
-    #- TARGET=arm-linux-androideabi
-    #- TARGET=i686-linux-android
-    #- TARGET=x86_64-linux-android
+    - TARGET=x86_64-linux
+    - TARGET=aarch64-linux-android
+    - TARGET=arm-linux-androideabi
+    - TARGET=i686-linux-android
+    - TARGET=x86_64-linux-android
 
 matrix:
   fast_finish: true
@@ -42,14 +33,12 @@ matrix:
 install:
   # Move files from cache directory.
   - make cache
-  # Set-up step.
-  - export NDK_HOME=$HOME/android-ndk
-  - make setup
 
 script:
-  # Build/install/test step.
+  - export NDK_HOME=$HOME/android-ndk
+  # Setup/build/install/test steps, all together.
   - mkdir -p /tmp/android-travis
-  - make install
+  - make all
 
 before_cache:
   - make upload

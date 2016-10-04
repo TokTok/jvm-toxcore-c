@@ -1,7 +1,5 @@
 #include "../ToxCrypto.h"
 
-#ifdef TOX_DEFINED
-
 HANDLE ("Decryption", DECRYPTION)
 {
   switch (error)
@@ -38,5 +36,3 @@ HANDLE ("KeyDerivation", KEY_DERIVATION)
     }
   return unhandled ();
 }
-
-#endif

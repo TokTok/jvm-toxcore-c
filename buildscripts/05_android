@@ -22,7 +22,7 @@ my $PLATFORM = "android-19";
 
 my %ABI = (
    # Target triple                                     Emulator binary            Image ABI      NDK ABI
-   'arm-linux-androideabi' =>                         ['emulator',                'armeabi-v7a', 'armeabi-v7a'],
+   'arm-linux-androideabi' => ($ENV{TRAVIS} ? undef : ['emulator',                'armeabi-v7a', 'armeabi-v7a']),
    'aarch64-linux-android' => ($ENV{TRAVIS} ? undef : ['emulator64-ranchu-arm64', 'armeabi-v7a', 'arm64-v8a']),
    'i686-linux-android'    => ($ENV{TRAVIS} ? undef : ['emulator',                'x86',         'x86']),
 );

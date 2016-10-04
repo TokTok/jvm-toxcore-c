@@ -1,10 +1,10 @@
 diff --git a/toxcore/TCP_server.c b/toxcore/TCP_server.c
-index d7401de..1ba77a2 100644
+index a078da9..ced28ba 100644
 --- a/toxcore/TCP_server.c
 +++ b/toxcore/TCP_server.c
-@@ -32,6 +32,10 @@
- 
- #include "util.h"
+@@ -68,6 +68,10 @@ size_t tcp_server_listen_count(const TCP_Server *tcp_server)
+     return tcp_server->num_listening_socks;
+ }
  
 +#ifndef EPOLLRDHUP
 +#define EPOLLRDHUP 0x2000
