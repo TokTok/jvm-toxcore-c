@@ -50,7 +50,7 @@ my ($toxcore_user, $toxcore_repo) = split '/', $toxcore;
       '--disable-tests',
       only_on (qr/android/, '--disable-rt'),
    ],
-   ["https://github.com/google", "protobuf", "master", @common,
+   ["https://github.com/google", "protobuf", "v3.0.2", @common,
       (only_on qr/android/, '--with-protoc=protoc'),
       (only_on qr/arm-linux-androideabi/,
          'LDFLAGS=-latomic', # For __atomic_fetch_add_4.

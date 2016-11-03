@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
 // Test dependencies.
 libraryDependencies ++= Seq(
   "com.intellij" % "forms_rt" % "7.0.3",
-  "com.storm-enroute" %% "scalameter" % "0.8-SNAPSHOT",
+  "com.storm-enroute" %% "scalameter" % "0.7",
   "jline" % "jline" % "2.14.2",
   "junit" % "junit" % "4.12",
   "org.scalacheck" %% "scalacheck" % "1.13.2",

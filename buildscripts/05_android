@@ -18,13 +18,14 @@ my $C = require C;
 # Run adb logcat -d on test failure.
 my $LOGCAT_ON_FAILURE = 1;
 
-my $PLATFORM = "android-19";
+my $PLATFORM = "android-24";
 
 my %ABI = (
-   # Target triple                                     Emulator binary            Image ABI      NDK ABI
-   'arm-linux-androideabi' => ($ENV{TRAVIS} ? undef : ['emulator',                'armeabi-v7a', 'armeabi-v7a']),
-   'aarch64-linux-android' => ($ENV{TRAVIS} ? undef : ['emulator64-ranchu-arm64', 'armeabi-v7a', 'arm64-v8a']),
-   'i686-linux-android'    => ($ENV{TRAVIS} ? undef : ['emulator',                'x86',         'x86']),
+   # Target triple                                     Emulator binary   Image ABI      NDK ABI
+   'arm-linux-androideabi' => ($ENV{TRAVIS} ? undef : ['emulator',       'armeabi-v7a', 'armeabi-v7a']),
+   'aarch64-linux-android' => ($ENV{TRAVIS} ? undef : ['emulator64-arm', 'arm64-v8a',   'arm64-v8a']),
+   'i686-linux-android'    => ($ENV{TRAVIS} ? undef : ['emulator',       'x86',         'x86']),
+   'x86_64-linux-android'  => ($ENV{TRAVIS} ? undef : ['emulator64-x86', 'x86_64',      'x86_64']),
 );
 
 
@@ -45,8 +46,8 @@ if ($abi) {
 
    my $native_lib_dir = "toktok/src/main/libs/$abi_native_name";
 
-   my $native_lib_dst = "$native_lib_dir/libtox4j.so";
-   my $native_lib_src = "target/$TARGET/libtox4j.so";
+   my $native_lib_dst = "$native_lib_dir/libtox4j-c.so";
+   my $native_lib_src = "target/$TARGET/libtox4j-c.so";
    if (-f $native_lib_src) {
       print "Copying native library from $native_lib_src to $native_lib_dst\n";
       must_system "cp", "-a", $native_lib_src, $native_lib_dst;
@@ -54,7 +55,7 @@ if ($abi) {
 
    my ($adb_state) = must_popen "adb", "get-state";
    if ($adb_state ne "device") {
-      my @targets = must_popen "android", "list", "targets", "-c";
+      my @targets = grep { /^android-/ } must_popen "android", "list", "targets", "-c";
       my ($target) = grep { $_ eq $PLATFORM } @targets;
       $target ||= $targets[-1];
       print "Available targets: @targets, selecting $target\n";
@@ -66,6 +67,7 @@ if ($abi) {
          my @args = ($abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window");
          BuildScript::show \@args;
          exec @args;
+         die "exec failed: $!";
       }
       print "Waiting for device to be online\n";
       must_system "adb", "wait-for-device";

@@ -52,7 +52,7 @@ my %NDK_FILES = (
 );
 
 
-my $NDK_DIR = "android-ndk-r12b";
+my $NDK_DIR = "android-ndk-r13b";
 my $NDK_PACKAGE = "$NDK_DIR-$^O-x86_64.zip";
 
 if ($C->HOST ne $C->TARGET) {
