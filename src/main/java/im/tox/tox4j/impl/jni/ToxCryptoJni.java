@@ -10,8 +10,8 @@ public final class ToxCryptoJni {
   static native byte[] toxPassKeyEncrypt(byte[] data, byte[] passKey);
   static native byte[] toxGetSalt(byte[] data);
   static native boolean toxIsDataEncrypted(byte[] data);
-  static native byte[] toxDeriveKeyWithSalt(byte[] passphrase, byte[] salt);
-  static native byte[] toxDeriveKeyFromPass(byte[] passphrase);
+  static native byte[] toxPassKeyDeriveWithSalt(byte[] passphrase, byte[] salt);
+  static native byte[] toxPassKeyDerive(byte[] passphrase);
   static native byte[] toxPassKeyDecrypt(byte[] data, byte[] passKey);
   static native byte[] toxHash(byte[] data);
 

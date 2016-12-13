@@ -1,39 +1,36 @@
 #include "ToxCrypto.h"
 
 
-template<typename Iterator, std::size_t N>
-static void
-byte_copy_to (Iterator begin, uint8_t const (&data)[N])
+struct pass_key_deleter
 {
-  std::copy (data, data + N, begin);
-}
+  void operator () (Tox_Pass_Key *pass_key)
+  {
+    tox_pass_key_free (pass_key);
+  }
+};
 
-template<typename Iterator, std::size_t N>
-static void
-byte_copy_from (uint8_t (&data)[N], Iterator begin)
-{
-  std::copy (begin, begin + N, data);
-}
+typedef std::unique_ptr<Tox_Pass_Key, pass_key_deleter> pass_key_ptr;
 
 
 static jbyteArray
-pass_key_to_java (JNIEnv *env, TOX_PASS_KEY const &out_key)
+pass_key_to_java (JNIEnv *env, Tox_Pass_Key const &out_key)
 {
-  std::vector<uint8_t> pass_key;
-  byte_copy_to (std::back_inserter (pass_key), out_key.salt);
-  byte_copy_to (std::back_inserter (pass_key), out_key.key);
-  return toJavaArray (env, pass_key);
+  return toJavaArray (env,
+    *reinterpret_cast<uint8_t const (*)[TOX_PASS_SALT_LENGTH + TOX_PASS_KEY_LENGTH]> (&out_key));
 }
 
-static TOX_PASS_KEY
+static pass_key_ptr
 pass_key_from_java (JNIEnv *env, jbyteArray passKeyArray)
 {
-  TOX_PASS_KEY pass_key;
+  pass_key_ptr pass_key (tox_pass_key_new ());
+  tox4j_assert (pass_key != nullptr);
 
   auto passKey = fromJavaArray (env, passKeyArray);
-  tox4j_assert (passKey.size () == sizeof pass_key.salt + sizeof pass_key.key);
-  byte_copy_from (pass_key.salt, passKey.data ());
-  byte_copy_from (pass_key.key , passKey.data () + sizeof pass_key.salt);
+  tox4j_assert (passKey.size () == TOX_PASS_SALT_LENGTH + TOX_PASS_KEY_LENGTH);
+  std::copy (
+    passKey.begin (),
+    passKey.end (),
+    reinterpret_cast<uint8_t *> (pass_key.get ()));
 
   return pass_key;
 }
@@ -41,25 +38,30 @@ pass_key_from_java (JNIEnv *env, jbyteArray passKeyArray)
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    getSalt
+ * Method:    toxGetSalt
  * Signature: ([B)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxGetSalt
   (JNIEnv *env, jclass, jbyteArray dataArray)
 {
   auto data = fromJavaArray (env, dataArray);
-  uint8_t salt[TOX_PASS_SALT_LENGTH];
+  uint8_t salt[TOX_PASS_SALT_LENGTH] = { 0 };
 
-  if (tox_get_salt (data.data (), salt))
-    return toJavaArray (env, salt);
-
-  return toJavaArray (env, std::vector<uint8_t> ());
+  LogEntry log_entry (tox_get_salt);
+  return with_error_handling<ToxCrypto> (log_entry, env,
+    [env, &salt] (bool er)
+      {
+        return toJavaArray (env, salt);
+      },
+    tox_get_salt,
+    data.data (), salt
+  );
 }
 
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    isDataEncrypted
+ * Method:    toxIsDataEncrypted
  * Signature: ([B)Z
  */
 JNIEXPORT jboolean JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxIsDataEncrypted
@@ -74,15 +76,16 @@ JNIEXPORT jboolean JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxIsDataEncr
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    deriveKeyWithSalt
+ * Method:    toxPassKeyDeriveWithSalt
  * Signature: ([B[B)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxDeriveKeyWithSalt
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDeriveWithSalt
   (JNIEnv *env, jclass, jbyteArray passphraseArray, jbyteArray saltArray)
 {
   auto passphrase = fromJavaArray (env, passphraseArray);
   auto salt = fromJavaArray (env, saltArray);
-  TOX_PASS_KEY out_key;
+  pass_key_ptr out_key (tox_pass_key_new ());
+  tox4j_assert (out_key != nullptr);
 
   if (salt.size () != TOX_PASS_SALT_LENGTH)
     {
@@ -90,47 +93,48 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxDeriveKe
       return nullptr;
     }
 
-  LogEntry log_entry (tox_derive_key_with_salt);
+  LogEntry log_entry (tox_pass_key_derive_with_salt);
   return with_error_handling<ToxCrypto> (log_entry, env,
     [env, &out_key] (bool)
       {
-        return pass_key_to_java (env, out_key);
+        return pass_key_to_java (env, *out_key);
       },
-    tox_derive_key_with_salt,
-    (unsigned char *)passphrase.data (), passphrase.size (),
-    (unsigned char *)salt.data (),
-    &out_key
+    tox_pass_key_derive_with_salt,
+    out_key.get (),
+    passphrase.data (), passphrase.size (),
+    salt.data ()
   );
 }
 
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    deriveKeyFromPass
+ * Method:    toxPassKeyDerive
  * Signature: ([B)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxDeriveKeyFromPass
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDerive
   (JNIEnv *env, jclass, jbyteArray passphraseArray)
 {
   auto passphrase = fromJavaArray (env, passphraseArray);
-  TOX_PASS_KEY out_key;
+  pass_key_ptr out_key (tox_pass_key_new ());
+  tox4j_assert (out_key != nullptr);
 
-  LogEntry log_entry (tox_derive_key_from_pass);
+  LogEntry log_entry (tox_pass_key_derive);
   return with_error_handling<ToxCrypto> (log_entry, env,
     [env, &out_key] (bool)
       {
-        return pass_key_to_java (env, out_key);
+        return pass_key_to_java (env, *out_key);
       },
-    tox_derive_key_from_pass,
-    (unsigned char *)passphrase.data (), passphrase.size (),
-    &out_key
+    tox_pass_key_derive,
+    out_key.get (),
+    passphrase.data (), passphrase.size ()
   );
 }
 
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    decrypt
+ * Method:    toxPassKeyDecrypt
  * Signature: ([B[B)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDecrypt
@@ -146,7 +150,7 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyD
     )
   );
 
-  TOX_PASS_KEY const pass_key = pass_key_from_java (env, passKeyArray);
+  pass_key_ptr pass_key = pass_key_from_java (env, passKeyArray);
 
   LogEntry log_entry (tox_pass_key_decrypt);
   return with_error_handling<ToxCrypto> (log_entry, env,
@@ -155,8 +159,8 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyD
         return toJavaArray (env, out);
       },
     tox_pass_key_decrypt,
+    pass_key.get (),
     data.data (), data.size (),
-    &pass_key,
     out.data ()
   );
 }
@@ -164,7 +168,7 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyD
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    encrypt
+ * Method:    toxPassKeyEncrypt
  * Signature: ([B[B)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyEncrypt
@@ -173,7 +177,7 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyE
   auto data = fromJavaArray (env, dataArray);
   std::vector<uint8_t> out (data.size () + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
 
-  TOX_PASS_KEY const pass_key = pass_key_from_java (env, passKeyArray);
+  pass_key_ptr pass_key = pass_key_from_java (env, passKeyArray);
 
   LogEntry log_entry (tox_pass_key_encrypt);
   return with_error_handling<ToxCrypto> (log_entry, env,
@@ -182,8 +186,8 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyE
         return toJavaArray (env, out);
       },
     tox_pass_key_encrypt,
+    pass_key.get (),
     data.data (), data.size (),
-    &pass_key,
     out.data ()
   );
 }

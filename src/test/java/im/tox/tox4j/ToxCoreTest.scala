@@ -136,10 +136,10 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
         assert(tox.getNospam == test)
         assert(tox.getNospam == tox.getNospam)
         val check = Array(
-          (test >> 8 * 0).toByte,
-          (test >> 8 * 1).toByte,
+          (test >> 8 * 3).toByte,
           (test >> 8 * 2).toByte,
-          (test >> 8 * 3).toByte
+          (test >> 8 * 1).toByte,
+          (test >> 8 * 0).toByte
         )
         val nospam: Array[Byte] = tox.getAddress.value.slice(ToxCoreConstants.PublicKeySize, ToxCoreConstants.PublicKeySize + 4)
         assert(nospam sameElements check)

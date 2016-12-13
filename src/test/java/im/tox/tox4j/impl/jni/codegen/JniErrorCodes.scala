@@ -2,7 +2,7 @@ package im.tox.tox4j.impl.jni.codegen
 
 import im.tox.tox4j.av.exceptions._
 import im.tox.tox4j.core.exceptions._
-import im.tox.tox4j.crypto.exceptions.{ ToxDecryptionException, ToxEncryptionException, ToxKeyDerivationException }
+import im.tox.tox4j.crypto.exceptions._
 import im.tox.tox4j.exceptions.JavaOnly
 import im.tox.tox4j.impl.jni.codegen.NameConversions.{ cxxTypeName, javaTypeName }
 import im.tox.tox4j.impl.jni.codegen.cxx.Ast._
@@ -84,6 +84,7 @@ object JniErrorCodes extends CodeGenerator {
       Seq(
         generateErrorCode(ToxDecryptionException.Code.values),
         generateErrorCode(ToxEncryptionException.Code.values),
+        generateErrorCode(ToxGetSaltException.Code.values),
         generateErrorCode(ToxKeyDerivationException.Code.values)
       )
   }

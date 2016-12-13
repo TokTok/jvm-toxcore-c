@@ -19,9 +19,6 @@ my @common = (
    ),
 );
 
-my $toxcore = $ENV{TOXCORE} || "TokTok/c-toxcore";
-my ($toxcore_user, $toxcore_repo) = split '/', $toxcore;
-
 # External dependencies.
 (
    ["https://github.com/yasm", "yasm", "master", @common],
@@ -45,7 +42,7 @@ my ($toxcore_user, $toxcore_repo) = split '/', $toxcore;
       '--enable-minimal',
       '--disable-pie',
    ],
-   ["https://github.com/$toxcore_user", $toxcore_repo, "master", @common,
+   ["https://github.com/TokTok", "c-toxcore", "master", @common,
       '--disable-testing',
       '--disable-tests',
       only_on (qr/android/, '--disable-rt'),

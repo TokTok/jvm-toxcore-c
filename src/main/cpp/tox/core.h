@@ -22,7 +22,6 @@ namespace tox
     ::tox_callback_##CB(tox, callback); \
   }
 
-#if TOX_VERSION_IS_API_COMPATIBLE(0, 0, 1)
   COMPAT_CB (self_connection_status)
   COMPAT_CB (friend_status_message)
   COMPAT_CB (friend_name)
@@ -38,7 +37,6 @@ namespace tox
   COMPAT_CB (friend_message)
   COMPAT_CB (friend_read_receipt)
   COMPAT_CB (friend_status)
-#endif
 
 #undef COMPAT_CB
 
