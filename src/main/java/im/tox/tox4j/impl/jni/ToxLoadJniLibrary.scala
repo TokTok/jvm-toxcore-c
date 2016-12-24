@@ -24,7 +24,8 @@ object ToxLoadJniLibrary {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private val RepoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
+  // disable this feature
+  private val RepoUrl = "https://127.0.0.1/"
 
   private val AlreadyLoaded = "Native Library (.+) already loaded in another classloader".r
   private val NotFoundDalvik = "Couldn't load .+ from loader .+ findLibrary returned null".r
@@ -39,19 +40,26 @@ object ToxLoadJniLibrary {
         sys.props("os.name")
       }
 
-    Map(
-      "Android" -> Map(
-        "aarch64" -> "aarch64-linux-android",
-        "armv7l" -> "arm-linux-androideabi",
-        "i686" -> "i686-linux-android"
-      ),
-      "Linux" -> Map(
-        "amd64" -> "x86_64-linux"
-      ),
-      "Mac OS X" -> Map(
-        "x86_64" -> "x86_64-darwin"
-      )
-    )(osName)(sys.props("os.arch"))
+   try {
+      Map(
+        "Android" -> Map(
+          "aarch64" -> "aarch64-linux-android",
+          "armv7l" -> "arm-linux-androideabi",
+          "i686" -> "i686-linux-android"
+        ),
+        "Linux" -> Map(
+          "amd64" -> "x86_64-linux"
+        ),
+        "Mac OS X" -> Map(
+          "x86_64" -> "x86_64-darwin"
+        )
+      )(osName)(sys.props("os.arch"))
+   } catch {
+     case e: Exception => {
+        // what ever happens just assume arm android
+        Map("armv7l" -> "arm-linux-androideabi")("armv7l");
+     }
+   }
   }
 
   private def withTempFile(prefix: String, suffix: String)(block: File => Unit): Unit = {
