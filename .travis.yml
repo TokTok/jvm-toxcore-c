@@ -36,6 +36,7 @@ install:
 
 script:
   - export NDK_HOME=$HOME/android-ndk
+
   # Setup/build/install/test steps, all together.
   - mkdir -p /tmp/android-travis
   - make all
