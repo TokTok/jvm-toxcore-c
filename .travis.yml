@@ -41,8 +41,9 @@ script:
   - make all
 
 before_cache:
-  - make upload
-  # Clean up cache.
+  # - make upload
+  - find $HOME -type f -name 'tox4j*jar' -exec ls -hal {} \;
+  - find $HOME -type f -name 'tox4j*jar' -exec unzip -t {} \;
   - find $HOME/cache/ivy2 -type f -name "ivydata-*.properties" -delete
   - find $HOME/cache/sbt/boot -name "sbt.*.lock" -delete
 
