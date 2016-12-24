@@ -1,7 +1,7 @@
 // General settings.
 organization  := "org.toktok"
 name          := "tox4j-c"
-version       := "0.1.0-SNAPSHOT"
+version       := "0.1.1-SNAPSHOT"
 scalaVersion  := "2.11.7"
 
 bintrayVcsUrl := Some("https://github.com/TokTok/jvm-toxcore-c")
@@ -16,7 +16,7 @@ resolvers += Resolver.bintrayRepo("toktok", "maven")
 
 // Build dependencies.
 libraryDependencies ++= Seq(
-  "org.toktok" %% "tox4j-api" % "0.1.0",
+  "org.toktok" %% "tox4j-api" % "0.1.1",
   "org.toktok" %% "macros" % "0.1.0",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.43"
 )
@@ -42,8 +42,8 @@ inConfig(Test)(Keys.compile <<= Keys.compile.dependsOn(nativeLink in NativeTest)
 
 nativeLibraryDependencies ++= Seq(
   "google" % "protobuf" % "3.0.0-beta-1",
-  "toktok" % "libtoxav" % "0.0.1",
-  "toktok" % "libtoxcore" % "0.0.1",
+  "toktok" % "libtoxav" % "0.1.0",
+  "toktok" % "libtoxcore" % "0.1.0",
   // Required, since toxav's pkg-config files are incomplete:
   "jedisct1" % "libsodium" % "1.0.7",
   "webmproject" % "vpx" % "1.5.0"

@@ -60,6 +60,9 @@ struct MakeArrayFromJava
   {
   }
 
+  CType const *begin () const { return data (); }
+  CType const *end   () const { return data () + size (); }
+
   CType const *
   data () const
   {

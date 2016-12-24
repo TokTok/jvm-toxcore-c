@@ -24,10 +24,10 @@ object ToxCryptoImpl extends ToxCrypto {
     ToxCryptoJni.toxGetSalt(data)
   override def isDataEncrypted(data: Array[Byte]): Boolean =
     ToxCryptoJni.toxIsDataEncrypted(data)
-  override def deriveKeyWithSalt(passphrase: Array[Byte], salt: Array[Byte]): PassKey =
-    ToxCryptoJni.toxDeriveKeyWithSalt(passphrase, salt)
-  override def deriveKeyFromPass(passphrase: Array[Byte]): PassKey =
-    ToxCryptoJni.toxDeriveKeyFromPass(passphrase)
+  override def passKeyDeriveWithSalt(passphrase: Array[Byte], salt: Array[Byte]): PassKey =
+    ToxCryptoJni.toxPassKeyDeriveWithSalt(passphrase, salt)
+  override def passKeyDerive(passphrase: Array[Byte]): PassKey =
+    ToxCryptoJni.toxPassKeyDerive(passphrase)
   override def decrypt(data: Array[Byte], passKey: PassKey): Array[Byte] =
     ToxCryptoJni.toxPassKeyDecrypt(data, passKey)
   override def hash(data: Array[Byte]): Array[Byte] =

@@ -26,6 +26,17 @@ HANDLE ("Encryption", ENCRYPTION)
   return unhandled ();
 }
 
+HANDLE ("GetSalt", GET_SALT)
+{
+  switch (error)
+    {
+    success_case (GET_SALT);
+    failure_case (GET_SALT, BAD_FORMAT);
+    failure_case (GET_SALT, NULL);
+    }
+  return unhandled ();
+}
+
 HANDLE ("KeyDerivation", KEY_DERIVATION)
 {
   switch (error)
