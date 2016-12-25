@@ -32,7 +32,8 @@ my @common = (
       (only_on qr/aarch64-linux-android/,
          '--libc=$SYSROOT'
       ),
-      (only_on qr/arm-linux-androideabi/, '--target=armv7-android-gcc'),
+      (only_on qr/arm-linux-androideabi/, '--target=arm-android-gcc'),
+      (only_on qr/armv7-linux-androideabi/, '--target=armv7-android-gcc'),
       (only_on qr/aarch64-linux-android/, '--target=arm64-android-gcc'),
       (only_on qr/i686-linux-android/   , '--target=x86-android-gcc'  ),
       (only_on qr/x86_64-linux-android/ , '--target=x86_64-android-gcc'  ),
