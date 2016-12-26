@@ -61,7 +61,7 @@ object ToxCoreTestBase extends Assertions {
       else if ('0' to '9' contains c) { c - '0' }
       else if ('A' to 'F' contains c) { c - 'A' + 10 }
       else if ('a' to 'f' contains c) { c - 'a' + 10 }
-      else { throw new IllegalArgumentException(s"non-hex digit character: $c") }
+      else { throw new IllegalArgumentException(s"Non-hex digit character: $c") }
     digit.toByte
   }
 

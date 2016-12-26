@@ -47,7 +47,7 @@ my @common = (
       '--disable-tests',
       only_on (qr/android/, '--disable-rt'),
    ],
-   ["https://github.com/google", "protobuf", "v3.0.2", @common,
+   ["https://github.com/google", "protobuf", "v3.1.0", @common,
       (only_on qr/android/, '--with-protoc=protoc'),
       (only_on qr/arm-linux-androideabi/,
          'LDFLAGS=-latomic', # For __atomic_fetch_add_4.

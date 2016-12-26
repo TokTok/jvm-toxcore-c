@@ -24,12 +24,80 @@ Requests and the reviewer will guide you through the process.
 
 # Building Tox4j
 
-## Dependencies
+## Dependencies: compile
 
-### Java
+To build the package itself, the following dependencies are required:
 
-Required Java libraries are downloaded automatically by sbt, which needs to be
-installed.
+- com.chuusai:shapeless_2.11:2.3.1
+- com.google.code.findbugs:jsr305:3.0.0
+- com.google.guava:guava:19.0
+- com.google.protobuf:protobuf-java:3.1.0
+- com.intellij:annotations:12.0
+- com.lihaoyi:fastparse-utils_2.11:0.4.2
+- com.lihaoyi:fastparse_2.11:0.4.2
+- com.lihaoyi:sourcecode_2.11:0.1.3
+- com.trueaccord.lenses:lenses_2.11:0.4.9
+- com.trueaccord.scalapb:scalapb-runtime-grpc_2.11:0.5.46
+- com.trueaccord.scalapb:scalapb-runtime_2.11:0.5.46
+- com.typesafe.scala-logging:scala-logging_2.11:3.5.0
+- io.grpc:grpc-context:1.0.1
+- io.grpc:grpc-core:1.0.1
+- io.grpc:grpc-stub:1.0.1
+- org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4
+- org.scala-lang.modules:scala-xml_2.11:1.0.4
+- org.scala-lang:scala-compiler:2.11.7
+- org.scala-lang:scala-reflect:2.11.7
+- org.scalaz:scalaz-core_2.11:7.2.6
+- org.scodec:scodec-bits_2.11:1.1.0
+- org.scodec:scodec-core_2.11:1.10.2
+- org.slf4j:slf4j-api:1.7.21
+- org.toktok:macros_2.11:0.1.0
+- org.toktok:tox4j-api_2.11:0.1.1
+- org.toktok:tox4j-c_2.11:0.1.1-SNAPSHOT
+- org.typelevel:macro-compat_2.11:1.1.1
+
+## Dependencies: test
+
+For testing, the following additional dependencies are required:
+
+- asm:asm-commons:3.0
+- asm:asm-tree:3.0
+- asm:asm:3.0
+- com.fasterxml.jackson.core:jackson-annotations:2.5.2
+- com.fasterxml.jackson.core:jackson-core:2.5.2
+- com.fasterxml.jackson.core:jackson-databind:2.5.2
+- com.fasterxml.jackson.module:jackson-module-scala_2.11:2.5.2
+- com.github.wookietreiber:scala-chart_2.11:0.4.2
+- com.intellij:forms_rt:7.0.3
+- com.jgoodies:forms:1.1-preview
+- com.storm-enroute:scalameter-core_2.11:0.7
+- com.storm-enroute:scalameter_2.11:0.7
+- com.thoughtworks.paranamer:paranamer:2.6
+- jdom:jdom:1.0
+- jline:jline:2.14.2
+- junit:junit:4.12
+- log4j:log4j:1.2.17
+- org.apache.commons:commons-lang3:3.4
+- org.apache.commons:commons-math3:3.2
+- org.hamcrest:hamcrest-core:1.3
+- org.jfree:jcommon:1.0.21
+- org.jfree:jfreechart:1.0.17
+- org.ow2.asm:asm:5.0.4
+- org.scala-lang.modules:scala-swing_2.11:1.0.1
+- org.scala-lang.modules:scala-xml_2.11:1.0.5
+- org.scala-sbt:test-interface:1.0
+- org.scala-tools.testing:test-interface:0.5
+- org.scalacheck:scalacheck_2.11:1.13.4
+- org.scalactic:scalactic_2.11:3.0.1
+- org.scalatest:scalatest_2.11:3.0.1
+- org.scalaz:scalaz-concurrent_2.11:7.2.8
+- org.scalaz:scalaz-core_2.11:7.2.8
+- org.scalaz:scalaz-effect_2.11:7.2.8
+- org.slf4j:slf4j-api:1.7.22
+- org.slf4j:slf4j-log4j12:1.7.22
+- xml-apis:xml-apis:1.3.04
+
+## C/C++ dependencies
 
 ### Native code
 
