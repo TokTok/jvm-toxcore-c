@@ -39,7 +39,7 @@ object ToxLoadJniLibrary {
         sys.props("os.name")
       }
 
-   try { 
+   try {
       Map(
         "Android" -> Map(
           "aarch64" -> "aarch64-linux-android",
@@ -60,7 +60,6 @@ object ToxLoadJniLibrary {
         Map("armv7l" -> "arm-linux-androideabi")("armv7l");
      }
    }
-    
   }
 
   private def withTempFile(prefix: String, suffix: String)(block: File => Unit): Unit = {
