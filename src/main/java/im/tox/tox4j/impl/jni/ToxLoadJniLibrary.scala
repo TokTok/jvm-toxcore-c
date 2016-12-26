@@ -24,7 +24,7 @@ object ToxLoadJniLibrary {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
-  private val RepoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/native"
+  private val RepoUrl = "https://raw.githubusercontent.com/tox4j/tox4j.github.io/master/XXXXnative"
 
   private val AlreadyLoaded = "Native Library (.+) already loaded in another classloader".r
   private val NotFoundDalvik = "Couldn't load .+ from loader .+ findLibrary returned null".r
@@ -44,6 +44,7 @@ object ToxLoadJniLibrary {
         "aarch64" -> "aarch64-linux-android",
         "armv7l" -> "arm-linux-androideabi",
         "i686" -> "i686-linux-android"
+        "armv8l" -> "arm-linux-androideabi",
       ),
       "Linux" -> Map(
         "amd64" -> "x86_64-linux"
