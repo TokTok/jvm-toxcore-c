@@ -39,20 +39,28 @@ object ToxLoadJniLibrary {
         sys.props("os.name")
       }
 
-    Map(
-      "Android" -> Map(
-        "aarch64" -> "aarch64-linux-android",
-        "armv7l" -> "arm-linux-androideabi",
-        "i686" -> "i686-linux-android"
-        "armv8l" -> "arm-linux-androideabi",
-      ),
-      "Linux" -> Map(
-        "amd64" -> "x86_64-linux"
-      ),
-      "Mac OS X" -> Map(
-        "x86_64" -> "x86_64-darwin"
-      )
-    )(osName)(sys.props("os.arch"))
+   try { 
+      Map(
+        "Android" -> Map(
+          "aarch64" -> "aarch64-linux-android",
+          "armv7l" -> "arm-linux-androideabi",
+          "i686" -> "i686-linux-android"
+          // "armv8l" -> "arm-linux-androideabi",
+        ),
+        "Linux" -> Map(
+          "amd64" -> "x86_64-linux"
+        ),
+        "Mac OS X" -> Map(
+          "x86_64" -> "x86_64-darwin"
+        )
+      )(osName)(sys.props("os.arch"))
+   } catch {
+     case e: Exception => {
+        // what ever happens just assume arm android
+        Map("armv7l" -> "arm-linux-androideabi")("armv7l");
+     }
+   }
+    
   }
 
   private def withTempFile(prefix: String, suffix: String)(block: File => Unit): Unit = {
