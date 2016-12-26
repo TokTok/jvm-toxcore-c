@@ -25,7 +25,7 @@ final class SendFileButtonOnAction(toxGui: MainView) extends ActionListener {
 
       val file = new File(toxGui.fileName.getText)
       if (!file.exists) {
-        JOptionPane.showMessageDialog(toxGui, "File does not exist: " + file)
+        JOptionPane.showMessageDialog(toxGui, s"File does not exist: $file")
       } else {
         toxGui.fileModel.addOutgoing(
           friendNumber,

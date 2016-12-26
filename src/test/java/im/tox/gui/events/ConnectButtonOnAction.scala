@@ -91,7 +91,7 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
       toxGui.addMessage("Created Tox instance; started event loop")
     } catch {
       case e: ToxException[_] =>
-        toxGui.addMessage("Error creating Tox instance: " + e.code)
+        toxGui.addMessage(s"Error creating Tox instance: ${e.code}")
       case e: Throwable =>
         JOptionPane.showMessageDialog(toxGui, MainView.printExn(e))
     }

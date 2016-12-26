@@ -41,7 +41,7 @@ final class FileRecvCallbackTest extends AliceBobTest {
     }
 
     override def fileRecv(friendNumber: ToxFriendNumber, fileNumber: Int, kind: Int, fileSize: Long, filename: ToxFilename)(state: ChatState): ChatState = {
-      debug("received file send request " + fileNumber + " from friend number " + friendNumber)
+      debug(s"received file send request $fileNumber from friend number $friendNumber")
       assert(friendNumber == AliceBobTestBase.FriendNumber)
       assert(fileNumber == (0 | 0x10000))
       assert(kind == ToxFileKind.DATA)

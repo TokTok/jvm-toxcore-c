@@ -70,9 +70,12 @@ private[jni] final class Event extends (() => Unit) {
 
   @tailrec
   private def pruneCallbacks(): Unit = {
-    if (callbacks.nonEmpty && callbacks.last == Event.EmptyCallback) {
-      callbacks.remove(callbacks.size - 1)
-      pruneCallbacks()
+    callbacks.lastOption match {
+      case Some(Event.EmptyCallback) =>
+        callbacks.remove(callbacks.size - 1)
+        pruneCallbacks()
+      case _ =>
+      // Nothing to do.
     }
   }
 

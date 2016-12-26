@@ -65,7 +65,7 @@ final class MainView extends MainViewBase {
       messages.setModel(messageModel)
     }
 
-    val message = MainView.DateFormat.format(new Date) + ' ' + str
+    val message = MainView.DateFormat.format(new Date).toString + ' ' + str
     messageModel.addElement(message)
 
     MainView.logger.info(message)

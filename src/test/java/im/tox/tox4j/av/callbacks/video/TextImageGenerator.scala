@@ -2,7 +2,9 @@ package im.tox.tox4j.av.callbacks.video
 
 import im.tox.tox4j.av.data.{ Height, Width }
 
-abstract class TextImageGenerator(rows: String*) extends VideoGenerator {
+abstract class TextImageGenerator(row0: String, rowN: String*) extends VideoGenerator {
+
+  private def rows: Seq[String] = row0 +: rowN
 
   override final def yuv(t: Int): (Array[Byte], Array[Byte], Array[Byte]) = {
     val width = this.width.value
@@ -18,7 +20,7 @@ abstract class TextImageGenerator(rows: String*) extends VideoGenerator {
     VideoGenerator.resizeNearestNeighbour(width, height, this)
   }
 
-  override def width: Width = Width.fromInt(rows.head.length).get
+  override def width: Width = Width.fromInt(row0.length).get
   override def height: Height = Height.fromInt(rows.size).get
   override def length: Int = sys.env.get("TRAVIS").map(_ => 4).getOrElse(64)
 

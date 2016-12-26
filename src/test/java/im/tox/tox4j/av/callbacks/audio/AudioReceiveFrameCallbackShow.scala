@@ -178,7 +178,7 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
       val queue = new ArrayBlockingQueue[Option[(Int, Array[Short])]](audioLength / frameSize / 2)
 
       // Start a thread to consume the frames.
-      Future(playFrames(queue)).start
+      Future(playFrames(queue)).unsafeStart
 
       queue
     }

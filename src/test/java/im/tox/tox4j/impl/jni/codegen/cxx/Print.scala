@@ -58,6 +58,7 @@ object Print {
   /**
    * Statements.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def printStmt(stmt: Stmt, spacing: Doc = line): Doc = { // scalastyle:ignore cyclomatic.complexity
     stmt match {
       case Switch(cond, CompoundStmt(cases)) =>
@@ -66,7 +67,7 @@ object Print {
           printSeq(cases)(printStmt(_)) ::
           "}") ::
           line
-      case Switch(cond, body) => sys.error("Invalid switch-body: " + body)
+      case Switch(cond, body) => sys.error(s"invalid switch-body: $body")
       case Case(expr, body) => "case" :+: printExpr(expr) :: ":" :+: printStmt(body)
       case Default(body) => "default:" :+: printStmt(body)
       case Break => "break;"

@@ -18,7 +18,7 @@ final class PortTest extends ModuleCompanionTest(Port) {
   test("creation") {
     for (portNumber <- Port.MinValue to Port.MaxValue) {
       Port.fromInt(portNumber) match {
-        case None => fail("out of range: " + portNumber)
+        case None => fail(s"out of range: $portNumber")
         case Some(port) => assert(port.value == portNumber)
       }
     }
