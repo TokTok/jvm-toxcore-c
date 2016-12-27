@@ -21,7 +21,7 @@ my @common = (
 
 # External dependencies.
 (
-   ["https://github.com/yasm", "yasm", "master", @common],
+   ["https://github.com/yasm", "yasm", "v1.3.0", @common],
    ["https://github.com/webmproject", "libvpx", "v1.6.0",
       '--disable-examples',
       '--disable-unit-tests',
@@ -33,16 +33,17 @@ my @common = (
          '--libc=$SYSROOT'
       ),
       (only_on qr/arm-linux-androideabi/, '--target=armv7-android-gcc'),
+      (only_on qr/XXXXarmv7-linux-androideabiXX/, '--target=armv7-android-gcc'),
       (only_on qr/aarch64-linux-android/, '--target=arm64-android-gcc'),
       (only_on qr/i686-linux-android/   , '--target=x86-android-gcc'  ),
       (only_on qr/x86_64-linux-android/ , '--target=x86_64-android-gcc'  ),
    ],
-   ["https://github.com/xiph", "opus", "master", @common],
-   ["https://github.com/jedisct1", "libsodium", "stable", @common,
+   ["https://github.com/xiph", "opus", "v1.1.3", @common],
+   ["https://github.com/jedisct1", "libsodium", "1.0.11", @common,
       '--enable-minimal',
       '--disable-pie',
    ],
-   ["https://github.com/TokTok", "c-toxcore", "master", @common,
+   ["https://github.com/TokTok", "c-toxcore", "v0.1.2", @common,
       '--disable-testing',
       '--disable-tests',
       only_on (qr/android/, '--disable-rt'),
