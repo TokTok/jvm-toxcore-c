@@ -18,7 +18,7 @@ resolvers += Resolver.bintrayRepo("toktok", "maven")
 libraryDependencies ++= Seq(
   "org.toktok" %% "tox4j-api" % "0.1.1",
   "org.toktok" %% "macros" % "0.1.0",
-  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.43"
+  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.46"
 )
 
 // Test dependencies.
@@ -27,10 +27,10 @@ libraryDependencies ++= Seq(
   "com.storm-enroute" %% "scalameter" % "0.7",
   "jline" % "jline" % "2.14.2",
   "junit" % "junit" % "4.12",
-  "org.scalacheck" %% "scalacheck" % "1.13.2",
-  "org.scalatest" %% "scalatest" % "3.0.0",
-  "org.scalaz" %% "scalaz-concurrent" % "7.2.6",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.21"
+  "org.scalacheck" %% "scalacheck" % "1.13.4",
+  "org.scalatest" %% "scalatest" % "3.0.1",
+  "org.scalaz" %% "scalaz-concurrent" % "7.2.8",
+  "org.slf4j" % "slf4j-log4j12" % "1.7.22"
 ) map (_ % Test)
 
 // Add ScalaMeter as test framework.
