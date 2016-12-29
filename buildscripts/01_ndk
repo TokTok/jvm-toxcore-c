@@ -1,5 +1,13 @@
 #!/usr/bin/env perl
 
+
+system("echo '================================' >> /tmp/inst.log");
+system("echo '================================' >> /tmp/inst.log");
+system("echo $0 >> /tmp/inst.log");
+system("echo '================================' >> /tmp/inst.log");
+system("echo '================================' >> /tmp/inst.log");
+
+
 use strict;
 use utf8;
 use lib 'buildscripts';
@@ -62,7 +70,7 @@ if ($C->HOST ne $C->TARGET) {
    if (not -f $NDK_PACKAGE) {
       my $url = "http://dl.google.com/android/repository/$NDK_PACKAGE";
       print "Downloading NDK package from $url\n";
-      system "curl", "-s", $url, "-o", $NDK_PACKAGE;
+      system2 "curl", "-s", $url, "-o", $NDK_PACKAGE;
       if ($?) {
          must_system "wget", "-q", $url;
       }
