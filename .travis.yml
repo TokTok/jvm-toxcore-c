@@ -36,15 +36,13 @@ install:
 
 script:
   - export NDK_HOME=$HOME/android-ndk
-
   # Setup/build/install/test steps, all together.
   - mkdir -p /tmp/android-travis
   - make all
 
 before_cache:
-  # - make upload
-  - find $HOME -type f -name 'tox4j*jar' -exec ls -hal {} \;
-  - find $HOME -type f -name 'tox4j*jar' -exec unzip -t {} \;
+  - make upload
+  # Clean up cache.
   - find $HOME/cache/ivy2 -type f -name "ivydata-*.properties" -delete
   - find $HOME/cache/sbt/boot -name "sbt.*.lock" -delete
 
