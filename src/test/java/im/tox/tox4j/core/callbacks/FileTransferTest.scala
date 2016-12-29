@@ -59,7 +59,7 @@ final class FileTransferTest extends AliceBobTest {
       assert(fileSize == fileData.length)
       assert(new String(filename.value) == s"file for $name.png")
       state.addTask { (tox, av, state) =>
-        debug("sending control RESUME for " + fileNumber)
+        debug(s"sending control RESUME for $fileNumber")
         tox.fileControl(friendNumber, fileNumber, ToxFileControl.RESUME)
         state
       }

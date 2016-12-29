@@ -25,14 +25,14 @@ trait ToxTestMixin extends ToxExceptionChecks {
   @throws[ToxNewException]
   @throws[ToxFriendAddException]
   protected def addFriends(@NotNull tox: ToxCore, count: Int): ToxFriendNumber = {
-    if (count < 1) {
-      throw new IllegalArgumentException("Cannot add less than 1 friend: " + count)
-    }
     (0 until count).map { (i: Int) =>
       ToxCoreImplFactory.withToxUnit { friend =>
         tox.addFriendNorequest(friend.getPublicKey)
       }
-    }.last
+    }.lastOption match {
+      case None => throw new IllegalArgumentException(s"Cannot add less than 1 friend: $count")
+      case Some(num) => num
+    }
   }
 
   @throws[ToxBootstrapException]

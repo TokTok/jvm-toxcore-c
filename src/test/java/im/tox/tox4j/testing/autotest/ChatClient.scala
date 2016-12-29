@@ -104,7 +104,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
 
   override def selfConnectionStatus(connectionStatus: ToxConnection)(state: ChatStateT[T]): ChatStateT[T] = {
     if (connectionStatus != ToxConnection.NONE) {
-      debug("is now connected to the network with " + connectionStatus)
+      debug(s"is now connected to the network with $connectionStatus")
     } else {
       debug("is now disconnected from the network")
     }
@@ -114,7 +114,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
   override def friendConnectionStatus(friendNumber: ToxFriendNumber, connection: ToxConnection)(state: ChatStateT[T]): ChatStateT[T] = {
     assert(friendNumber == AliceBobTestBase.FriendNumber)
     if (connection != ToxConnection.NONE) {
-      debug(s"is now connected to friend $friendNumber with " + connection)
+      debug(s"is now connected to friend $friendNumber with $connection")
     } else {
       debug(s"is now disconnected from friend $friendNumber")
     }

@@ -96,7 +96,7 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxCoreEventListener[U
     position: Long,
     @NotNull data: Array[Byte]
   )(state: Unit): Unit = {
-    addMessage("fileRecvChunk", friendNumber, fileNumber, position, "byte[" + data.length + ']')
+    addMessage("fileRecvChunk", friendNumber, fileNumber, position, s"byte[${data.length}]")
     try {
       toxGui.fileModel.get(friendNumber, fileNumber).write(position, data)
     } catch {

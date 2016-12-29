@@ -12,7 +12,7 @@ object MethodMap {
 
   private def removeSelf(name: Seq[String]): Seq[String] = {
     name.headOption match {
-      case Some("self") => name.tail
+      case Some("self") => name.drop(1)
       case _ => name
     }
   }
@@ -36,7 +36,7 @@ object MethodMap {
       .map { method =>
         val expectedName = (method.getName
           |> NameConversions.cxxVarName
-          |> (_.split("_").toSeq.tail)
+          |> (_.split("_").toSeq.drop(1))
           |> removeSelf
           |> moveActionToFront
           |> (_.mkString("_"))
