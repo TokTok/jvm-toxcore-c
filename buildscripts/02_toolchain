@@ -11,79 +11,7 @@ my $C = require C;
 
 
 ##############################################################################
-##!/usr/bin/env perl
-
-
-system("echo '================================' >> /tmp/inst.log");
-system("echo '================================' >> /tmp/inst.log");
-system("echo $0 >> /tmp/inst.log");
-system("echo '================================' >> /tmp/inst.log");
-system("echo '================================' >> /tmp/inst.log");
-
-
-use strict;
-use utf8;
-use lib 'buildscripts';
-
-use File::Path 'make_path', 'remove_tree';
-
-use BuildScript;
-my $C = require C;
-
-
-##############################################################################
 #
-# :: Install Android toolchain.
-#
-##############################################################################
-
-
-my %ARCH = (
-   'arm-linux-androideabi' => 'arm',
-   'aarch64-linux-android' => 'arm64',
-   'i686-linux-android'    => 'x86',
-   'x86_64-linux-android'  => 'x86_64',
-);
-
-my %API = (
-   'arm-linux-androideabi' => 9,
-   'aarch64-linux-android' => 21,
-   'i686-linux-android'    => 9,
-   'x86_64-linux-android'  => 21,
-);
-
-
-if ($C->HOST ne $C->TARGET) {
-   die "No NDK path set" unless defined $C->NDK_HOME;
-
-   my $toolchain = "toolchains/" . $C->TARGET;
-   # Remove the old toolchain and create a new empty directory for it.
-   remove_tree $toolchain;
-   make_path $toolchain;
-
-   # Install a standalone Android NDK toolchain.
-   must_system (
-      $C->NDK_HOME . "/build/tools/make_standalone_toolchain.py",
-      "--arch", $ARCH{$C->TARGET},
-      "--install-dir", $toolchain,
-      "--api", $API{$C->TARGET},
-      "--force",
-   );
-
-   my $cached_sysroot = $C->CACHE_DIR . "/" . $C->TARGET;
-   if (-d $cached_sysroot) {
-      # If we have a cached sysroot/usr, remove the NDK one.
-      remove_tree "$toolchain/sysroot/usr";
-   } else {
-      # Otherwise, move the NDK one into the cache.
-      must_system "mv", "$toolchain/sysroot/usr", $cached_sysroot;
-   }
-
-   # Then symlink the cached sysroot/usr to the toolchain path.
-   symlink $cached_sysroot, "$toolchain/sysroot/usr"
-      or die "Could not symlink cached sysroot: $!";
-}
-
 # :: Install Android toolchain.
 #
 ##############################################################################
