@@ -1,7 +1,7 @@
 // General settings.
 organization  := "org.toktok"
 name          := "tox4j-c"
-version       := "0.1.1-SNAPSHOT"
+version       := "0.1.2-SNAPSHOT"
 scalaVersion  := "2.11.7"
 
 bintrayVcsUrl := Some("https://github.com/TokTok/jvm-toxcore-c")
@@ -16,7 +16,7 @@ resolvers += Resolver.bintrayRepo("toktok", "maven")
 
 // Build dependencies.
 libraryDependencies ++= Seq(
-  "org.toktok" %% "tox4j-api" % "0.1.1",
+  "org.toktok" %% "tox4j-api" % "0.1.2",
   "org.toktok" %% "macros" % "0.1.0",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.46"
 )

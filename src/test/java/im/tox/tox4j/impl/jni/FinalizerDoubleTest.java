@@ -27,6 +27,7 @@ public class FinalizerDoubleTest extends JUnitSuite {
   private static final ToxOptions OPTIONS = new ToxOptions(
       true,
       true,
+      true,
       ProxyOptions.None$.MODULE$,
       ToxCoreConstants.DefaultStartPort(),
       ToxCoreConstants.DefaultEndPort(),

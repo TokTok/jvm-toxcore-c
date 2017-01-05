@@ -79,6 +79,7 @@ final class ToxCoreImpl(@NotNull val options: ToxOptions) extends ToxCore {
     ToxCoreJni.toxNew(
       options.ipv6Enabled,
       options.udpEnabled,
+      options.localDiscoveryEnabled,
       options.proxy.proxyType.ordinal,
       options.proxy.proxyAddress,
       options.proxy.proxyPort,

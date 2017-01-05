@@ -42,7 +42,7 @@ object ToxCoreImplFactory extends ToxCoreFactory {
   }
 
   def withToxUnit[R](ipv6Enabled: Boolean, udpEnabled: Boolean, proxy: ProxyOptions)(f: ToxCore => R): R = {
-    withToxUnit(ToxOptions(ipv6Enabled, udpEnabled, proxy))(f)
+    withToxUnit(ToxOptions(ipv6Enabled, udpEnabled, proxy = proxy))(f)
   }
 
   def withToxUnit[R](ipv6Enabled: Boolean, udpEnabled: Boolean)(f: ToxCore => R): R = {
@@ -70,7 +70,7 @@ object ToxCoreImplFactory extends ToxCoreFactory {
   }
 
   def withToxS[R](ipv6Enabled: Boolean, udpEnabled: Boolean, proxy: ProxyOptions)(f: ToxCore => R): R = {
-    withToxS(ToxOptions(ipv6Enabled, udpEnabled, proxy))(f)
+    withToxS(ToxOptions(ipv6Enabled, udpEnabled, proxy = proxy))(f)
   }
 
   def withToxes[R](count: Int, options: ToxOptions)(f: ToxList => R): R = {

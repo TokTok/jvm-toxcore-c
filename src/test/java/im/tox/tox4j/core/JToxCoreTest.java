@@ -22,7 +22,7 @@ public final class JToxCoreTest extends JUnitSuite {
 
   private final ToxCoreEventListener<Void> handler = new ToxCoreEventAdapter<>();
   private final ToxOptions options = new ToxOptions(
-      true, true,
+      true, true, true,
       new ProxyOptions.Http("localhost", 1234),
       ToxCoreConstants.DefaultStartPort(),
       ToxCoreConstants.DefaultEndPort(),

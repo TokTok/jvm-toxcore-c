@@ -240,7 +240,7 @@ REGISTER_FUNCS (
  * Signature: (ZZILjava/lang/String;IIII)I
  */
 TOX_METHOD (jint, New,
-  jboolean ipv6Enabled, jboolean udpEnabled,
+  jboolean ipv6Enabled, jboolean udpEnabled, jboolean localDiscoveryEnabled,
   jint proxyType, jstring proxyHost, jint proxyPort,
   jint startPort, jint endPort, jint tcpPort,
   jint saveDataType, jbyteArray saveData)
@@ -258,32 +258,32 @@ TOX_METHOD (jint, New,
       return 0;
     }
 
-  opts->ipv6_enabled = ipv6Enabled;
-  opts->udp_enabled = udpEnabled;
+  tox_options_set_ipv6_enabled (opts.get (), ipv6Enabled);
+  tox_options_set_udp_enabled (opts.get (), udpEnabled);
+  tox_options_set_local_discovery_enabled (opts.get (), localDiscoveryEnabled);
 
-  opts->proxy_type = Enum::valueOf<TOX_PROXY_TYPE> (env, proxyType);
+  tox_options_set_proxy_type (opts.get (), Enum::valueOf<TOX_PROXY_TYPE> (env, proxyType));
   UTFChars proxy_host (env, proxyHost);
-  opts->proxy_host = proxy_host.data ();
-  opts->proxy_port = proxyPort;
+  tox_options_set_proxy_host (opts.get (), proxy_host.data ());
+  tox_options_set_proxy_port (opts.get (), proxyPort);
 
-  opts->start_port = startPort;
-  opts->end_port = endPort;
-  opts->tcp_port = tcpPort;
+  tox_options_set_start_port (opts.get (), startPort);
+  tox_options_set_end_port (opts.get (), endPort);
+  tox_options_set_tcp_port (opts.get (), tcpPort);
 
   auto assert_valid_uint16 = [env](int port) {
     tox4j_assert (port >= 0);
     tox4j_assert (port <= 65535);
   };
-  if (opts->proxy_type != TOX_PROXY_TYPE_NONE)
+  if (tox_options_get_proxy_type (opts.get ()) != TOX_PROXY_TYPE_NONE)
     assert_valid_uint16 (proxyPort);
   assert_valid_uint16 (startPort);
   assert_valid_uint16 (endPort);
   assert_valid_uint16 (tcpPort);
 
   auto save_data = fromJavaArray (env, saveData);
-  opts->savedata_type = Enum::valueOf<TOX_SAVEDATA_TYPE> (env, saveDataType);
-  opts->savedata_data   = save_data.data ();
-  opts->savedata_length = save_data.size ();
+  tox_options_set_savedata_type (opts.get (), Enum::valueOf<TOX_SAVEDATA_TYPE> (env, saveDataType));
+  tox_options_set_savedata_data (opts.get (), save_data.data (), save_data.size ());
 
   return instances.with_error_handling (env,
     [env] (tox::core_ptr tox)

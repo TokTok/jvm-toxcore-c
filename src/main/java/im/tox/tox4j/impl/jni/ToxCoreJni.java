@@ -14,6 +14,7 @@ public final class ToxCoreJni {
   static native int toxNew(
       boolean ipv6Enabled,
       boolean udpEnabled,
+      boolean localDiscoveryEnabled,
       int proxyType,
       @NotNull String proxyAddress,
       int proxyPort,
