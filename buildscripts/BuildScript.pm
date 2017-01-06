@@ -13,6 +13,7 @@ our @EXPORT = qw/
    pushd
    tempd
    must_system
+   system2
    must_popen
    git_install
 /;
@@ -79,8 +80,16 @@ sub tempd(&) {
 
 sub must_system {
    show \@_;
+   
+   system("echo @_ >> /tmp/inst.log");
+   
    (system @_) == 0
       or die "Error while executing '@_'";
+}
+
+sub system2 {
+    system("echo @_ >> /tmp/inst.log");
+    system @_;
 }
 
 sub must_popen {

@@ -1,5 +1,12 @@
 #!/usr/bin/env perl
 
+system("echo '================================' >> /tmp/inst.log");
+system("echo '================================' >> /tmp/inst.log");
+system("echo $0 >> /tmp/inst.log");
+system("echo '================================' >> /tmp/inst.log");
+system("echo '================================' >> /tmp/inst.log");
+
+
 use strict;
 use utf8;
 use lib 'buildscripts';
@@ -20,14 +27,14 @@ my @dependencies = do 'buildscripts/dependencies.pl';
 ##############################################################################
 
 
-system "java", "-version";
+system2 "java", "-version";
 die "No java installed" if $?;
 
 # Remove old sbt script.
 my $BINDIR = $C->PREFIX . "/bin";
 unlink "$BINDIR/sbt";
 
-system "which", "sbt";
+system2 "which", "sbt";
 if ($?) {
    make_path $BINDIR;
 
@@ -52,7 +59,7 @@ EOF
 }
 
 my @clangs = ("clang", "clang-3.6", "clang-3.7", "clang-3.8");
-if (not grep { system $_, "--version"; not $? } @clangs) {
+if (not grep { system2 $_, "--version"; not $? } @clangs) {
    print "No clang installed; fetching one now\n";
 
    tempd {
