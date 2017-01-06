@@ -20,20 +20,20 @@ my @dependencies = do 'buildscripts/dependencies.pl';
 ##############################################################################
 
 
-system "java", "-version";
-die "No java installed" if $?;
+system 'java', '-version';
+die 'No java installed' if $?;
 
 # Remove old sbt script.
-my $BINDIR = $C->PREFIX . "/bin";
+my $BINDIR = $C->PREFIX . '/bin';
 unlink "$BINDIR/sbt";
 
-system "which", "sbt";
+system 'which', 'sbt';
 if ($?) {
    make_path $BINDIR;
 
    if (not -f "$BINDIR/sbt-launch.jar") {
       print "No sbt installed; fetching one now\n";
-      must_system "curl", "-s", "-L", "-o", "$BINDIR/sbt-launch.jar", "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar";
+      must_system 'curl', '-s', '-L', '-o', "$BINDIR/sbt-launch.jar", 'http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar';
    }
    open my $fh, '>', "$BINDIR/sbt"
       or die "Could not open sbt script for writing: $!";
@@ -51,17 +51,17 @@ EOF
    chmod 0755, "$BINDIR/sbt";
 }
 
-my @clangs = ("clang", "clang-3.6", "clang-3.7", "clang-3.8");
-if (not grep { system $_, "--version"; not $? } @clangs) {
+my @clangs = ('clang', 'clang-3.6', 'clang-3.7', 'clang-3.8');
+if (not grep { system $_, '--version'; not $? } @clangs) {
    print "No clang installed; fetching one now\n";
 
    tempd {
-      my $TARNAME = "clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04";
-      must_system "wget", "http://llvm.org/releases/3.7.0/$TARNAME.tar.xz";
-      must_system "tar", "Jxf", "$TARNAME.tar.xz";
+      my $TARNAME = 'clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04';
+      must_system 'wget', "http://llvm.org/releases/3.7.0/$TARNAME.tar.xz";
+      must_system 'tar', 'Jxf', "$TARNAME.tar.xz";
       pushd {
          for (<*>) {
-            must_system "cp", "-a", $_, $C->PREFIX;
+            must_system 'cp', '-a', $_, $C->PREFIX;
          }
       } $TARNAME;
    };
@@ -76,14 +76,14 @@ if (not grep { system $_, "--version"; not $? } @clangs) {
 
 
 sub install_dependency {
-   my ($baseurl, $repo, $branch, @flags) = @_;
+   my ($baseurl, $repo, $branch, $makeflags, @flags) = @_;
 
-   unshift @flags, "--prefix=" . $C->PREFIX;
+   unshift @flags, '--prefix=' . $C->PREFIX;
 
    @flags = flatten_flags $C->HOST, @flags;
    my $state = \%{ $C->STATE->{$C->HOST} };
 
-   git_install $state, $C->JOBS, $baseurl, $repo, $branch, @flags;
+   git_install $state, $C->JOBS, $baseurl, $repo, $branch, $makeflags, @flags;
 }
 
 

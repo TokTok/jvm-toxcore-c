@@ -9,7 +9,7 @@ use Data::Dumper;
 
 use BuildScript;
 my $C = require C;
-$C = "C";
+$C = 'C';
 
 my @dependencies = do 'buildscripts/dependencies.pl';
 
@@ -39,7 +39,7 @@ sub expand_vars {
 
 
 sub install_dependency {
-   my ($baseurl, $repo, $branch, @flags) = @_;
+   my ($baseurl, $repo, $branch, $makeflags, @flags) = @_;
 
    # Not abs_path here, because it should be relative to the sysroot.
    unshift @flags, "--prefix=$prefix";
@@ -57,7 +57,7 @@ sub install_dependency {
    local $ENV{CC} = "$toolchain/bin/$TARGET-clang";
    local $ENV{CXX} = "$toolchain/bin/$TARGET-clang++";
 
-   git_install $state, $C->JOBS, $baseurl, $repo, $branch, @flags;
+   git_install $state, $C->JOBS, $baseurl, $repo, $branch, $makeflags, @flags;
 }
 
 

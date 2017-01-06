@@ -18,6 +18,6 @@ my $C = require C;
 # Hack to make sbt-coveralls work.
 must_system "cp -r \$PWD/src/main/*/* \$PWD/";
 
-if ($C->TEST_GOAL eq "coverage" and -f "target/scala-2.11/coverage-report/cobertura.xml") {
-   must_system $C->SBT, "coveralls";
+if ($C->TEST_GOAL eq 'coverage' and -f 'target/scala-2.11/coverage-report/cobertura.xml') {
+   must_system $C->SBT, 'coveralls';
 }

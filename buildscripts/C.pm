@@ -34,15 +34,15 @@ sub NDK_HOME {
       "$ENV{HOME}/android-ndk",
       "$ENV{HOME}/usr/android-ndk-r11b",
       "$ENV{HOME}/usr/android-ndk",
-      "/opt/android-ndk-r11b",
-      "/opt/android-ndk",
+      '/opt/android-ndk-r11b',
+      '/opt/android-ndk',
    );
    $ndk_home || $ENV{NDK_HOME} || "$ENV{HOME}/android-ndk"
 }
 
 sub SBT { split /\s+/, ($ENV{SBT} || 'sbt') }
 sub JOBS { $ENV{TOX4J_JOBS} || 4 }
-sub PREFIX { CACHE_DIR . "/usr" }
+sub PREFIX { CACHE_DIR . '/usr' }
 
 sub GITHUB_KEY {
    $ENV{GITHUB_KEY} || do {
@@ -60,7 +60,7 @@ sub GITHUB_KEY {
 make_path CACHE_DIR;
 
 # Load and store the persistent program state.
-my $statefile = CACHE_DIR . "/state.pst";
+my $statefile = CACHE_DIR . '/state.pst';
 my $STATE = eval { Storable::retrieve $statefile } || {};
 END { Storable::store $STATE, $statefile }
 
@@ -86,9 +86,9 @@ $ENV{LDFLAGS} = "-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib";
 ($ENV{CXX}) = grep { `which $_` } qw/clang++ clang++-3.8 clang++-3.7 clang++-3.6/;
 
 # Enable optimisation on dependencies.
-#$ENV{CFLAGS} = $ENV{CXXFLAGS} = "-O3";
+#$ENV{CFLAGS} = $ENV{CXXFLAGS} = '-O3';
 
-if ($ARGV[0] eq "show-env") {
+if ($ARGV[0] eq 'show-env') {
    print <<EOF;
 PATH="$ENV{PATH}"
 PKG_CONFIG_PATH="$ENV{PKG_CONFIG_PATH}"

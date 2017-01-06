@@ -18,7 +18,7 @@ my $C = require C;
 # Run adb logcat -d on test failure.
 my $LOGCAT_ON_FAILURE = 1;
 
-my $PLATFORM = "android-24";
+my $PLATFORM = 'android-24';
 
 my %ABI = (
    # Target triple                                     Emulator binary   Image ABI      NDK ABI
@@ -41,8 +41,8 @@ my $abi = $ABI{$C->TARGET};
 if ($abi) {
    my ($abi_emulator, $abi_name, $abi_native_name) = @$abi;
 
-   must_system "git", "clone", "http://github.com/iphydf/toktok", "toktok"
-      unless -e "toktok";
+   must_system 'git', 'clone', 'http://github.com/TokTok/toktok-android', 'toktok'
+      unless -e 'toktok';
 
    my $native_lib_dir = "toktok/src/main/libs/$abi_native_name";
 
@@ -50,12 +50,12 @@ if ($abi) {
    my $native_lib_src = "target/$TARGET/libtox4j-c.so";
    if (-f $native_lib_src) {
       print "Copying native library from $native_lib_src to $native_lib_dst\n";
-      must_system "cp", "-a", $native_lib_src, $native_lib_dst;
+      must_system 'cp', '-a', $native_lib_src, $native_lib_dst;
    }
 
-   my ($adb_state) = must_popen "adb", "get-state";
-   if ($adb_state ne "device") {
-      my @targets = grep { /^android-/ } must_popen "android", "list", "targets", "-c";
+   my ($adb_state) = must_popen 'adb', 'get-state';
+   if ($adb_state ne 'device') {
+      my @targets = grep { /^android-/ } must_popen 'android', 'list', 'targets', '-c';
       my ($target) = grep { $_ eq $PLATFORM } @targets;
       $target ||= $targets[-1];
       print "Available targets: @targets, selecting $target\n";
@@ -64,34 +64,34 @@ if ($abi) {
       if (not ($emulator_pid = fork)) {
          print "Changing directory to $ENV{ANDROID_HOME}/tools\n";
          chdir "$ENV{ANDROID_HOME}/tools";
-         my @args = ($abi_emulator, "-avd", "test-$abi_native_name", "-no-audio", "-no-skin", "-no-window");
+         my @args = ($abi_emulator, '-avd', "test-$abi_native_name", '-no-audio', '-no-skin', '-no-window');
          BuildScript::show \@args;
          exec @args;
          die "exec failed: $!";
       }
       print "Waiting for device to be online\n";
-      must_system "adb", "wait-for-device";
+      must_system 'adb', 'wait-for-device';
 #      print "Device online; waiting 2 minutes for boot animation to stop\n";
 #      for (0 .. 120) {
-#         my ($bootanim) = must_popen -q => "adb", "shell", "getprop", "init.svc.bootanim";
+#         my ($bootanim) = must_popen -q => 'adb', 'shell', 'getprop', 'init.svc.bootanim';
 #         print "Boot animation $bootanim (after $_ seconds)\r";
-#         last if $bootanim eq "stopped";
+#         last if $bootanim eq 'stopped';
 #         sleep 1;
 #      }
    }
    print "\nUnlocking screen\n";
-   must_system "adb", "shell", "input", "keyevent", "82";
+   must_system 'adb', 'shell', 'input', 'keyevent', '82';
 
    pushd {
-      must_system "adb", "logcat", "-c";
+      must_system 'adb', 'logcat', '-c';
       if ($LOGCAT_ON_FAILURE) {
-         system "sbt", "clean", "android:test";
+         system 'sbt', 'clean', 'android:test';
          if ($?) {
-            must_system "adb", "logcat", "-d";
-            die "Android tests failed";
+            must_system 'adb', 'logcat', '-d';
+            die 'Android tests failed';
          }
       } else {
-         must_system "sbt", "clean", "android:test";
+         must_system 'sbt', 'clean', 'android:test';
       }
-   } "toktok";
+   } 'toktok';
 }

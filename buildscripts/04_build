@@ -25,8 +25,8 @@ my $C = require C;
    unlink $local_sbt;
 
    # Copy the target-specific SBT configuration if one exists.
-   my $local_sbt_config = "buildscripts/android/local.". $C->TARGET . ".sbt";
-   must_system "cp", $local_sbt_config, $local_sbt
+   my $local_sbt_config = 'buildscripts/android/local.'. $C->TARGET . '.sbt';
+   must_system 'cp', $local_sbt_config, $local_sbt
       if -f $local_sbt_config;
 }
 

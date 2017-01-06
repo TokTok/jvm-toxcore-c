@@ -52,19 +52,19 @@ my %NDK_FILES = (
 );
 
 
-my $NDK_DIR = "android-ndk-r13b";
+my $NDK_DIR = 'android-ndk-r13b';
 my $NDK_PACKAGE = "$NDK_DIR-$^O-x86_64.zip";
 
 if ($C->HOST ne $C->TARGET) {
-   die "No NDK path set" unless defined $C->NDK_HOME;
+   die 'No NDK path set' unless defined $C->NDK_HOME;
 
    # Download NDK package if it wasn't downloaded, yet.
    if (not -f $NDK_PACKAGE) {
       my $url = "http://dl.google.com/android/repository/$NDK_PACKAGE";
       print "Downloading NDK package from $url\n";
-      system "curl", "-s", $url, "-o", $NDK_PACKAGE;
+      system 'curl', '-s', $url, '-o', $NDK_PACKAGE;
       if ($?) {
-         must_system "wget", "-q", $url;
+         must_system 'wget', '-q', $url;
       }
    }
 
@@ -75,12 +75,12 @@ if ($C->HOST ne $C->TARGET) {
    print "Extracting $NDK_PACKAGE...\n";
    my @lines = eval {
       my @files = map { "$NDK_DIR/$_" } @{ $NDK_FILES{$C->TARGET} };
-      must_popen "7z", "x", $NDK_PACKAGE, map { "-ir!$_" } @files
+      must_popen '7z', 'x', $NDK_PACKAGE, map { "-ir!$_" } @files
    };
 
    if ($@ =~ /No such file or directory/) {
       # 7z didn't exist, so just unzip the whole archive.
-      @lines = must_popen "unzip", $NDK_PACKAGE;
+      @lines = must_popen 'unzip', $NDK_PACKAGE;
    }
 
    my $extracted = grep { /^Extracting/ } @lines;
@@ -91,7 +91,7 @@ if ($C->HOST ne $C->TARGET) {
    print "$_\n" for @rest;
 
    # Just so sources/cxx-stl/stlport/../gabi++ works.
-   #must_system "mkdir", "$NDK_DIR/sources/cxx-stl/stlport";
+   #must_system 'mkdir', "$NDK_DIR/sources/cxx-stl/stlport";
 
-   must_system "mv", (abs_path $NDK_DIR), $C->NDK_HOME;
+   must_system 'mv', (abs_path $NDK_DIR), $C->NDK_HOME;
 }

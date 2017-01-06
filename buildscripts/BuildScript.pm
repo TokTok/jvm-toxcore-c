@@ -84,7 +84,7 @@ sub must_system {
 }
 
 sub must_popen {
-   if ($_[0] eq "-q") {
+   if ($_[0] eq '-q') {
       shift;
    } else {
       show \@_;
@@ -105,7 +105,7 @@ sub must_popen {
 
 
 sub git_install {
-   my ($state, $jobs, $baseurl, $repo, $branch, @flags) = @_;
+   my ($state, $jobs, $baseurl, $repo, $branch, $makeflags, @flags) = @_;
 
    # Apply patch if one exists.
    my $patch = "buildscripts/patches/$repo.patch";
@@ -115,10 +115,10 @@ sub git_install {
    local $ENV{CPPFLAGS} = "$ENV{CPPFLAGS} -fPIC";
 
    tempd {
-      must_system "git", "clone", "--depth=1", "--branch=$branch", "$baseurl/$repo.git";
+      must_system 'git', 'clone', '--depth=1', "--branch=$branch", "$baseurl/$repo.git";
       chdir $repo;
 
-      my ($rev) = must_popen "git", "rev-parse", "HEAD";
+      my ($rev) = must_popen 'git', 'rev-parse', 'HEAD';
       if ($state->{$repo} eq $rev and not C::ALWAYS_BUILD (undef, $repo)) {
          print "Dependency '$repo' already up-to-date.\n";
       } else {
@@ -132,12 +132,12 @@ sub git_install {
 
          # Generate autotools stuff. Don't use autogen.sh here, because
          # protobuf's autogen.sh tries to download GMock with curl.
-         must_system "autoreconf", "-fi"
+         must_system 'autoreconf', '-fi'
             unless -f 'configure';
 
          # Run ./configure to generate Makefiles.
          mkdir '_build'
-            or die "Could not create build directory";
+            or die 'Could not create build directory';
          chdir '_build';
 
          print "PATH     = $ENV{PATH}\n";
@@ -148,16 +148,16 @@ sub git_install {
 
          # Run configure in the vpath build directory.
          eval {
-            must_system "../configure", @flags;
+            must_system '../configure', @flags;
          };
          if ($@) {
-            must_system "cat", "config.log";
+            must_system 'cat', 'config.log';
             die $@;
          }
 
          # Then build and install.
-         must_system "make", "-j$jobs";
-         must_system "make", "install";
+         must_system 'make', @$makeflags, "-j$jobs";
+         must_system 'make', @$makeflags, 'install';
 
          # Update commit hash in persistent state.
          $state->{$repo} = $rev;
