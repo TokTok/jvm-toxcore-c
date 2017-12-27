@@ -11,7 +11,7 @@ final class IterateTimingBench extends TimingReport {
 
   protected override def confidence = Seq[KeyValue](exec.benchRuns -> 100)
 
-  val eventListener = new ToxCoreEventAdapter[Unit]
+  private val eventListener = new ToxCoreEventAdapter[Unit]
 
   timing.of[ToxCore] {
 

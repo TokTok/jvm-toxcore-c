@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.bench
 
+import im.tox.core.typesafe.Equals._
 import im.tox.tox4j.bench.ToxBenchBase._
 import im.tox.tox4j.bench.{ Confidence, TimingReport }
 import im.tox.tox4j.core.ToxCore
@@ -49,7 +50,7 @@ final class FriendListTimingBench extends TimingReport {
         case (friendList, tox) =>
           assert(friendList.length >= 100)
           assert(friendList.length <= 1000)
-          assert(friendList.length % 100 == 0)
+          assert(friendList.length % 100 === 0)
           friendList foreach tox.deleteFriend
       }
     }

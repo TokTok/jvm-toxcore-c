@@ -18,10 +18,10 @@ final class BootstrapButtonOnAction(toxGui: MainView) extends ActionListener {
         toxGui.tox.addTcpRelay _,
         toxGui.tox.bootstrap _
       ) foreach (_(
-        toxGui.bootstrapHost.getText,
-        Port.unsafeFromInt(toxGui.bootstrapPort.getText.toInt),
-        ToxPublicKey.fromValue(parsePublicKey(toxGui.bootstrapKey.getText.trim)).get
-      ))
+          toxGui.bootstrapHost.getText,
+          Port.unsafeFromInt(toxGui.bootstrapPort.getText.toInt),
+          ToxPublicKey.fromValue(parsePublicKey(toxGui.bootstrapKey.getText.trim)).get
+        ))
     } catch {
       case e: ToxBootstrapException =>
         toxGui.addMessage("Bootstrap failed: ", e.code)

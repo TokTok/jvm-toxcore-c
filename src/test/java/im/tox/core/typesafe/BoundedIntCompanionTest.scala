@@ -18,8 +18,8 @@ abstract class BoundedIntCompanionTest[T <: AnyVal](module: BoundedIntCompanion[
     }
 
     tooSmallGen.toList ++ tooLargeGen.toList match {
-      case Nil => fail(s"$module is a bounded int companion but sets no bounds")
-      case List(gen) => gen
+      case Nil                  => fail(s"$module is a bounded int companion but sets no bounds")
+      case List(gen)            => gen
       case gen1 :: gen2 :: tail => Gen.oneOf(gen1, gen2, tail: _*)
     }
   }

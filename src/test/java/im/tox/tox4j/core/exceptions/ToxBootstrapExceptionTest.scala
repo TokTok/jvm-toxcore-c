@@ -8,9 +8,9 @@ import org.scalatest.FunSuite
 
 final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
 
-  val host = "192.254.75.98"
-  val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
-  val port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get
+  private val host = "192.254.75.98"
+  private val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
+  private val port = Port.fromInt(ToxCoreConstants.DefaultStartPort).get
 
   test("BootstrapBadPort1") {
     interceptWithTox(ToxBootstrapException.Code.BAD_PORT)(

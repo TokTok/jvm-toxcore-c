@@ -1,5 +1,6 @@
 package im.tox.tox4j.impl.jni.codegen
 
+import im.tox.core.typesafe.Equals._
 import im.tox.tox4j.av.callbacks.ToxAvEventAdapter
 import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter
 import im.tox.tox4j.impl.jni.codegen.NameConversions.{ cxxTypeName, cxxVarName, javaVarName }
@@ -7,6 +8,7 @@ import im.tox.tox4j.impl.jni.codegen.cxx.Ast._
 
 object JniCallbacks extends CodeGenerator {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   def getAllInterfaces(clazz: Class[_]): List[Class[_]] = {
     (Option(clazz.getSuperclass).toList.flatMap(getAllInterfaces)
       ++ clazz.getInterfaces
@@ -22,10 +24,10 @@ object JniCallbacks extends CodeGenerator {
           javaVarName(name.substring(0, name.lastIndexOf('_')).toLowerCase)
         }
 
-        val method = interface.getDeclaredMethods.filter(_.getName == expectedMethodName) match {
-          case Array() => sys.error(s"Callback interfaces $interface does not provide a method '$expectedMethodName'")
+        val method = interface.getDeclaredMethods.filter(_.getName === expectedMethodName) match {
+          case Array()             => sys.error(s"Callback interfaces $interface does not provide a method '$expectedMethodName'")
           case Array(singleMethod) => singleMethod
-          case methods => sys.error(s"Callback interfaces $interface contains multiple overloads for '$expectedMethodName'")
+          case methods             => sys.error(s"Callback interfaces $interface contains multiple overloads for '$expectedMethodName'")
         }
 
         Seq(

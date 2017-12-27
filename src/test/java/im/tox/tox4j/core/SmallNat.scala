@@ -20,8 +20,8 @@ final case class SmallNat(self: Int) extends AnyVal with IntegralProxy[Int] {
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
 object SmallNat {
-  val MinValue = 0
-  val MaxValue = 100
+  val MinValue: Int = 0
+  val MaxValue: Int = 100
 
   implicit val arbSmallNat: Arbitrary[SmallNat] = Arbitrary(Gen.choose(MinValue, MaxValue).map(apply))
   implicit def smallNatToInt(smallNat: SmallNat): Int = smallNat.self

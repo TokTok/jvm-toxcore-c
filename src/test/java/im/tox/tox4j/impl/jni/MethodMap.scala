@@ -13,7 +13,7 @@ object MethodMap {
   private def removeSelf(name: Seq[String]): Seq[String] = {
     name.headOption match {
       case Some("self") => name.drop(1)
-      case _ => name
+      case _            => name
     }
   }
 

@@ -51,7 +51,7 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
 
     val toxSave: SaveDataOptions =
       toxGui.load() match {
-        case None => SaveDataOptions.None
+        case None       => SaveDataOptions.None
         case Some(data) => SaveDataOptions.ToxSave(data)
       }
 

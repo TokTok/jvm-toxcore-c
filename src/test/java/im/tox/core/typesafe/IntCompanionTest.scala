@@ -3,6 +3,7 @@ package im.tox.core.typesafe
 import im.tox.core.ModuleCompanionTest
 import org.scalacheck.{ Arbitrary, Gen }
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 abstract class IntCompanionTest[T <: AnyVal](module: IntCompanion[T]) extends ModuleCompanionTest(module) {
 
   protected def genValidInt: Gen[Int]

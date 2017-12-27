@@ -17,6 +17,7 @@ object ToxCryptoTest {
   private final case class EncryptedData(data: Seq[Byte]) extends AnyVal
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec with PropertyChecks with ToxTestMixin {
 
   private val random = new Random

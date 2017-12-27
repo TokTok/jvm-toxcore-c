@@ -24,7 +24,7 @@ final class VideoReceiveFrameTimingBench extends TimingReport {
     val nonCachingHandler = new ToxAvEventAdapter[Unit] with Serializable
 
     val cachingHandler = new ToxAvEventAdapter[Unit] with Serializable {
-      val cache = Some((
+      private val cache = Some((
         Array.ofDim[Byte](width * height),
         Array.ofDim[Byte](width * height / 4),
         Array.ofDim[Byte](width * height / 4)

@@ -21,7 +21,7 @@ abstract class CodeGenerator extends App {
   def writeCode(path: String, sep: String = "\n\n")(code: Ast.TranslationUnit): Unit = {
     val renderer = new PrettyRenderer(130)
 
-    val writer = new PrintWriter(new File("src/main/cpp", path))
+    val writer = new PrintWriter(new File("cpp/src", path))
     try {
       writer.println(code.map(Print.printDecl).map(renderer).mkString(sep))
     } finally {

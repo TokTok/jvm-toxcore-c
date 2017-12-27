@@ -11,12 +11,12 @@ import im.tox.tox4j.testing.GetDisjunction._
 
 final class CoreCallbackTimingBench extends TimingReport {
 
-  val eventListener = new ToxCoreEventAdapter[Unit]
+  private val eventListener = new ToxCoreEventAdapter[Unit]
 
-  val friendNumber = ToxFriendNumber.fromInt(1).get
-  val publicKey = ToxPublicKey.fromValue(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).get
-  val nickname = ToxNickname.fromValue(Array.ofDim[Byte](ToxNickname.MaxSize)).get
-  val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
+  private val friendNumber = ToxFriendNumber.fromInt(1).get
+  private val publicKey = ToxPublicKey.fromValue(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).get
+  private val nickname = ToxNickname.fromValue(Array.ofDim[Byte](ToxNickname.MaxSize)).get
+  private val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
 
   def invokePerformance(method: String, f: ToxCoreImpl => Unit): Unit = {
     performance of method in {

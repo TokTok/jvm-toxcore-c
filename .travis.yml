@@ -1,50 +1,47 @@
 language: scala
+scala: 2.11.12
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.5
     packages:
-      - clang-3.5
-      - p7zip-full
+    - libgtest-dev
+    - p7zip-full
+    - yasm
 
 cache:
   directories:
-    - $HOME/cache
+  - $HOME/.ivy2
+  - $HOME/.sbt
+  - $PWD/_git
+  - $PWD/_install
 
 matrix:
   include:
-    # Test builds first, since they don't upload things.
-    - env: TEST_GOAL=coverage
-    - env: TEST_GOAL=coverage
-      language: generic
-      os: osx
-    - env: TEST_GOAL=performance
-    # Production builds after test builds so only tested artifacts are uploaded.
-    - env: TARGET=x86_64-linux
-    - env: TARGET=aarch64-linux-android
-    - env: TARGET=arm-linux-androideabi
-    - env: TARGET=i686-linux-android
-    - env: TARGET=x86_64-linux-android
+  # Test builds first, since they don't upload things.
+  - env: GOAL=test TARGET=host
+#    stage: Test
+  - env: GOAL=test TARGET=host
+    language: generic
+    os: osx
+    install: brew install sbt
+  # Production builds after test builds so only tested artifacts are uploaded.
+#  - env: GOAL=release TARGET=host
+#    stage: Release
+  - env: GOAL=release TARGET=aarch64-linux-android
+  - env: GOAL=release TARGET=arm-linux-androideabi
+  - env: GOAL=release TARGET=i686-linux-android
+  - env: GOAL=release TARGET=x86_64-linux-android
   fast_finish: true
 
 install:
-  # Move files from cache directory.
-  - make cache
+- test -f _install/host/protobuf.stamp || scripts/build-host -j$(nproc || sysctl -n hw.ncpu) $PWD/_install/host/protobuf.stamp
 
 script:
-  - export NDK_HOME=$HOME/android-ndk
-  # Setup/build/install/test steps, all together.
-  - mkdir -p /tmp/android-travis
-  - make all
+- scripts/build-$TARGET -j$(nproc || sysctl -n hw.ncpu) $GOAL
 
-before_cache:
-  - make upload
-  # Clean up cache.
-  - find $HOME/cache/ivy2 -type f -name "ivydata-*.properties" -delete
-  - find $HOME/cache/sbt/boot -name "sbt.*.lock" -delete
+after_success:
+- if [ "$GOAL" = "test" ]; then sbt coveralls; fi
 
 branches:
   only:
-    - master
+  - master

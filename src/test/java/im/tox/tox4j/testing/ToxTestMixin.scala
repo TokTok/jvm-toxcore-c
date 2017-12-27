@@ -30,7 +30,7 @@ trait ToxTestMixin extends ToxExceptionChecks {
         tox.addFriendNorequest(friend.getPublicKey)
       }
     }.lastOption match {
-      case None => throw new IllegalArgumentException(s"Cannot add less than 1 friend: $count")
+      case None      => throw new IllegalArgumentException(s"Cannot add less than 1 friend: $count")
       case Some(num) => num
     }
   }

@@ -18,6 +18,7 @@ object JniErrorCodes extends CodeGenerator {
     val javaEnum = values(0).getClass.getSimpleName
     val cxxEnum = cxxTypeName(javaEnum)
 
+    @SuppressWarnings(Array("org.wartremover.warts.Equals"))
     val failureCases = values filter { value =>
       value.getClass.getField(value.name).getAnnotation(classOf[JavaOnly]) == null
     } map { value =>

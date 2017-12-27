@@ -27,15 +27,16 @@ abstract class FilePauseResumeTestBase extends AliceBobTest {
     data.toSeq
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   final case class State(
-    aliceSentFileNumber: Int = -1,
-    aliceOffset: Long = 0L,
-    aliceShouldPause: Int = -1,
-    fileId: ToxFileId = ToxFileId.empty,
-    receivedData: Array[Byte] = Array.ofDim(fileData.length),
-    bobSentFileNumber: Int = -1,
-    bobOffset: Long = 0L,
-    bobShouldPause: Int = -1
+      aliceSentFileNumber: Int = -1,
+      aliceOffset: Long = 0L,
+      aliceShouldPause: Int = -1,
+      fileId: ToxFileId = ToxFileId.empty,
+      receivedData: Array[Byte] = Array.ofDim(fileData.length),
+      bobSentFileNumber: Int = -1,
+      bobOffset: Long = 0L,
+      bobShouldPause: Int = -1
   )
 
   final override def initialState: State = State()

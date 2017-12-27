@@ -36,16 +36,16 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
 
   object Handler extends EventListener(0) {
 
-    val bitRate = BitRate.fromInt(320).get
-    val audioPerFrame = AudioLength.Length40
-    val samplingRate = SamplingRate.Rate48k
-    val frameSize = SampleCount(audioPerFrame, samplingRate).value
-    val framesPerIteration = 2
+    private val bitRate = BitRate.fromInt(320).get
+    private val audioPerFrame = AudioLength.Length40
+    private val samplingRate = SamplingRate.Rate48k
+    private val frameSize = SampleCount(audioPerFrame, samplingRate).value
+    private val framesPerIteration = 2
 
-    val audio = AudioGenerators.default
-    val audioLength = audio.length(samplingRate)
-    val playback = new AudioPlayback(samplingRate)
-    val displayWave = !sys.env.contains("TRAVIS")
+    private val audio = AudioGenerators.default
+    private val audioLength = audio.length(samplingRate)
+    private val playback = new AudioPlayback(samplingRate)
+    private val displayWave = !sys.env.contains("TRAVIS")
 
     override def friendConnectionStatus(
       friendNumber: ToxFriendNumber,
@@ -78,6 +78,8 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
       }
     }
 
+    // There is no stack recursion here, it pushes thunks of itself for deferred execution.
+    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore, av: ToxAv, state0: State): State = {
       val state = state0.modify(_ + frameSize * framesPerIteration)
 
@@ -113,6 +115,8 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
       state
     }
 
+    // There is no stack recursion here, it pushes thunks of itself for deferred execution.
+    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     def waitForPlayback(length: Int)(state: State): State = {
       if (!playback.done(length)) {
         state.addTask { (tox, av, state) =>

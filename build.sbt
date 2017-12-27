@@ -1,8 +1,8 @@
 // General settings.
 organization  := "org.toktok"
 name          := "tox4j-c"
-version       := "0.1.2-SNAPSHOT"
-scalaVersion  := "2.11.7"
+version       := "0.1.3-SNAPSHOT"
+scalaVersion  := "2.11.12"
 
 bintrayVcsUrl := Some("https://github.com/TokTok/jvm-toxcore-c")
 
@@ -16,7 +16,7 @@ resolvers += Resolver.bintrayRepo("toktok", "maven")
 
 // Build dependencies.
 libraryDependencies ++= Seq(
-  "org.toktok" %% "tox4j-api" % "0.1.2",
+  "org.toktok" %% "tox4j-api" % "0.1.3",
   "org.toktok" %% "macros" % "0.1.0",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.46"
 )
@@ -36,24 +36,12 @@ libraryDependencies ++= Seq(
 // Add ScalaMeter as test framework.
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
-// Native dependencies.
-import im.tox.sbt.NativeCompilePlugin.Keys.nativeLink
-inConfig(Test)(Keys.compile <<= Keys.compile.dependsOn(nativeLink in NativeTest))
-
-nativeLibraryDependencies ++= Seq(
-  "google" % "protobuf" % "3.0.0-beta-1",
-  "toktok" % "libtoxav" % "0.1.0",
-  "toktok" % "libtoxcore" % "0.1.0",
-  // Required, since toxav's pkg-config files are incomplete:
-  "jedisct1" % "libsodium" % "1.0.7",
-  "webmproject" % "vpx" % "1.5.0"
-)
-
+// Disable parallel test execution, as network tests become flaky that way.
+parallelExecution in Test := false
 
 /******************************************************************************
  * Other settings and plugin configuration.
  ******************************************************************************/
-
 
 // TODO(iphydf): Require less test coverage for now, until ToxAv is tested.
 import scoverage.ScoverageKeys._
@@ -72,11 +60,9 @@ compileOrder := CompileOrder.Mixed
 scalaSource in Compile := (javaSource in Compile).value
 scalaSource in Test    := (javaSource in Test   ).value
 
-
 /******************************************************************************
  * Proguard configuration.
  ******************************************************************************/
-
 
 proguardSettings
 
@@ -90,5 +76,3 @@ ProguardKeys.inputs in Proguard := (fullClasspath in Test).value.files.filterNot
 ).contains(f.getName))
 ProguardKeys.binaryDeps in Proguard := (sbt.Keys.compile in Test).value.relations.allBinaryDeps.toSeq
 ProguardKeys.options in Proguard += "@" + (baseDirectory.value / "tools" / "proguard.txt").getPath
-
-fork in Test := true

@@ -10,6 +10,7 @@ import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FlatSpec
 import org.scalatest.prop.PropertyChecks
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class ToxCoreTest extends FlatSpec with PropertyChecks {
 
   "addFriend" should "return increasing friend numbers and increment the friend list size" in {

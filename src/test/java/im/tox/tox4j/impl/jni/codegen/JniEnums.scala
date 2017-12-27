@@ -8,10 +8,10 @@ import im.tox.tox4j.impl.jni.codegen.cxx.Ast._
 object JniEnums extends CodeGenerator {
 
   final case class Side[E <: Enum[E]](
-    ty: Type,
-    name: String,
-    origin: String,
-    expr: E => Expr
+      ty: Type,
+      name: String,
+      origin: String,
+      expr: E => Expr
   )
 
   def enumMapping[E <: Enum[E]](values: Seq[E], cxxEnum: String, from: Side[E], to: Side[E]): Decl = {

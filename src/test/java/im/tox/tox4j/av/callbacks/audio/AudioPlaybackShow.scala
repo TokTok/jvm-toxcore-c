@@ -7,12 +7,12 @@ import org.scalatest.FunSuite
 @SuppressWarnings(Array("org.wartremover.warts.While"))
 final class AudioPlaybackShow extends FunSuite {
 
-  val audio = AudioGenerators.default
+  private val audio = AudioGenerators.default
 
-  val samplingRate = SamplingRate.Rate24k
-  val audioLength = AudioLength.Length60
-  val frameSize = SampleCount(audioLength, samplingRate)
-  val playback = new AudioPlayback(samplingRate)
+  private val samplingRate = SamplingRate.Rate24k
+  private val audioLength = AudioLength.Length60
+  private val frameSize = SampleCount(audioLength, samplingRate)
+  private val playback = new AudioPlayback(samplingRate)
 
   test("main") {
     val terminalWidth = TerminalFactory.get.getWidth

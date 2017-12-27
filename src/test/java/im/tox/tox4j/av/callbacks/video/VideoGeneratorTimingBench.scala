@@ -3,13 +3,14 @@ package im.tox.tox4j.av.callbacks.video
 import im.tox.tox4j.av.data.{ Height, Width }
 import im.tox.tox4j.bench.{ Confidence, TimingReport }
 import im.tox.tox4j.bench.ToxBenchBase._
+import org.scalameter.api.Gen
 
 @SuppressWarnings(Array("org.wartremover.warts.While"))
 final class VideoGeneratorTimingBench extends TimingReport {
 
   protected override def confidence = Confidence.normal
 
-  val frames100k = range("frames")(500)
+  val frames100k: Gen[Int] = range("frames")(500)
 
   timing.of[VideoGenerator] {
 

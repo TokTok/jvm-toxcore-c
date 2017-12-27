@@ -155,12 +155,12 @@ object ToxBenchBase {
    * should not mutate it. If it does, it needs to ensure that it returns to an equivalent state as before the test
    * began. In particular, if you add friends, you need to ensure that you remove all but 1 friends on tearDown.
    */
-  val toxInstance = Gen.single("tox")(classOf[ToxCoreImpl]).map(_ => makeTox()).cached
+  val toxInstance: Gen[ToxCore] = Gen.single("tox")(classOf[ToxCoreImpl]).map(_ => makeTox()).cached
 
   /**
    * Generator for a [[ToxAv]] instance.
    */
-  val toxAvInstance = toxInstance.map(tox => new ToxAvImpl(tox.asInstanceOf[ToxCoreImpl]): ToxAv).cached
+  val toxAvInstance: Gen[ToxAv] = toxInstance.map(tox => new ToxAvImpl(tox.asInstanceOf[ToxCoreImpl]): ToxAv).cached
 
   /**
    * Helper function to create a range axis evenly divided into 10 samples. The range starts with `upto / 10` and ends
@@ -178,21 +178,21 @@ object ToxBenchBase {
     Gen.range(axisName)(upto / 10, upto, upto / 10)
   }
 
-  val nodes = range("nodes")(100)
-  val instances = range("instances")(100)
+  val nodes: Gen[Int] = range("nodes")(100)
+  val instances: Gen[Int] = range("instances")(100)
 
   def friends: Int => Gen[Int] = range("friends")
-  val friends1k = friends(1000)
-  val friends10k = friends(10000)
+  val friends1k: Gen[Int] = friends(1000)
+  val friends10k: Gen[Int] = friends(10000)
 
   def iterations: Int => Gen[Int] = range("iterations")
-  val iterations1k = iterations(1000)
-  val iterations10k = iterations(10000)
-  val iterations100k = iterations(100000)
-  val iterations1000k = iterations(1000000)
+  val iterations1k: Gen[Int] = iterations(1000)
+  val iterations10k: Gen[Int] = iterations(10000)
+  val iterations100k: Gen[Int] = iterations(100000)
+  val iterations1000k: Gen[Int] = iterations(1000000)
 
-  val nameLengths = Gen.range("name length")(0, ToxCoreConstants.MaxNameLength, 8)
-  val statusMessageLengths = Gen.range("status message length")(0, ToxCoreConstants.MaxStatusMessageLength, 100)
+  val nameLengths: Gen[Int] = Gen.range("name length")(0, ToxCoreConstants.MaxNameLength, 8)
+  val statusMessageLengths: Gen[Int] = Gen.range("status message length")(0, ToxCoreConstants.MaxStatusMessageLength, 100)
 
   // Derived generators
 
@@ -266,7 +266,7 @@ object ToxBenchBase {
   /**
    * Produces [[instances]] valid Tox save data arrays as produced by [[ToxCore.getSavedata]].
    */
-  val toxSaves = {
+  val toxSaves: Gen[Seq[ToxOptions]] = {
     for (sz <- instances) yield {
       for (_ <- 0 until sz) yield {
         ToxOptions(saveData = SaveDataOptions.ToxSave(makeTox().getSavedata))
@@ -274,7 +274,7 @@ object ToxBenchBase {
     }
   }
 
-  val names = nameLengths.map(Array.ofDim[Byte]).map(ToxNickname.fromValue(_).get)
-  val statusMessages = statusMessageLengths.map(Array.ofDim[Byte]).map(ToxStatusMessage.fromValue(_).get)
+  val names: Gen[ToxNickname] = nameLengths.map(Array.ofDim[Byte]).map(ToxNickname.fromValue(_).get)
+  val statusMessages: Gen[ToxStatusMessage] = statusMessageLengths.map(Array.ofDim[Byte]).map(ToxStatusMessage.fromValue(_).get)
 
 }

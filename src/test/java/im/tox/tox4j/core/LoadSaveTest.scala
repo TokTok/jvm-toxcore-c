@@ -10,7 +10,10 @@ import org.scalatest.FunSuite
 
 import scala.annotation.tailrec
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals"))
+@SuppressWarnings(Array(
+  "org.wartremover.warts.ArrayEquals",
+  "org.wartremover.warts.Equals"
+))
 final class LoadSaveTest extends FunSuite {
 
   private trait Check {

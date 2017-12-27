@@ -13,13 +13,13 @@ import scala.annotation.tailrec
 import scalaz.Scalaz._
 
 object AliceBobTestBase {
-  val FriendNumber = ToxFriendNumber.fromInt(10).get
+  val FriendNumber: ToxFriendNumber = ToxFriendNumber.fromInt(10).get
 
   final case class Chatter[T](
-    tox: ToxCore,
-    av: ToxAv,
-    client: ChatClientT[T],
-    state: ChatStateT[T]
+      tox: ToxCore,
+      av: ToxAv,
+      client: ChatClientT[T],
+      state: ChatStateT[T]
   )
 }
 
@@ -35,6 +35,7 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
 
   protected def newChatClient(name: String, expectedFriendName: String): ChatClient
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   private def getTopLevelMethod(stackTrace: Seq[StackTraceElement]): String = {
     stackTrace
       .filter(_.getClassName == classOf[AliceBobTest].getName)
@@ -57,6 +58,7 @@ abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   protected def runAliceBobTest(
     withTox: (ToxCore => Unit) => Unit,
     withToxAv: ToxCore => (ToxAv => Unit) => Unit

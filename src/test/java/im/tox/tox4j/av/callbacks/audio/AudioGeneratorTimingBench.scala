@@ -8,10 +8,10 @@ final class AudioGeneratorTimingBench extends TimingReport {
 
   protected override def confidence = Confidence.normal
 
-  val audioLength = AudioLength.Length60
-  val audioSamplingRate = SamplingRate.Rate8k
+  private val audioLength = AudioLength.Length60
+  private val audioSamplingRate = SamplingRate.Rate8k
 
-  val frames1k = range("frames")(1000)
+  private val frames1k = range("frames")(1000)
 
   @SuppressWarnings(Array("org.wartremover.warts.While"))
   def performanceTest(name: String, generator: AudioGenerator): Unit = {

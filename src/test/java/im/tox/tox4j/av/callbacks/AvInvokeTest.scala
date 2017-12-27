@@ -100,8 +100,8 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
     forAll { (friendNumber: ToxFriendNumber, pcm: Array[Short], samplingRate: SamplingRate) =>
       val channels =
         pcm.length match {
-          case length if length % 2 == 0 => AudioChannels.Stereo
-          case length => AudioChannels.Mono
+          case length if length % 2 === 0 => AudioChannels.Stereo
+          case length                     => AudioChannels.Mono
         }
       callbackTest(
         _.invokeAudioReceiveFrame(friendNumber, pcm, channels, samplingRate),

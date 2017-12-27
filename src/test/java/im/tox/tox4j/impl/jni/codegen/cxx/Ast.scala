@@ -14,9 +14,9 @@ object Ast {
   final case class Reference(inner: Type) extends Type
 
   object Type {
-    val void = Typename("void")
-    val jint = Typename("jint")
-    val jboolean = Typename("jboolean")
+    val void: Typename = Typename("void")
+    val jint: Typename = Typename("jint")
+    val jboolean: Typename = Typename("jboolean")
   }
 
   /**

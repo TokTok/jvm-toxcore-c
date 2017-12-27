@@ -66,7 +66,7 @@ final class BadInstanceNumberTest extends FunSuite with PropertyChecks {
           fail("No exception thrown. Expected IllegalStateException or ToxKilledException.")
         } catch {
           case _: IllegalStateException =>
-          case _: ToxKilledException => // Both fine.
+          case _: ToxKilledException    => // Both fine.
         }
       }
     }

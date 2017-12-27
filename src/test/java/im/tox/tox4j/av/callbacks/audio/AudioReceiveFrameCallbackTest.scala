@@ -73,6 +73,8 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       }
     }
 
+    // There is no stack recursion here, it pushes thunks of itself for deferred execution.
+    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     private def sendFrame(friendNumber: ToxFriendNumber)(tox: ToxCore, av: ToxAv, state0: State): State = {
       val state = state0.modify(s => s.copy(t = s.t + frameSize * framesPerIteration))
 

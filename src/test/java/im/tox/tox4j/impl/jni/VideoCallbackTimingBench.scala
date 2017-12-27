@@ -9,19 +9,19 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 
 final class VideoCallbackTimingBench extends TimingReport {
 
-  val VideoLength = 30
+  private val VideoLength = 30
 
-  val friendNumber = ToxFriendNumber.fromInt(1).get
+  private val friendNumber = ToxFriendNumber.fromInt(1).get
 
-  val width = VideoGenerators.DefaultWidth
-  val height = VideoGenerators.DefaultHeight
-  val yStride = width.value + 80
-  val uStride = yStride / 2
-  val vStride = yStride / 2
+  private val width = VideoGenerators.DefaultWidth
+  private val height = VideoGenerators.DefaultHeight
+  private val yStride = width.value + 80
+  private val uStride = yStride / 2
+  private val vStride = yStride / 2
 
-  val y = Array.ofDim[Byte](yStride * height.value)
-  val u = Array.ofDim[Byte](uStride * height.value / 2)
-  val v = Array.ofDim[Byte](uStride * height.value / 2)
+  private val y = Array.ofDim[Byte](yStride * height.value)
+  private val u = Array.ofDim[Byte](uStride * height.value / 2)
+  private val v = Array.ofDim[Byte](uStride * height.value / 2)
 
   object EventListener extends ToxAvEventAdapter[Unit] with Serializable
 

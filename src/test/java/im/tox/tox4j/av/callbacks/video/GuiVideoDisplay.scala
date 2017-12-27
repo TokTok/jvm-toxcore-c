@@ -26,15 +26,15 @@ object GuiVideoDisplay {
 
   final class UI(width: Width, height: Height) {
 
-    val senderImageView, receiverImageView = new Label {
+    val senderImageView, receiverImageView: Label = new Label {
       border = BorderFactory.createEtchedBorder(EtchedBorder.RAISED)
       icon = new ImageIcon(newImage(width, height))
     }
 
-    val senderLabel = new Label("No frames sent yet")
-    val receiverLabel = new Label("No frames received yet")
+    val senderLabel: Label = new Label("No frames sent yet")
+    val receiverLabel: Label = new Label("No frames received yet")
 
-    val dialog = new Dialog(new Frame) {
+    val dialog: Dialog = new Dialog(new Frame) {
       contents = new BoxPanel(Orientation.Vertical) {
         contents += new BoxPanel(Orientation.Horizontal) {
           contents += senderImageView
