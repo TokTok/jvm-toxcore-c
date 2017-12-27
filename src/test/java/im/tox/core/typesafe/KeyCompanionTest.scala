@@ -3,6 +3,7 @@ package im.tox.core.typesafe
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalacheck.{ Arbitrary, Gen }
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 abstract class KeyCompanionTest[T <: AnyVal, S <: Security](
     companion: KeyCompanion[T, S]
 )(implicit final val arbT: Arbitrary[T]) extends FixedSizeByteArrayCompanionTest(companion) {

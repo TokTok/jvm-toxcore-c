@@ -4,6 +4,7 @@ import gnieh.pp._
 import im.tox.tox4j.impl.jni.codegen.cxx.Ast._
 import org.apache.commons.lang3.StringEscapeUtils
 
+@SuppressWarnings(Array("org.wartremover.warts.Recursion"))
 object Print {
 
   private def flatten(docs: Seq[Doc], sep: Doc = empty): Doc = {
@@ -23,9 +24,9 @@ object Print {
    */
   private def printTypeInner(ty: Type): Doc = {
     ty match {
-      case Typename(name) => text(name) :: space
-      case Const(inner) => printTypeInner(inner) :: "const "
-      case Pointer(inner) => printTypeInner(inner) :: "*"
+      case Typename(name)   => text(name) :: space
+      case Const(inner)     => printTypeInner(inner) :: "const "
+      case Pointer(inner)   => printTypeInner(inner) :: "*"
       case Reference(inner) => printTypeInner(inner) :: "&"
     }
   }
@@ -33,7 +34,7 @@ object Print {
   def printType(ty: Type, spacing: Doc = empty): Doc = {
     ty match {
       case Typename(name) => text(name) :: spacing
-      case _ => printTypeInner(ty)
+      case _              => printTypeInner(ty)
     }
   }
 
@@ -42,11 +43,11 @@ object Print {
    */
   def printPreproc(pp: Preproc): Doc = {
     pp match {
-      case Include(header) => "#include \"" :: header :: "\""
-      case Ifdef(name) => "#ifdef " :: name
-      case Comment(text) => "// " :: text
-      case Endif => "#endif"
-      case MacroCall(expr) => printExpr(expr)
+      case Include(header)      => "#include \"" :: header :: "\""
+      case Ifdef(name)          => "#ifdef " :: name
+      case Comment(text)        => "// " :: text
+      case Endif                => "#endif"
+      case MacroCall(expr)      => printExpr(expr)
       case MacroFun(init, body) => printExpr(init) :|: printStmt(body)
       case ToxFun(returnType, name, params, body) =>
         "JAVA_METHOD" :+: nest(2)("(" :: printType(returnType) :: "," :+: name :: "," :|:
@@ -67,16 +68,16 @@ object Print {
           printSeq(cases)(printStmt(_)) ::
           "}") ::
           line
-      case Switch(cond, body) => sys.error(s"invalid switch-body: $body")
-      case Case(expr, body) => "case" :+: printExpr(expr) :: ":" :+: printStmt(body)
-      case Default(body) => "default:" :+: printStmt(body)
-      case Break => "break;"
-      case Return(expr) => "return" :: expr.fold(empty)(expr => space :: printExpr(expr)) :: ";" :: spacing
-      case ExprStmt(expr) => printExpr(expr) :: ";" :: spacing
+      case Switch(cond, body)       => sys.error(s"invalid switch-body: $body")
+      case Case(expr, body)         => "case" :+: printExpr(expr) :: ":" :+: printStmt(body)
+      case Default(body)            => "default:" :+: printStmt(body)
+      case Break                    => "break;"
+      case Return(expr)             => "return" :: expr.fold(empty)(expr => space :: printExpr(expr)) :: ";" :: spacing
+      case ExprStmt(expr)           => printExpr(expr) :: ";" :: spacing
       case CompoundStmt(Seq(stmt0)) => nest(2)("{" :|: printStmt(stmt0, empty)) :|: "}"
-      case CompoundStmt(stmts) => nest(2)("{" :|: printSeq(stmts.slice(0, stmts.length - 1))(printStmt(_))) :: printStmt(stmts.last) :: "}"
-      case stmt: Oneliner => group(printSeq(stmt.stmts)(printStmt(_, empty))) :: spacing
-      case pp: Preproc => printPreproc(pp)
+      case CompoundStmt(stmts)      => nest(2)("{" :|: printSeq(stmts.slice(0, stmts.length - 1))(printStmt(_))) :: printStmt(stmts.last) :: "}"
+      case stmt: Oneliner           => group(printSeq(stmt.stmts)(printStmt(_, empty))) :: spacing
+      case pp: Preproc              => printPreproc(pp)
     }
   }
 
@@ -85,13 +86,13 @@ object Print {
    */
   def printExpr(expr: Expr): Doc = {
     expr match {
-      case Identifier(name) => name
-      case IntegerLiteral(value) => value
-      case StringLiteral(value) => "\"" :: StringEscapeUtils.escapeJava(value) :: "\""
-      case FunCall(callee, args) => printExpr(callee) :+: "(" :: printSeq(args, "," :: space)(printExpr) :: ")"
+      case Identifier(name)             => name
+      case IntegerLiteral(value)        => value
+      case StringLiteral(value)         => "\"" :: StringEscapeUtils.escapeJava(value) :: "\""
+      case FunCall(callee, args)        => printExpr(callee) :+: "(" :: printSeq(args, "," :: space)(printExpr) :: ")"
       case BinaryOperator(op, lhs, rhs) => printExpr(lhs) :+: op :+: printExpr(rhs)
-      case Equals(lhs, rhs) => printExpr(lhs) :+: "==" :+: printExpr(rhs)
-      case Access(lhs, name) => printExpr(lhs) :: "." :: name
+      case Equals(lhs, rhs)             => printExpr(lhs) :+: "==" :+: printExpr(rhs)
+      case Access(lhs, name)            => printExpr(lhs) :: "." :: name
     }
   }
 
@@ -110,7 +111,7 @@ object Print {
           printStmt(body)
 
       case Param(ty, name) => printType(ty, space) :: name
-      case pp: Preproc => printPreproc(pp)
+      case pp: Preproc     => printPreproc(pp)
     }
   }
 

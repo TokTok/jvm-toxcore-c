@@ -9,8 +9,8 @@ import im.tox.tox4j.testing.GetDisjunction._
 
 final class ToxCoreTimingBench extends TimingReport {
 
-  val port = Port.fromInt(8080).get
-  val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
+  private val port = Port.fromInt(8080).get
+  private val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
 
   timing.of[ToxCore] {
 

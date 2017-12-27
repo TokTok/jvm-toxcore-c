@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.core.typesafe.Equals._
 import scala.language.implicitConversions
 
 @SuppressWarnings(Array(
@@ -12,7 +13,7 @@ object InvokeTest {
     override def equals(rhs: Any): Boolean = {
       rhs match {
         case rhs: ByteArray => this.array.deep == rhs.array.deep
-        case _ => false
+        case _              => false
       }
     }
 
@@ -26,7 +27,7 @@ object InvokeTest {
   }
 
   implicit def wrapByteArray(array: Array[Byte]): ByteArray = {
-    if (array == null) {
+    if (array === null) {
       null
     } else {
       ByteArray(array)
@@ -37,7 +38,7 @@ object InvokeTest {
     override def equals(rhs: Any): Boolean = {
       rhs match {
         case rhs: ShortArray => this.array.deep == rhs.array.deep
-        case _ => false
+        case _               => false
       }
     }
 
@@ -51,7 +52,7 @@ object InvokeTest {
   }
 
   implicit def wrapShortArray(array: Array[Short]): ShortArray = {
-    if (array == null) {
+    if (array === null) {
       null
     } else {
       ShortArray(array)

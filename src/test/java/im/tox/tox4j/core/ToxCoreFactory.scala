@@ -14,7 +14,10 @@ abstract class ToxCoreFactory {
     }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+  @SuppressWarnings(Array(
+    "org.wartremover.warts.Equals",
+    "org.wartremover.warts.Recursion"
+  ))
   final def withToxN[R](
     count: Int,
     options: ToxOptions = ToxOptions(),
@@ -36,6 +39,7 @@ abstract class ToxCoreFactory {
   )(
     f: List[ToxCore] => R
   ): R = {
+    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     def go(options: List[ToxOptions], toxes: List[ToxCore]): R = {
       options match {
         case Nil => f(toxes.reverse)

@@ -12,7 +12,7 @@ final class BenchWip extends TimingReport {
 
   protected override def confidence = Confidence.normal
 
-  val eventListener = new ToxCoreEventAdapter[Unit]
+  private val eventListener = new ToxCoreEventAdapter[Unit]
 
   timing.of[ToxCore] {
 

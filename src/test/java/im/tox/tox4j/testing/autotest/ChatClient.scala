@@ -83,7 +83,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
   @tailrec
   private def getOuterClass(clazz: Class[_]): Class[_] = {
     Option(clazz.getEnclosingClass) match {
-      case None => clazz
+      case None            => clazz
       case Some(enclosing) => getOuterClass(enclosing)
     }
   }
@@ -92,7 +92,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
     logger.info(s"[${Thread.currentThread.getId}] $selfName: $message")
   }
 
-  var expectedFriendAddress = ToxFriendAddress.unsafeFromValue(null)
+  var expectedFriendAddress: ToxFriendAddress = ToxFriendAddress.unsafeFromValue(null)
   protected def expectedFriendPublicKey: ToxPublicKey = {
     ToxPublicKey.fromValue(expectedFriendAddress.value.slice(0, ToxPublicKey.Size)).get
   }

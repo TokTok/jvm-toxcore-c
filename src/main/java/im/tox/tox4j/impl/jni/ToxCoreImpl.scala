@@ -14,7 +14,11 @@ import org.jetbrains.annotations.{ NotNull, Nullable }
 import org.slf4j.LoggerFactory
 
 // scalastyle:off null
-@SuppressWarnings(Array("org.wartremover.warts.Null"))
+@SuppressWarnings(Array(
+  "org.wartremover.warts.ArrayEquals",
+  "org.wartremover.warts.Equals",
+  "org.wartremover.warts.Null"
+))
 object ToxCoreImpl {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
@@ -70,7 +74,7 @@ object ToxCoreImpl {
 @throws[ToxNewException]("If an error was detected in the configuration or a runtime error occurred.")
 final class ToxCoreImpl(@NotNull val options: ToxOptions) extends ToxCore {
 
-  private[this] val onCloseCallbacks = new Event
+  private[this] val onCloseCallbacks: Event = new Event
 
   /**
    * This field has package visibility for [[ToxAvImpl]].

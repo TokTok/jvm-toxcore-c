@@ -1,5 +1,6 @@
 package im.tox.tox4j.core
 
+import im.tox.core.typesafe.Equals._
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.core.exceptions.ToxNewException
@@ -38,8 +39,8 @@ final class ToxList(newTox: () => ToxCore, count: Int) {
 
   def close(): Unit = toxes.foreach(_.tox.close())
 
-  def isAllConnected: Boolean = toxes.forall(_.connected != ToxConnection.NONE)
-  def isAnyConnected: Boolean = toxes.exists(_.connected != ToxConnection.NONE)
+  def isAllConnected: Boolean = toxes.forall(_.connected =/= ToxConnection.NONE)
+  def isAnyConnected: Boolean = toxes.exists(_.connected =/= ToxConnection.NONE)
 
   def iterate(): Unit = toxes.foreach(entry => entry.tox.iterate(handler)(entry))
 

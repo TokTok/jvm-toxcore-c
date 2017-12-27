@@ -15,9 +15,11 @@
 /local.sbt
 /local.properties
 
-# Android NDK.
-/toolchains
-/android-ndk-*.bin
+# CMake build directory.
+/android-ndk-*.zip
+_git
+_build
+_install
 
 # IDEA meta files.
 .idea
@@ -32,17 +34,14 @@
 # Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# JNI configure output.
-config.log
-
 # Debug log from toxcore.
 libtoxcore.log
 
 # Gradle temporary directory.
 .gradle
 
-# Generated proguard configuration.
-/proguard-sbt.txt
-
 # Java runtime support for disassembly.
 hsdis-*.*
+
+# Generated proguard configuration.
+/proguard-sbt.txt

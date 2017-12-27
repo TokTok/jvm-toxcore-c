@@ -11,6 +11,7 @@ import im.tox.tox4j.av.exceptions._
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.impl.jni.ToxAvImpl.logger
+import im.tox.tox4j.impl.jni.internal.Event
 import org.jetbrains.annotations.NotNull
 import org.slf4j.LoggerFactory
 
@@ -27,7 +28,7 @@ private object ToxAvImpl {
 @throws[ToxavNewException]("If there was already an A/V session.")
 final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
 
-  private[this] val onClose = tox.addOnCloseCallback(close)
+  private[this] val onClose: Event.Id = tox.addOnCloseCallback(close)
 
   private[jni] val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)
 

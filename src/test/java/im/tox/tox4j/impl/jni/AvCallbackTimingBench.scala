@@ -9,15 +9,15 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 
 final class AvCallbackTimingBench extends TimingReport {
 
-  val audioLength = AudioLength.Length60
-  val channels = AudioChannels.Mono
-  val samplingRate = SamplingRate.Rate48k
+  private val audioLength = AudioLength.Length60
+  private val channels = AudioChannels.Mono
+  private val samplingRate = SamplingRate.Rate48k
 
-  val pcm = Array.ofDim[Short](
+  private val pcm = Array.ofDim[Short](
     SampleCount(audioLength, samplingRate).value * channels.value
   )
 
-  val friendNumber = ToxFriendNumber.fromInt(1).get
+  private val friendNumber = ToxFriendNumber.fromInt(1).get
 
   object EventListener extends ToxAvEventAdapter[Unit] with Serializable
 

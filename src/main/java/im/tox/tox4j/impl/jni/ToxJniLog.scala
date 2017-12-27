@@ -179,7 +179,7 @@ case object ToxJniLog {
         out.print('}')
       case V.VSint64(sint64) => out.print(sint64)
       case V.VString(string) => out.print(string)
-      case V.Empty => out.print("void")
+      case V.Empty           => out.print("void")
     }
   }
 

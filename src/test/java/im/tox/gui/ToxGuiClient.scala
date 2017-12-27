@@ -1,5 +1,6 @@
 package im.tox.gui
 
+import im.tox.core.typesafe.Equals._
 import javax.swing._
 
 /**
@@ -9,12 +10,12 @@ object ToxGuiClient extends App {
 
   for {
     info <- UIManager.getInstalledLookAndFeels
-    if info.getName == "Nimbus"
+    if info.getName === "Nimbus"
   } {
     UIManager.setLookAndFeel(info.getClassName)
   }
 
-  val dialog = new MainView
+  val dialog: MainView = new MainView
   dialog.pack()
   dialog.setVisible(true)
 

@@ -12,6 +12,7 @@ final class FileTransferTest extends AliceBobTest {
   private val fileData = new Array[Byte](1500)
   new Random().nextBytes(fileData)
 
+  @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   sealed case class State(
       receivedData: Array[Byte] = Array.ofDim[Byte](fileData.length),
       position: Long = 0L,
