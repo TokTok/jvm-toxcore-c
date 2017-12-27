@@ -16,7 +16,7 @@ object Confidence {
    *
    * VM invocation overhead: 1 second.
    */
-  val lowest = Seq[KeyValue](
+  val lowest: Seq[KeyValue] = Seq[KeyValue](
     exec.benchRuns -> 2,
     exec.independentSamples -> 1
   )
@@ -27,7 +27,7 @@ object Confidence {
    *
    * VM invocation overhead: 1 second.
    */
-  val low = Seq[KeyValue](
+  val low: Seq[KeyValue] = Seq[KeyValue](
     exec.benchRuns -> 10,
     exec.independentSamples -> 1
   )
@@ -38,7 +38,7 @@ object Confidence {
    *
    * VM invocation overhead: 4 seconds.
    */
-  val normal = Seq[KeyValue](
+  val normal: Seq[KeyValue] = Seq[KeyValue](
     exec.benchRuns -> 36,
     exec.independentSamples -> 3
   )
@@ -51,7 +51,7 @@ object Confidence {
    *
    * VM invocation overhead: 17 seconds.
    */
-  val high = Seq[KeyValue](
+  val high: Seq[KeyValue] = Seq[KeyValue](
     exec.benchRuns -> 100,
     exec.independentSamples -> 10
   )
@@ -63,7 +63,7 @@ object Confidence {
    *
    * VM invocation overhead: 55 seconds.
    */
-  val extreme = Seq[KeyValue](
+  val extreme: Seq[KeyValue] = Seq[KeyValue](
     exec.benchRuns -> 1000,
     exec.independentSamples -> 50
   )
@@ -91,7 +91,7 @@ object Confidence {
    *
    * VM invocation overhead: 2 minutes, 11 seconds.
    */
-  val insane = Seq[KeyValue](
+  val insane: Seq[KeyValue] = Seq[KeyValue](
     exec.benchRuns -> 20000,
     exec.independentSamples -> 100
   )

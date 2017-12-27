@@ -9,7 +9,7 @@ import scalaz.{ -\/, \/, \/- }
 final case class GetDisjunction[T] private (disjunction: CoreError \/ T) extends Assertions {
   def get: T = {
     disjunction match {
-      case -\/(error) => fail(error.toString)
+      case -\/(error)   => fail(error.toString)
       case \/-(success) => success
     }
   }

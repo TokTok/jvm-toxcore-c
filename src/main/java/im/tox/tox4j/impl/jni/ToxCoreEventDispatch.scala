@@ -12,8 +12,8 @@ object ToxCoreEventDispatch {
   def convert(status: Connection.Type): ToxConnection = {
     status match {
       case Connection.Type.NONE => ToxConnection.NONE
-      case Connection.Type.TCP => ToxConnection.TCP
-      case Connection.Type.UDP => ToxConnection.UDP
+      case Connection.Type.TCP  => ToxConnection.TCP
+      case Connection.Type.UDP  => ToxConnection.UDP
     }
   }
 
@@ -36,7 +36,7 @@ object ToxCoreEventDispatch {
   def convert(control: FileControl.Type): ToxFileControl = {
     control match {
       case FileControl.Type.RESUME => ToxFileControl.RESUME
-      case FileControl.Type.PAUSE => ToxFileControl.PAUSE
+      case FileControl.Type.PAUSE  => ToxFileControl.PAUSE
       case FileControl.Type.CANCEL => ToxFileControl.CANCEL
     }
   }
@@ -228,6 +228,7 @@ object ToxCoreEventDispatch {
   }
 
   @SuppressWarnings(Array(
+    "org.wartremover.warts.ArrayEquals",
     "org.wartremover.warts.Equals",
     "org.wartremover.warts.Null"
   ))

@@ -11,13 +11,13 @@ import scala.reflect.runtime.{ universe => u }
 
 object JniMethodImpls extends CodeGenerator {
 
-  val javaTypeMap = Map(
+  private val javaTypeMap = Map(
     "void" -> Type.void,
     "int" -> Type.jint,
     "boolean" -> Type.jboolean
   )
 
-  val scalaTypeMap = Map(
+  private val scalaTypeMap = Map(
     "Int" -> Type.jint,
     classOf[ToxFriendNumber].getName -> Type.jint
   )

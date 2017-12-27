@@ -5,6 +5,7 @@ import org.scalatest.Assertions
 
 trait ToxExceptionChecks extends Assertions {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   protected def intercept[E <: Enum[E]](code: E)(f: => Unit) = {
     try {
       f

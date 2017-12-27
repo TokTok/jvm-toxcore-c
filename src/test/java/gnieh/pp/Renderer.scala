@@ -28,6 +28,7 @@ final class PrettyRenderer(width: Int) extends (Doc => SimpleDoc) {
     best(width, 0, List((0, doc)))
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def best(width: Int, column: Int, docs: Docs): SimpleDoc = {
     docs match {
       case Nil =>
@@ -76,18 +77,19 @@ object CompactRenderer extends (Doc => SimpleDoc) {
     scan(0, List(doc))
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def scan(column: Int, docs: List[Doc]): SimpleDoc = docs match { // scalastyle:ignore cyclomatic.complexity
     case Nil => SEmpty
     case doc :: docs =>
       doc match {
-        case EmptyDoc => SEmpty
-        case TextDoc(text) => SText(text, scan(column + text.length, docs))
-        case LineDoc(_) => scan(column, doc.flatten :: docs)
+        case EmptyDoc               => SEmpty
+        case TextDoc(text)          => SText(text, scan(column + text.length, docs))
+        case LineDoc(_)             => scan(column, doc.flatten :: docs)
         case ConsDoc(first, second) => scan(column, first :: second :: docs)
-        case NestDoc(j, doc) => scan(column, doc :: docs)
-        case UnionDoc(long, _) => scan(column, long :: docs)
-        case AlignDoc(inner) => scan(column, inner :: docs)
-        case ColumnDoc(f) => scan(column, f(column) :: docs)
+        case NestDoc(j, doc)        => scan(column, doc :: docs)
+        case UnionDoc(long, _)      => scan(column, long :: docs)
+        case AlignDoc(inner)        => scan(column, inner :: docs)
+        case ColumnDoc(f)           => scan(column, f(column) :: docs)
       }
   }
 
@@ -122,20 +124,22 @@ final class TruncateRenderer(max: Int, unit: CountUnit, inner: Doc => SimpleDoc)
   /** Truncates the simple document, depending on the constructor criterion. */
   def truncate(doc: SimpleDoc): SimpleDoc = {
     unit match {
-      case Lines => firstLines(max, doc)
+      case Lines      => firstLines(max, doc)
       case Characters => firstChars(max, doc)
-      case Words => firstWords(max, doc)
+      case Words      => firstWords(max, doc)
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def firstLines(maxLines: Int, doc: SimpleDoc): SimpleDoc = {
     doc match {
-      case SText(text, next) if maxLines >= 1 => SText(text, firstLines(maxLines, next))
+      case SText(text, next) if maxLines >= 1  => SText(text, firstLines(maxLines, next))
       case SLine(indent, next) if maxLines > 1 => SLine(indent, firstLines(maxLines - 1, next))
-      case _ => SEmpty
+      case _                                   => SEmpty
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def firstChars(maxChars: Int, doc: SimpleDoc): SimpleDoc = {
     doc match {
       case SText(text, next) if maxChars >= text.replaceAll(" ", "").length => SText(text, firstChars(maxChars - text.length, next))
@@ -144,6 +148,7 @@ final class TruncateRenderer(max: Int, unit: CountUnit, inner: Doc => SimpleDoc)
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def firstWords(maxWords: Int, doc: SimpleDoc): SimpleDoc = {
     doc match {
       case SText(text, next) if text.trim.isEmpty && maxWords > 0 => SText(text, firstWords(maxWords, next))

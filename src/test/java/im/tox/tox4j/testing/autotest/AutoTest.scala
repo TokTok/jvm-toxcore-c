@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
+import im.tox.core.typesafe.Equals._
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.ToxEventListener
 import im.tox.tox4j.av.{ ToxAv, ToxAvFactory }
@@ -73,10 +74,10 @@ object AutoTest {
   }
 
   final case class Participant[S](
-    tox: ToxCore,
-    av: ToxAv,
-    handler: EventListener[S],
-    state: ClientState[S]
+      tox: ToxCore,
+      av: ToxAv,
+      handler: EventListener[S],
+      state: ClientState[S]
   )
 
 }
@@ -147,7 +148,7 @@ final case class AutoTest(
           for ((tox, av, id) <- avsWithIds) yield {
             // Everybody adds everybody else as friend.
             val friendList =
-              for ((friendTox, friendAv, friendId) <- avsWithIds if friendId != id) yield {
+              for ((friendTox, friendAv, friendId) <- avsWithIds if friendId =/= id) yield {
                 tox.addFriendNorequest(friendTox.getPublicKey) -> friendId
               }
             (tox, av, id, Map(friendList: _*))

@@ -7,9 +7,9 @@ import org.scalatest.Assertions
 
 object VideoGenerators extends Assertions {
 
-  val DefaultWidth = Width.fromInt(400).get
-  val DefaultHeight = Height.fromInt(400).get
-  val VideoLength = 100
+  val DefaultWidth: Width = Width.fromInt(400).get
+  val DefaultHeight: Height = Height.fromInt(400).get
+  val VideoLength: Int = 100
 
   // TODO(iphydf): Several of these break with the following error in
   // libtoxcore.log, especially at higher resolutions:
@@ -116,7 +116,7 @@ object VideoGenerators extends Assertions {
     /**
      * Plain colours for testing.
      */
-    val values = Seq(
+    val values: Seq[Color] = Seq(
       Color.white,
       Color.lightGray,
       Color.gray,
@@ -132,8 +132,8 @@ object VideoGenerators extends Assertions {
       Color.blue
     )
 
-    val FramesPerColor = 3
-    val VideoLength = Colors.values.length * Colors.FramesPerColor
+    private val FramesPerColor = 3
+    private val VideoLength = Colors.values.length * Colors.FramesPerColor
 
     def get(t: Int): Color = values(t / FramesPerColor % values.length)
   }
@@ -187,7 +187,7 @@ object VideoGenerators extends Assertions {
     "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   )
 
-  val all = Map[String, (Width, Height, Int) => VideoGenerator](
+  val all: Map[String, (Width, Height, Int) => VideoGenerator] = Map[String, (Width, Height, Int) => VideoGenerator](
     "xor1" -> Xor1,
     "xor2" -> Xor2,
     "xor3" -> Xor3,
@@ -199,7 +199,7 @@ object VideoGenerators extends Assertions {
     "smiley" -> { (w, h, _) => VideoGenerator.resizeNearestNeighbour(w, h, Smiley) }
   )
 
-  val default = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
+  val default: VideoGenerator = VideoGenerator.resizeNearestNeighbour(DefaultWidth, DefaultHeight, Smiley)
   // val default = XorGradient(DefaultWidth, DefaultHeight)
 
 }

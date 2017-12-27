@@ -21,10 +21,11 @@ object MainView {
   private val MaxMessages = 1000
   private val DateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss.SSS]")
 
+  @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   private final case class SaveData(
-    toxSave: Array[Byte],
-    friendList: FriendList,
-    messages: DefaultListModel[String]
+      toxSave: Array[Byte],
+      friendList: FriendList,
+      messages: DefaultListModel[String]
   )
 
   def printExn(exn: Throwable): String = {
@@ -45,10 +46,10 @@ final class MainView extends MainViewBase {
   var tox: ToxCore = null
   var eventLoop: Thread = null
 
-  var messageModel = new DefaultListModel[String]
-  var friendListModel = new FriendList
-  val fileModel = new FileTransferModel
-  val toxEvents = new InvokeLaterToxEventListener[Unit](new GuiToxEventListener(this))
+  var messageModel: DefaultListModel[String] = new DefaultListModel[String]
+  var friendListModel: FriendList = new FriendList
+  val fileModel: FileTransferModel = new FileTransferModel
+  val toxEvents: InvokeLaterToxEventListener[Unit] = new InvokeLaterToxEventListener[Unit](new GuiToxEventListener(this))
 
   def addMessage(args: Any*): Unit = {
     val str = new StringBuilder
@@ -65,7 +66,7 @@ final class MainView extends MainViewBase {
       messages.setModel(messageModel)
     }
 
-    val message = MainView.DateFormat.format(new Date).toString + ' ' + str
+    val message = MainView.DateFormat.format(new Date).toString + " " + str.toString
     messageModel.addElement(message)
 
     MainView.logger.info(message)

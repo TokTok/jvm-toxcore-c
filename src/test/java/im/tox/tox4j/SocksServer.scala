@@ -175,7 +175,7 @@ final class SocksServer extends Closeable with Runnable with Assertions {
       case 0x01 => establishStream(input, output, address, port)
       case 0x02 => throw new IOException("TCP/IP port binding not supported")
       case 0x03 => throw new IOException("Associating UDP port not supported")
-      case _ => throw new IOException(s"Unknown command: $command")
+      case _    => throw new IOException(s"Unknown command: $command")
     }
   }
 

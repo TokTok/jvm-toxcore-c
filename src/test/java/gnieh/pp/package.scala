@@ -188,7 +188,7 @@ package object pp {
   implicit def opt2doc[T](o: Option[T])(implicit ev1: T => Doc): Doc = {
     o match {
       case Some(d) => d
-      case None => empty
+      case None    => empty
     }
   }
 
