@@ -18,7 +18,7 @@ resolvers += Resolver.bintrayRepo("toktok", "maven")
 libraryDependencies ++= Seq(
   "org.toktok" %% "tox4j-api" % "0.1.3",
   "org.toktok" %% "macros" % "0.1.0",
-  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.46"
+  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.43"
 )
 
 // Test dependencies.
