@@ -1,5 +1,6 @@
 NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)/$(TARGET)
 
+DLLEXT		:= .so
 TOOLCHAIN	:= $(DESTDIR)/$(TARGET)
 SYSROOT		:= $(TOOLCHAIN)/sysroot
 PREFIX		:= $(SYSROOT)/usr
@@ -12,6 +13,7 @@ export LDFLAGS		:= -llog
 export PKG_CONFIG_LIBDIR:= $(PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
 export PATH		:= $(TOOLCHAIN)/bin:$(PATH)
+export TOX4J_PLATFORM	:= $(TARGET)
 
 protobuf_CONFIGURE	:= --prefix=$(PREFIX) --host=$(TARGET) --with-sysroot=$(SYSROOT) --disable-shared --with-protoc=$(PROTOC)
 libsodium_CONFIGURE	:= --prefix=$(PREFIX) --host=$(TARGET) --with-sysroot=$(SYSROOT) --disable-shared --enable-minimal

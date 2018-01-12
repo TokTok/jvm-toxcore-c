@@ -10,23 +10,28 @@ addons:
 
 cache:
   directories:
-  - $HOME/.ivy2
-  - $HOME/.sbt
-  - $PWD/_git
-  - $PWD/_install
+  - "$HOME/.ivy2"
+  - "$HOME/.sbt"
+  - "$PWD/_git"
+  - "$PWD/_install"
+
+env:
+  global:
+    secure: "V+9XzUGKkC30QT1YKThlYCbgx1Vln452uIhnclp5BFVN0acFnnxMvwiH4cpg/Ivh49kezQk3pqy1wG6PaRqLVDzc9+qVa40e93Ia2oy9RhylvtAah74YwKdVIqyjJnV8hOZk+H64EfHk7/6di4bxJQt5KDpYsvpbM0tS9FBnbbtD0Gf6LekvpjcZLBR77977Q7i4A+t035KWGVu5YOjjaollvCK9t2DI+GR8i7RAprKdeSwBzk/0mUNmglsuX91jNOh3mUTMdeQsbDKpCT1lTjxkEppwdGFHYSGm1Vzkgbv4GJsKbiqgHq1KCP7KTBwl8xNbFplBKcx/Osi4ATpk+AFunDayct94R7wjl54wkTZ6clw9E6Y89XahBGpxg/YaQlgi2+bAGxX63OnHndKsLl6ZXm2o8JIZMSCnG2auRmV/hS1MPZdG7e4NiDEtBIoeg5MIq8DvRaG6f6Ejg6DbKO5UUjuF3JMhJMRYF+4NwBdpo9umJEBKibFwoANjW3gDtLIUQvzB2C1jO5Op/kPOHRGkzpsAA6c8XoYxOBB4UZHuc00GJcsOJcEx79WD04etFl/aohok5iTyVSvbvMKy2k6Ru9wvd1RZ9TTiZiqpcOXnyOfwPsDMfA3dixXoWEWnkcHHDvFGJGAnh5Qf04quOm/GPABd0fwkSzutH2UO8hA="
+    secure: "e4ZtSfIoaiFT4e/3XwkWXa0ye2DvxsMmnvhwX8+sup1xkRpYK6/eR8RELnpAVx0GG9Hdp6Bhwfv+O7z7gJgMajU6fskljmtAnuuhWCwjOvNb8m6Hz/2nQWWalxln0MlKog80TBW+bq4swOjyMg6TGX53L91gyIqiQsoQ9PtDicvDk7xNVAigFoId/I9ZRxUbIQHDPUum/Ns0gDSKllOmJ4Wl8vEl5G2DKoHXKDJ5HPozOkbR8YyssOGW5h5P1ngyIRmVTQ+U5Pctnn4uDWolPtrvVEiNtFvEwJwMplYpSkbyMwicPOp9/bVe2sZNDaJAUxpBpam2ChGI78jTxo2WcspqTtWAJFYilDYLX2cMdO1pDbMo3V+EOLYVcLegKTtOBlfeMrK+auAFY9uGmJAQ65Qxv5E0t3hDBHzzDOiI8MCJAgCQAoJNd9RWY3xioWdyLRAicgqZaRnVTcSzbhc5Hcc5vK+srRkkoZtiW9nIu3D4Q/5njpz+9t2S68cK+j3uvlW0ZkRN5v1GZD7QV57e6Z2M3qL9lqMAgfnDvr0+sbF+i31ReYN71jtI6tIhvq6NTrwmc8Up0tAwcvVxK/Y8gX/4aLQ2CdoRtHqmrKcTMYIpbtWK+VtVSUihYfopmZebw6xTd0pZcAV5FIx8QPkUXfnCtDT8q3Nvw8J1c7bQWzg="
 
 matrix:
   include:
   # Test builds first, since they don't upload things.
   - env: GOAL=test TARGET=host
-#    stage: Test
-  - env: GOAL=test TARGET=host
+    stage: Test
+  # Production builds after test builds so only tested artifacts are uploaded.
+  - env: GOAL=release TARGET=host
+    stage: Release
+  - env: GOAL=release TARGET=host
     language: generic
     os: osx
     install: brew install sbt
-  # Production builds after test builds so only tested artifacts are uploaded.
-#  - env: GOAL=release TARGET=host
-#    stage: Release
   - env: GOAL=release TARGET=aarch64-linux-android
   - env: GOAL=release TARGET=arm-linux-androideabi
   - env: GOAL=release TARGET=i686-linux-android

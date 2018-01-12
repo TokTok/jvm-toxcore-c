@@ -3,20 +3,47 @@
 TARGET := host
 
 include scripts/common.mk
+include scripts/$(shell uname -s).mk
 
 TOOLCHAIN	:= $(DESTDIR)/$(TARGET)
 TOOLCHAIN_FILE	:= $(TOOLCHAIN)/.stamp
 PREFIX		:= $(TOOLCHAIN)
 
-export CC := $(shell which clang || which gcc)
-export CXX := $(shell which clang++ || which g++)
+export CC		:= $(shell which clang || which gcc)
+export CXX		:= $(shell which clang++ || which g++)
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
+export TOX4J_PLATFORM	:= $(shell perl -e 'print $$^O')-$(shell uname -m)
 
 build: $(TOOLCHAIN)/tox4j.stamp
 	sbt -Djava.library.path=$(PREFIX)/lib "publishLocal" "makeScripts"
 
-release: build
-	@echo "Releases not implemented yet"
+_build/$(TARGET)/tox4j/libtox4j-c$(DLLEXT): $(TOOLCHAIN)/tox4j.stamp
+	ls -l $@
+	touch $@
+
+ifeq ($(BINTRAY_USER),)
+release: _build/$(TARGET)/tox4j/libtox4j-c$(DLLEXT)
+	@echo 'Not releasing without BINTRAY_USER'
+else
+ifneq ($(TRAVIS_BRANCH),master)
+release: _build/$(TARGET)/tox4j/libtox4j-c$(DLLEXT)
+	@echo 'No release done on branch "$(TRAVIS_BRANCH)"'
+else
+release: _build/$(TARGET)/tox4j/libtox4j-c$(DLLEXT) $(HOME)/.bintray/.credentials
+	rm -rf $(wildcard cpp/src/main/resources/im/tox/tox4j/impl/jni/*/)
+	mkdir -p cpp/src/main/resources/im/tox/tox4j/impl/jni/$(TOX4J_PLATFORM)/
+	cp $< cpp/src/main/resources/im/tox/tox4j/impl/jni/$(TOX4J_PLATFORM)/
+	cd cpp && sbt bintrayUnpublish publish
+
+$(HOME)/.bintray/.credentials:
+	mkdir -p $(@D)
+	@echo 'Writing $@'
+	@echo 'realm = Bintray API Realm' > $@
+	@echo 'host = api.bintray.com' >> $@
+	@echo 'user = $(BINTRAY_USER)' >> $@
+	@echo 'password = $(BINTRAY_PASSWORD)' >> $@
+endif
+endif
 
 test: build
 	$(MAKE) -C _build/$(TARGET)/tox4j test
@@ -52,5 +79,4 @@ $(TOOLCHAIN):
 $(TOOLCHAIN_FILE): $(TOOLCHAIN)
 	touch $@
 
-include scripts/$(shell uname -s).mk
 include scripts/dependencies.mk
