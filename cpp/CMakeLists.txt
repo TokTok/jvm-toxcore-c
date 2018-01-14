@@ -132,7 +132,6 @@ add_library(${PROJECT_NAME} SHARED
   src/ToxCrypto/debug.cpp
   src/ToxCrypto/encryptsave.cpp
   src/ToxCrypto/hash.cpp
-  src/ToxCrypto/sodium.cpp
   src/ToxCrypto/ToxCrypto.cpp
   src/ToxCrypto/ToxCrypto.h
   src/Tox4j.cpp

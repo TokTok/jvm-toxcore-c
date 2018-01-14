@@ -15,12 +15,4 @@ public final class ToxCryptoJni {
   static native byte[] toxPassKeyDecrypt(byte[] data, byte[] passKey);
   static native byte[] toxHash(byte[] data);
 
-  public static native void randombytes(byte[] buffer);
-  public static native int cryptoBoxKeypair(byte[] publicKey, byte[] secretKey);
-  public static native int cryptoBox(byte[] cipherText, byte[] plainText, byte[] nonce, byte[] publicKey, byte[] privateKey);
-  public static native int cryptoBoxOpen(byte[] plainText, byte[] cipherText, byte[] nonce, byte[] publicKey, byte[] privateKey);
-  public static native int cryptoBoxBeforenm(byte[] sharedKey, byte[] publicKey, byte[] privateKey);
-  public static native int cryptoBoxAfternm(byte[] cipherText, byte[] plainText, byte[] nonce, byte[] sharedKey);
-  public static native int cryptoBoxOpenAfternm(byte[] plainText, byte[] cipherText, byte[] nonce, byte[] sharedKey);
-
 }

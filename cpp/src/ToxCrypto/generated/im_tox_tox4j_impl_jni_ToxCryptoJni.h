@@ -63,62 +63,6 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyD
 JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxHash
   (JNIEnv *, jclass, jbyteArray);
 
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    randombytes
- * Signature: ([B)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_randombytes
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    cryptoBoxKeypair
- * Signature: ([B[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_cryptoBoxKeypair
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    cryptoBox
- * Signature: ([B[B[B[B[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_cryptoBox
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    cryptoBoxOpen
- * Signature: ([B[B[B[B[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_cryptoBoxOpen
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    cryptoBoxBeforenm
- * Signature: ([B[B[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_cryptoBoxBeforenm
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    cryptoBoxAfternm
- * Signature: ([B[B[B[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_cryptoBoxAfternm
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    cryptoBoxOpenAfternm
- * Signature: ([B[B[B[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_cryptoBoxOpenAfternm
-  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
-
 #ifdef __cplusplus
 }
 #endif
