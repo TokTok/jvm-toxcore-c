@@ -9,8 +9,6 @@ abstract class IntCompanionTest[T <: AnyVal](module: IntCompanion[T]) extends Mo
   protected def genValidInt: Gen[Int]
   protected def genInvalidInt: Gen[Int]
 
-  override protected final def arbT = Arbitrary(genValidInt.map(module.fromInt(_).get))
-
   test("fromInt (valid)") {
     forAll(genValidInt) { (int: Int) =>
       assert(module.fromInt(int).isDefined)

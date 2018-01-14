@@ -15,8 +15,6 @@ object PortTest {
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class PortTest extends ModuleCompanionTest(Port) {
 
-  override val arbT = PortTest.arbPort
-
   test("creation") {
     for (portNumber <- Port.MinValue to Port.MaxValue) {
       Port.fromInt(portNumber) match {
