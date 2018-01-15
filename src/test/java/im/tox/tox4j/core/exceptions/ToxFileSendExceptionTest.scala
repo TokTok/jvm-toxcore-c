@@ -14,14 +14,14 @@ final class ToxFileSendExceptionTest extends FunSuite with ToxTestMixin {
   test("FileSendNotConnected") {
     interceptWithTox(ToxFileSendException.Code.FRIEND_NOT_CONNECTED)(
       _.fileSend(friendNumber, ToxFileKind.DATA, 123, ToxFileId.empty,
-        ToxFilename.fromString("filename").get)
+        ToxFilename.fromString("filename").toOption.get)
     )
   }
 
   test("FileSendNotFound") {
     interceptWithTox(ToxFileSendException.Code.FRIEND_NOT_FOUND)(
       _.fileSend(badFriendNumber, ToxFileKind.DATA, 123, ToxFileId.empty,
-        ToxFilename.fromString("filename").get)
+        ToxFilename.fromString("filename").toOption.get)
     )
   }
 

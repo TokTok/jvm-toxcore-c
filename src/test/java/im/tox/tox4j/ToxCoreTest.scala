@@ -16,7 +16,7 @@ import org.scalatest.FunSuite
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class ToxCoreTest extends FunSuite with ToxTestMixin {
 
-  val publicKey: ToxPublicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).get
+  val publicKey: ToxPublicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).toOption.get
   val eventListener: ToxCoreEventAdapter[Unit] = new ToxCoreEventAdapter[Unit]
 
   test("ToxNew") {
@@ -151,7 +151,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("GetAndSetName") {
     withToxUnit { tox =>
       assert(tox.getName.value.isEmpty)
-      tox.setName(ToxNickname.fromString("myname").get)
+      tox.setName(ToxNickname.fromString("myname").toOption.get)
       assert(new String(tox.getName.value) == "myname")
     }
   }
@@ -159,7 +159,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetNameMinSize") {
     withToxUnit { tox =>
       val array = ToxCoreTestBase.randomBytes(1)
-      tox.setName(ToxNickname.fromValue(array).get)
+      tox.setName(ToxNickname.fromValue(array).toOption.get)
       assert(tox.getName.value sameElements array)
     }
   }
@@ -167,7 +167,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetNameMaxSize") {
     withToxUnit { tox =>
       val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxNameLength)
-      tox.setName(ToxNickname.fromValue(array).get)
+      tox.setName(ToxNickname.fromValue(array).toOption.get)
       assert(tox.getName.value sameElements array)
     }
   }
@@ -176,7 +176,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withToxUnit { tox =>
       (1 to ToxCoreConstants.MaxNameLength) foreach { i =>
         val array = ToxCoreTestBase.randomBytes(i)
-        tox.setName(ToxNickname.fromValue(array).get)
+        tox.setName(ToxNickname.fromValue(array).toOption.get)
         assert(tox.getName.value sameElements array)
       }
     }
@@ -185,9 +185,9 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("UnsetName") {
     withToxUnit { tox =>
       assert(tox.getName.value.isEmpty)
-      tox.setName(ToxNickname.fromString("myname").get)
+      tox.setName(ToxNickname.fromString("myname").toOption.get)
       assert(tox.getName.value.nonEmpty)
-      tox.setName(ToxNickname.fromString("").get)
+      tox.setName(ToxNickname.fromString("").toOption.get)
       assert(tox.getName.value.isEmpty)
     }
   }
@@ -195,7 +195,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("GetAndSetStatusMessage") {
     withToxUnit { tox =>
       assert(tox.getStatusMessage.value.isEmpty)
-      tox.setStatusMessage(ToxStatusMessage.fromString("message").get)
+      tox.setStatusMessage(ToxStatusMessage.fromString("message").toOption.get)
       assert(new String(tox.getStatusMessage.value) == "message")
     }
   }
@@ -203,7 +203,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetStatusMessageMinSize") {
     withToxUnit { tox =>
       val array = ToxCoreTestBase.randomBytes(1)
-      tox.setStatusMessage(ToxStatusMessage.fromValue(array).get)
+      tox.setStatusMessage(ToxStatusMessage.fromValue(array).toOption.get)
       assert(tox.getStatusMessage.value sameElements array)
     }
   }
@@ -211,7 +211,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetStatusMessageMaxSize") {
     withToxUnit { tox =>
       val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxStatusMessageLength)
-      tox.setStatusMessage(ToxStatusMessage.fromValue(array).get)
+      tox.setStatusMessage(ToxStatusMessage.fromValue(array).toOption.get)
       assert(tox.getStatusMessage.value sameElements array)
     }
   }
@@ -220,7 +220,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withToxUnit { tox =>
       (1 to ToxCoreConstants.MaxStatusMessageLength) foreach { i =>
         val array = ToxCoreTestBase.randomBytes(i)
-        tox.setStatusMessage(ToxStatusMessage.fromValue(array).get)
+        tox.setStatusMessage(ToxStatusMessage.fromValue(array).toOption.get)
         assert(tox.getStatusMessage.value sameElements array)
       }
     }
@@ -229,9 +229,9 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("UnsetStatusMessage") {
     withToxUnit { tox =>
       assert(tox.getStatusMessage.value.isEmpty)
-      tox.setStatusMessage(ToxStatusMessage.fromString("message").get)
+      tox.setStatusMessage(ToxStatusMessage.fromString("message").toOption.get)
       assert(tox.getStatusMessage.value.nonEmpty)
-      tox.setStatusMessage(ToxStatusMessage.fromString("").get)
+      tox.setStatusMessage(ToxStatusMessage.fromString("").toOption.get)
       assert(tox.getStatusMessage.value.isEmpty)
     }
   }
@@ -252,7 +252,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
         withToxUnit { friend =>
           val friendNumber = tox.addFriend(
             friend.getAddress,
-            ToxFriendRequestMessage.fromString("heyo").get
+            ToxFriendRequestMessage.fromString("heyo").toOption.get
           )
           assert(friendNumber == i)
         }

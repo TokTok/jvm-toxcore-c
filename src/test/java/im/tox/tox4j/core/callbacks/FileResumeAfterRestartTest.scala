@@ -61,7 +61,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
               ToxFileKind.DATA,
               fileData.length,
               ToxFileId.empty,
-              ToxFilename.fromValue(s"file for $expectedFriendName.png".getBytes).get
+              ToxFilename.fromValue(s"file for $expectedFriendName.png".getBytes).toOption.get
             )
             fileId = tox.getFileFileId(friendNumber, aliceSentFileNumber)
             aliceAddress = tox.getAddress
@@ -79,7 +79,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
           debug("See alice go off-line")
           state.addTask { (tox, av, state) =>
             tox.deleteFriend(friendNumber)
-            tox.addFriend(aliceAddress, ToxFriendRequestMessage.fromValue("Please add me back".getBytes).get)
+            tox.addFriend(aliceAddress, ToxFriendRequestMessage.fromValue("Please add me back".getBytes).toOption.get)
             state
           }
         }

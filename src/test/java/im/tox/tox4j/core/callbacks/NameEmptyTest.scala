@@ -21,7 +21,7 @@ final class NameEmptyTest extends AliceBobTest {
           assert(name.value.isEmpty)
 
           state.addTask { (tox, av, state) =>
-            tox.setName(ToxNickname.fromString("One").get)
+            tox.setName(ToxNickname.fromString("One").toOption.get)
             state
           }.set(1)
 
@@ -29,7 +29,7 @@ final class NameEmptyTest extends AliceBobTest {
           assert(new String(name.value) == "One")
 
           state.addTask { (tox, av, state) =>
-            tox.setName(ToxNickname.fromString("").get)
+            tox.setName(ToxNickname.fromString("").toOption.get)
             state
           }.set(2)
 

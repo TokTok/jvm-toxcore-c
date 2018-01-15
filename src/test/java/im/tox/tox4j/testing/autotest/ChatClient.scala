@@ -94,7 +94,7 @@ class ChatClientT[T](val selfName: String, val expectedFriendName: String) exten
 
   var expectedFriendAddress: ToxFriendAddress = ToxFriendAddress.unsafeFromValue(null)
   protected def expectedFriendPublicKey: ToxPublicKey = {
-    ToxPublicKey.fromValue(expectedFriendAddress.value.slice(0, ToxPublicKey.Size)).get
+    ToxPublicKey.fromValue(expectedFriendAddress.value.slice(0, ToxPublicKey.Size)).toOption.get
   }
 
   protected def isAlice = selfName == "Alice"

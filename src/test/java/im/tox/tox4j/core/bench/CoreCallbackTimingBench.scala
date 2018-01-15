@@ -14,8 +14,8 @@ final class CoreCallbackTimingBench extends TimingReport {
   private val eventListener = new ToxCoreEventAdapter[Unit]
 
   private val friendNumber = ToxFriendNumber.fromInt(1).get
-  private val publicKey = ToxPublicKey.fromValue(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).get
-  private val nickname = ToxNickname.fromValue(Array.ofDim[Byte](ToxNickname.MaxSize)).get
+  private val publicKey = ToxPublicKey.fromValue(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize)).toOption.get
+  private val nickname = ToxNickname.fromValue(Array.ofDim[Byte](ToxNickname.MaxSize)).toOption.get
   private val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
 
   def invokePerformance(method: String, f: ToxCoreImpl => Unit): Unit = {

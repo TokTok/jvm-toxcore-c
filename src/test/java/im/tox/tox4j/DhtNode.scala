@@ -11,7 +11,7 @@ final case class DhtNode(ipv4: String, ipv6: String, udpPort: Port, tcpPort: Por
       ipv4, ipv6,
       Port.unsafeFromInt(udpPort),
       Port.unsafeFromInt(tcpPort),
-      ToxPublicKey.fromValue(ToxCoreTestBase.parsePublicKey(dhtId)).get
+      ToxPublicKey.fromValue(ToxCoreTestBase.parsePublicKey(dhtId)).toOption.get
     )
   }
 

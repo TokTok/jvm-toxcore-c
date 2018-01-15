@@ -24,7 +24,7 @@ final class ToxCoreEventAdapterTest extends FunSuite {
   }
 
   test[FileRecv] {
-    listener.fileRecv(friendNumber, 0, ToxFileKind.DATA, 0, ToxFilename.fromString("").get)(())
+    listener.fileRecv(friendNumber, 0, ToxFileKind.DATA, 0, ToxFilename.fromString("").toOption.get)(())
   }
 
   test[FileRecvChunk] {
@@ -40,18 +40,18 @@ final class ToxCoreEventAdapterTest extends FunSuite {
   }
 
   test[FriendMessage] {
-    listener.friendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").get)(())
+    listener.friendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("hello").toOption.get)(())
   }
 
   test[FriendName] {
-    listener.friendName(friendNumber, ToxNickname.fromString("").get)(())
+    listener.friendName(friendNumber, ToxNickname.fromString("").toOption.get)(())
   }
 
   test[FriendRequest] {
     listener.friendRequest(
       ToxPublicKey.unsafeFromValue(null),
       0,
-      ToxFriendRequestMessage.fromString("").get
+      ToxFriendRequestMessage.fromString("").toOption.get
     )(())
   }
 
@@ -60,7 +60,7 @@ final class ToxCoreEventAdapterTest extends FunSuite {
   }
 
   test[FriendStatusMessage] {
-    listener.friendStatusMessage(friendNumber, ToxStatusMessage.fromString("").get)(())
+    listener.friendStatusMessage(friendNumber, ToxStatusMessage.fromString("").toOption.get)(())
   }
 
   test[FriendTyping] {
@@ -68,11 +68,11 @@ final class ToxCoreEventAdapterTest extends FunSuite {
   }
 
   test[FriendLosslessPacket] {
-    listener.friendLosslessPacket(friendNumber, ToxLosslessPacket.fromByteArray(160, Array.empty).get)(())
+    listener.friendLosslessPacket(friendNumber, ToxLosslessPacket.fromByteArray(160, Array.empty).toOption.get)(())
   }
 
   test[FriendLossyPacket] {
-    listener.friendLossyPacket(friendNumber, ToxLossyPacket.fromByteArray(200, Array.empty).get)(())
+    listener.friendLossyPacket(friendNumber, ToxLossyPacket.fromByteArray(200, Array.empty).toOption.get)(())
   }
 
   test[FriendReadReceipt] {

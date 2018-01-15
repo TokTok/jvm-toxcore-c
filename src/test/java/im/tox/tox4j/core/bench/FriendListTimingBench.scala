@@ -34,7 +34,7 @@ final class FriendListTimingBench extends TimingReport {
     measure method "addFriend" in {
       using(friends(100) map friendAddresses, toxInstance.cached) tearDown clearFriendList in {
         case (friendList, tox) =>
-          friendList foreach (tox.addFriend(_, ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get))
+          friendList foreach (tox.addFriend(_, ToxFriendRequestMessage.fromValue(Array.ofDim(1)).toOption.get))
       }
     }
 

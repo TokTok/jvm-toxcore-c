@@ -15,7 +15,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
       ToxCoreImplFactory.withToxUnit(
         _.addFriend(
           ToxFriendAddress.unsafeFromValue(Array.ofDim(1)),
-          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
+          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).toOption.get
         )
       )
     }
@@ -26,7 +26,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
       ToxCoreImplFactory.withToxUnit(
         _.addFriend(
           ToxFriendAddress.unsafeFromValue(Array.ofDim(ToxCoreConstants.AddressSize - 1)),
-          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
+          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).toOption.get
         )
       )
     }
@@ -37,7 +37,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
       ToxCoreImplFactory.withToxUnit(
         _.addFriend(
           ToxFriendAddress.unsafeFromValue(Array.ofDim(ToxCoreConstants.AddressSize + 1)),
-          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
+          ToxFriendRequestMessage.fromValue(Array.ofDim(1)).toOption.get
         )
       )
     }
@@ -47,7 +47,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.NULL)(
       _.addFriend(
         ToxFriendAddress.unsafeFromValue(null),
-        ToxFriendRequestMessage.fromValue(Array.ofDim(1)).get
+        ToxFriendRequestMessage.fromValue(Array.ofDim(1)).toOption.get
       )
     )
   }
@@ -62,7 +62,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     ToxCoreImplFactory.withToxUnit(
       _.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength - 1)).get
+        ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength - 1)).toOption.get
       )
     )
   }
@@ -71,7 +71,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     ToxCoreImplFactory.withToxUnit(
       _.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength)).get
+        ToxFriendRequestMessage.fromValue(Array.ofDim(ToxCoreConstants.MaxFriendRequestLength)).toOption.get
       )
     )
   }
@@ -89,7 +89,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.NO_MESSAGE)(
       _.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromString("").get
+        ToxFriendRequestMessage.fromString("").toOption.get
       )
     )
   }
@@ -98,7 +98,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.OWN_KEY) { tox =>
       tox.addFriend(
         tox.getAddress,
-        ToxFriendRequestMessage.fromString("hello").get
+        ToxFriendRequestMessage.fromString("hello").toOption.get
       )
     }
   }
@@ -107,11 +107,11 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.ALREADY_SENT) { tox =>
       tox.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromString("hello").get
+        ToxFriendRequestMessage.fromString("hello").toOption.get
       )
       tox.addFriend(
         validAddress,
-        ToxFriendRequestMessage.fromString("hello").get
+        ToxFriendRequestMessage.fromString("hello").toOption.get
       )
     }
   }
@@ -120,7 +120,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.BAD_CHECKSUM)(
       _.addFriend(
         ToxFriendAddress.unsafeFromValue(validAddress.value.updated(0, (validAddress.value(0) + 1).toByte)),
-        ToxFriendRequestMessage.fromString("hello").get
+        ToxFriendRequestMessage.fromString("hello").toOption.get
       )
     )
   }
@@ -129,9 +129,9 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
     interceptWithTox(ToxFriendAddException.Code.SET_NEW_NOSPAM) { tox =>
       ToxCoreImplFactory.withToxUnit { friend =>
         friend.setNospam(12345678)
-        tox.addFriend(friend.getAddress, ToxFriendRequestMessage.fromString("hello").get)
+        tox.addFriend(friend.getAddress, ToxFriendRequestMessage.fromString("hello").toOption.get)
         friend.setNospam(87654321)
-        tox.addFriend(friend.getAddress, ToxFriendRequestMessage.fromString("hello").get)
+        tox.addFriend(friend.getAddress, ToxFriendRequestMessage.fromString("hello").toOption.get)
       }
     }
   }

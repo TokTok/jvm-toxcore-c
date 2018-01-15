@@ -12,25 +12,25 @@ final class ToxFriendCustomPacketExceptionTest extends FunSuite with ToxTestMixi
 
   test("SendLosslessPacketNotConnected") {
     interceptWithTox(ToxFriendCustomPacketException.Code.FRIEND_NOT_CONNECTED)(
-      _.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.fromValue(Array[Byte](160.toByte, 0, 1, 2, 3)).get)
+      _.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.fromValue(Array[Byte](160.toByte, 0, 1, 2, 3)).toOption.get)
     )
   }
 
   test("SendLossyPacketNotConnected") {
     interceptWithTox(ToxFriendCustomPacketException.Code.FRIEND_NOT_CONNECTED)(
-      _.friendSendLossyPacket(friendNumber, ToxLossyPacket.fromValue(200.toByte +: Array.ofDim[Byte](4)).get)
+      _.friendSendLossyPacket(friendNumber, ToxLossyPacket.fromValue(200.toByte +: Array.ofDim[Byte](4)).toOption.get)
     )
   }
 
   test("SendLosslessPacketNotFound") {
     interceptWithTox(ToxFriendCustomPacketException.Code.FRIEND_NOT_FOUND)(
-      _.friendSendLosslessPacket(badFriendNumber, ToxLosslessPacket.fromValue(Array[Byte](160.toByte, 0, 1, 2, 3)).get)
+      _.friendSendLosslessPacket(badFriendNumber, ToxLosslessPacket.fromValue(Array[Byte](160.toByte, 0, 1, 2, 3)).toOption.get)
     )
   }
 
   test("SendLossyPacketNotFound") {
     interceptWithTox(ToxFriendCustomPacketException.Code.FRIEND_NOT_FOUND)(
-      _.friendSendLossyPacket(badFriendNumber, ToxLossyPacket.fromValue(Array[Byte](200.toByte, 0, 1, 2, 3)).get)
+      _.friendSendLossyPacket(badFriendNumber, ToxLossyPacket.fromValue(Array[Byte](200.toByte, 0, 1, 2, 3)).toOption.get)
     )
   }
 

@@ -17,19 +17,19 @@ abstract class KeyCompanionTest[T <: AnyVal, S <: Security](
         Gen.choose('A', 'F')
       )
     ).map(new String(_))) { string =>
-      companion.fromHexString(string).get
+      companion.fromHexString(string).toOption.get
     }
   }
 
   test("toString") {
     forAll { (self: T) =>
-      assert(companion.equals(companion.fromHexString(self.toString).get, self))
+      assert(companion.equals(companion.fromHexString(self.toString).toOption.get, self))
     }
   }
 
   test("toHexString") {
     forAll { (self: T) =>
-      assert(companion.equals(companion.fromHexString(companion.toHexString(self)).get, self))
+      assert(companion.equals(companion.fromHexString(companion.toHexString(self)).toOption.get, self))
     }
   }
 

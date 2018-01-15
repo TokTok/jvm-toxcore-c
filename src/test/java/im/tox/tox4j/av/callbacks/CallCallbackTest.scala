@@ -41,7 +41,7 @@ final class CallCallbackTest extends AutoTestSuite with ToxExceptionChecks {
           }
           // Say "No thanks" and stop talking.
           debug(state, s"Got a call from ${state.id(friendNumber)}; rejecting")
-          tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("No thanks").get)
+          tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, 0, ToxFriendMessage.fromString("No thanks").toOption.get)
           state.finish
         }
       } else {

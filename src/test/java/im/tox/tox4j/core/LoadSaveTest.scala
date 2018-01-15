@@ -43,9 +43,9 @@ final class LoadSaveTest extends FunSuite {
       override def change(tox: ToxCore): Boolean = {
         expected =
           if (expected.value == null) {
-            ToxNickname.fromString("").get
+            ToxNickname.fromString("").toOption.get
           } else {
-            ToxNickname.fromValue(ToxCoreTestBase.randomBytes(expected.value.length + 1)).get
+            ToxNickname.fromValue(ToxCoreTestBase.randomBytes(expected.value.length + 1)).toOption.get
           }
         tox.setName(expected)
         expected.value.length < ToxCoreConstants.MaxNameLength
@@ -63,9 +63,9 @@ final class LoadSaveTest extends FunSuite {
 
       override def change(tox: ToxCore): Boolean = {
         if (expected.value == null) {
-          expected = ToxStatusMessage.fromString("").get
+          expected = ToxStatusMessage.fromString("").toOption.get
         } else {
-          expected = ToxStatusMessage.fromValue(ToxCoreTestBase.randomBytes(expected.value.length + 1)).get
+          expected = ToxStatusMessage.fromValue(ToxCoreTestBase.randomBytes(expected.value.length + 1)).toOption.get
         }
         tox.setStatusMessage(expected)
         expected.value.length < ToxCoreConstants.MaxNameLength
@@ -117,7 +117,7 @@ final class LoadSaveTest extends FunSuite {
         withToxUnit { toxFriend =>
           expected = tox.addFriend(
             toxFriend.getAddress,
-            ToxFriendRequestMessage.fromString("hello").get
+            ToxFriendRequestMessage.fromString("hello").toOption.get
           )
         }
         false

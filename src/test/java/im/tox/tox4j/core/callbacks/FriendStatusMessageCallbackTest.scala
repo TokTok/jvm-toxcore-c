@@ -16,7 +16,7 @@ final class FriendStatusMessageCallbackTest extends AliceBobTest {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         state.addTask { (tox, av, state) =>
-          tox.setStatusMessage(ToxStatusMessage.fromString(s"I like $expectedFriendName").get)
+          tox.setStatusMessage(ToxStatusMessage.fromString(s"I like $expectedFriendName").toOption.get)
           state
         }
       } else {
