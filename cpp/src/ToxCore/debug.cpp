@@ -26,15 +26,17 @@ print_arg<Tox_Options *> (protolog::Value &value, Tox_Options *const &options)
   else
     {
       protolog::Struct *object = value.mutable_v_object ();
-      print_member (*object, "ipv6_enabled", options->ipv6_enabled);
-      print_member (*object, "udp_enabled", options->udp_enabled);
-      print_member (*object, "proxy_type", options->proxy_type);
-      print_member (*object, "proxy_host", options->proxy_host);
-      print_member (*object, "start_port", options->start_port);
-      print_member (*object, "end_port", options->end_port);
-      print_member (*object, "tcp_port", options->tcp_port);
-      print_member (*object, "savedata_type", options->savedata_type);
-      print_member (*object, "savedata", options->savedata_data, options->savedata_length);
+      print_member (*object, "ipv6_enabled", tox_options_get_ipv6_enabled(options));
+      print_member (*object, "udp_enabled", tox_options_get_udp_enabled(options));
+      print_member (*object, "proxy_type", tox_options_get_proxy_type(options));
+      print_member (*object, "proxy_host", tox_options_get_proxy_host(options));
+      print_member (*object, "start_port", tox_options_get_start_port(options));
+      print_member (*object, "end_port", tox_options_get_end_port(options));
+      print_member (*object, "tcp_port", tox_options_get_tcp_port(options));
+      print_member (*object, "savedata_type", tox_options_get_savedata_type(options));
+      print_member (*object, "savedata",
+        tox_options_get_savedata_data(options),
+        tox_options_get_savedata_length(options));
     }
 }
 
