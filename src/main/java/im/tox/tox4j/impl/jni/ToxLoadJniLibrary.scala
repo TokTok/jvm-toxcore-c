@@ -84,7 +84,7 @@ object ToxLoadJniLibrary {
     }
   }
 
-  def load(name: String): Unit = {
+  def load(name: String): Unit = synchronized {
     try {
       System.loadLibrary(name)
     } catch {
