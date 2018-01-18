@@ -24,9 +24,6 @@ tox4j_CONFIGURE		:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE
 
 build: $(TOOLCHAIN)/tox4j.stamp
 
-release: build
-	@echo "Releases not implemented yet"
-
 test: build
 	@echo "No tests for Android builds"
 
@@ -66,3 +63,5 @@ $(TOOLCHAIN_FILE): $(TOOLCHAIN)/AndroidVersion.txt
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)' >> $@
 	@$(POST_RULE)
+
+include scripts/release.mk

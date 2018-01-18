@@ -47,6 +47,9 @@ script:
 after_success:
 - if [ "$GOAL" = "test" ]; then sbt coveralls; fi
 
+before_cache:
+- rm -f android-ndk-*.zip
+
 branches:
   only:
   - master

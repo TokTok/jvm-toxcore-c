@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing.autotest
 
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.ToxAv
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
@@ -10,7 +11,6 @@ import org.scalatest.FunSuite
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
-import scalaz.Scalaz._
 
 object AliceBobTestBase {
   val FriendNumber: ToxFriendNumber = ToxFriendNumber.fromInt(10).get

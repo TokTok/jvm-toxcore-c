@@ -32,7 +32,11 @@ $(TOOLCHAIN)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 # toxcore
 
 $(SRCDIR)/toxcore:
-	git clone --depth=1 https://github.com/TokTok/c-toxcore $@
+	if [ -e ../c-toxcore ]; then					\
+	  ln -s $(realpath ../c-toxcore) $@;				\
+	else								\
+	  git clone --depth=1 https://github.com/TokTok/c-toxcore $@;	\
+	fi
 
 $(TOOLCHAIN)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libsodium opus libvpx,$(TOOLCHAIN)/$i.stamp)
 	@$(PRE_RULE)

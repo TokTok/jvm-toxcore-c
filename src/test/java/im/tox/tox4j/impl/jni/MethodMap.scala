@@ -2,9 +2,8 @@ package im.tox.tox4j.impl.jni
 
 import java.lang.reflect.{ Method, Modifier }
 
+import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.impl.jni.codegen.NameConversions
-
-import scalaz.Scalaz._
 
 object MethodMap {
 

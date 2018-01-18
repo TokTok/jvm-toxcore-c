@@ -1,13 +1,13 @@
 package im.tox.tox4j.impl.jni
 
 import java.io.File
+import java.io.InputStream
 
 import com.google.common.io.Files
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
-import scala.tools.nsc.interpreter.InputStream
 
 object ToxLoadJniLibrary {
 
@@ -17,7 +17,7 @@ object ToxLoadJniLibrary {
   private val NotFoundDalvik = "Couldn't load .+ from loader .+ findLibrary returned null".r
   private val NotFoundJvm = "no .+ in java.library.path".r
 
-  private def withTempFile(name: String)(block: File => Unit): Unit = {
+  private def withTempFile(name: String)(block: File => Boolean): Boolean = {
     val (prefix, suffix) = name.splitAt(name.lastIndexOf("."))
     val file = File.createTempFile(prefix, suffix)
     file.deleteOnExit()
@@ -30,12 +30,17 @@ object ToxLoadJniLibrary {
     }
   }
 
-  private def withResource(name: String)(block: InputStream => Unit): Unit = {
+  private def withResource(name: String)(block: InputStream => Boolean): Boolean = {
     val stream = getClass.getResourceAsStream(name)
-    try {
-      block(stream)
-    } finally {
-      stream.close()
+    if (stream == null) {
+      logger.debug(s"Resource '$name' not found")
+      false
+    } else {
+      try {
+        block(stream)
+      } finally {
+        stream.close()
+      }
     }
   }
 
@@ -45,12 +50,13 @@ object ToxLoadJniLibrary {
    *
    * @param location A [[File]] pointing to the existing library.
    */
-  private def loadFromSystem(location: File): Unit = {
+  private def loadFromSystem(location: File): Boolean = {
     withTempFile(location.getName) { libraryFile =>
       logger.info(s"Copying $location to $libraryFile")
       Files.copy(location, libraryFile)
 
       System.load(libraryFile.getPath)
+      true
     }
   }
 
@@ -60,7 +66,7 @@ object ToxLoadJniLibrary {
    *
    * @param name The library name without "dll" suffix or "lib" prefix.
    */
-  private def loadFromJar(name: String): Unit = {
+  private def loadFromJar(name: String): Boolean = {
     val osName = Map(
       "Mac OS X" -> "darwin"
     ).withDefault((x: String) => x.toLowerCase.split(" ").head)
@@ -76,11 +82,16 @@ object ToxLoadJniLibrary {
     logger.debug(s"Loading $name from resource: $resourceName")
     val location = new File(resourceName)
     withTempFile(location.getName) { libraryFile =>
-      withResource(resourceName) { stream =>
+      if (withResource(resourceName) { stream =>
         logger.debug(s"Copying $resourceName to ${libraryFile.getPath}")
         Files.asByteSink(libraryFile).writeFrom(stream)
+        true
+      }) {
+        System.load(libraryFile.getPath)
+        true
+      } else {
+        false
       }
-      System.load(libraryFile.getPath)
     }
   }
 
@@ -89,19 +100,25 @@ object ToxLoadJniLibrary {
       System.loadLibrary(name)
     } catch {
       case exn: UnsatisfiedLinkError =>
-        exn.getMessage match {
+        logger.debug(
+          s"Could not load native library '$name' (${exn.getMessage}). " +
+            s"java.library.path = ${sys.props("java.library.path")}."
+        )
+        if (exn.getMessage match {
           case AlreadyLoaded(location) =>
             logger.warn(s"${exn.getMessage} copying file and loading again")
             loadFromSystem(new File(location))
           case NotFoundJvm() =>
             loadFromJar(name)
           case NotFoundDalvik() =>
-            logger.error(
-              s"Could not load native library '$name' (${exn.getMessage}). " +
-                s"java.library.path = ${sys.props("java.library.path")}."
-            )
+            logger.error(s"Could not load native library '$name'; giving up.")
+            false
           case _ =>
-            throw exn
+            false
+        }) {
+          logger.debug(s"Loading '$name' successful")
+        } else {
+          throw exn
         }
     }
   }

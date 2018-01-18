@@ -1,6 +1,7 @@
 package im.tox.tox4j.testing
 
 import im.tox.core.error.CoreError
+import im.tox.core.typesafe.\/
 import im.tox.tox4j.DhtNodeSelector._
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
@@ -9,7 +10,6 @@ import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import org.jetbrains.annotations.NotNull
 
 import scala.language.implicitConversions
-import scalaz.\/
 
 trait ToxTestMixin extends ToxExceptionChecks {
 

@@ -60,18 +60,6 @@ final class ToxJniLogTest extends FunSuite with PropertyChecks {
     }
   }
 
-  test("Java conversions") {
-    ToxJniLog() // clear
-
-    ToxJniLog.maxSize = TestMaxSize
-    assert(ToxJniLog().entries.isEmpty)
-    ToxCoreImplFactory.withToxUnit { tox => }
-
-    val log = ToxJniLog()
-    assert(JniLog.fromJavaProto(JniLog.toJavaProto(log)) == log)
-    assert(JniLog.fromAscii(log.toString) == log)
-  }
-
   test("concurrent logging works") {
     ToxJniLog() // clear
     ToxJniLog.maxSize = 10000

@@ -173,25 +173,24 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${PROTOBUF_LIBRARIES}
-  ${TOXAV_LIBRARIES}
-  ${TOXCORE_LIBRARIES}
 )
 
 if(LIBTOXCORE_FOUND)
   target_link_libraries(${PROJECT_NAME}
-    ${LIBTOXAV_LIBRARIES}
-    ${LIBTOXCORE_LIBRARIES}
+    ${LIBTOXAV_STATIC_LIBRARIES}
+    ${LIBTOXCORE_STATIC_LIBRARIES}
   )
 else()
   target_link_libraries(${PROJECT_NAME}
-    ${TOXCORE_LIBRARIES}
+    ${TOXAV_STATIC_LIBRARIES}
+    ${TOXCORE_STATIC_LIBRARIES}
   )
 endif()
 
 # Windows and OSX don't have this linker functionality.
 if(NOT WIN32 AND NOT APPLE)
   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-    "-Wl,-z,defs -Wl,--version-script,${CMAKE_SOURCE_DIR}/src/libtox4j-c.ver")
+    "-Wl,-z,defs -Wl,--version-script,${CMAKE_SOURCE_DIR}/src/libtox4j-c.ld")
 endif()
 
 #
