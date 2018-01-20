@@ -114,6 +114,9 @@ tox4j_friend_message_cb (uint32_t friend_number, TOX_MESSAGE_TYPE type, /*uint32
     case TOX_MESSAGE_TYPE_ACTION:
       msg->set_type (MessageType::ACTION);
       break;
+    case TOX_MESSAGE_TYPE_CORRECTION:
+      msg->set_type (MessageType::CORRECTION);
+      break;
     }
 
   msg->set_time_delta (0);

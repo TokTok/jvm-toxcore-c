@@ -5,32 +5,33 @@ package im.tox.tox4j.core.proto;
 
 message Connection {
   enum Type {
-    NONE    = 0;
-    TCP     = 1;
-    UDP     = 2;
+    NONE       = 0;
+    TCP        = 1;
+    UDP        = 2;
   }
 }
 
 message UserStatus {
   enum Type {
-    NONE    = 0;
-    AWAY    = 1;
-    BUSY    = 2;
+    NONE       = 0;
+    AWAY       = 1;
+    BUSY       = 2;
   }
 }
 
 message MessageType {
   enum Type {
-    NORMAL  = 0;
-    ACTION  = 1;
+    NORMAL     = 0;
+    ACTION     = 1;
+    CORRECTION = 2;
   }
 }
 
 message FileControl {
   enum Type {
-    RESUME  = 0;
-    PAUSE   = 1;
-    CANCEL  = 2;
+    RESUME     = 0;
+    PAUSE      = 1;
+    CANCEL     = 2;
   }
 }
 
