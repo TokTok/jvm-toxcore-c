@@ -93,19 +93,89 @@ scala_library(
     ],
 )
 
-scala_test(
-    name = "jvm-toxcore-c-test",
+scala_library(
+    name = "codegen_lib",
+    testonly = True,
     srcs = glob([
-        "src/test/java/**/*.scala",
+        "src/test/java/gnieh/**/*.scala",
+        "src/test/java/im/tox/tox4j/impl/jni/codegen/**/*.scala",
+        "src/test/java/im/tox/tox4j/impl/jni/MethodMap.scala",
     ]),
+    deps = [
+        ":jvm-toxcore-c",
+        "//jvm-macros",
+        "//jvm-toxcore-api",
+        "@com_google_guava_guava//jar",
+        "@org_apache_commons_commons_lang3//jar",
+    ],
+)
+
+scala_library(
+    name = "test_lib",
+    testonly = True,
+    srcs = [
+        "src/test/java/im/tox/core/random/RandomCore.scala",
+        "src/test/java/im/tox/tox4j/ConnectedListener.scala",
+        "src/test/java/im/tox/tox4j/DhtNode.scala",
+        "src/test/java/im/tox/tox4j/DhtNodeSelector.scala",
+        "src/test/java/im/tox/tox4j/SocksServer.scala",
+        "src/test/java/im/tox/tox4j/TestConstants.scala",
+        "src/test/java/im/tox/tox4j/ToxCoreTestBase.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioGenerator.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioGenerators.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/video/ArithmeticVideoGenerator.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/video/RgbVideoGenerator.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/video/TextImageGenerator.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/video/VideoConversions.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/video/VideoGenerator.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/video/VideoGenerators.scala",
+        "src/test/java/im/tox/tox4j/core/SmallNat.scala",
+        "src/test/java/im/tox/tox4j/core/ToxCoreFactory.scala",
+        "src/test/java/im/tox/tox4j/core/ToxList.scala",
+        "src/test/java/im/tox/tox4j/core/callbacks/FilePauseResumeTestBase.scala",
+        "src/test/java/im/tox/tox4j/core/callbacks/InvokeTest.scala",
+        "src/test/java/im/tox/tox4j/crypto/ToxCryptoTest.scala",
+        "src/test/java/im/tox/tox4j/impl/jni/NamingConventionsTest.scala",
+        "src/test/java/im/tox/tox4j/impl/jni/ToxAvImplFactory.scala",
+        "src/test/java/im/tox/tox4j/impl/jni/ToxCoreImplFactory.scala",
+        "src/test/java/im/tox/tox4j/testing/GetDisjunction.scala",
+        "src/test/java/im/tox/tox4j/testing/ToxExceptionChecks.scala",
+        "src/test/java/im/tox/tox4j/testing/ToxTestMixin.scala",
+        "src/test/java/im/tox/tox4j/testing/autotest/AliceBobTest.scala",
+        "src/test/java/im/tox/tox4j/testing/autotest/AliceBobTestBase.scala",
+        "src/test/java/im/tox/tox4j/testing/autotest/AutoTest.scala",
+        "src/test/java/im/tox/tox4j/testing/autotest/AutoTestSuite.scala",
+        "src/test/java/im/tox/tox4j/testing/autotest/ChatClient.scala",
+    ],
+    deps = [
+        ":codegen_lib",
+        ":jvm-toxcore-c",
+        "//jvm-macros",
+        "//jvm-toxcore-api",
+        "@com_chuusai_shapeless//jar:file",
+        "@com_intellij_annotations//jar",
+        "@com_typesafe_scala_logging_scala_logging//jar:file",
+        "@org_scalacheck_scalacheck//jar",
+        "@org_scalactic_scalactic//jar:file",
+        "@org_scalatest_scalatest//jar:file",
+        "@org_slf4j_slf4j_api//jar",
+    ],
+)
+
+[scala_test(
+    name = src[src.rindex("/") + 1:-6],
+    size = "small",
+    srcs = [src],
     data = [":libtox4j-c.so"],
     jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
     resources = glob([
         "src/test/resources/**/*",
     ]),
     deps = [
+        ":codegen_lib",
         ":jni_scala_proto",
         ":jvm-toxcore-c",
+        ":test_lib",
         "//jvm-macros",
         "//jvm-toxcore-api",
         "@com_chuusai_shapeless//jar:file",
@@ -120,10 +190,11 @@ scala_test(
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_log4j12//jar",
     ],
-)
+) for src in glob(["src/test/java/**/*Test.scala"])]
 
 [java_test(
     name = src[src.rindex("/") + 1:-5],
+    size = "small",
     srcs = [src],
     data = [":libtox4j-c.so"],
     jvm_flags = ["-Djava.library.path=`dirname $(location :libtox4j-c.so)`"],
