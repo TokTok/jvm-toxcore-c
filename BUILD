@@ -29,8 +29,14 @@ cc_proto_library(
     deps = [":jni_proto"],
 )
 
-cc_library(
-    name = "jni_lib",
+scalapb_proto_library(
+    name = "jni_scala_proto",
+    with_flat_package = True,
+    deps = [":jni_proto"],
+)
+
+cc_binary(
+    name = "libtox4j-c.so",
     srcs = glob([
         "cpp/src/**/*.cpp",
         "cpp/src/**/*.h",
@@ -49,30 +55,14 @@ cc_library(
         "cpp/src",
         "src/main/protobuf",
     ],
-    deps = [
-        ":jni_cc_proto",
-        "//c-toxcore:headers",
-        "//c-toxcore/toxav",
-        "//c-toxcore/toxcore",
-        "//c-toxcore/toxencryptsave",
-    ],
-)
-
-cc_binary(
-    name = "libtox4j-c.so",
     linkopts = ["-Wl,--version-script,$(location cpp/src/libtox4j-c.ld)"],
     linkshared = True,
     visibility = ["//visibility:public"],
     deps = [
         "cpp/src/libtox4j-c.ld",
-        ":jni_lib",
+        ":jni_cc_proto",
+        "//c-toxcore",
     ],
-)
-
-scalapb_proto_library(
-    name = "jni_scala_proto",
-    with_flat_package = True,
-    deps = [":jni_proto"],
 )
 
 scala_library(
