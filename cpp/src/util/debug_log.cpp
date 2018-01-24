@@ -72,7 +72,7 @@ JniLog::Entry::~Entry ()
 
 
 JniLog::JniLog ()
-  : self (std::make_unique<data> ())
+  : self (make_unique<data> ())
 {
 }
 

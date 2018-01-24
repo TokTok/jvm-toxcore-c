@@ -4,16 +4,17 @@
 extern "C" char *gets (char *);
 #endif
 
-#if !defined(HAVE_MAKE_UNIQUE)
 #include <memory>
 
-namespace std {
-  template<typename T, typename ...Args>
-  unique_ptr<T>
-  make_unique (Args &&...args)
-  {
-    return std::unique_ptr<T> (new T (std::forward<Args> (args)...));
-  }
+#if defined(HAVE_MAKE_UNIQUE)
+using ::std::make_unique;
+#else
+
+template<typename T, typename ...Args>
+std::unique_ptr<T>
+make_unique (Args &&...args)
+{
+  return std::unique_ptr<T> (new T (std::forward<Args> (args)...));
 }
 #endif
 

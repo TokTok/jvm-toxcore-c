@@ -9,7 +9,7 @@
 static std::unique_ptr<int>
 make_int (int i)
 {
-  return std::make_unique<int> (i);
+  return make_unique<int> (i);
 }
 
 

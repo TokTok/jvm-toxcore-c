@@ -48,7 +48,6 @@ cc_binary(
         "-Wno-error=switch",
         "-Wno-parentheses",
         "-std=c++14",
-        "-DHAVE_MAKE_UNIQUE",
         "-DHAVE_TO_STRING",
     ],
     includes = [
