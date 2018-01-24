@@ -85,14 +85,27 @@ TOX_METHOD (void, CallControl,
 
 /*
  * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavBitRateSet
- * Signature: (IIII)V
+ * Method:    toxavAudioSetBitRate
+ * Signature: (III)V
  */
-TOX_METHOD (void, BitRateSet,
-  jint instanceNumber, jint friendNumber, jint audioBitRate, jint videoBitRate)
+TOX_METHOD (void, AudioSetBitRate,
+  jint instanceNumber, jint friendNumber, jint audioBitRate)
 {
   return instances.with_instance_ign (env, instanceNumber,
-    toxav_bit_rate_set, friendNumber, audioBitRate, videoBitRate
+    toxav_audio_set_bit_rate, friendNumber, audioBitRate
+  );
+}
+
+/*
+ * Class:     im_tox_tox4j_impl_ToxAvJni
+ * Method:    toxavVideoSetBitRate
+ * Signature: (III)V
+ */
+TOX_METHOD (void, VideoSetBitRate,
+  jint instanceNumber, jint friendNumber, jint videoBitRate)
+{
+  return instances.with_instance_ign (env, instanceNumber,
+    toxav_video_set_bit_rate, friendNumber, videoBitRate
   );
 }
 

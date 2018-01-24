@@ -73,11 +73,19 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavCallControl
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    toxavBitRateSet
- * Signature: (IIII)V
+ * Method:    toxavAudioSetBitRate
+ * Signature: (III)V
  */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavBitRateSet
-  (JNIEnv *, jclass, jint, jint, jint, jint);
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavAudioSetBitRate
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxAvJni
+ * Method:    toxavVideoSetBitRate
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavVideoSetBitRate
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
@@ -105,11 +113,19 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeAudioReceiveFra
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeBitRateStatus
- * Signature: (IIII)V
+ * Method:    invokeAudioBitRate
+ * Signature: (III)V
  */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeBitRateStatus
-  (JNIEnv *, jclass, jint, jint, jint, jint);
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeAudioBitRate
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxAvJni
+ * Method:    invokeVideoBitRate
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeVideoBitRate
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni

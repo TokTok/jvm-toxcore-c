@@ -105,8 +105,13 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       state.addTask(sendFrame(friendNumber))
     }
 
-    override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: State): State = {
-      debug(state, s"Bit rate in call with ${state.id(friendNumber)} should change to $audioBitRate for audio and $videoBitRate for video")
+    override def audioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate)(state: State): State = {
+      debug(state, s"Bit rate in call with ${state.id(friendNumber)} should change to $audioBitRate for audio")
+      state
+    }
+
+    override def videoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate)(state: State): State = {
+      debug(state, s"Bit rate in call with ${state.id(friendNumber)} should change to $videoBitRate for video")
       state
     }
 

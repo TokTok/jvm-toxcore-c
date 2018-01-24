@@ -23,10 +23,14 @@ message CallState {
   repeated Kind call_state       = 2;
 }
 
-message BitRateStatus {
+message AudioBitRate {
   uint32        friend_number    = 1;
   uint32        audio_bit_rate   = 2;
-  uint32        video_bit_rate   = 3;
+}
+
+message VideoBitRate {
+  uint32        friend_number    = 1;
+  uint32        video_bit_rate   = 2;
 }
 
 message AudioReceiveFrame {
@@ -52,7 +56,8 @@ message VideoReceiveFrame {
 message AvEvents {
   repeated Call               call                = 1;
   repeated CallState          call_state          = 2;
-  repeated BitRateStatus      bit_rate_status     = 3;
-  repeated AudioReceiveFrame  audio_receive_frame = 4;
-  repeated VideoReceiveFrame  video_receive_frame = 5;
+  repeated AudioBitRate       audio_bit_rate      = 3;
+  repeated VideoBitRate       video_bit_rate      = 4;
+  repeated AudioReceiveFrame  audio_receive_frame = 5;
+  repeated VideoReceiveFrame  video_receive_frame = 6;
 }

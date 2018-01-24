@@ -66,12 +66,21 @@ object ToxAvEventDispatch {
     }
   }
 
-  private def dispatchBitRateStatus[S](handler: BitRateStatusCallback[S], bitRateStatus: Seq[BitRateStatus])(state: S): S = {
-    bitRateStatus.foldLeft(state) {
-      case (state, BitRateStatus(friendNumber, audioBitRate, videoBitRate)) =>
-        handler.bitRateStatus(
+  private def dispatchAudioBitRate[S](handler: AudioBitRateCallback[S], audioBitRate: Seq[AudioBitRate])(state: S): S = {
+    audioBitRate.foldLeft(state) {
+      case (state, AudioBitRate(friendNumber, audioBitRate)) =>
+        handler.audioBitRate(
           ToxFriendNumber.unsafeFromInt(friendNumber),
-          BitRate.unsafeFromInt(audioBitRate),
+          BitRate.unsafeFromInt(audioBitRate)
+        )(state)
+    }
+  }
+
+  private def dispatchVideoBitRate[S](handler: VideoBitRateCallback[S], videoBitRate: Seq[VideoBitRate])(state: S): S = {
+    videoBitRate.foldLeft(state) {
+      case (state, VideoBitRate(friendNumber, videoBitRate)) =>
+        handler.videoBitRate(
+          ToxFriendNumber.unsafeFromInt(friendNumber),
           BitRate.unsafeFromInt(videoBitRate)
         )(state)
     }
@@ -136,7 +145,8 @@ object ToxAvEventDispatch {
     (state
       |> dispatchCall(handler, events.call)
       |> dispatchCallState(handler, events.callState)
-      |> dispatchBitRateStatus(handler, events.bitRateStatus)
+      |> dispatchAudioBitRate(handler, events.audioBitRate)
+      |> dispatchVideoBitRate(handler, events.videoBitRate)
       |> dispatchAudioReceiveFrame(handler, events.audioReceiveFrame)
       |> dispatchVideoReceiveFrame(handler, events.videoReceiveFrame))
   }

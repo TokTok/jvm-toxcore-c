@@ -1,4 +1,4 @@
-load("@io_bazel_rules_scala//scala:scala.bzl", "scala_library", "scala_test")
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_binary", "scala_library", "scala_test")
 load("@io_bazel_rules_scala//scala_proto:scala_proto.bzl", "scalapb_proto_library")
 
 genrule(
@@ -201,3 +201,19 @@ scala_library(
         "@org_slf4j_slf4j_log4j12//jar",
     ],
 ) for src in glob(["src/test/java/**/*.java"])]
+
+[scala_binary(
+    name = src[src.rindex("/") + 1:-6],
+    testonly = True,
+    srcs = [src],
+    main_class = "im.tox.tox4j.impl.jni.codegen." + src[src.rindex("/") + 1:-6],
+    resources = glob([
+        "src/test/resources/**/*",
+    ]),
+    deps = [
+        ":codegen_lib",
+        ":jvm-toxcore-c",
+        "//jvm-toxcore-api",
+        "@com_google_guava_guava//jar",
+    ],
+) for src in glob(["src/test/java/im/tox/tox4j/impl/jni/codegen/Jni*.scala"])]

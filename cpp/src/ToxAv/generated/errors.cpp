@@ -21,8 +21,7 @@ HANDLE ("BitRateSet", BIT_RATE_SET)
     success_case (BIT_RATE_SET);
     failure_case (BIT_RATE_SET, FRIEND_NOT_FOUND);
     failure_case (BIT_RATE_SET, FRIEND_NOT_IN_CALL);
-    failure_case (BIT_RATE_SET, INVALID_AUDIO_BIT_RATE);
-    failure_case (BIT_RATE_SET, INVALID_VIDEO_BIT_RATE);
+    failure_case (BIT_RATE_SET, INVALID_BIT_RATE);
     failure_case (BIT_RATE_SET, SYNC);
     }
   return unhandled ();

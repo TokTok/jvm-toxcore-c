@@ -35,14 +35,23 @@ tox4j_call_state_cb (uint32_t friend_number, uint32_t state, Events *events)
 
 
 static void
-tox4j_bit_rate_status_cb (uint32_t friend_number,
-                          uint32_t audio_bit_rate,
-                          uint32_t video_bit_rate,
-                          Events *events)
+tox4j_audio_bit_rate_cb (uint32_t friend_number,
+                         uint32_t audio_bit_rate,
+                         Events *events)
 {
-  auto msg = events->add_bit_rate_status ();
+  auto msg = events->add_audio_bit_rate ();
   msg->set_friend_number (friend_number);
   msg->set_audio_bit_rate (audio_bit_rate);
+}
+
+
+static void
+tox4j_video_bit_rate_cb (uint32_t friend_number,
+                         uint32_t video_bit_rate,
+                         Events *events)
+{
+  auto msg = events->add_video_bit_rate ();
+  msg->set_friend_number (friend_number);
   msg->set_video_bit_rate (video_bit_rate);
 }
 
@@ -179,17 +188,34 @@ TOX_METHOD (void, Finalize,
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeBitRateStatus
- * Signature: (IIII)V
+ * Method:    invokeAudioBitRate
+ * Signature: (III)V
  */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeBitRateStatus
-  (JNIEnv *env, jclass, jint instanceNumber, jint friendNumber, jint audioBitRate, jint videoBitRate)
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeAudioBitRate
+  (JNIEnv *env, jclass, jint instanceNumber, jint friendNumber, jint audioBitRate)
 {
   return instances.with_instance (env, instanceNumber,
     [=] (ToxAV *av, Events &events)
       {
         assert (av != nullptr);
-        tox4j_bit_rate_status_cb (friendNumber, audioBitRate, videoBitRate, &events);
+        tox4j_audio_bit_rate_cb (friendNumber, audioBitRate, &events);
+      }
+  );
+}
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxAvJni
+ * Method:    invokeVideoBitRate
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeVideoBitRate
+  (JNIEnv *env, jclass, jint instanceNumber, jint friendNumber, jint videoBitRate)
+{
+  return instances.with_instance (env, instanceNumber,
+    [=] (ToxAV *av, Events &events)
+      {
+        assert (av != nullptr);
+        tox4j_video_bit_rate_cb (friendNumber, videoBitRate, &events);
       }
   );
 }

@@ -77,8 +77,12 @@ final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
     ToxAvJni.toxavCallControl(instanceNumber, friendNumber.value, control.ordinal)
 
   @throws[ToxavBitRateSetException]
-  override def setBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit =
-    ToxAvJni.toxavBitRateSet(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
+  override def setAudioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate): Unit =
+    ToxAvJni.toxavAudioSetBitRate(instanceNumber, friendNumber.value, audioBitRate.value)
+
+  @throws[ToxavBitRateSetException]
+  override def setVideoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate): Unit =
+    ToxAvJni.toxavVideoSetBitRate(instanceNumber, friendNumber.value, videoBitRate.value)
 
   @throws[ToxavSendFrameException]
   override def audioSendFrame(
@@ -102,8 +106,10 @@ final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
 
   def invokeAudioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate): Unit =
     ToxAvJni.invokeAudioReceiveFrame(instanceNumber, friendNumber.value, pcm, channels.value, samplingRate.value)
-  def invokeBitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit =
-    ToxAvJni.invokeBitRateStatus(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
+  def invokeAudioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate): Unit =
+    ToxAvJni.invokeAudioBitRate(instanceNumber, friendNumber.value, audioBitRate.value)
+  def invokeVideoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate): Unit =
+    ToxAvJni.invokeVideoBitRate(instanceNumber, friendNumber.value, videoBitRate.value)
   def invokeCall(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean): Unit =
     ToxAvJni.invokeCall(instanceNumber, friendNumber.value, audioEnabled, videoEnabled)
   def invokeCallState(friendNumber: ToxFriendNumber, callState: util.EnumSet[ToxavFriendCallState]): Unit =
