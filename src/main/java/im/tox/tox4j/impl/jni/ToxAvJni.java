@@ -20,7 +20,8 @@ public final class ToxAvJni {
   static native void toxavCall(int instanceNumber, int friendNumber, int audioBitRate, int videoBitRate) throws ToxavCallException;
   static native void toxavAnswer(int instanceNumber, int friendNumber, int audioBitRate, int videoBitRate) throws ToxavAnswerException;
   static native void toxavCallControl(int instanceNumber, int friendNumber, int control) throws ToxavCallControlException;
-  static native void toxavBitRateSet(int instanceNumber, int friendNumber, int audioBitRate, int videoBitRate) throws ToxavBitRateSetException;
+  static native void toxavBitRateSetAudio(int instanceNumber, int friendNumber, int audioBitRate) throws ToxavBitRateSetException;
+  static native void toxavBitRateSetVideo(int instanceNumber, int friendNumber, int videoBitRate) throws ToxavBitRateSetException;
 
   static native void toxavAudioSendFrame(
       int instanceNumber,

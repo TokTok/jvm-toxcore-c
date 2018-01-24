@@ -77,8 +77,12 @@ final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
     ToxAvJni.toxavCallControl(instanceNumber, friendNumber.value, control.ordinal)
 
   @throws[ToxavBitRateSetException]
-  override def setBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit =
-    ToxAvJni.toxavBitRateSet(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
+  override def setBitRateAudio(friendNumber: ToxFriendNumber, audioBitRate: BitRate): Unit =
+    ToxAvJni.toxavBitRateSetAudio(instanceNumber, friendNumber.value, audioBitRate.value)
+
+  @throws[ToxavBitRateSetException]
+  override def setBitRateVideo(friendNumber: ToxFriendNumber, videoBitRate: BitRate): Unit =
+    ToxAvJni.toxavBitRateSetVideo(instanceNumber, friendNumber.value, videoBitRate.value)
 
   @throws[ToxavSendFrameException]
   override def audioSendFrame(

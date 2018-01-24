@@ -73,11 +73,19 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavCallControl
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    toxavBitRateSet
+ * Method:    toxavBitRateSetAudio
  * Signature: (IIII)V
  */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavBitRateSet
-  (JNIEnv *, jclass, jint, jint, jint, jint);
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavBitRateSetAudio
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxAvJni
+ * Method:    toxavBitRateSetVideo
+ * Signature: (IIII)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavBitRateSetVideo
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
