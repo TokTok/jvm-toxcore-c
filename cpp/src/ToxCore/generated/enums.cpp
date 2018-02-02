@@ -86,7 +86,6 @@ Enum::ordinal<TOX_MESSAGE_TYPE> (JNIEnv *env, TOX_MESSAGE_TYPE valueOf)
     {
     case TOX_MESSAGE_TYPE_NORMAL: return 0;
     case TOX_MESSAGE_TYPE_ACTION: return 1;
-    case TOX_MESSAGE_TYPE_CORRECTION: return 2;
     }
   tox4j_fatal ("Invalid enumerator from toxcore");
 }
@@ -99,7 +98,6 @@ Enum::valueOf<TOX_MESSAGE_TYPE> (JNIEnv *env, jint ordinal)
     {
     case 0: return TOX_MESSAGE_TYPE_NORMAL;
     case 1: return TOX_MESSAGE_TYPE_ACTION;
-    case 2: return TOX_MESSAGE_TYPE_CORRECTION;
     }
   tox4j_fatal ("Invalid enumerator from Java");
 }
@@ -112,7 +110,6 @@ print_arg<TOX_MESSAGE_TYPE> (protolog::Value &value, TOX_MESSAGE_TYPE const &arg
     {
     case TOX_MESSAGE_TYPE_NORMAL: value.set_v_string ("TOX_MESSAGE_TYPE_NORMAL"); return;
     case TOX_MESSAGE_TYPE_ACTION: value.set_v_string ("TOX_MESSAGE_TYPE_ACTION"); return;
-    case TOX_MESSAGE_TYPE_CORRECTION: value.set_v_string ("TOX_MESSAGE_TYPE_CORRECTION"); return;
     }
   value.set_v_string ("(TOX_MESSAGE_TYPE)" + std::to_string (arg));
 }

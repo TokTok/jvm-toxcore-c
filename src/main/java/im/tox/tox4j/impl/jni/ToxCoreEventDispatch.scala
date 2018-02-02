@@ -43,9 +43,8 @@ object ToxCoreEventDispatch {
 
   def convert(messageType: MessageType.Type): ToxMessageType = {
     messageType match {
-      case MessageType.Type.NORMAL     => ToxMessageType.NORMAL
-      case MessageType.Type.ACTION     => ToxMessageType.ACTION
-      case MessageType.Type.CORRECTION => ToxMessageType.CORRECTION
+      case MessageType.Type.NORMAL => ToxMessageType.NORMAL
+      case MessageType.Type.ACTION => ToxMessageType.ACTION
     }
   }
 
