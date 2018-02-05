@@ -3,7 +3,10 @@ load("@io_bazel_rules_scala//scala_proto:scala_proto.bzl", "scalapb_proto_librar
 
 genrule(
     name = "copy_link_jni_md_header",
-    srcs = ["@local_jdk//:jni_md_header-linux"],
+    srcs = select({
+        "//tools/config:freebsd": ["@local_jdk//:jni_md_header-freebsd"],
+        "//tools/config:linux": ["@local_jdk//:jni_md_header-linux"],
+    }),
     outs = ["cpp/src/jni_md.h"],
     cmd = "cp -f $< $@",
 )
