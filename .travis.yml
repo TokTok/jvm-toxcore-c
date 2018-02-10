@@ -20,27 +20,27 @@ env:
   - secure: "mZFIQOfFLWasqa9LuPvP/ZrJ1JSp+/iYzU5ARYDh+ySjCZPoAUwTLICluqYbKBVmLK+f65iAjbWVYKgK+i14I3txaXw03CnU+ZZBZE4Q/0RWdMFNG8xk5b3ggXy6CBxBNBfrlyfNB3JCgtFayHdekwIwqrQpVcK3DUrpFkMyRiKqeywii7HkcXHdKeg0ZdHbhZHUZu7X23+f5J7zoj20vh7Fxck7iPzOG5lCFEWueS942i6gZkMaJijQArEEGGZw8FFAR+lsq5EKhicHJuJbwRQzHMLStMz7vl34LmiHXTJxVVv4CEeFOxWF0crowKPdaSWXQCL1enl5vYH0oLrr+ZR+ZSo5sFtdnmujpDTQaWfTA06kS7MhWGE1/LT/9W5RGCZy/FuRafiAWjUHz2bqTKP07Cz6LTG4+LngvnQ4eHS/1bXJ+eLy2D37iURVsnHA817p+wRO4sfWmV1oVSylbM7tEcG9jVnUHLXpDjNR5PpdUDpbN3lrxa0ZIwL9Uyu1WkuIgaBGflfp2gpgeK1yLUMHmnZkCNGzTz3+j0zPXVOex68ac8X3FVvKoj4FhGhN+YeXzMBH+igetRPE9Y32+Rq8/e9zrj+kcqNmCW1+lc6axaCPDT2TKjKUV6dy2+bYz8VOUC9dRTTEoaHnIgbgHjt1No+vT2jyXxu6e0kntqQ="
   - secure: "SfREeQcDNMjYdGBlIDegl54Wr28hDIpIcbtqNNuC/LQzN8tLkj4XnC28MLcBsxaNckbUQv9+8sR9yE6flQaXwerfnDXUX97iTtmH6qMZswTGiJTo2olJ0K1XArGPQoRLuZ37+TW44c4Gh7aEQZZX1a/0YcT2v+jQ1LBOewnY9GRTK4941bHiIWbpDoknBjqOEcfRQd0ZOWHm6hbnDQKWPwvKl4KVh13gBefiTBd0uMPb4LwnKMKHSzwjpZTI0b9ykvDGZR/Ad4Eu6f+8pMuEuBZr5a+vhm+OD+b23iDpnHszk5+6q589eEX/KqXUoFat0lvF+b6yHFxdXALlDXgL+YmN3G5mW665uSHH7aYe23kGkMIijgYHu/35DCij6T3u4M/GpW9UHuIX20U07B25cOpmNibVBQ11iOV/f8FD/wQw1QtvQ3BWNMFTKI21ZOE//PGRfLZP6pinrZKAhfcdteItjEdtWuS+vvhRh73VKVPRtPofLRvcfGUp+KHYVSf7a1EbJ6elFNopFQxPh2nMavmHx6gFot6UPnEA/POMZg6P4jLxThkCy/3Ixe72ObJpod1O+V84UkZx3dev/2n0Ae+MCaXZOcYjCSDDzDPirPq+fQ8OkrMxREobm+LMx4r1ZtF66TNwdjTIb4CpfOl3nWM8vkcK5hVo0ocnO0QBGL0="
 
-stages:
-  - name: Test
-  - name: Release
-    if: type IN (push, api, cron)
+#stages:
+#  - name: Test
+#  - name: Release
+#    if: type IN (push, api, cron)
 
 matrix:
   include:
   # Test builds first, since they don't upload things.
-  - env: GOAL=test TARGET=host
-    stage: Test
+#  - env: GOAL=test TARGET=host
+#    stage: Test
   # Production builds after test builds so only tested artifacts are uploaded.
-  - env: GOAL=release TARGET=host
-    stage: Release
-  - env: GOAL=release TARGET=host
-    language: generic
-    os: osx
-    install: brew install sbt
+#  - env: GOAL=release TARGET=host
+#    stage: Release
+#  - env: GOAL=release TARGET=host
+#    language: generic
+#    os: osx
+#    install: brew install sbt
   - env: GOAL=release TARGET=aarch64-linux-android
-  - env: GOAL=release TARGET=arm-linux-androideabi
-  - env: GOAL=release TARGET=i686-linux-android
-  - env: GOAL=release TARGET=x86_64-linux-android
+#  - env: GOAL=release TARGET=arm-linux-androideabi
+#  - env: GOAL=release TARGET=i686-linux-android
+#  - env: GOAL=release TARGET=x86_64-linux-android
   fast_finish: true
 
 install:
@@ -48,14 +48,8 @@ install:
 - if [ -e _git/toxcore ]; then (cd _git/toxcore && git pull); fi
 
 script:
+- ls -R /usr/src/gtest
 - scripts/build-$TARGET -j$(nproc || sysctl -n hw.ncpu) $GOAL
 
 after_success:
 - if [ "$GOAL" = "test" ]; then sbt coveralls; fi
-
-before_cache:
-- rm -f android-ndk-*.zip
-
-branches:
-  only:
-  - master

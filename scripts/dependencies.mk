@@ -43,7 +43,7 @@ $(TOOLCHAIN)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libs
 	@$(PRE_RULE)
 	mkdir -p $(BUILDDIR)/$(notdir $<)
 	cd $(BUILDDIR)/$(notdir $<) && cmake $(SRCDIR)/$(notdir $<) $($(notdir $<)_CONFIGURE)
-	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install
+	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install VERBOSE=1
 	mkdir -p $(@D) && touch $@
 	@$(POST_RULE)
 
