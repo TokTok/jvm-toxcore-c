@@ -6,6 +6,7 @@ genrule(
     srcs = select({
         "//tools/config:freebsd": ["@local_jdk//:jni_md_header-freebsd"],
         "//tools/config:linux": ["@local_jdk//:jni_md_header-linux"],
+        "//tools/config:osx": ["@local_jdk//:jni_md_header-darwin"],
     }),
     outs = ["cpp/src/jni_md.h"],
     cmd = "cp -f $< $@",
@@ -57,14 +58,34 @@ cc_binary(
         "cpp/src",
         "src/main/protobuf",
     ],
-    linkopts = ["-Wl,--version-script,$(location cpp/src/libtox4j-c.ld)"],
+    linkopts = select({
+        "//tools/config:freebsd": ["-Wl,--version-script,$(location cpp/src/libtox4j-c.ld)"],
+        "//tools/config:linux": ["-Wl,--version-script,$(location cpp/src/libtox4j-c.ld)"],
+        "//tools/config:osx": [],
+    }),
     linkshared = True,
-    visibility = ["//visibility:public"],
     deps = [
         "cpp/src/libtox4j-c.ld",
         ":jni_cc_proto",
         "//c-toxcore",
     ],
+)
+
+genrule(
+    name = "native_macho",
+    srcs = [":libtox4j-c.so"],
+    outs = ["libtox4j-c.dylib"],
+    cmd = "cp $< $@",
+)
+
+filegroup(
+    name = "native",
+    srcs = select({
+        "//tools/config:freebsd": [":libtox4j-c.so"],
+        "//tools/config:linux": [":libtox4j-c.so"],
+        "//tools/config:osx": [":libtox4j-c.dylib"],
+    }),
+    visibility = ["//visibility:public"],
 )
 
 scala_library(
@@ -158,7 +179,7 @@ scala_library(
     name = src[src.rindex("/") + 1:-6],
     size = "small",
     srcs = [src],
-    data = [":libtox4j-c.so"],
+    data = [":native"],
     jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
     resources = glob([
         "src/test/resources/**/*",
@@ -188,8 +209,8 @@ scala_library(
     name = src[src.rindex("/") + 1:-5],
     size = "small",
     srcs = [src],
-    data = [":libtox4j-c.so"],
-    jvm_flags = ["-Djava.library.path=`dirname $(location :libtox4j-c.so)`"],
+    data = [":native"],
+    jvm_flags = ["-Djava.library.path=`dirname $(location :native)`"],
     resources = glob([
         "src/test/resources/**/*",
     ]),
