@@ -1,5 +1,8 @@
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_binary", "scala_library", "scala_test")
 load("@io_bazel_rules_scala//scala_proto:scala_proto.bzl", "scalapb_proto_library")
+load("//tools:project.bzl", "project")
+
+project("jvm-toxcore-c")
 
 genrule(
     name = "copy_link_jni_md_header",
