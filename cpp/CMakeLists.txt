@@ -182,7 +182,6 @@ if(LIBTOXCORE_FOUND)
   )
 else()
   target_link_libraries(${PROJECT_NAME}
-    ${TOXAV_STATIC_LIBRARIES}
     ${TOXCORE_STATIC_LIBRARIES}
   )
 endif()

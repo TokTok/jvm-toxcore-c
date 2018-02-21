@@ -45,7 +45,7 @@ matrix:
 
 install:
 - test -f _install/host/protobuf.stamp || scripts/build-host -j$(nproc || sysctl -n hw.ncpu) $PWD/_install/host/protobuf.stamp
-- if [ -e _git/toxcore ]; then (cd _git/toxcore && git pull); fi
+- if [ -e _git/toxcore ]; then (cd _git/toxcore && git reset --hard && git clean -fdx && git pull); fi
 
 script:
 - scripts/build-$TARGET -j$(nproc || sysctl -n hw.ncpu) $GOAL
@@ -55,7 +55,3 @@ after_success:
 
 before_cache:
 - rm -f android-ndk-*.zip
-
-branches:
-  only:
-  - master

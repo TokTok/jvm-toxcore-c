@@ -42,7 +42,7 @@ $(TOOLCHAIN)/toxcore.stamp: $(foreach f,$(shell cd $(SRCDIR)/toxcore && git ls-f
 $(TOOLCHAIN)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libsodium opus libvpx,$(TOOLCHAIN)/$i.stamp)
 	@$(PRE_RULE)
 	mkdir -p $(BUILDDIR)/$(notdir $<)
-	cd $(BUILDDIR)/$(notdir $<) && cmake $(SRCDIR)/$(notdir $<) $($(notdir $<)_CONFIGURE)
+	cd $(BUILDDIR)/$(notdir $<) && cmake $(SRCDIR)/$(notdir $<) $($(notdir $<)_CONFIGURE) -DMUST_BUILD_TOXAV=ON
 	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install
 	mkdir -p $(@D) && touch $@
 	@$(POST_RULE)
