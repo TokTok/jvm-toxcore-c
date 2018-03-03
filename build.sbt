@@ -1,7 +1,7 @@
 // General settings.
 organization  := "org.toktok"
 name          := "tox4j-c"
-version       := "0.1.7"
+version       := "0.2.0"
 scalaVersion  := "2.11.12"
 
 bintrayVcsUrl := Some("https://github.com/TokTok/jvm-toxcore-c")

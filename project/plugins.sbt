@@ -1,6 +1,6 @@
 // Common tox4j build rules.
 resolvers += Resolver.bintrayIvyRepo("toktok", "sbt-plugins")
-addSbtPlugin("org.toktok" % "sbt-plugins" % "0.1.4")
+addSbtPlugin("org.toktok" % "sbt-plugins" % "0.1.5")
 
 // Compiler version for additional plugins in this project.
 scalaVersion  := "2.10.7"
