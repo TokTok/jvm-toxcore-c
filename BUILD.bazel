@@ -173,8 +173,8 @@ scala_library(
         "@com_typesafe_scala_logging_scala_logging//jar:file",
         "@org_scalacheck_scalacheck//jar",
         "@org_scalactic_scalactic//jar:file",
-        "@org_scalatest_scalatest//jar:file",
         "@org_slf4j_slf4j_api//jar",
+        "@scalatest//jar:file",
     ],
 )
 
@@ -202,7 +202,6 @@ scala_library(
         "@org_apache_commons_commons_lang3//jar",
         "@org_scalacheck_scalacheck//jar",
         "@org_scalactic_scalactic//jar:file",
-        "@org_scalatest_scalatest//jar:file",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_log4j12//jar",
     ],
@@ -223,9 +222,9 @@ scala_library(
         "@junit_junit//jar",
         "@log4j_log4j//jar",
         "@org_scalactic_scalactic//jar",
-        "@org_scalatest_scalatest//jar",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_log4j12//jar",
+        "@scalatest//jar",
     ],
 ) for src in glob(["src/test/java/**/*.java"])]
 
