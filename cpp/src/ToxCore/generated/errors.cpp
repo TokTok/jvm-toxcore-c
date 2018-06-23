@@ -189,6 +189,7 @@ HANDLE ("New", NEW)
     failure_case (NEW, PROXY_BAD_PORT);
     failure_case (NEW, PROXY_BAD_TYPE);
     failure_case (NEW, PROXY_NOT_FOUND);
+    failure_case (NEW, PROXY_WITH_UDP);
     }
   return unhandled ();
 }
