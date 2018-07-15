@@ -17,7 +17,7 @@ $(TOOLCHAIN)/tox4j.stamp: $(BUILDDIR)/tox4j/Makefile
 # protobuf
 
 $(SRCDIR)/protobuf:
-	git clone --depth=1 --branch=3.5.0.1 https://github.com/google/protobuf $@
+	git clone --depth=1 --branch=v3.6.0 https://github.com/google/protobuf $@
 
 $(TOOLCHAIN)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 	@$(PRE_RULE)
@@ -42,7 +42,7 @@ $(TOOLCHAIN)/toxcore.stamp: $(foreach f,$(shell cd $(SRCDIR)/toxcore && git ls-f
 $(TOOLCHAIN)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libsodium opus libvpx,$(TOOLCHAIN)/$i.stamp)
 	@$(PRE_RULE)
 	mkdir -p $(BUILDDIR)/$(notdir $<)
-	cd $(BUILDDIR)/$(notdir $<) && cmake $(SRCDIR)/$(notdir $<) $($(notdir $<)_CONFIGURE) -DMUST_BUILD_TOXAV=ON
+	cd $(BUILDDIR)/$(notdir $<) && cmake $(SRCDIR)/$(notdir $<) $($(notdir $<)_CONFIGURE) -DMUST_BUILD_TOXAV=ON -DBOOTSTRAP_DAEMON=OFF
 	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install
 	mkdir -p $(@D) && touch $@
 	@$(POST_RULE)
@@ -51,7 +51,7 @@ $(TOOLCHAIN)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libs
 # libsodium
 
 $(SRCDIR)/libsodium:
-	git clone --depth=1 --branch=1.0.11 https://github.com/jedisct1/libsodium $@
+	git clone --depth=1 --branch=1.0.16 https://github.com/jedisct1/libsodium $@
 
 $(TOOLCHAIN)/libsodium.stamp: $(SRCDIR)/libsodium $(TOOLCHAIN_FILE)
 	@$(PRE_RULE)

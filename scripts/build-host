@@ -39,7 +39,7 @@ cpp/src/ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h: build
 regenerate: $(foreach i,$(wildcard bin/Jni*),$i.run) $(wildcard cpp/src/*/generated/*.h)
 
 protobuf_CONFIGURE	:= --prefix=$(PREFIX) --disable-shared
-libsodium_CONFIGURE	:= --prefix=$(PREFIX) --disable-shared --enable-minimal
+libsodium_CONFIGURE	:= --prefix=$(PREFIX) --disable-shared
 opus_CONFIGURE		:= --prefix=$(PREFIX) --disable-shared
 libvpx_CONFIGURE	:= --prefix=$(PREFIX) --disable-examples --disable-unit-tests --enable-pic
 toxcore_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DENABLE_STATIC=ON -DENABLE_SHARED=OFF
