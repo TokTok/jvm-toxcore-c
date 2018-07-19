@@ -15,8 +15,8 @@ Requests and the reviewer will guide you through the process.
 
 |      Build      |   Status  |
 |-----------------|-----------|
-| Travis CI       | [![Travis Build Status](https://api.travis-ci.org/tox4j/tox4j.svg)](https://travis-ci.org/tox4j/tox4j) | 
-| Coverage        | [![Coverage Status](https://coveralls.io/repos/tox4j/tox4j/badge.svg?branch=master)](https://coveralls.io/r/tox4j/tox4j?branch=master) |
+| Travis CI       | [![Travis Build Status](https://api.travis-ci.org/TokTok/jvm-toxcore-c.svg)](https://travis-ci.org/TokTok/jvm-toxcore-c) | 
+| Coverage        | [![Coverage Status](https://coveralls.io/repos/TokTok/jvm-toxcore-c/badge.svg?branch=master)](https://coveralls.io/r/TokTok/jvm-toxcore-c?branch=master) |
 | Android arm64   | [![Android arm64 Status](https://build.tox.chat/buildStatus/icon?job=tox4j_build_android_arm64_release)](https://build.tox.chat/job/tox4j_build_android_arm64_release/) |
 | Android armeabi | [![Android armeabi Status](https://build.tox.chat/buildStatus/icon?job=tox4j_build_android_armel_release)](https://build.tox.chat/job/tox4j_build_android_armel_release/) |
 | Android x86     | [![Android x86 Status](https://build.tox.chat/buildStatus/icon?job=tox4j_build_android_x86_release)](https://build.tox.chat/job/tox4j_build_android_x86_release/) |
