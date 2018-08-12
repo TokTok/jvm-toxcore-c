@@ -1,2 +1,2 @@
 heroku:
-	$(MAKE) -f build-host
+	$(MAKE) -f scripts/build-host
