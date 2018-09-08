@@ -53,7 +53,7 @@ get_vector<T, get_size, get_data>::register_funcs_0 ()
   );
 
   return true;
-};
+}
 
 
 template<std::size_t N>
