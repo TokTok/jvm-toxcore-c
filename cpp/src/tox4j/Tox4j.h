@@ -11,6 +11,13 @@
 #include "util/to_bytes.h"
 
 
+#if defined(__GNUC__)
+#define NORETURN __attribute__((__noreturn__))
+#else
+#define NORETURN
+#endif
+
+
 #define JAVA_METHOD_NAME(NAME) \
   PP_CAT(Java_im_tox_tox4j_impl_jni_, PP_CAT(CLASS, PP_CAT(Jni_, NAME)))
 

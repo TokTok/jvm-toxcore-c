@@ -1,5 +1,5 @@
 // im.tox.tox4j.core.ToxCoreConstants$
-void
+static void 
 checkToxCoreConstants ()
 {
   static_assert (TOX_ADDRESS_SIZE == 38, "Java constant out of sync with C");

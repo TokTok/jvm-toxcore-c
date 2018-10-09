@@ -212,10 +212,11 @@ tox_new_unique (Tox_Options const *options, TOX_ERR_NEW *error)
 }
 
 
-static void
+static NORETURN void
 tox_finalize ()
 {
-  assert (!"This function is only here for register_funcs and should never be called.");
+  fprintf (stderr, "This function is only here for register_funcs and should never be called.");
+  abort ();
 }
 
 

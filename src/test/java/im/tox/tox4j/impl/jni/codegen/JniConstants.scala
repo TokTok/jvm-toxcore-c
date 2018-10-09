@@ -11,7 +11,7 @@ object JniConstants extends CodeGenerator {
     val clazz = constants.getClass
 
     Fun(
-      returnType = Type.void,
+      returnType = Static(Type.void),
       name = "check" + clazz.getSimpleName.replace("$", ""),
       params = Seq(),
       body = CompoundStmt(

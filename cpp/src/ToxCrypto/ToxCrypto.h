@@ -12,4 +12,6 @@
 #define PREFIX    tox
 
 
+void reference_symbols_crypto ();
+
 struct ToxCrypto;

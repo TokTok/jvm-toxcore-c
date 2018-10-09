@@ -16,6 +16,8 @@
 #define PREFIX    toxav
 #endif
 
+void reference_symbols_av ();
+
 namespace av
 {
   namespace proto = im::tox::tox4j::av::proto;

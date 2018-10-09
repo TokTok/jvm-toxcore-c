@@ -25,6 +25,7 @@ object Print {
   private def printTypeInner(ty: Type): Doc = {
     ty match {
       case Typename(name)   => text(name) :: space
+      case Static(inner)    => "static " :: printTypeInner(inner)
       case Const(inner)     => printTypeInner(inner) :: "const "
       case Pointer(inner)   => printTypeInner(inner) :: "*"
       case Reference(inner) => printTypeInner(inner) :: "&"

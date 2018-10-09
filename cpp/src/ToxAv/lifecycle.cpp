@@ -105,10 +105,11 @@ toxav_new_unique (Tox *tox, TOXAV_ERR_NEW *error)
 }
 
 
-static void
+static NORETURN void
 toxav_finalize ()
 {
-  assert (!"This function is only here for register_funcs and should never be called.");
+  fprintf (stderr, "This function is only here for register_funcs and should never be called.");
+  abort ();
 }
 
 

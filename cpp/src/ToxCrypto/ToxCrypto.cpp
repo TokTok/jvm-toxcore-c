@@ -17,6 +17,7 @@ template<> char const *exn_prefix<ToxCrypto>() { return ""; }
 void
 reference_symbols_crypto ()
 {
+  checkToxCryptoConstants ();
 #define JAVA_METHOD_REF(NAME)  unused (JAVA_METHOD_NAME (NAME));
 #define CXX_FUNCTION_REF(NAME) unused (NAME);
 #include "generated/natives.h"

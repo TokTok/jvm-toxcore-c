@@ -1,5 +1,5 @@
 // im.tox.tox4j.crypto.ToxCryptoConstants$
-void
+static void 
 checkToxCryptoConstants ()
 {
   static_assert (TOX_PASS_BOX_ZERO_BYTES == 16, "Java constant out of sync with C");
