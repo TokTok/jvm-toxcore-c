@@ -86,5 +86,5 @@ throw_tox_exception (JNIEnv *env, char const *module, char const *prefix, char c
     return;
   tox4j_assert (exception);
 
-  env->Throw ((jthrowable)exception);
+  env->Throw (static_cast<jthrowable>(exception));
 }

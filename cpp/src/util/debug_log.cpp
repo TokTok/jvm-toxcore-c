@@ -39,9 +39,9 @@ struct JniLog::data
 
 
 JniLog::Entry::Entry (data *log, protolog::JniLogEntry *entry, std::unique_lock<std::recursive_mutex> lock)
-  : log (log)
-  , entry (entry)
-  , lock (std::move (lock))
+  : log_ (log)
+  , entry_ (entry)
+  , lock_ (std::move (lock))
 {
 }
 
@@ -49,14 +49,14 @@ JniLog::Entry::Entry (data *log, protolog::JniLogEntry *entry, std::unique_lock<
 JniLog::Entry::~Entry ()
 {
   // Check if this entry needs to be filtered out.
-  if (entry && std::find (log->filters.begin (), log->filters.end (), entry->name ()) != log->filters.end ())
+  if (entry_ && std::find (log_->filters.begin (), log_->filters.end (), entry_->name ()) != log_->filters.end ())
     {
-      auto *entries = log->log.mutable_entries ();
+      auto *entries = log_->log.mutable_entries ();
 
       // Search for the current entry in the recently added entries.
       auto found = std::find_if (entries->rbegin (), entries->rend (),
         [this](auto const &element)
-        { return &element == entry; }
+        { return &element == entry_; }
       );
 
       // This would mean the log was cleared before the mutex was unlocked.

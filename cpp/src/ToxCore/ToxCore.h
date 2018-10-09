@@ -16,6 +16,8 @@
 #define PREFIX    tox
 #endif
 
+void reference_symbols_core ();
+
 namespace core
 {
   namespace proto = im::tox::tox4j::core::proto;

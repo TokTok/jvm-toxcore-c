@@ -268,14 +268,14 @@ struct JniLog
     Entry (data *log = nullptr, protolog::JniLogEntry *entry = nullptr, std::unique_lock<std::recursive_mutex> lock = { });
     ~Entry ();
 
-    protolog::JniLogEntry *operator -> () const { return  entry; }
-    protolog::JniLogEntry &operator *  () const { return *entry; }
-    explicit operator bool () const { return entry; }
+    protolog::JniLogEntry *operator -> () const { return  entry_; }
+    protolog::JniLogEntry &operator *  () const { return *entry_; }
+    explicit operator bool () const { return entry_; }
 
   private:
-    data *log;
-    protolog::JniLogEntry *entry;
-    std::unique_lock<std::recursive_mutex> lock;
+    data *log_;
+    protolog::JniLogEntry *entry_;
+    std::unique_lock<std::recursive_mutex> lock_;
   };
 
   JniLog ();
