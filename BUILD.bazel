@@ -7,9 +7,9 @@ project()
 genrule(
     name = "copy_link_jni_md_header",
     srcs = select({
-        "//tools/config:freebsd": ["@local_jdk//:jni_md_header-freebsd"],
-        "//tools/config:linux": ["@local_jdk//:jni_md_header-linux"],
-        "//tools/config:osx": ["@local_jdk//:jni_md_header-darwin"],
+        "//tools/config:freebsd": ["@bazel_tools//tools/jdk:jni_md_header-freebsd"],
+        "//tools/config:linux": ["@bazel_tools//tools/jdk:jni_md_header-linux"],
+        "//tools/config:osx": ["@bazel_tools//tools/jdk:jni_md_header-darwin"],
     }),
     outs = ["cpp/src/jni_md.h"],
     cmd = "cp -f $< $@",
@@ -17,7 +17,7 @@ genrule(
 
 genrule(
     name = "copy_link_jni_header",
-    srcs = ["@local_jdk//:jni_header"],
+    srcs = ["@bazel_tools//tools/jdk:jni_header"],
     outs = ["cpp/src/jni.h"],
     cmd = "cp -f $< $@",
 )
