@@ -51,10 +51,7 @@ $(TOOLCHAIN)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libs
 # libsodium
 
 $(SRCDIR)/libsodium:
-#	TODO(iphydf): Upgrade to 1.0.17 once it's released. 14, 15, and 16 don't
-#	build on Android.
-#	git clone --depth=1 --branch=1.0.17 https://github.com/jedisct1/libsodium $@
-	git clone --depth=1 --branch=1.0.13 https://github.com/jedisct1/libsodium $@
+	git clone --depth=1 --branch=1.0.18 https://github.com/jedisct1/libsodium $@
 
 $(TOOLCHAIN)/libsodium.stamp: $(SRCDIR)/libsodium $(TOOLCHAIN_FILE)
 	@$(PRE_RULE)
