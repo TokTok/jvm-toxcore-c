@@ -38,7 +38,6 @@ cc_proto_library(
 
 scalapb_proto_library(
     name = "jni_scala_proto",
-    with_flat_package = True,
     deps = [":jni_proto"],
 )
 
@@ -118,6 +117,7 @@ scala_library(
         "src/test/java/im/tox/tox4j/impl/jni/MethodMap.scala",
     ]),
     deps = [
+        ":jni_scala_proto",
         ":jvm-toxcore-c",
         "//jvm-macros",
         "//jvm-toxcore-api",
@@ -235,6 +235,7 @@ scala_library(
     ]),
     deps = [
         ":codegen_lib",
+        ":jni_scala_proto",
         ":jvm-toxcore-c",
         "//jvm-toxcore-api",
         "@com_google_guava_guava//jar",

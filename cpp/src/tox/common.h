@@ -46,12 +46,6 @@ namespace tox
     template<typename Subsystem, typename Sig>
     struct mk_tox_cb;
 
-    // XXX: why don't variadic templates work here?
-    template<typename Subsystem, typename ...Args>
-    struct mk_tox_cb<Subsystem, void (Subsystem *, Args..., void *)>
-      : tox_cb<Subsystem, Args...>
-    { };
-
     template<typename Subsystem, typename Arg1>
     struct mk_tox_cb<Subsystem, void (Subsystem *, Arg1, void *)>
       : tox_cb<Subsystem, Arg1>
