@@ -47,7 +47,7 @@ print_arg<core::Events *> (protolog::Value &value, core::Events *const &events)
   if (events == nullptr)
     value.set_v_string ("<null>");
   else
-    value.set_v_string ("<core::Events[" + std::to_string (events->ByteSize ()) + "]>");
+    value.set_v_string ("<core::Events[" + std::to_string (events->ByteSizeLong ()) + "]>");
 }
 
 #define enum_case(ENUM)                               \

@@ -106,10 +106,10 @@ TOX_METHOD (jbyteArray, Iterate,
         LogEntry log_entry (instanceNumber, tox_iterate, tox);
 
         log_entry.print_result (tox_iterate, tox, &events);
-        if (events.ByteSize () == 0)
+        if (events.ByteSizeLong () == 0)
           return nullptr;
 
-        std::vector<char> buffer (events.ByteSize ());
+        std::vector<char> buffer (events.ByteSizeLong ());
         events.SerializeToArray (buffer.data (), buffer.size ());
         events.Clear ();
 

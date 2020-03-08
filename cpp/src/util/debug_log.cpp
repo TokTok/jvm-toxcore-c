@@ -114,7 +114,7 @@ JniLog::clear ()
         }
     }
 
-  std::vector<char> buffer (self->log.ByteSize ());
+  std::vector<char> buffer (self->log.ByteSizeLong ());
   self->log.SerializeToArray (buffer.data (), buffer.size ());
   self->log.Clear ();
 

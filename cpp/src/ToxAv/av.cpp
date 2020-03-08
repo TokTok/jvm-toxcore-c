@@ -32,10 +32,10 @@ TOX_METHOD (jbyteArray, Iterate,
 #else
         log_entry.print_result (toxav_iterate, av);
 #endif
-        if (events.ByteSize () == 0)
+        if (events.ByteSizeLong () == 0)
           return nullptr;
 
-        std::vector<char> buffer (events.ByteSize ());
+        std::vector<char> buffer (events.ByteSizeLong ());
         events.SerializeToArray (buffer.data (), buffer.size ());
         events.Clear ();
 

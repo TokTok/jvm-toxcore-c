@@ -34,5 +34,5 @@ print_arg<av::Events *> (protolog::Value &value, av::Events *const &events)
   if (events == nullptr)
     value.set_v_string ("<null>");
   else
-    value.set_v_string ("<av::Events[" + std::to_string (events->ByteSize ()) + "]>");
+    value.set_v_string ("<av::Events[" + std::to_string (events->ByteSizeLong ()) + "]>");
 }
