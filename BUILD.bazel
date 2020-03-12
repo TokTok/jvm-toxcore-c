@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_proto_library")
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_binary", "scala_library", "scala_test")
 load("@io_bazel_rules_scala//scala_proto:scala_proto.bzl", "scalapb_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
@@ -115,8 +117,9 @@ scala_library(
     srcs = glob([
         "src/test/java/gnieh/**/*.scala",
         "src/test/java/im/tox/tox4j/impl/jni/codegen/**/*.scala",
+    ]) + [
         "src/test/java/im/tox/tox4j/impl/jni/MethodMap.scala",
-    ]),
+    ],
     deps = [
         ":jni_scala_proto",
         ":jvm-toxcore-c",
