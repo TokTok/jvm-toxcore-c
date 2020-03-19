@@ -15,7 +15,7 @@ object ToxLoadJniLibrary {
 
   private val AlreadyLoaded = "Native Library (.+) already loaded in another classloader".r
   private val NotFoundDalvik = "Couldn't load .+ from loader .+ findLibrary returned null".r
-  private val NotFoundJvm = "no .+ in java.library.path".r
+  private val NotFoundJvm = "no .+ in java.library.path.*".r
 
   private def withTempFile(name: String)(block: File => Boolean): Boolean = {
     val (prefix, suffix) = name.splitAt(name.lastIndexOf("."))
@@ -113,7 +113,8 @@ object ToxLoadJniLibrary {
           case NotFoundDalvik() =>
             logger.error(s"Could not load native library '$name'; giving up.")
             false
-          case _ =>
+          case msg =>
+            logger.error(s"Unhandled UnsatisfiedLinkError: '$msg'.")
             false
         }) {
           logger.debug(s"Loading '$name' successful")
