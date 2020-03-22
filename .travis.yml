@@ -1,6 +1,8 @@
 ---
 language: scala
 scala: 2.11.12
+dist: xenial
+os: linux
 
 addons:
   apt:
@@ -26,7 +28,7 @@ stages:
   - name: Release
     if: type IN (push, api, cron)
 
-matrix:
+jobs:
   include:
     # Test builds first, since they don't upload things.
     - env: GOAL=test TARGET=host

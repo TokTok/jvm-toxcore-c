@@ -17,7 +17,7 @@ $(TOOLCHAIN)/tox4j.stamp: $(BUILDDIR)/tox4j/Makefile
 # protobuf
 
 $(SRCDIR)/protobuf:
-	git clone --depth=1 --branch=v3.6.0 https://github.com/google/protobuf $@
+	git clone --depth=1 --branch=v3.11.1 https://github.com/google/protobuf $@
 
 $(TOOLCHAIN)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 	@$(PRE_RULE)
