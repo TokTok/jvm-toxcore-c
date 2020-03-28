@@ -12,11 +12,9 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
-import jline.TerminalFactory
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
-import scalaz.concurrent.Future
 
 /**
  * This test name does not end in "Test" so it won't be run by the CI build. This is
@@ -29,6 +27,7 @@ import scalaz.concurrent.Future
 final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptionChecks {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
+  private val terminalWidth = 190
 
   override def maxParticipantCount: Int = 2
 
@@ -110,11 +109,6 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
       state.addTask(sendFrame(friendNumber))
     }
 
-    override def bitRateStatus(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate)(state: State): State = {
-      debug(state, s"Bit rate in call with ${state.id(friendNumber)} should change to $audioBitRate for audio and $videoBitRate for video")
-      state
-    }
-
     // There is no stack recursion here, it pushes thunks of itself for deferred execution.
     @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     def waitForPlayback(length: Int)(state: State): State = {
@@ -157,15 +151,14 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
           assert(receivedPcm.length == expectedPcm.length)
 
           if (displayWave) {
-            val width = TerminalFactory.get.getWidth
             if (t == 0) {
               System.out.print("\u001b[2J")
             }
             System.out.print("\u001b[H")
             System.out.println("Received:")
-            System.out.println(AudioPlayback.showWave(receivedPcm, width))
+            System.out.println(AudioPlayback.showWave(receivedPcm, terminalWidth))
             System.out.println("Expected:")
-            System.out.println(AudioPlayback.showWave(expectedPcm, width))
+            System.out.println(AudioPlayback.showWave(expectedPcm, terminalWidth))
           }
 
           playback.play(receivedPcm)
@@ -182,7 +175,7 @@ final class AudioReceiveFrameCallbackShow extends AutoTestSuite with ToxExceptio
       val queue = new ArrayBlockingQueue[Option[(Int, Array[Short])]](audioLength / frameSize / 2)
 
       // Start a thread to consume the frames.
-      Future(playFrames(queue)).unsafeStart
+      new Thread { override def run() { playFrames(queue) } }.start
 
       queue
     }

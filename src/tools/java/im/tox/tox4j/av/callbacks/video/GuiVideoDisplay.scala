@@ -5,7 +5,7 @@ import java.awt.image.{ BufferedImage, DataBufferByte }
 import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.border.EtchedBorder
-import javax.swing.{ BorderFactory, ImageIcon }
+import javax.swing.{ BorderFactory, ImageIcon, JDialog }
 
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.callbacks.video.GuiVideoDisplay.{ UI, newImage }
@@ -69,7 +69,7 @@ object GuiVideoDisplay {
           BufferedImage.TYPE_INT_RGB
         )
 
-        dialog.self.paint(image.getGraphics)
+        dialog.self.asInstanceOf[JDialog].paint(image.getGraphics)
 
         ImageIO.write(image, "jpg", new File(capturePath, f"$frameNumber%03d.jpg"))
       }

@@ -143,6 +143,7 @@ scala_library(
         "src/test/java/im/tox/tox4j/ToxCoreTestBase.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioGenerator.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioGenerators.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioPlayback.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/video/ArithmeticVideoGenerator.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/video/RgbVideoGenerator.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/video/TextImageGenerator.scala",
@@ -245,3 +246,74 @@ scala_library(
         "@com_google_guava_guava//jar",
     ],
 ) for src in glob(["src/test/java/im/tox/tox4j/impl/jni/codegen/Jni*.scala"])]
+
+scala_binary(
+    name = "AudioPlaybackShow",
+    testonly = True,
+    srcs = [
+        "src/tools/java/im/tox/tox4j/av/callbacks/audio/AudioPlaybackShow.scala",
+    ],
+    main_class = "im.tox.tox4j.av.callbacks.audio.AudioPlaybackShow",
+    resources = glob([
+        "src/test/resources/**/*",
+    ]),
+    deps = [
+        ":jvm-toxcore-c",
+        ":test_lib",
+        "//jvm-toxcore-api",
+    ],
+)
+
+scala_test(
+    name = "AudioReceiveFrameCallbackShow",
+    size = "small",
+    srcs = ["src/tools/java/im/tox/tox4j/av/callbacks/audio/AudioReceiveFrameCallbackShow.scala"],
+    data = [":native"],
+    jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
+    resources = glob([
+        "src/test/resources/**/*",
+    ]),
+    tags = ["manual"],
+    deps = [
+        ":jvm-toxcore-c",
+        ":test_lib",
+        "//jvm-toxcore-api",
+        "//third_party/scala:com_typesafe_scala_logging_scala_logging",
+        "@io_bazel_rules_scala//scala/scalatest",
+        "@log4j_log4j//jar",
+        "@org_jetbrains_annotations//jar",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_log4j12//jar",
+    ],
+)
+
+scala_test(
+    name = "VideoReceiveFrameCallbackShow",
+    size = "small",
+    srcs = [
+        "src/tools/java/im/tox/tox4j/av/callbacks/video/ConsoleVideoDisplay.scala",
+        "src/tools/java/im/tox/tox4j/av/callbacks/video/GuiVideoDisplay.scala",
+        "src/tools/java/im/tox/tox4j/av/callbacks/video/RgbVideoDisplay.scala",
+        "src/tools/java/im/tox/tox4j/av/callbacks/video/VideoDisplay.scala",
+        "src/tools/java/im/tox/tox4j/av/callbacks/video/VideoReceiveFrameCallbackShow.scala",
+    ],
+    data = [":native"],
+    jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
+    resources = glob([
+        "src/test/resources/**/*",
+    ]),
+    tags = ["manual"],
+    deps = [
+        ":jvm-toxcore-c",
+        ":test_lib",
+        "//jvm-toxcore-api",
+        "//third_party/scala:com_chuusai_shapeless",
+        "//third_party/scala:com_typesafe_scala_logging_scala_logging",
+        "@io_bazel_rules_scala//scala/scalatest",
+        "@log4j_log4j//jar",
+        "@org_jetbrains_annotations//jar",
+        "@org_scala_lang_modules_scala_swing//jar",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_log4j12//jar",
+    ],
+)
