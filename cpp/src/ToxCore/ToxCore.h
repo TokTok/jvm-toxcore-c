@@ -28,26 +28,57 @@ namespace core
 }
 
 
-template<typename T, size_t get_size (Tox const *), void get_data (Tox const *, T *)>
+template<typename ConvertT, typename T>
+struct convert_vector
+{
+  static std::vector<ConvertT>
+  value (std::vector<T> vec)
+  {
+    return std::vector<ConvertT> (vec.begin (), vec.end ());
+  }
+};
+
+template<typename ConvertT>
+struct convert_vector<ConvertT, ConvertT>
+{
+  static std::vector<ConvertT>
+  value (std::vector<ConvertT> vec)
+  {
+    return vec;
+  }
+};
+
+
+template<
+  typename T,
+  size_t get_size (Tox const *),
+  void get_data (Tox const *, T *),
+  typename ConvertT = T
+>
 struct get_vector
 {
   static bool register_funcs_0 ();
 
-  static std::vector<T>
+  static std::vector<ConvertT>
   make (Tox const *tox)
   {
-    std::vector<T> name (get_size (tox));
-    get_data (tox, name.data ());
+    std::vector<T> vec (get_size (tox));
+    get_data (tox, vec.data ());
 
     assert (register_funcs_0 ());
 
-    return name;
+    return convert_vector<ConvertT, T>::value (std::move (vec));
   }
 };
 
-template<typename T, size_t get_size (Tox const *), void get_data (Tox const *, T *)>
+template<
+  typename T,
+  size_t get_size (Tox const *),
+  void get_data (Tox const *, T *),
+  typename ConvertT
+>
 bool
-get_vector<T, get_size, get_data>::register_funcs_0 ()
+get_vector<T, get_size, get_data, ConvertT>::register_funcs_0 ()
 {
   REGISTER_FUNCS (
     reinterpret_cast<uintptr_t> (make),

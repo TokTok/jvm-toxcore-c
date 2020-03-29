@@ -94,6 +94,7 @@ TOX_METHOD (jintArray, SelfGetFriendList,
   return instances.with_instance_noerr (env, instanceNumber,
     get_vector<uint32_t,
       tox_self_get_friend_list_size,
-      tox_self_get_friend_list>::make
+      tox_self_get_friend_list,
+      jint>::make
   );
 }

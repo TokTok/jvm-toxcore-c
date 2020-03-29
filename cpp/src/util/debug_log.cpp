@@ -46,6 +46,16 @@ JniLog::Entry::Entry (data *log, protolog::JniLogEntry *entry, std::unique_lock<
 }
 
 
+JniLog::Entry::Entry(Entry &&rhs)
+  : log_ (rhs.log_)
+  , entry_ (rhs.entry_)
+  , lock_ (std::move (rhs.lock_))
+{
+  rhs.log_ = nullptr;
+  rhs.entry_ = nullptr;
+}
+
+
 JniLog::Entry::~Entry ()
 {
   // Check if this entry needs to be filtered out.
@@ -280,7 +290,7 @@ print_arg<std::vector<uint8_t>> (protolog::Value &value, std::vector<uint8_t> co
 
 template<>
 void
-print_arg<std::vector<uint32_t>> (protolog::Value &value, std::vector<uint32_t> const &data)
+print_arg<std::vector<jint>> (protolog::Value &value, std::vector<jint> const &data)
 {
   value.set_v_string ("int[" + std::to_string (data.size ()) + "]");
 }

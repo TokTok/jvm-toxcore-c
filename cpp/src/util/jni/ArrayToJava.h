@@ -55,7 +55,7 @@ template<> struct ArrayToJava<jdouble > { typedef MakeArrayToJava<jdouble , jdou
 
 
 template<typename CType>
-using ArrayToJava = typename detail::ArrayToJava<typename std::make_signed<CType>::type>::type;
+using ArrayToJava = typename detail::ArrayToJava<std::make_signed_t<CType>>::type;
 
 
 template<typename T>

@@ -330,7 +330,7 @@ struct ToxInstances
       [&] (Object *tox, Events &events)
         {
           unused (events);
-          LogEntry log_entry (instanceNumber, tox_func, tox, args...);
+          InstanceLogEntry log_entry (instanceNumber, tox_func, tox, args...);
           return ::with_error_handling<Object> (
             log_entry, env, success_func,
             tox_func, tox, std::forward<Args> (args)...
@@ -376,7 +376,7 @@ struct ToxInstances
       [&] (Object *tox, Events &events)
         {
           unused (events);
-          LogEntry log_entry (instanceNumber, tox_func, tox, args...);
+          InstanceLogEntry log_entry (instanceNumber, tox_func, tox, args...);
           return conversions<ToxFunc, Object *, Args...>::to_java (
             env, log_entry, tox_func, tox, std::forward<Args> (args)...
           );

@@ -25,7 +25,7 @@ TOX_METHOD (jbyteArray, Iterate,
   return instances.with_instance (env, instanceNumber,
     [=] (ToxAV *av, Events &events) -> jbyteArray
       {
-        LogEntry log_entry (instanceNumber, toxav_iterate, av);
+        InstanceLogEntry log_entry (instanceNumber, toxav_iterate, av);
 
 #if 0
         log_entry.print_result (toxav_iterate, av, &events);

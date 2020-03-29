@@ -107,7 +107,7 @@ namespace tox
     { };
 
 
-    template<typename Subsystem, typename Sig, void Set (Subsystem *, Sig, void *)>
+    template<typename Subsystem, typename Sig, void Set (Subsystem *, Sig *, void *)>
     struct cb
       : mk_tox_cb<Subsystem, Sig>::template func<Set>
     { };

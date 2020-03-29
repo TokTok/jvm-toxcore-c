@@ -263,7 +263,7 @@ struct JniLog
    */
   struct Entry
   {
-    Entry (Entry &&) = default;
+    Entry (Entry &&);
 
     Entry (data *log = nullptr, protolog::JniLogEntry *entry = nullptr, std::unique_lock<std::recursive_mutex> lock = { });
     ~Entry ();
@@ -342,10 +342,10 @@ struct LogEntry
    * omit uninteresting arguments for the log.
    */
   template<typename Func, typename ...Args>
-  LogEntry (Func func, Args const &...args)
+  explicit LogEntry (Func func, Args const&...args)
   {
     static_assert (
-      std::is_function<typename std::remove_pointer<Func>::type>::value,
+      std::is_function<std::remove_pointer_t<Func>>::value,
       "The first argument to LogEntry must be a function or instance number."
     );
 
@@ -354,17 +354,6 @@ struct LogEntry
         print_func (*entry, reinterpret_cast<uintptr_t> (func));
         print_args (*entry, args...);
       }
-  }
-
-  /**
-   * The same as above but with an instance number.
-   */
-  template<typename Func, typename ...Args>
-  LogEntry (int instanceNumber, Func func, Args const &...args)
-    : LogEntry (func, args...)
-  {
-    if (entry)
-      entry->set_instance_number (instanceNumber);
   }
 
 
@@ -380,9 +369,9 @@ struct LogEntry
   {
     if (entry)
       {
-        auto start = std::chrono::system_clock::now();
+        auto start = std::chrono::system_clock::now ();
         auto result = wrap_void (func, std::forward<Args> (args)...);
-        auto end = std::chrono::system_clock::now();
+        auto end = std::chrono::system_clock::now ();
 
         using std::chrono::duration_cast;
         using std::chrono::seconds;
@@ -404,8 +393,23 @@ struct LogEntry
     return wrap_void (func, std::forward<Args> (args)...);
   }
 
-private:
+protected:
   JniLog::Entry const entry = jni_log.new_entry ();
+};
+
+struct InstanceLogEntry
+  : LogEntry
+{
+  /**
+   * The same as above but with an instance number.
+   */
+  template<typename Func, typename ...Args>
+  InstanceLogEntry (int instanceNumber, Func func, Args const &...args)
+    : LogEntry (func, args...)
+  {
+    if (entry)
+      entry->set_instance_number (instanceNumber);
+  }
 };
 
 #endif
