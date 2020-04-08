@@ -86,6 +86,9 @@ $(SRCDIR)/libvpx:
 
 $(TOOLCHAIN)/libvpx.stamp: $(SRCDIR)/libvpx $(TOOLCHAIN_FILE)
 	@$(PRE_RULE)
+	echo $(PATH)
+	mkdir -p $(TOOLCHAIN)/bin
+	ln -f $(CC) $(TOOLCHAIN)/bin/aarch64-linux-android-gcc
 	mkdir -p $(BUILDDIR)/$(notdir $<)
 	cd $(BUILDDIR)/$(notdir $<) && $(SRCDIR)/$(notdir $<)/configure $($(notdir $<)_CONFIGURE)
 	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install

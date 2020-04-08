@@ -7,8 +7,11 @@ PREFIX		:= $(SYSROOT)/usr
 TOOLCHAIN_FILE	:= $(SRCDIR)/$(TARGET).cmake
 PROTOC		:= $(DESTDIR)/host/bin/protoc
 
-export CC		:= $(TOOLCHAIN)/bin/$(TARGET)-clang
-export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)-clang++
+export CC  := $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/$(TARGET)$(NDK_API)-clang
+export CXX := $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/$(TARGET)$(NDK_API)-clang++
+
+#export CC		:= $(TOOLCHAIN)/bin/$(TARGET)-clang
+#export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)-clang++
 export LDFLAGS		:= -llog
 export PKG_CONFIG_LIBDIR:= $(PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
@@ -33,22 +36,22 @@ $(NDK_HOME):
 	# This is put into the root dir, not into $(SRCDIR), because it's huge and
 	# clutters the Travis CI cache.
 	test -f $(NDK_PACKAGE) || curl -s $(NDK_URL) -o $(NDK_PACKAGE)
-	7z x $(NDK_PACKAGE) $(foreach x,$(NDK_FILES),'-ir!$(NDK_DIR)/$x') > /dev/null
+	7z x $(NDK_PACKAGE) $(foreach x,$(NDK_FILES),'-ir!$(NDK_DIR)/$x')
 	rm -rf $@
 	mv $(NDK_DIR) $@
 	@$(POST_RULE)
 
-$(TOOLCHAIN)/AndroidVersion.txt: $(NDK_HOME)
-	@$(PRE_RULE)
-	$</build/tools/make_standalone_toolchain.py	\
-		--arch $(NDK_ARCH)			\
-		--install-dir $(@D)			\
-		--api $(NDK_API)			\
-		--force
-	@$(POST_RULE)
-	@touch $@
+# $(TOOLCHAIN)/AndroidVersion.txt: $(NDK_HOME)
+# 	@$(PRE_RULE)
+# 	$</build/tools/make_standalone_toolchain.py	\
+# 		--arch $(NDK_ARCH)			\
+# 		--install-dir $(@D)			\
+# 		--api $(NDK_API)			\
+# 		--force
+# 	@$(POST_RULE)
+# 	@touch $@
 
-$(TOOLCHAIN_FILE): $(TOOLCHAIN)/AndroidVersion.txt
+$(TOOLCHAIN_FILE): $(NDK_HOME)
 	@$(PRE_RULE)
 	mkdir -p $(@D)
 	echo 'set(CMAKE_SYSTEM_NAME Linux)' > $@
