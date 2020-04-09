@@ -1,17 +1,14 @@
 NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)/$(TARGET)
 
 DLLEXT		:= .so
-TOOLCHAIN	:= $(DESTDIR)/$(TARGET)
+TOOLCHAIN	:= $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64
 SYSROOT		:= $(TOOLCHAIN)/sysroot
 PREFIX		:= $(SYSROOT)/usr
 TOOLCHAIN_FILE	:= $(SRCDIR)/$(TARGET).cmake
 PROTOC		:= $(DESTDIR)/host/bin/protoc
 
-export CC  := $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/$(TARGET)$(NDK_API)-clang
-export CXX := $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/$(TARGET)$(NDK_API)-clang++
-
-#export CC		:= $(TOOLCHAIN)/bin/$(TARGET)-clang
-#export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)-clang++
+export CC		:= $(TOOLCHAIN)/bin/$(TARGET)$(NDK_API)-clang
+export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)$(NDK_API)-clang++
 export LDFLAGS		:= -llog
 export PKG_CONFIG_LIBDIR:= $(PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
@@ -41,17 +38,7 @@ $(NDK_HOME):
 	mv $(NDK_DIR) $@
 	@$(POST_RULE)
 
-# $(TOOLCHAIN)/AndroidVersion.txt: $(NDK_HOME)
-# 	@$(PRE_RULE)
-# 	$</build/tools/make_standalone_toolchain.py	\
-# 		--arch $(NDK_ARCH)			\
-# 		--install-dir $(@D)			\
-# 		--api $(NDK_API)			\
-# 		--force
-# 	@$(POST_RULE)
-# 	@touch $@
-
-$(TOOLCHAIN_FILE): $(NDK_HOME)
+$(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
 	@$(PRE_RULE)
 	mkdir -p $(@D)
 	echo 'set(CMAKE_SYSTEM_NAME Linux)' > $@
