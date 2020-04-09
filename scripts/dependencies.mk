@@ -86,7 +86,6 @@ $(SRCDIR)/libvpx:
 
 $(PREFIX)/libvpx.stamp: $(SRCDIR)/libvpx $(TOOLCHAIN_FILE)
 	@$(PRE_RULE)
-	echo $(PATH)
 	mkdir -p $(BUILDDIR)/$(notdir $<)
 	cd $(BUILDDIR)/$(notdir $<) && $(SRCDIR)/$(notdir $<)/configure $($(notdir $<)_CONFIGURE)
 	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install

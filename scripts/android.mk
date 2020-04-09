@@ -1,4 +1,4 @@
-NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)/$(TARGET)
+NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)
 
 DLLEXT		:= .so
 TOOLCHAIN	:= $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64
@@ -33,17 +33,15 @@ $(NDK_HOME):
 	# This is put into the root dir, not into $(SRCDIR), because it's huge and
 	# clutters the Travis CI cache.
 	test -f $(NDK_PACKAGE) || curl -s $(NDK_URL) -o $(NDK_PACKAGE)
-	7z x $(NDK_PACKAGE) $(foreach x,$(NDK_FILES),'-ir!$(NDK_DIR)/$x')
-	test -d $@ && find $@ -exec chmod +w {} \; && rm -rf $@
-	mv $(NDK_DIR) $@
-	mkdir -p $(TOOLCHAIN)/bin
-	ln -f $(CC) $(TOOLCHAIN)/bin/$(TARGET)-gcc
-	ln -f $(CXX) $(TOOLCHAIN)/bin/$(TARGET)-g++
-	find $@ -exec chmod -w {} \;
+	7z x $(NDK_PACKAGE) -o$(NDK_HOME)_tmp && mv $(NDK_HOME)_tmp/* $(NDK_HOME) && rm -r $(NDK_HOME)_tmp/
+	test -d $@ && find $@ -exec chmod +w {} \;
 	@$(POST_RULE)
 
 $(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
 	@$(PRE_RULE)
+	mkdir -p $(TOOLCHAIN)/bin
+	ln -f $(CC) $(TOOLCHAIN)/bin/$(TARGET)-gcc
+	ln -f $(CXX) $(TOOLCHAIN)/bin/$(TARGET)-g++
 	mkdir -p $(@D)
 	echo 'set(CMAKE_SYSTEM_NAME Linux)' > $@
 	echo >> $@
@@ -52,6 +50,7 @@ $(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
 	echo 'set(CMAKE_C_COMPILER $(TOOLCHAIN)/bin/$(TARGET)-gcc)' >> $@
 	echo 'set(CMAKE_CXX_COMPILER $(TOOLCHAIN)/bin/$(TARGET)-g++)' >> $@
 	echo >> $@
+	echo 'set(CMAKE_FIND_ROOT_PATH $(PREFIX))' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)' >> $@
