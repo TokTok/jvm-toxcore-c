@@ -14,7 +14,7 @@ export CXX		:= $(shell which clang++ || which g++)
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
 export TOX4J_PLATFORM	:= $(shell perl -e 'print $$^O')-$(shell uname -m)
 
-build: $(TOOLCHAIN)/tox4j.stamp
+build: $(PREFIX)/tox4j.stamp
 	sbt -Djava.library.path=$(PREFIX)/lib "publishLocal" "makeScripts"
 
 test: build
