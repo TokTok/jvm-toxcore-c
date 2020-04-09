@@ -3,7 +3,7 @@ NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)/$(TARGET)
 DLLEXT		:= .so
 TOOLCHAIN	:= $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64
 SYSROOT		:= $(TOOLCHAIN)/sysroot
-PREFIX		:= $(SYSROOT)/usr
+PREFIX		:= $(DESTDIR)/$(TARGET)
 TOOLCHAIN_FILE	:= $(SRCDIR)/$(TARGET).cmake
 PROTOC		:= $(DESTDIR)/host/bin/protoc
 
@@ -22,7 +22,7 @@ libvpx_CONFIGURE	:= --prefix=$(PREFIX) --sdk-path=$(NDK_HOME) --libc=$(SYSROOT) 
 toxcore_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c -DENABLE_STATIC=ON -DENABLE_SHARED=OFF
 tox4j_CONFIGURE		:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c
 
-build: $(TOOLCHAIN)/tox4j.stamp
+build: $(PREFIX)/tox4j.stamp
 
 test: build
 	@echo "No tests for Android builds"
@@ -34,8 +34,12 @@ $(NDK_HOME):
 	# clutters the Travis CI cache.
 	test -f $(NDK_PACKAGE) || curl -s $(NDK_URL) -o $(NDK_PACKAGE)
 	7z x $(NDK_PACKAGE) $(foreach x,$(NDK_FILES),'-ir!$(NDK_DIR)/$x')
-	rm -rf $@
+	test -d $@ && find $@ -exec chmod +w {} \; && rm -rf $@
 	mv $(NDK_DIR) $@
+	mkdir -p $(TOOLCHAIN)/bin
+	ln -f $(CC) $(TOOLCHAIN)/bin/$(TARGET)-gcc
+	ln -f $(CXX) $(TOOLCHAIN)/bin/$(TARGET)-g++
+	find $@ -exec chmod -w {} \;
 	@$(POST_RULE)
 
 $(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
