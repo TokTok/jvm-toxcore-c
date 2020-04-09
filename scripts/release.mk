@@ -1,4 +1,4 @@
-_build/$(TARGET)/tox4j/libtox4j-c$(DLLEXT): $(TOOLCHAIN)/tox4j.stamp
+_build/$(TARGET)/tox4j/libtox4j-c$(DLLEXT): $(PREFIX)/tox4j.stamp
 	ls -l $@
 	touch $@
 
