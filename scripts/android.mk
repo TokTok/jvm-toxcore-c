@@ -49,8 +49,8 @@ $(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
 	echo >> $@
 	echo 'set(CMAKE_SYSROOT $(SYSROOT))' >> $@
 	echo >> $@
-	echo 'set(CMAKE_C_COMPILER $(CC))' >> $@
-	echo 'set(CMAKE_CXX_COMPILER $(CXX))' >> $@
+	echo 'set(CMAKE_C_COMPILER $(TOOLCHAIN)/bin/$(TARGET)-gcc)' >> $@
+	echo 'set(CMAKE_CXX_COMPILER $(TOOLCHAIN)/bin/$(TARGET)-g++)' >> $@
 	echo >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)' >> $@
