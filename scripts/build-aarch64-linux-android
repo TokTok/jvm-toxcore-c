@@ -14,6 +14,7 @@ NDK_FILES := $(NDK_COMMON_FILES)						\
 NDK_API := 21
 NDK_ARCH := arm64
 VPX_ARCH := arm64-android-gcc
+VPX_COMPILER := $(TARGET)
 
 include scripts/android.mk
 include scripts/dependencies.mk

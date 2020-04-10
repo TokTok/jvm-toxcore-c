@@ -1,17 +1,20 @@
 #!/usr/bin/make -f
 
-TARGET := arm-linux-androideabi
+TARGET := armv7a-linux-androideabi
 
 include scripts/common.mk
 
 NDK_FILES := $(NDK_COMMON_FILES)			\
-	platforms/android-9				\
-	sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi*	\
-	toolchains/arm-linux-androideabi-4.9
+	platforms/android-21/arch-arm				\
+	toolchains/llvm/prebuilt/linux-x86_64/arm-linux-androideabi		\
+	toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-*	\
+	toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi21-*	\
+	toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21
 
-NDK_API := 9
+NDK_API := 21
 NDK_ARCH := arm
 VPX_ARCH := armv7-android-gcc
+VPX_COMPILER := arm-linux-androideabi
 
 include scripts/android.mk
 include scripts/dependencies.mk

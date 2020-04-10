@@ -40,8 +40,8 @@ $(NDK_HOME):
 $(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
 	@$(PRE_RULE)
 	mkdir -p $(TOOLCHAIN)/bin
-	ln -f $(CC) $(TOOLCHAIN)/bin/$(TARGET)-gcc
-	ln -f $(CXX) $(TOOLCHAIN)/bin/$(TARGET)-g++
+	ln -f $(CC) $(TOOLCHAIN)/bin/$(VPX_COMPILER)-gcc
+	ln -f $(CXX) $(TOOLCHAIN)/bin/$(VPX_COMPILER)-g++
 	mkdir -p $(@D)
 	echo 'set(CMAKE_SYSTEM_NAME Linux)' > $@
 	echo >> $@
