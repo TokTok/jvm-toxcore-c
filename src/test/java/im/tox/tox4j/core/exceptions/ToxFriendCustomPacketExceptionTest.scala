@@ -36,13 +36,13 @@ final class ToxFriendCustomPacketExceptionTest extends FunSuite with ToxTestMixi
 
   test("SendLosslessPacketInvalid") {
     interceptWithTox(ToxFriendCustomPacketException.Code.INVALID)(
-      _.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.unsafeFromValue(Array[Byte](159.toByte)))
+      _.friendSendLosslessPacket(friendNumber, ToxLosslessPacket.unsafeFromValue(Array[Byte](100.toByte)))
     )
   }
 
   test("SendLossyPacketInvalid") {
     interceptWithTox(ToxFriendCustomPacketException.Code.INVALID)(
-      _.friendSendLossyPacket(friendNumber, ToxLossyPacket.unsafeFromValue(Array[Byte](199.toByte)))
+      _.friendSendLossyPacket(friendNumber, ToxLossyPacket.unsafeFromValue(Array[Byte](100.toByte)))
     )
   }
 

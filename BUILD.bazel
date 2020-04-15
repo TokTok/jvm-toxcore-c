@@ -272,10 +272,10 @@ scala_binary(
     name = "AudioPlaybackShow",
     testonly = True,
     srcs = [
-        "src/tools/java/im/tox/tox4j/av/callbacks/audio/AudioPlaybackShow.scala",
-        "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioPlayback.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioGenerator.scala",
         "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioGenerators.scala",
+        "src/test/java/im/tox/tox4j/av/callbacks/audio/AudioPlayback.scala",
+        "src/tools/java/im/tox/tox4j/av/callbacks/audio/AudioPlaybackShow.scala",
     ],
     main_class = "im.tox.tox4j.av.callbacks.audio.AudioPlaybackShow",
     resources = glob([
