@@ -33,8 +33,7 @@ $(NDK_HOME):
 	# This is put into the root dir, not into $(SRCDIR), because it's huge and
 	# clutters the Travis CI cache.
 	test -f $(NDK_PACKAGE) || curl -s $(NDK_URL) -o $(NDK_PACKAGE)
-	7z x $(NDK_PACKAGE) -o$(NDK_HOME)_tmp && mv $(NDK_HOME)_tmp/* $(NDK_HOME) && rm -r $(NDK_HOME)_tmp/
-	test -d $@ && find $@ -exec chmod +w {} \;
+	7z x $(NDK_PACKAGE) -o$(NDK_HOME)
 	@$(POST_RULE)
 
 $(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
