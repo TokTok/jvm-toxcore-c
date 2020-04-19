@@ -4,13 +4,6 @@ TARGET := i686-linux-android
 
 include scripts/common.mk
 
-NDK_FILES := $(NDK_COMMON_FILES)			\
-	platforms/android-21/arch-arm				\
-	toolchains/llvm/prebuilt/linux-x86_64/i686-linux-android		\
-	toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-*	\
-	toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-*	\
-	toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21
-
 NDK_API := 21
 NDK_ARCH := x86
 VPX_ARCH := x86-android-gcc
