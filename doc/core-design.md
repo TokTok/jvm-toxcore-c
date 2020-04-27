@@ -1,50 +1,49 @@
-Core API design notes
-=====================
+# Core API design notes
 
 This is a general document containing reasoning behind design choices made in
 the creation of the Tox Core API. It also mentions some alternatives considered
 and the reasons for not choosing them.
 
-Design criteria
----------------
+## Design criteria
 
 Our design focuses on the following aspects:
 
-- Forward-thinking: the API should remain stable over an extended period of time.
-- Stable ABI: we should give the user the ability to be long-term binary compatible.
-- Minimise human errors: on the API designer's, its implementer's, and its user's side.
-- Prefer self-consistency over minor readability improvements.
-- Provide one and only one way to perform a certain task (or at least as few
-  as possible).
+-   Forward-thinking: the API should remain stable over an extended period of
+    time.
+-   Stable ABI: we should give the user the ability to be long-term binary
+    compatible.
+-   Minimise human errors: on the API designer's, its implementer's, and its
+    user's side.
+-   Prefer self-consistency over minor readability improvements.
+-   Provide one and only one way to perform a certain task (or at least as few
+    as possible).
 
 Readability is an important criterion for API design, since clear client code
 reduces possibility for error. However, given the choice between making a few
 call sites more readable and keeping the API self-consistent, we prefer
 consistency.
 
-
-Types
------
+## Types
 
 We try to use types in a semantically meaningful way.
 
-- `uint8_t *` is used for byte arrays. Tox requires a platform where bytes are
-  exactly 8 bits. Data in byte arrays is generally uninterpreted (except for
-  keys), and is usually simply the payload for the various network functions.
-  These byte arrays need an explicit length to be passed along with them, if
-  they are of variable length, because they are not NUL-terminated.
-- `char const *` contains NUL-terminated C strings that are read and interpreted
-  by Core. These are used for host names.
-- `bool` is used whenever the result of a function means success or failure.
-  `true` always means success, `false` always means failure. In options, `true`
-  means enabled, `false` means disabled.
-- `size_t` is used for byte array lengths.
-- `uint16_t` is used for port numbers. TCP/UDP port numbers are 16 bit, with
-  port 0 being reserved. Port numbers are always expected in host byte order.
-  Core takes care of proper conversion as required by networking functions.
-- `uint32_t` is used for identifiers throughout Core. Examples of these are
-  friend IDs and message receipts. It is also used for the nospam value, which
-  is four 8-bit bytes long.
+-   `uint8_t *` is used for byte arrays. Tox requires a platform where bytes are
+    exactly 8 bits. Data in byte arrays is generally uninterpreted (except for
+    keys), and is usually simply the payload for the various network functions.
+    These byte arrays need an explicit length to be passed along with them, if
+    they are of variable length, because they are not NUL-terminated.
+-   `char const *` contains NUL-terminated C strings that are read and
+    interpreted by Core. These are used for host names.
+-   `bool` is used whenever the result of a function means success or failure.
+    `true` always means success, `false` always means failure. In options,
+    `true` means enabled, `false` means disabled.
+-   `size_t` is used for byte array lengths.
+-   `uint16_t` is used for port numbers. TCP/UDP port numbers are 16 bit, with
+    port 0 being reserved. Port numbers are always expected in host byte order.
+    Core takes care of proper conversion as required by networking functions.
+-   `uint32_t` is used for identifiers throughout Core. Examples of these are
+    friend IDs and message receipts. It is also used for the nospam value, which
+    is four 8-bit bytes long.
 
 ### `typedef`
 
@@ -65,9 +64,7 @@ result of `tox_new` as a pointer, meaning they can implicitly convert it from
 and to `void *`, making it possible to pass a Tox instance as a user data
 pointer in other APIs (or indeed the Tox Core API).
 
-
-Error conditions
-----------------
+## Error conditions
 
 ### Returning errors in the same value as success
 
@@ -78,10 +75,9 @@ various error codes into this negative integer. For functions returning
 pointers, this is not possible, making error diagnosis on such functions rather
 rudimentary. These functions can then take an out parameter for the error code.
 
-An advantage of having negative integers for error codes is that, if there is
-a global set of error codes for the entire API, the error codes can be
-propagated through the library from the original failing code back to the public
-API.
+An advantage of having negative integers for error codes is that, if there is a
+global set of error codes for the entire API, the error codes can be propagated
+through the library from the original failing code back to the public API.
 
 ### Returning errors in a designated error code
 
@@ -114,17 +110,17 @@ instead of passing it as an out parameter. The functions in () are essentially
 useless functions kept for legacy reasons (their value can also be read through
 callbacks).
 
-- `tox_bootstrap`
-- `tox_self_set_name`
-- `tox_self_set_status_message`
-- `tox_friend_get_public_key`
-- (`tox_friend_get_name`)
-- (`tox_friend_get_status_message`)
-- `tox_self_set_typing`
-- `tox_friend_delete`
-- `tox_file_control`
-- `tox_friend_send_lossy_packet`
-- `tox_friend_send_lossless_packet`
+-   `tox_bootstrap`
+-   `tox_self_set_name`
+-   `tox_self_set_status_message`
+-   `tox_friend_get_public_key`
+-   (`tox_friend_get_name`)
+-   (`tox_friend_get_status_message`)
+-   `tox_self_set_typing`
+-   `tox_friend_delete`
+-   `tox_file_control`
+-   `tox_friend_send_lossy_packet`
+-   `tox_friend_send_lossless_packet`
 
 The scenario in which the call site of these functions would be improved is one
 where the caller wants to know the specific error condition (not just the fact
@@ -176,8 +172,8 @@ intent as the former, but the former can be seen as slightly more explicit.
 
 However, these two readability improvements come at a rather high cost:
 
-- Loss of self-consistency
-- Increasing potential human errors
+-   Loss of self-consistency
+-   Increasing potential human errors
 
 Having a self-consistent API is a tremendous advantage for anyone who starts to
 learn the API. The Core API was designed with quick adaptation in mind. Client
@@ -221,8 +217,8 @@ Error codes are often negative integers in C APIs, because they are returned in
 the same (signed) integer return value as the valid positive "success" values.
 Since the error set is disjunct and completely separate from the result set, the
 actual value of error codes is irrelevant. They could be prime numbers,
-fibonacci numbers (minus the first one, since it is equal to the second one),
-or any other integer sequence in the range of the `int` type.
+fibonacci numbers (minus the first one, since it is equal to the second one), or
+any other integer sequence in the range of the `int` type.
 
 In the Core API, we use positive values for error codes, since this allows us to
 keep the value of the enumerator implicitly defined by the C compiler,
@@ -235,9 +231,7 @@ explicit values written in the API makes it less likely for client programmers
 to start assuming that these values can be used interchangably with the
 enumerator names.
 
-
-Program state machine
----------------------
+## Program state machine
 
 The program state machine is the graph of all possible states the Tox object can
 be in, and the transitions between those states. A general design principle we
@@ -247,48 +241,41 @@ number of transitions, reach every state from every other state. This means for
 example that the program must always be able to return to the initial state by a
 bounded sequence of function calls.
 
-
-Naming conventions
-------------------
+## Naming conventions
 
 A Tox instance contains several pieces of mutable information, such as nickname
-and user status. Each of these has a set of functions named:
-- `tox_set_${name}`: Setter function. If the information is a variable size byte
-  array, this function will additionally have a length parameter.
-- `tox_get_${name}`: Getter function. May require a variable size byte array.
-- `tox_${name}_size`: Size function. Returns the required length of the variable
-  size byte array to be passed to the `tox_get_${name}` function. If the size is
-  known at compile time, this function does not exist.
+and user status. Each of these has a set of functions named: -
+`tox_set_${name}`: Setter function. If the information is a variable size byte
+array, this function will additionally have a length parameter. -
+`tox_get_${name}`: Getter function. May require a variable size byte array. -
+`tox_${name}_size`: Size function. Returns the required length of the variable
+size byte array to be passed to the `tox_get_${name}` function. If the size is
+known at compile time, this function does not exist.
 
 Some information, such as Client ID and nickname, can be retrieved for both the
-local client and for friends. Such functions are named:
-- Local:
-  - `tox_self_set_${name}`: Setter for local client.
-  - `tox_self_get_${name}`: Getter for local client.
-  - `tox_self_${name}_size`: Size function for local client.
-- Friend:
-  - `tox_friend_set_${name}`: Setter for friend info.
-  - `tox_friend_get${name}`: Getter for friend info.
-  - `tox_friend_${name}_size`: Size function for friend info.
+local client and for friends. Such functions are named: - Local: -
+`tox_self_set_${name}`: Setter for local client. - `tox_self_get_${name}`:
+Getter for local client. - `tox_self_${name}_size`: Size function for local
+client. - Friend: - `tox_friend_set_${name}`: Setter for friend info. -
+`tox_friend_get${name}`: Getter for friend info. - `tox_friend_${name}_size`:
+Size function for friend info.
 
 Functions that get or set local information that does not exist for friends,
 such as public/private keys and the nospam value, do not contain the word
 "self".
 
+## `Tox_Options`
 
-`Tox_Options`
--------------
-
-`Tox_Options` is the only struct in the core API. It is used as the parameter
-to `tox_new` to set various startup and set-once runtime options. We considered
+`Tox_Options` is the only struct in the core API. It is used as the parameter to
+`tox_new` to set various startup and set-once runtime options. We considered
 expanding the struct into parameters to `tox_new`, since that would make
-bindings in some languages much easier (one would not need to create a struct
-of which the layout is generally unknown). This thought was discarded, because
+bindings in some languages much easier (one would not need to create a struct of
+which the layout is generally unknown). This thought was discarded, because
 
-- In the future there may be many set-once startup options, and having an
-  increasing number of parameters for `tox_new` would become unwieldy.
-- Every time a new option is added, we would need to break the API.
-- A struct allows us to easily get a default options object.
+-   In the future there may be many set-once startup options, and having an
+    increasing number of parameters for `tox_new` would become unwieldy.
+-   Every time a new option is added, we would need to break the API.
+-   A struct allows us to easily get a default options object.
 
 ### Allocation/deallocation functions
 
