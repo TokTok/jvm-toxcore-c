@@ -144,6 +144,7 @@ scala_library(
         "//jvm-toxcore-api",
         "@maven//:com_google_guava_guava",
         "@maven//:org_apache_commons_commons_lang3",
+        "@maven//:org_jetbrains_annotations",
     ],
 )
 
@@ -265,6 +266,7 @@ scala_library(
         ":jvm-toxcore-c",
         "//jvm-toxcore-api",
         "@maven//:com_google_guava_guava",
+        "@maven//:org_jetbrains_annotations",
     ],
 ) for src in glob(["src/test/java/im/tox/tox4j/impl/jni/codegen/Jni*.scala"])]
 
