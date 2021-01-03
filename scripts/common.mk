@@ -9,14 +9,14 @@ export LDFLAGS		:=
 export PATH		:= $(DESTDIR)/host/bin:$(PATH)
 
 # Android NDK
-NDK_DIR		:= android-ndk-r13b
+NDK_DIR		:= android-ndk-r21
 NDK_PACKAGE	:= $(NDK_DIR)-$(shell perl -e 'print $$^O')-x86_64.zip
 NDK_URL		:= http://dl.google.com/android/repository/$(NDK_PACKAGE)
 
-NDK_COMMON_FILES :=					\
-	build						\
-	sources/android/cpufeatures			\
-	sources/cxx-stl/gnu-libstdc++/4.9/include	\
-	prebuilt/linux-x86_64				\
-	prebuilt/darwin-x86_64				\
-	toolchains/llvm
+NDK_COMMON_FILES :=						\
+	sources/android/cpufeatures				\
+	toolchains/llvm/prebuilt/linux-x86_64/bin/clang		\
+	toolchains/llvm/prebuilt/linux-x86_64/bin/clang++	\
+	toolchains/llvm/prebuilt/linux-x86_64/lib/lib64		\
+	toolchains/llvm/prebuilt/linux-x86_64/lib64		\
+	toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include

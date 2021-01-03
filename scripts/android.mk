@@ -1,15 +1,15 @@
-NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)/$(TARGET)
+NDK_HOME	:= $(SRCDIR)/$(NDK_DIR)
 
 DLLEXT		:= .so
-TOOLCHAIN	:= $(DESTDIR)/$(TARGET)
+TOOLCHAIN	:= $(NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64
 SYSROOT		:= $(TOOLCHAIN)/sysroot
-PREFIX		:= $(SYSROOT)/usr
+PREFIX		:= $(DESTDIR)/$(TARGET)
 TOOLCHAIN_FILE	:= $(SRCDIR)/$(TARGET).cmake
 PROTOC		:= $(DESTDIR)/host/bin/protoc
 
-export CC		:= $(TOOLCHAIN)/bin/$(TARGET)-clang
-export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)-clang++
-export LDFLAGS		:= -llog
+export CC		:= $(TOOLCHAIN)/bin/$(TARGET)$(NDK_API)-clang
+export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)$(NDK_API)-clang++
+export LDFLAGS		:= -static-libstdc++ -llog
 export PKG_CONFIG_LIBDIR:= $(PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
 export PATH		:= $(TOOLCHAIN)/bin:$(PATH)
@@ -22,7 +22,7 @@ libvpx_CONFIGURE	:= --prefix=$(PREFIX) --sdk-path=$(NDK_HOME) --libc=$(SYSROOT) 
 toxcore_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c -DENABLE_STATIC=ON -DENABLE_SHARED=OFF
 tox4j_CONFIGURE		:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c
 
-build: $(TOOLCHAIN)/tox4j.stamp
+build: $(PREFIX)/tox4j.stamp
 
 test: build
 	@echo "No tests for Android builds"
@@ -33,31 +33,23 @@ $(NDK_HOME):
 	# This is put into the root dir, not into $(SRCDIR), because it's huge and
 	# clutters the Travis CI cache.
 	test -f $(NDK_PACKAGE) || curl -s $(NDK_URL) -o $(NDK_PACKAGE)
-	7z x $(NDK_PACKAGE) $(foreach x,$(NDK_FILES),'-ir!$(NDK_DIR)/$x') > /dev/null
-	rm -rf $@
-	mv $(NDK_DIR) $@
+	7z x $(NDK_PACKAGE) -o$(SRCDIR) > /dev/null
 	@$(POST_RULE)
 
-$(TOOLCHAIN)/AndroidVersion.txt: $(NDK_HOME)
+$(TOOLCHAIN_FILE): $(NDK_HOME) scripts/android.mk
 	@$(PRE_RULE)
-	$</build/tools/make_standalone_toolchain.py	\
-		--arch $(NDK_ARCH)			\
-		--install-dir $(@D)			\
-		--api $(NDK_API)			\
-		--force
-	@$(POST_RULE)
-	@touch $@
-
-$(TOOLCHAIN_FILE): $(TOOLCHAIN)/AndroidVersion.txt
-	@$(PRE_RULE)
+	mkdir -p $(TOOLCHAIN)/bin
+	ln -f $(CC) $(TOOLCHAIN)/bin/$(VPX_TARGET)-gcc
+	ln -f $(CXX) $(TOOLCHAIN)/bin/$(VPX_TARGET)-g++
 	mkdir -p $(@D)
 	echo 'set(CMAKE_SYSTEM_NAME Linux)' > $@
 	echo >> $@
 	echo 'set(CMAKE_SYSROOT $(SYSROOT))' >> $@
 	echo >> $@
-	echo 'set(CMAKE_C_COMPILER $(CC))' >> $@
-	echo 'set(CMAKE_CXX_COMPILER $(CXX))' >> $@
+	echo 'set(CMAKE_C_COMPILER $(TOOLCHAIN)/bin/$(TARGET)-gcc)' >> $@
+	echo 'set(CMAKE_CXX_COMPILER $(TOOLCHAIN)/bin/$(TARGET)-g++)' >> $@
 	echo >> $@
+	echo 'set(CMAKE_FIND_ROOT_PATH $(PREFIX))' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)' >> $@
 	echo 'set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)' >> $@

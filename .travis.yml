@@ -42,7 +42,7 @@ jobs:
       install: brew install sbt
     - env: GOAL=release TARGET=aarch64-linux-android
     - env: GOAL=release TARGET=arm-linux-androideabi
-#   - env: GOAL=release TARGET=i686-linux-android
+    - env: GOAL=release TARGET=i686-linux-android
     - env: GOAL=release TARGET=x86_64-linux-android
   fast_finish: true
 

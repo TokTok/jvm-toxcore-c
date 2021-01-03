@@ -4,15 +4,10 @@ TARGET := aarch64-linux-android
 
 include scripts/common.mk
 
-NDK_FILES := $(NDK_COMMON_FILES)				\
-	platforms/android-21/arch-arm64				\
-	prebuilt/android-arm64					\
-	sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a	\
-	toolchains/aarch64-linux-android-4.9
-
 NDK_API := 21
 NDK_ARCH := arm64
 VPX_ARCH := arm64-android-gcc
+VPX_TARGET := $(TARGET)
 
 include scripts/android.mk
 include scripts/dependencies.mk

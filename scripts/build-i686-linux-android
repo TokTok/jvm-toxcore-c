@@ -4,14 +4,10 @@ TARGET := i686-linux-android
 
 include scripts/common.mk
 
-NDK_FILES := $(NDK_COMMON_FILES)			\
-	platforms/android-9				\
-	sources/cxx-stl/gnu-libstdc++/4.9/libs/x86	\
-	toolchains/x86-4.9
-
-NDK_API := 9
+NDK_API := 16
 NDK_ARCH := x86
 VPX_ARCH := x86-android-gcc
+VPX_TARGET := $(TARGET)
 
 include scripts/android.mk
 include scripts/dependencies.mk
