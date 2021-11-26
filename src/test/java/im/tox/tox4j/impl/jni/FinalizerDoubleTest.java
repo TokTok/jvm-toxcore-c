@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
  */
 public class FinalizerDoubleTest extends JUnitSuite {
 
-  private static final Logger logger = LoggerFactory.getLogger(FinalizerDoubleTest.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(FinalizerDoubleTest.class);
 
   private static final ToxOptions OPTIONS = new ToxOptions( //
       true,                                                 //
