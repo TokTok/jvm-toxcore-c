@@ -8,10 +8,10 @@ import im.tox.tox4j.impl.jni.ToxCoreImpl
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.withToxUnit
 import im.tox.tox4j.testing.GetDisjunction._
 import org.scalatest.FlatSpec
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class ToxCoreTest extends FlatSpec with PropertyChecks {
+final class ToxCoreTest extends FlatSpec with ScalaCheckPropertyChecks {
 
   "addFriend" should "return increasing friend numbers and increment the friend list size" in {
     forAll { (count: SmallNat, message: Array[Byte]) =>

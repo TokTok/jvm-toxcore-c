@@ -196,6 +196,7 @@ scala_library(
         "@maven//:com_typesafe_scala_logging_scala_logging_2_11",
         "@maven//:org_jetbrains_annotations",
         "@maven//:org_scalacheck_scalacheck_2_11",
+        "@maven//:org_scalatestplus_scalacheck_1_14_2_11",
         "@maven//:org_slf4j_slf4j_api",
     ],
 )
@@ -226,6 +227,7 @@ scala_library(
         "@maven//:org_apache_commons_commons_lang3",
         "@maven//:org_jetbrains_annotations",
         "@maven//:org_scalacheck_scalacheck_2_11",
+        "@maven//:org_scalatestplus_scalacheck_1_14_2_11",
         "@maven//:org_slf4j_slf4j_api",
     ],
 ) for src in glob(["src/test/java/**/*Test.scala"])]
@@ -248,6 +250,7 @@ scala_library(
         "//jvm-toxcore-api",
         "@io_bazel_rules_scala//scala/scalatest",
         "@maven//:junit_junit",
+        "@maven//:org_scalatestplus_junit_4_13_2_11",
         "@maven//:org_slf4j_slf4j_api",
     ],
 ) for src in glob(["src/test/java/**/*.java"])]
