@@ -2,10 +2,10 @@ package im.tox.core.random
 
 import org.scalacheck.Gen
 import org.scalatest.WordSpec
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class RandomCoreTest extends WordSpec with PropertyChecks {
+final class RandomCoreTest extends WordSpec with ScalaCheckPropertyChecks {
 
   "entropy" should {
     "be 0 for the empty sequence" in {

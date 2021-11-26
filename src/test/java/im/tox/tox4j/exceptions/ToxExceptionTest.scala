@@ -2,10 +2,10 @@ package im.tox.tox4j.exceptions
 
 import im.tox.tox4j.core.exceptions.ToxBootstrapException
 import org.scalatest.FlatSpec
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class ToxExceptionTest extends FlatSpec with PropertyChecks {
+final class ToxExceptionTest extends FlatSpec with ScalaCheckPropertyChecks {
 
   "getMessage" should "contain the error code name" in {
     ToxBootstrapException.Code.values().foreach { code =>

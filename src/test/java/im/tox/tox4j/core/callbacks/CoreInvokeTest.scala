@@ -10,12 +10,12 @@ import im.tox.tox4j.testing.GetDisjunction._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{ Arbitrary, Gen }
 import org.scalatest.FunSuite
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.language.implicitConversions
 import scala.util.Random
 
-final class CoreInvokeTest extends FunSuite with PropertyChecks {
+final class CoreInvokeTest extends FunSuite with ScalaCheckPropertyChecks {
 
   final class TestEventListener extends ToxCoreEventListener[Option[Event]] {
     private def setEvent(event: Event)(state: Option[Event]): Option[Event] = {

@@ -6,12 +6,12 @@ import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.options.ProxyOptions
 import im.tox.tox4j.impl.jni.{ ToxAvImplFactory, ToxCoreImplFactory }
 import im.tox.tox4j.{ SocksServer, ToxCoreTestBase }
-import org.scalatest.concurrent.Timeouts
+import org.scalatest.concurrent.TimeLimits
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
 
 import scala.language.postfixOps
 
-abstract class AliceBobTest extends AliceBobTestBase with Timeouts {
+abstract class AliceBobTest extends AliceBobTestBase with TimeLimits {
 
   protected def ignoreTimeout = false
 
