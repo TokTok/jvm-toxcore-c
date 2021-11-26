@@ -1,5 +1,8 @@
 package im.tox.tox4j.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import im.tox.tox4j.core.callbacks.ToxCoreEventAdapter;
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener;
 import im.tox.tox4j.core.enums.ToxFileControl;
@@ -13,24 +16,18 @@ import im.tox.tox4j.exceptions.ToxException;
 import im.tox.tox4j.impl.jni.ToxCoreImpl;
 import org.junit.Assert;
 import org.junit.Test;
-import org.scalatest.junit.JUnitSuite;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.scalatestplus.junit.JUnitSuite;
 
 public final class JToxCoreTest extends JUnitSuite {
 
-  private final ToxCoreEventListener<Void> handler = new ToxCoreEventAdapter<>();
+  private final ToxCoreEventListener<Void> handler =
+      new ToxCoreEventAdapter<>();
+
   private final ToxOptions options = new ToxOptions(
-      true, true, true,
-      new ProxyOptions.Http("localhost", 1234),
-      ToxCoreConstants.DefaultStartPort(),
-      ToxCoreConstants.DefaultEndPort(),
-      0,
+      true, true, true, new ProxyOptions.Http("localhost", 1234),
+      ToxCoreConstants.DefaultStartPort(), ToxCoreConstants.DefaultEndPort(), 0,
       // TODO(iphydf): This is kind of ugly. Do we want to live with this?
-      SaveDataOptions.None$.MODULE$,
-      true
-  );
+      SaveDataOptions.None$.MODULE$, true);
 
   private void expectBoolean(boolean bool) {}
 
@@ -102,5 +99,4 @@ public final class JToxCoreTest extends JUnitSuite {
       assertNotNull(e);
     }
   }
-
 }

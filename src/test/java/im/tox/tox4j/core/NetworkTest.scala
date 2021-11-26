@@ -8,7 +8,7 @@ import im.tox.tox4j.core.NetworkTest.logger
 import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{ withToxUnit, withToxes }
 import org.scalatest.FlatSpec
-import org.scalatest.concurrent.Timeouts
+import org.scalatest.concurrent.TimeLimits
 import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
@@ -19,7 +19,7 @@ object NetworkTest {
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.While"))
-final class NetworkTest extends FlatSpec with Timeouts {
+final class NetworkTest extends FlatSpec with TimeLimits {
 
   // TODO(iphydf): Figure out why the bootstrap tests all fail on Travis.
   /*

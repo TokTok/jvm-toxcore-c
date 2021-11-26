@@ -8,7 +8,7 @@ import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.{ ToxAvImplFactory, ToxCoreImplFactory }
 import im.tox.tox4j.testing.autotest.AutoTest.ClientState
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Timeouts
+import org.scalatest.concurrent.TimeLimits
 import org.slf4j.LoggerFactory
 import shapeless.<:!<
 
@@ -40,7 +40,7 @@ object AutoTestSuite {
 
 }
 
-abstract class AutoTestSuite extends FunSuite with Timeouts {
+abstract class AutoTestSuite extends FunSuite with TimeLimits {
 
   private val logger = Logger(LoggerFactory.getLogger(getClass))
 
