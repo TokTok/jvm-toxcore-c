@@ -1,7 +1,7 @@
 ---
 cirrus-ci_task:
   container:
-    image: toxchat/toktok-stack:0.0.12
+    image: toxchat/toktok-stack:0.0.19
     cpu: 2
     memory: 6G
   configure_script:
