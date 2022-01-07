@@ -40,8 +40,8 @@ find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 find_package(JNI)
-if(JNI_FOUND)
-  include_directories(${JNI_INCLUDE_DIRS})
+if(JAVA_INCLUDE_PATH)
+  include_directories(${JAVA_INCLUDE_PATH})
 endif()
 
 include_directories("src")
