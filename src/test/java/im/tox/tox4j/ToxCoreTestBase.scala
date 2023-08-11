@@ -10,6 +10,7 @@ import org.scalatest.Assertions
 object ToxCoreTestBase extends Assertions {
 
   private[tox4j] val nodeCandidates = Seq(
+    new DhtNode("tox.kurnevsky.net", "tox.kurnevsky.net", 33445, "82EF82BA33445A1F91A7DB27189ECFC0C013E06E3DA71F588ED692BED625EC23"),
     new DhtNode("tox.initramfs.io", "tox.initramfs.io", 33445, "3F0A45A268367C1BEA652F258C85F4A66DA76BCAA667A49E770BCC4917AB6A25"),
     new DhtNode("tox.verdict.gg", null, 33445, "1C5293AEF2114717547B39DA8EA6F1E331E5E358B35F9B6B5F19317911C5F976")
   )
