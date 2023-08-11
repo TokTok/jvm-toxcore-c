@@ -56,6 +56,11 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withToxUnit(_.close())
   }
 
+  /*
+   * Can't easily test this anymore, because bootstrap now actually reports
+   * success/failure immediately.
+   */
+  /*
   test("BootstrapBorderlinePort1") {
     withToxUnit { tox =>
       tox.bootstrap(
@@ -75,6 +80,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
       )
     }
   }
+  */
 
   test("IterationInterval") {
     withToxUnit { tox =>
