@@ -12,6 +12,5 @@ branches:
     protection:
       required_status_checks:
         contexts:
-          - bazel-opt
           - Codacy Static Code Analysis
           - code-review/reviewable
