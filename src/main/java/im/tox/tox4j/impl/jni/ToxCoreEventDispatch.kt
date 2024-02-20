@@ -103,7 +103,7 @@ object ToxCoreEventDispatch {
           state,
           { next, ev ->
             handler.friendConnectionStatus(
-                ToxFriendNumber(ev.getFriendNumber()), convert(ev.getConnectionStatus()), next)
+                ev.getFriendNumber(), convert(ev.getConnectionStatus()), next)
           })
 
   private fun <S> dispatchFriendTyping(

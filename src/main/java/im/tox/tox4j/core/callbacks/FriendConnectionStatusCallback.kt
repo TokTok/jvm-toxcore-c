@@ -20,4 +20,10 @@ interface FriendConnectionStatusCallback<ToxCoreState> {
       connectionStatus: ToxConnection,
       state: ToxCoreState
   ): ToxCoreState = state
+
+  fun friendConnectionStatus(
+      friendNumber: Int,
+      connectionStatus: ToxConnection,
+      state: ToxCoreState
+  ): ToxCoreState = friendConnectionStatus(ToxFriendNumber(friendNumber), connectionStatus, state)
 }

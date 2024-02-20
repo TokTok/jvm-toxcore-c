@@ -9,7 +9,7 @@ import im.tox.tox4j.core.exceptions.*
 import im.tox.tox4j.core.options.ToxOptions
 
 /**
- * Initialises the new Tox instance with an optional save-data received from [[getSavedata]].
+ * Initialises the new Tox instance with an optional save-data received from [[savedata]].
  *
  * @param options Connection options object with optional save-data.
  */
@@ -50,16 +50,16 @@ final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
     ToxCoreJni.toxAddTcpRelay(instanceNumber, address, port.value.toInt(), publicKey.value)
   }
 
-  override val getSavedata: ByteArray
+  override val savedata: ByteArray
     get() = ToxCoreJni.toxGetSavedata(instanceNumber)
 
-  override val getUdpPort: Port
+  override val udpPort: Port
     get() = Port(ToxCoreJni.toxSelfGetUdpPort(instanceNumber).toUShort())
 
-  override val getTcpPort: Port
+  override val tcpPort: Port
     get() = Port(ToxCoreJni.toxSelfGetTcpPort(instanceNumber).toUShort())
 
-  override val getDhtId: ToxPublicKey
+  override val dhtId: ToxPublicKey
     get() = ToxPublicKey(ToxCoreJni.toxSelfGetDhtId(instanceNumber))
 
   override val iterationInterval: Int
@@ -68,38 +68,30 @@ final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
   override fun <S> iterate(handler: ToxCoreEventListener<S>, state: S): S =
       ToxCoreEventDispatch.dispatch(handler, ToxCoreJni.toxIterate(instanceNumber), state)
 
-  override val getPublicKey: ToxPublicKey
+  override val publicKey: ToxPublicKey
     get() = ToxPublicKey(ToxCoreJni.toxSelfGetPublicKey(instanceNumber))
 
-  override val getSecretKey: ToxSecretKey
+  override val secretKey: ToxSecretKey
     get() = ToxSecretKey(ToxCoreJni.toxSelfGetSecretKey(instanceNumber))
 
-  override fun setNospam(nospam: Int): Unit = ToxCoreJni.toxSelfSetNospam(instanceNumber, nospam)
-
-  override val getNospam: Int
+  override var nospam: Int
     get() = ToxCoreJni.toxSelfGetNospam(instanceNumber)
+    set(value) = ToxCoreJni.toxSelfSetNospam(instanceNumber, value)
 
-  override val getAddress: ToxFriendAddress
+  override val address: ToxFriendAddress
     get() = ToxFriendAddress(ToxCoreJni.toxSelfGetAddress(instanceNumber))
 
-  override fun setName(name: ToxNickname): Unit =
-      ToxCoreJni.toxSelfSetName(instanceNumber, name.value)
-
-  override val getName: ToxNickname
+  override var name: ToxNickname
     get() = ToxNickname(ToxCoreJni.toxSelfGetName(instanceNumber))
+    set(value) = ToxCoreJni.toxSelfSetName(instanceNumber, value.value)
 
-  override fun setStatusMessage(message: ToxStatusMessage): Unit {
-    ToxCoreJni.toxSelfSetStatusMessage(instanceNumber, message.value)
-  }
-
-  override val getStatusMessage: ToxStatusMessage
+  override var statusMessage: ToxStatusMessage
     get() = ToxStatusMessage(ToxCoreJni.toxSelfGetStatusMessage(instanceNumber))
+    set(value) = ToxCoreJni.toxSelfSetStatusMessage(instanceNumber, value.value)
 
-  override fun setStatus(status: ToxUserStatus): Unit =
-      ToxCoreJni.toxSelfSetStatus(instanceNumber, status.ordinal)
-
-  override val getStatus: ToxUserStatus
+  override var status: ToxUserStatus
     get() = ToxUserStatus.values()[ToxCoreJni.toxSelfGetStatus(instanceNumber)]
+    set(value) = ToxCoreJni.toxSelfSetStatus(instanceNumber, value.ordinal)
 
   override fun addFriend(
       address: ToxFriendAddress,
@@ -126,7 +118,7 @@ final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
   override fun friendExists(friendNumber: ToxFriendNumber): Boolean =
       ToxCoreJni.toxFriendExists(instanceNumber, friendNumber.value)
 
-  override val getFriendList: IntArray
+  override val friendList: IntArray
     get() = ToxCoreJni.toxSelfGetFriendList(instanceNumber)
 
   override fun setTyping(friendNumber: ToxFriendNumber, typing: Boolean): Unit =
