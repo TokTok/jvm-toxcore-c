@@ -3,6 +3,7 @@ syntax = "proto3";
 package im.tox.tox4j.av.proto;
 
 option java_multiple_files = true;
+option optimize_for = LITE_RUNTIME;
 
 message Call {
   int32         friend_number     = 1;

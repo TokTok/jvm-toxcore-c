@@ -3,6 +3,7 @@ syntax = "proto3";
 package im.tox.tox4j.core.proto;
 
 option java_multiple_files = true;
+option optimize_for = LITE_RUNTIME;
 
 message Connection {
   enum Type {

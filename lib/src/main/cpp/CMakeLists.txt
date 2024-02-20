@@ -1,5 +1,5 @@
 project(tox4j-c)
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.16)
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH true)
@@ -11,42 +11,9 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 
-pkg_search_module(LIBTOXCORE libtoxcore)
-if(LIBTOXCORE_FOUND)
-  pkg_search_module(LIBTOXAV REQUIRED libtoxav)
-  link_directories(${LIBTOXCORE_LIBRARY_DIRS})
-  include_directories(${LIBTOXCORE_INCLUDE_DIRS})
-  foreach(flag ${LIBTOXCORE_CFLAGS_OTHER})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
-  endforeach()
-
-  link_directories(${LIBTOXAV_LIBRARY_DIRS})
-  include_directories(${LIBTOXAV_INCLUDE_DIRS})
-  foreach(flag ${LIBTOXAV_CFLAGS_OTHER})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
-  endforeach()
-else()
-  pkg_search_module(TOXCORE REQUIRED toxcore)
-  link_directories(${TOXCORE_LIBRARY_DIRS})
-  include_directories(${TOXCORE_INCLUDE_DIRS})
-  foreach(flag ${TOXCORE_CFLAGS_OTHER})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
-  endforeach()
-endif()
-
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-
+pkg_search_module(TOXCORE REQUIRED toxcore)
+find_package(protobuf CONFIG REQUIRED)
 find_package(JNI)
-if(JAVA_INCLUDE_PATH)
-  include_directories(${JAVA_INCLUDE_PATH})
-endif()
-if(JAVA_INCLUDE_PATH2)
-  include_directories(${JAVA_INCLUDE_PATH2})
-endif()
-
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_BINARY_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
@@ -96,14 +63,12 @@ endif()
 # Build
 #
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ToxAv/Av.proto
-                      ToxCore/Core.proto util/ProtoLog.proto)
-
 add_library(
   ${PROJECT_NAME} SHARED
   ${ANDROID_CPU_FEATURES}
-  ${PROTO_SRCS}
-  ${PROTO_HDRS}
+  ToxAv/Av.proto
+  ToxCore/Core.proto
+  util/ProtoLog.proto
   ToxAv/generated/enums.cpp
   ToxAv/generated/errors.cpp
   ToxAv/generated/impls.h
@@ -175,14 +140,27 @@ if(ANDROID_CPU_FEATURES)
   target_compile_definitions(${PROJECT_NAME} PRIVATE -Dtypeof=__typeof__)
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROTOBUF_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} protobuf::libprotobuf-lite)
 
-if(LIBTOXCORE_FOUND)
-  target_link_libraries(${PROJECT_NAME} ${LIBTOXAV_STATIC_LIBRARIES}
-                        ${LIBTOXCORE_STATIC_LIBRARIES})
-else()
-  target_link_libraries(${PROJECT_NAME} ${TOXCORE_STATIC_LIBRARIES})
+if(JAVA_INCLUDE_PATH)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${JAVA_INCLUDE_PATH})
 endif()
+if(JAVA_INCLUDE_PATH2)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${JAVA_INCLUDE_PATH2})
+endif()
+
+target_link_directories(${PROJECT_NAME} PUBLIC ${TOXCORE_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} ${TOXCORE_STATIC_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${TOXCORE_INCLUDE_DIRS})
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/ToxAv)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/ToxCore)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/util)
+
+protobuf_generate(TARGET ${PROJECT_NAME})
 
 # Windows and OSX don't have this linker functionality.
 if(NOT WIN32 AND NOT APPLE)
