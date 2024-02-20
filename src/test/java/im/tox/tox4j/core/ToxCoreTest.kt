@@ -57,10 +57,10 @@ class ToxCoreTest {
     val tox1 = newToxCore(ToxOptions())
     val tox2 = newToxCore(ToxOptions())
 
-    tox2.bootstrap("localhost", tox1.getUdpPort, tox1.getDhtId)
+    tox2.bootstrap("localhost", tox1.udpPort, tox1.dhtId)
 
-    tox1.addFriendNorequest(tox2.getPublicKey)
-    tox2.addFriendNorequest(tox1.getPublicKey)
+    tox1.addFriendNorequest(tox2.publicKey)
+    tox2.addFriendNorequest(tox1.publicKey)
 
     var connected1 = false
     var connected2 = false

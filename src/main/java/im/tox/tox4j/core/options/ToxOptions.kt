@@ -42,4 +42,8 @@ final data class ToxOptions(
     val tcpPort: UShort = ToxCoreConstants.DefaultTcpPort,
     val saveData: SaveDataOptions.Type = SaveDataOptions.None,
     val fatalErrors: Boolean = true,
-)
+) {
+    companion object {
+        val defaultInstance = ToxOptions()
+    }
+}

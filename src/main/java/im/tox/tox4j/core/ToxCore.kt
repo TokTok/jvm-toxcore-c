@@ -31,7 +31,7 @@ interface ToxCore : Closeable {
    *
    * @return a byte array containing the serialised tox instance.
    */
-  val getSavedata: ByteArray
+  val savedata: ByteArray
 
   /**
    * Create a new [[ToxCore]] instance with different options. The implementation may choose to
@@ -43,7 +43,7 @@ interface ToxCore : Closeable {
    * instance will operate correctly.
    *
    * If the [[ToxOptions.saveData]] field is not empty, this function will load the Tox instance
-   * from a byte array previously filled by [[getSavedata]].
+   * from a byte array previously filled by [[savedata]].
    *
    * If loading failed or succeeded only partially, an exception will be thrown.
    *
@@ -78,6 +78,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxBootstrapException::class)
   fun bootstrap(address: String, port: Port, publicKey: ToxPublicKey): Unit
+  fun bootstrap(address: String, port: Int, publicKey: ByteArray): Unit =
+      bootstrap(address, Port(port.toUShort()), ToxPublicKey(publicKey))
 
   /**
    * Connect to a TCP relay to forward traffic.
@@ -91,6 +93,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxBootstrapException::class)
   fun addTcpRelay(address: String, port: Port, publicKey: ToxPublicKey): Unit
+  fun addTcpRelay(address: String, port: Int, publicKey: ByteArray): Unit =
+      addTcpRelay(address, Port(port.toUShort()), ToxPublicKey(publicKey))
 
   /**
    * Get the UDP port this instance is bound to.
@@ -98,7 +102,8 @@ interface ToxCore : Closeable {
    * @return a port number between 1 and 65535.
    */
   // @Throws(ToxGetPortException::class)
-  val getUdpPort: Port
+  val udpPort: Port
+  fun getUdpPort(): Int = udpPort.value.toInt()
 
   /**
    * Return the TCP port this Tox instance is bound to. This is only relevant if the instance is
@@ -107,20 +112,22 @@ interface ToxCore : Closeable {
    * @return a port number between 1 and 65535.
    */
   // @Throws(ToxGetPortException::class)
-  val getTcpPort: Port
+  val tcpPort: Port
+  fun getTcpPort(): Int = tcpPort.value.toInt()
 
   /**
    * Writes the temporary DHT public key of this instance to a byte array.
    *
    * This can be used in combination with an externally accessible IP address and the bound port
-   * (from [[getUdpPort]]}) to run a temporary bootstrap node.
+   * (from [[udpPort]]}) to run a temporary bootstrap node.
    *
    * Be aware that every time a new instance is created, the DHT public key changes, meaning this
    * cannot be used to run a permanent bootstrap node.
    *
    * @return a byte array of size [[ToxCoreConstants.PublicKeySize]]
    */
-  val getDhtId: ToxPublicKey
+  val dhtId: ToxPublicKey
+  fun getDhtId(): ByteArray = dhtId.value
 
   /**
    * Get the time in milliseconds until [[iterate]] should be called again for optimal performance.
@@ -141,27 +148,24 @@ interface ToxCore : Closeable {
    *
    * @return a byte array of size [[ToxCoreConstants.PublicKeySize]]
    */
-  val getPublicKey: ToxPublicKey
+  val publicKey: ToxPublicKey
+  fun getPublicKey(): ByteArray = publicKey.value
 
   /**
    * Copy the Tox Secret Key from the Tox object.
    *
    * @return a byte array of size [[ToxCoreConstants.SecretKeySize]]
    */
-  val getSecretKey: ToxSecretKey
+  val secretKey: ToxSecretKey
+  fun getSecretKey(): ByteArray = secretKey.value
 
   /**
-   * Set the 4-byte nospam part of the address.
+   * The 4-byte nospam part of the address.
    *
    * Setting the nospam makes it impossible for others to send us friend requests that contained the
    * old nospam number.
-   *
-   * @param nospam the new nospam number.
    */
-  fun setNospam(nospam: Int): Unit
-
-  /** Get our current nospam number. */
-  val getNospam: Int
+  var nospam: Int
 
   /**
    * Get our current tox address to give to friends.
@@ -175,43 +179,33 @@ interface ToxCore : Closeable {
    *
    * @return a byte array of size [[ToxCoreConstants.AddressSize]]
    */
-  val getAddress: ToxFriendAddress
+  val address: ToxFriendAddress
+  fun getAddress(): ByteArray = address.value
 
   /**
-   * Set the nickname for the Tox client.
+   * The nickname for the Tox client.
    *
    * Cannot be longer than [[ToxCoreConstants.MaxNameLength]] bytes. Can be empty (zero-length).
-   *
-   * @param name A byte array containing the new nickname..
    */
   // @Throws(ToxSetInfoException::class)
-  fun setName(name: ToxNickname): Unit
-
-  /** Get our own nickname. */
-  val getName: ToxNickname
+  var name: ToxNickname
+  fun getName(): ByteArray = name.value
+  fun setName(value: ByteArray) { name = ToxNickname(value) }
 
   /**
-   * Set our status message.
+   * Our status message.
    *
    * Cannot be longer than [[ToxCoreConstants.MaxStatusMessageLength]] bytes.
-   *
-   * @param message the status message to set.
    */
   // @Throws(ToxSetInfoException::class)
-  fun setStatusMessage(message: ToxStatusMessage): Unit
-
-  /** Gets our own status message. May be null if the status message was empty. */
-  val getStatusMessage: ToxStatusMessage
+  var statusMessage: ToxStatusMessage
+  fun getStatusMessage(): ByteArray = statusMessage.value
+  fun setStatusMessage(value: ByteArray) { statusMessage = ToxStatusMessage(value) }
 
   /**
-   * Set our status.
-   *
-   * @param status status to set.
+   * Our status.
    */
-  fun setStatus(status: ToxUserStatus): Unit
-
-  /** Get our status. */
-  val getStatus: ToxUserStatus
+  var status: ToxUserStatus
 
   /**
    * Add a friend to the friend list and send a friend request.
@@ -240,6 +234,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxFriendAddException::class, IllegalArgumentException::class)
   fun addFriend(address: ToxFriendAddress, message: ToxFriendRequestMessage): ToxFriendNumber
+  fun addFriend(address: ByteArray, message: ByteArray): Int =
+      addFriend(ToxFriendAddress(address), ToxFriendRequestMessage(message)).value
 
   /**
    * Add a friend without sending a friend request.
@@ -257,6 +253,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxFriendAddException::class, IllegalArgumentException::class)
   fun addFriendNorequest(publicKey: ToxPublicKey): ToxFriendNumber
+  fun addFriendNorequest(publicKey: ByteArray): Int =
+      addFriendNorequest(ToxPublicKey(publicKey)).value
 
   /**
    * Remove a friend from the friend list.
@@ -268,6 +266,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxFriendDeleteException::class)
   fun deleteFriend(friendNumber: ToxFriendNumber): Unit
+  fun deleteFriend(friendNumber: Int): Unit =
+      deleteFriend(ToxFriendNumber(friendNumber))
 
   /**
    * Gets the friend number for the specified Public Key.
@@ -277,6 +277,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxFriendByPublicKeyException::class)
   fun friendByPublicKey(publicKey: ToxPublicKey): ToxFriendNumber
+  fun friendByPublicKey(publicKey: ByteArray): Int =
+      friendByPublicKey(ToxPublicKey(publicKey)).value
 
   /**
    * Gets the Public Key for the specified friend number.
@@ -286,6 +288,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxFriendGetPublicKeyException::class)
   fun getFriendPublicKey(friendNumber: ToxFriendNumber): ToxPublicKey
+  fun getFriendPublicKey(friendNumber: Int): ByteArray =
+      getFriendPublicKey(ToxFriendNumber(friendNumber)).value
 
   /**
    * Checks whether a friend with the specified friend number exists.
@@ -298,6 +302,8 @@ interface ToxCore : Closeable {
    * @return true if such a friend exists.
    */
   fun friendExists(friendNumber: ToxFriendNumber): Boolean
+  fun friendExists(friendNumber: Int): Boolean =
+      friendExists(ToxFriendNumber(friendNumber))
 
   /**
    * Get an array of currently valid friend numbers.
@@ -308,7 +314,7 @@ interface ToxCore : Closeable {
    * @return an array containing the currently valid friend numbers, the empty int array if there
    *   are no friends.
    */
-  val getFriendList: IntArray
+  val friendList: IntArray
 
   /**
    * Get an array of [[ToxFriendNumber]] objects with the same values as [[getFriendList]].
@@ -317,8 +323,8 @@ interface ToxCore : Closeable {
    *
    * @return [[getFriendList]] mapped to [[ToxFriendNumber]].
    */
-  val getFriendNumbers: List<ToxFriendNumber>
-    get() = getFriendList.map { ToxFriendNumber(it) }
+  val friendNumbers: List<ToxFriendNumber>
+    get() = friendList.map { ToxFriendNumber(it) }
 
   /**
    * Tell friend number whether or not we are currently typing.
@@ -330,6 +336,8 @@ interface ToxCore : Closeable {
    */
   // @Throws(ToxSetTypingException::class)
   fun setTyping(friendNumber: ToxFriendNumber, typing: Boolean): Unit
+  fun setTyping(friendNumber: Int, typing: Boolean): Unit =
+      setTyping(ToxFriendNumber(friendNumber), typing)
 
   /**
    * Send a text chat message to an online friend.
@@ -347,7 +355,7 @@ interface ToxCore : Closeable {
    * incremented by 1 each time a message is sent. If [[Int.MaxValue]] messages were sent, the next
    * message ID is [[Int.MinValue]].
    *
-   * Message IDs are not stored in the array returned by [[getSavedata]].
+   * Message IDs are not stored in the array returned by [[savedata]].
    *
    * @param friendNumber The friend number of the friend to send the message to.
    * @param messageType Message type (normal, action, ...).
@@ -363,6 +371,13 @@ interface ToxCore : Closeable {
       timeDelta: Int,
       message: ToxFriendMessage
   ): Int
+  fun friendSendMessage(
+      friendNumber: Int,
+      messageType: ToxMessageType,
+      timeDelta: Int,
+      message: ByteArray
+  ): Int =
+      friendSendMessage(ToxFriendNumber(friendNumber), messageType, timeDelta, ToxFriendMessage(message))
 
   /**
    * Sends a file control command to a friend for a given file transfer.

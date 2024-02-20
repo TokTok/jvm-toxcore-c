@@ -1,5 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_proto_library")
-load("@rules_java//java:defs.bzl", "java_proto_library")
+load("@rules_java//java:defs.bzl", "java_proto_library", "java_test")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library", "kt_jvm_test")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//tools/project:build_defs.bzl", "project")
@@ -94,5 +94,17 @@ kt_jvm_test(
         ":jvm-toxcore-c",
         "@maven//:org_jetbrains_kotlin_kotlin_test_junit",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+    ],
+)
+
+java_test(
+    name = "ToxCoreJavaTest",
+    size = "small",
+    srcs = ["src/test/java/im/tox/tox4j/core/ToxCoreJavaTest.java"],
+    jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
+    test_class = "im.tox.tox4j.core.ToxCoreJavaTest",
+    deps = [
+        ":jvm-toxcore-c",
+        "@maven//:junit_junit",
     ],
 )
