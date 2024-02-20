@@ -1,9 +1,8 @@
 #pragma once
 
-#include "cpp14compat.h"
-
 #include <utility>
 
+#include "cpp14compat.h"
 
 /**
  * Helper template to capture the return value of a function call so that
@@ -16,45 +15,34 @@
  * T must be movable or copyable for this to work. Also, all the arguments
  * must be copyable.
  */
-template<typename T>
-struct wrapped_value
-{
+template <typename T>
+struct wrapped_value {
   T value;
-  T unwrap () { return std::move (value); }
+  T unwrap() { return std::move(value); }
 
-  template<typename FuncT, typename ...Args>
-  static wrapped_value
-  wrap (FuncT func, Args &&...args)
-  {
-    return { func (std::forward<Args> (args)...) };
+  template <typename FuncT, typename... Args>
+  static wrapped_value wrap(FuncT func, Args &&...args) {
+    return {func(std::forward<Args>(args)...)};
   }
 };
 
+template <>
+struct wrapped_value<void> {
+  void unwrap() const {}
 
-template<>
-struct wrapped_value<void>
-{
-  void unwrap () const { }
-
-  template<typename FuncT, typename ...Args>
-  static wrapped_value
-  wrap (FuncT func, Args &&...args)
-  {
-    func (std::forward<Args> (args)...);
-    return { };
+  template <typename FuncT, typename... Args>
+  static wrapped_value wrap(FuncT func, Args &&...args) {
+    func(std::forward<Args>(args)...);
+    return {};
   }
 };
-
 
 /**
  * Call this with the function and its arguments to wrap the return value in
  * a wrapped_value class.
  */
-template<typename FuncT, typename ...Args>
-wrapped_value<typename std::result_of<FuncT (Args...)>::type>
-wrap_void (FuncT func, Args &&...args)
-{
-  return wrapped_value<
-    typename std::result_of<FuncT (Args...)>::type
-  >::wrap (func, std::forward<Args> (args)...);
+template <typename FuncT, typename... Args>
+wrapped_value<std::invoke_result_t<FuncT, Args...>> wrap_void(FuncT func, Args &&...args) {
+  return wrapped_value<std::invoke_result_t<FuncT, Args...>>::wrap(func,
+                                                                   std::forward<Args>(args)...);
 }

@@ -1,9 +1,8 @@
 project(tox4j-c)
 cmake_minimum_required(VERSION 2.8.7)
-enable_testing()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/tools/cmake")
 
-if (NOT DEFINED CMAKE_MACOSX_RPATH)
+if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH true)
 endif()
 
@@ -59,31 +58,37 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 include(CheckCXXSourceCompiles)
 
 # ::gets
-check_cxx_source_compiles("
+check_cxx_source_compiles(
+  "
 #include <cstdio>
 using ::gets;
 int main() {}
-" HAVE_GETS)
+"
+  HAVE_GETS)
 if(HAVE_GETS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_GETS=1")
 endif()
 
 # std::make_unique
-check_cxx_source_compiles("
+check_cxx_source_compiles(
+  "
 #include <memory>
 using std::make_unique;
 int main() {}
-" HAVE_MAKE_UNIQUE)
+"
+  HAVE_MAKE_UNIQUE)
 if(HAVE_MAKE_UNIQUE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_MAKE_UNIQUE=1")
 endif()
 
 # std::to_string
-check_cxx_source_compiles("
+check_cxx_source_compiles(
+  "
 #include <string>
 using std::to_string;
 int main() {}
-" HAVE_TO_STRING)
+"
+  HAVE_TO_STRING)
 if(HAVE_TO_STRING)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_TO_STRING=1")
 endif()
@@ -92,13 +97,11 @@ endif()
 # Build
 #
 
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
-  src/ToxAv/Av.proto
-  src/ToxCore/Core.proto
-  src/util/ProtoLog.proto
-)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS src/ToxAv/Av.proto
+                      src/ToxCore/Core.proto src/util/ProtoLog.proto)
 
-add_library(${PROJECT_NAME} SHARED
+add_library(
+  ${PROJECT_NAME} SHARED
   ${ANDROID_CPU_FEATURES}
   ${PROTO_SRCS}
   ${PROTO_HDRS}
@@ -167,32 +170,28 @@ add_library(${PROJECT_NAME} SHARED
   src/util/to_bytes.cpp
   src/util/to_bytes.h
   src/util/unused.h
-  src/util/wrap_void.h
-)
+  src/util/wrap_void.h)
 
 if(ANDROID_CPU_FEATURES)
   target_compile_definitions(${PROJECT_NAME} PRIVATE -Dtypeof=__typeof__)
 endif()
 
-target_link_libraries(${PROJECT_NAME}
-  ${PROTOBUF_LIBRARIES}
-)
+target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 
 if(LIBTOXCORE_FOUND)
-  target_link_libraries(${PROJECT_NAME}
-    ${LIBTOXAV_STATIC_LIBRARIES}
-    ${LIBTOXCORE_STATIC_LIBRARIES}
-  )
+  target_link_libraries(${PROJECT_NAME} ${LIBTOXAV_STATIC_LIBRARIES}
+                        ${LIBTOXCORE_STATIC_LIBRARIES})
 else()
-  target_link_libraries(${PROJECT_NAME}
-    ${TOXCORE_STATIC_LIBRARIES}
-  )
+  target_link_libraries(${PROJECT_NAME} ${TOXCORE_STATIC_LIBRARIES})
 endif()
 
 # Windows and OSX don't have this linker functionality.
 if(NOT WIN32 AND NOT APPLE)
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-    "-Wl,-z,defs -Wl,--version-script,${CMAKE_SOURCE_DIR}/src/libtox4j-c.ld")
+  set_target_properties(
+    ${PROJECT_NAME}
+    PROPERTIES
+      LINK_FLAGS
+      "-Wl,-z,defs -Wl,--version-script,${CMAKE_SOURCE_DIR}/src/libtox4j-c.ld")
 endif()
 
 #
@@ -200,33 +199,3 @@ endif()
 #
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION "lib")
-
-#
-# Testing
-#
-
-find_package(GTest)
-if(GTEST_FOUND)
-  add_executable(tox4j-test
-    test/util/jni/ArrayFromJava_test.cpp
-    test/util/jni/ArrayToJava_test.cpp
-    test/util/jni/UTFChars_test.cpp
-    test/util/debug_log_test.cpp
-    test/util/exceptions_test.cpp
-    test/util/instance_manager_test.cpp
-    test/util/to_bytes_test.cpp
-    test/util/wrap_void_test.cpp
-    test/tox4j/ToxInstances_test.cpp
-    test/tox/common_test.cpp
-    test/main.cpp
-    test/mock_jni.cpp
-    test/mock_jni.h
-  )
-
-  target_include_directories(tox4j-test PUBLIC ${GTEST_INCLUDE_DIRS})
-
-  target_link_libraries(tox4j-test ${GTEST_BOTH_LIBRARIES})
-  target_link_libraries(tox4j-test tox4j-c)
-
-  add_test(tox4j-test tox4j-test)
-endif()

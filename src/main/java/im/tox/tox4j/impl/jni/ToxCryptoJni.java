@@ -2,9 +2,8 @@ package im.tox.tox4j.impl.jni;
 
 @SuppressWarnings({"checkstyle:emptylineseparator", "checkstyle:linelength"})
 public final class ToxCryptoJni {
-
   static {
-    ToxLoadJniLibrary.load("tox4j-c");
+    System.loadLibrary("tox4j-c");
   }
 
   static native byte[] toxPassKeyEncrypt(byte[] data, byte[] passKey);
@@ -14,5 +13,4 @@ public final class ToxCryptoJni {
   static native byte[] toxPassKeyDerive(byte[] passphrase);
   static native byte[] toxPassKeyDecrypt(byte[] data, byte[] passKey);
   static native byte[] toxHash(byte[] data);
-
 }
