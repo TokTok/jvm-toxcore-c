@@ -1,7 +1,7 @@
 PRE_RULE = (echo "=== Building $@ ==="; ls -ld $@; true) && ls -ld $+
 POST_RULE = ls -ld $@
 
-$(BUILDDIR)/tox4j/Makefile: $(CURDIR)/cpp/CMakeLists.txt $(TOOLCHAIN_FILE) $(foreach i,protobuf toxcore,$(PREFIX)/$i.stamp)
+$(BUILDDIR)/tox4j/Makefile: $(CURDIR)/lib/src/cpp/CMakeLists.txt $(TOOLCHAIN_FILE) $(foreach i,protobuf toxcore,$(PREFIX)/$i.stamp)
 	@$(PRE_RULE)
 	mkdir -p $(@D)
 	cd $(@D) && cmake $(<D) $($(notdir $(@D))_CONFIGURE)

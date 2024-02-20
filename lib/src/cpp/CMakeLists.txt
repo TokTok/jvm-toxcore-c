@@ -1,6 +1,5 @@
 project(tox4j-c)
 cmake_minimum_required(VERSION 2.8.7)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/tools/cmake")
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH true)

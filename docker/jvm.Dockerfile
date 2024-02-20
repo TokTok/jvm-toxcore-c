@@ -19,5 +19,5 @@ WORKDIR /work/jvm-toxcore-c
 COPY scripts/ /work/jvm-toxcore-c/scripts/
 RUN scripts/build-host "$PWD/_install/host/protobuf.stamp" "-j$(nproc)"
 RUN scripts/build-host "$PWD/_install/host/toxcore.stamp" "-j$(nproc)"
-COPY cpp/ /work/jvm-toxcore-c/cpp/
+COPY lib/src/cpp/ /work/jvm-toxcore-c/lib/src/cpp/
 RUN scripts/build-host #"-j$(nproc)"
