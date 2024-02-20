@@ -30,7 +30,6 @@ proto_library(
     srcs = [
         "lib/src/main/proto/Av.proto",
         "lib/src/main/proto/Core.proto",
-        "lib/src/main/proto/ProtoLog.proto",
     ],
 )
 

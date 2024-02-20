@@ -68,14 +68,12 @@ add_library(
   ${ANDROID_CPU_FEATURES}
   ToxAv/Av.proto
   ToxCore/Core.proto
-  util/ProtoLog.proto
   ToxAv/generated/enums.cpp
   ToxAv/generated/errors.cpp
   ToxAv/generated/impls.h
   ToxAv/generated/im_tox_tox4j_impl_jni_ToxAvJni.h
   ToxAv/generated/natives.h
   ToxAv/av.cpp
-  ToxAv/debug.cpp
   ToxAv/lifecycle.cpp
   ToxAv/ToxAv.cpp
   ToxAv/ToxAv.h
@@ -88,7 +86,6 @@ add_library(
   ToxCore/clientinfo.cpp
   ToxCore/connection.cpp
   ToxCore/custom.cpp
-  ToxCore/debug.cpp
   ToxCore/filetransfer.cpp
   ToxCore/friendlist.cpp
   ToxCore/interaction.cpp
@@ -99,7 +96,6 @@ add_library(
   ToxCrypto/generated/errors.cpp
   ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h
   ToxCrypto/generated/natives.h
-  ToxCrypto/debug.cpp
   ToxCrypto/encryptsave.cpp
   ToxCrypto/hash.cpp
   ToxCrypto/ToxCrypto.cpp
@@ -122,8 +118,6 @@ add_library(
   util/jni/Enum.h
   util/jni/UTFChars.cpp
   util/jni/UTFChars.h
-  util/debug_log.cpp
-  util/debug_log.h
   util/exceptions.cpp
   util/exceptions.h
   util/instance_manager.h

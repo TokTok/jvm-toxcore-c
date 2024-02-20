@@ -81,10 +81,4 @@ public final class ToxCoreJni {
       throws ToxFriendCustomPacketException;
   static native void toxFriendSendLosslessPacket(int instanceNumber, int friendNumber, byte[] data)
       throws ToxFriendCustomPacketException;
-
-  static native byte[] tox4jLastLog();
-  static native int tox4jGetCurrentLogSize();
-  static native void tox4jSetMaxLogSize(int maxSize);
-  static native int tox4jGetMaxLogSize();
-  static native void tox4jSetLogFilter(String[] filter);
 }

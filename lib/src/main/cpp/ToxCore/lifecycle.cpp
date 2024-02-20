@@ -212,29 +212,6 @@ tox_new_unique (Tox_Options const *options, TOX_ERR_NEW *error)
 }
 
 
-static NORETURN void
-tox_finalize ()
-{
-  fprintf (stderr, "This function is only here for register_funcs and should never be called.");
-  abort ();
-}
-
-
-REGISTER_FUNCS (
-#define JAVA_METHOD_REF(x)
-#define CXX_FUNCTION_REF(func)  REGISTER_FUNC (func),
-#include "generated/natives.h"
-#undef CXX_FUNCTION_REF
-#undef JAVA_METHOD_REF
-
-#define CALLBACK(NAME)          REGISTER_FUNC (tox4j_##NAME##_cb),
-#include "tox/generated/core.h"
-#undef CALLBACK
-
-  REGISTER_FUNC (tox_new_unique)
-);
-
-
 /*
  * Class:     im_tox_tox4j_impl_ToxCoreJni
  * Method:    toxNew
