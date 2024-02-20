@@ -45,3 +45,6 @@ hsdis-*.*
 
 # Generated proguard configuration.
 /proguard-sbt.txt
+
+# Ignore Gradle build output directory
+build

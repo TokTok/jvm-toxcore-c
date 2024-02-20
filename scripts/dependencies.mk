@@ -32,10 +32,10 @@ $(PREFIX)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 # toxcore
 
 $(SRCDIR)/toxcore:
-	if [ -e ../c-toxcore ]; then					\
-	  ln -s $(realpath ../c-toxcore) $@;				\
-	else								\
-	  git clone --depth=1 https://github.com/TokTok/c-toxcore $@;	\
+	if [ -e ../c-toxcore ]; then								\
+	  ln -s $(realpath ../c-toxcore) $@;							\
+	else											\
+	  git clone --depth=1 --recurse-submodules https://github.com/TokTok/c-toxcore $@;	\
 	fi
 
 $(PREFIX)/toxcore.stamp: $(foreach f,$(shell cd $(SRCDIR)/toxcore && git ls-files),$(SRCDIR)/toxcore/$f)

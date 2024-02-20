@@ -114,7 +114,7 @@ object ToxAvEventDispatch {
                 ToxFriendNumber(ev.getFriendNumber()),
                 toShortArray(ev.getPcm()),
                 convert(ev.getChannels()),
-                (SamplingRate.values().filter { it.value == ev.getSamplingRate() })[0],
+                SamplingRate.values().filter { it.value == ev.getSamplingRate() }[0],
                 next)
           })
 
