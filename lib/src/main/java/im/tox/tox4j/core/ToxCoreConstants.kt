@@ -32,7 +32,7 @@ object ToxCoreConstants {
   /** Maximum length of a single message after which it should be split. */
   val MaxMessageLength = 1372
 
-  /** Maximum size of custom packets. TODO: should be LENGTH? */
+  /** Maximum size of custom packets. */
   val MaxCustomPacketSize = 1373
 
   /** Maximum file name length for file transfers. */

@@ -13,9 +13,10 @@ export CC		:= $(shell which clang || which gcc)
 export CXX		:= $(shell which clang++ || which g++)
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
 export TOX4J_PLATFORM	:= $(shell perl -e 'print $$^O')-$(shell uname -m)
+export LD_LIBRARY_PATH	:= $(PREFIX)/lib
 
 build: $(PREFIX)/tox4j.stamp
-	sbt -Djava.library.path=$(PREFIX)/lib "publishLocal" "makeScripts"
+	./gradlew build
 
 test: build
 	$(MAKE) -C _build/$(TARGET)/tox4j test

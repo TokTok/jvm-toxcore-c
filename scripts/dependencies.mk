@@ -1,7 +1,7 @@
 PRE_RULE = (echo "=== Building $@ ==="; ls -ld $@; true) && ls -ld $+
 POST_RULE = ls -ld $@
 
-$(BUILDDIR)/tox4j/Makefile: $(CURDIR)/cpp/CMakeLists.txt $(TOOLCHAIN_FILE) $(foreach i,protobuf toxcore,$(PREFIX)/$i.stamp)
+$(BUILDDIR)/tox4j/Makefile: $(CURDIR)/lib/src/main/cpp/CMakeLists.txt $(TOOLCHAIN_FILE) $(foreach i,protobuf toxcore,$(PREFIX)/$i.stamp)
 	@$(PRE_RULE)
 	mkdir -p $(@D)
 	cd $(@D) && cmake $(<D) $($(notdir $(@D))_CONFIGURE)
@@ -32,10 +32,10 @@ $(PREFIX)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 # toxcore
 
 $(SRCDIR)/toxcore:
-	if [ -e ../c-toxcore ]; then					\
-	  ln -s $(realpath ../c-toxcore) $@;				\
-	else								\
-	  git clone --depth=1 https://github.com/TokTok/c-toxcore $@;	\
+	if [ -e ../c-toxcore ]; then								\
+	  ln -s $(realpath ../c-toxcore) $@;							\
+	else											\
+	  git clone --depth=1 --recurse-submodules https://github.com/TokTok/c-toxcore $@;	\
 	fi
 
 $(PREFIX)/toxcore.stamp: $(foreach f,$(shell cd $(SRCDIR)/toxcore && git ls-files),$(SRCDIR)/toxcore/$f)

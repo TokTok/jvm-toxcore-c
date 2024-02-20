@@ -1,6 +1,5 @@
 project(tox4j-c)
-cmake_minimum_required(VERSION 2.8.7)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/tools/cmake")
+cmake_minimum_required(VERSION 2.8.12)
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH true)
@@ -46,10 +45,10 @@ if(JAVA_INCLUDE_PATH2)
   include_directories(${JAVA_INCLUDE_PATH2})
 endif()
 
-include_directories("src")
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_BINARY_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 #
 # C++ standard library features
@@ -97,80 +96,80 @@ endif()
 # Build
 #
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS src/ToxAv/Av.proto
-                      src/ToxCore/Core.proto src/util/ProtoLog.proto)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ToxAv/Av.proto
+                      ToxCore/Core.proto util/ProtoLog.proto)
 
 add_library(
   ${PROJECT_NAME} SHARED
   ${ANDROID_CPU_FEATURES}
   ${PROTO_SRCS}
   ${PROTO_HDRS}
-  src/ToxAv/generated/enums.cpp
-  src/ToxAv/generated/errors.cpp
-  src/ToxAv/generated/impls.h
-  src/ToxAv/generated/im_tox_tox4j_impl_jni_ToxAvJni.h
-  src/ToxAv/generated/natives.h
-  src/ToxAv/av.cpp
-  src/ToxAv/debug.cpp
-  src/ToxAv/lifecycle.cpp
-  src/ToxAv/ToxAv.cpp
-  src/ToxAv/ToxAv.h
-  src/ToxCore/generated/constants.h
-  src/ToxCore/generated/enums.cpp
-  src/ToxCore/generated/errors.cpp
-  src/ToxCore/generated/impls.h
-  src/ToxCore/generated/im_tox_tox4j_impl_jni_ToxCoreJni.h
-  src/ToxCore/generated/natives.h
-  src/ToxCore/clientinfo.cpp
-  src/ToxCore/connection.cpp
-  src/ToxCore/custom.cpp
-  src/ToxCore/debug.cpp
-  src/ToxCore/filetransfer.cpp
-  src/ToxCore/friendlist.cpp
-  src/ToxCore/interaction.cpp
-  src/ToxCore/lifecycle.cpp
-  src/ToxCore/ToxCore.cpp
-  src/ToxCore/ToxCore.h
-  src/ToxCrypto/generated/constants.h
-  src/ToxCrypto/generated/errors.cpp
-  src/ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h
-  src/ToxCrypto/generated/natives.h
-  src/ToxCrypto/debug.cpp
-  src/ToxCrypto/encryptsave.cpp
-  src/ToxCrypto/hash.cpp
-  src/ToxCrypto/ToxCrypto.cpp
-  src/ToxCrypto/ToxCrypto.h
-  src/Tox4j.cpp
-  src/cpp14compat.h
-  src/tox4j/ToxInstances.h
-  src/tox4j/Tox4j.h
-  src/tox/av.cpp
-  src/tox/av.h
-  src/tox/common.h
-  src/tox/core.cpp
-  src/tox/core.h
-  src/tox/generated/av.h
-  src/tox/generated/core.h
-  src/util/jni/ArrayFromJava.cpp
-  src/util/jni/ArrayFromJava.h
-  src/util/jni/ArrayToJava.cpp
-  src/util/jni/ArrayToJava.h
-  src/util/jni/Enum.h
-  src/util/jni/UTFChars.cpp
-  src/util/jni/UTFChars.h
-  src/util/debug_log.cpp
-  src/util/debug_log.h
-  src/util/exceptions.cpp
-  src/util/exceptions.h
-  src/util/instance_manager.h
-  src/util/logging.cpp
-  src/util/logging.h
-  src/util/pp_attributes.h
-  src/util/pp_cat.h
-  src/util/to_bytes.cpp
-  src/util/to_bytes.h
-  src/util/unused.h
-  src/util/wrap_void.h)
+  ToxAv/generated/enums.cpp
+  ToxAv/generated/errors.cpp
+  ToxAv/generated/impls.h
+  ToxAv/generated/im_tox_tox4j_impl_jni_ToxAvJni.h
+  ToxAv/generated/natives.h
+  ToxAv/av.cpp
+  ToxAv/debug.cpp
+  ToxAv/lifecycle.cpp
+  ToxAv/ToxAv.cpp
+  ToxAv/ToxAv.h
+  ToxCore/generated/constants.h
+  ToxCore/generated/enums.cpp
+  ToxCore/generated/errors.cpp
+  ToxCore/generated/impls.h
+  ToxCore/generated/im_tox_tox4j_impl_jni_ToxCoreJni.h
+  ToxCore/generated/natives.h
+  ToxCore/clientinfo.cpp
+  ToxCore/connection.cpp
+  ToxCore/custom.cpp
+  ToxCore/debug.cpp
+  ToxCore/filetransfer.cpp
+  ToxCore/friendlist.cpp
+  ToxCore/interaction.cpp
+  ToxCore/lifecycle.cpp
+  ToxCore/ToxCore.cpp
+  ToxCore/ToxCore.h
+  ToxCrypto/generated/constants.h
+  ToxCrypto/generated/errors.cpp
+  ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h
+  ToxCrypto/generated/natives.h
+  ToxCrypto/debug.cpp
+  ToxCrypto/encryptsave.cpp
+  ToxCrypto/hash.cpp
+  ToxCrypto/ToxCrypto.cpp
+  ToxCrypto/ToxCrypto.h
+  Tox4j.cpp
+  cpp14compat.h
+  tox4j/ToxInstances.h
+  tox4j/Tox4j.h
+  tox/av.cpp
+  tox/av.h
+  tox/common.h
+  tox/core.cpp
+  tox/core.h
+  tox/generated/av.h
+  tox/generated/core.h
+  util/jni/ArrayFromJava.cpp
+  util/jni/ArrayFromJava.h
+  util/jni/ArrayToJava.cpp
+  util/jni/ArrayToJava.h
+  util/jni/Enum.h
+  util/jni/UTFChars.cpp
+  util/jni/UTFChars.h
+  util/debug_log.cpp
+  util/debug_log.h
+  util/exceptions.cpp
+  util/exceptions.h
+  util/instance_manager.h
+  util/logging.cpp
+  util/logging.h
+  util/pp_attributes.h
+  util/pp_cat.h
+  util/to_bytes.cpp
+  util/to_bytes.h
+  util/unused.h
+  util/wrap_void.h)
 
 if(ANDROID_CPU_FEATURES)
   target_compile_definitions(${PROJECT_NAME} PRIVATE -Dtypeof=__typeof__)
@@ -191,7 +190,7 @@ if(NOT WIN32 AND NOT APPLE)
     ${PROJECT_NAME}
     PROPERTIES
       LINK_FLAGS
-      "-Wl,-z,defs -Wl,--version-script,${CMAKE_SOURCE_DIR}/src/libtox4j-c.ld")
+      "-Wl,-z,defs -Wl,--version-script,${CMAKE_SOURCE_DIR}/libtox4j-c.ld")
 endif()
 
 #
