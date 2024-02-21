@@ -103,54 +103,6 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavAudioSendFrame
 JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavVideoSendFrame
   (JNIEnv *, jclass, jint, jint, jint, jint, jbyteArray, jbyteArray, jbyteArray);
 
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeAudioReceiveFrame
- * Signature: (II[SII)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeAudioReceiveFrame
-  (JNIEnv *, jclass, jint, jint, jshortArray, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeAudioBitRate
- * Signature: (III)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeAudioBitRate
-  (JNIEnv *, jclass, jint, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeVideoBitRate
- * Signature: (III)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeVideoBitRate
-  (JNIEnv *, jclass, jint, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeCall
- * Signature: (IIZZ)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeCall
-  (JNIEnv *, jclass, jint, jint, jboolean, jboolean);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeCallState
- * Signature: (III)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeCallState
-  (JNIEnv *, jclass, jint, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    invokeVideoReceiveFrame
- * Signature: (IIII[B[B[BIII)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_invokeVideoReceiveFrame
-  (JNIEnv *, jclass, jint, jint, jint, jint, jbyteArray, jbyteArray, jbyteArray, jint, jint, jint);
-
 #ifdef __cplusplus
 }
 #endif

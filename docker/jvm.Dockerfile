@@ -41,3 +41,11 @@ COPY lib/ /work/jvm-toxcore-c/lib/
 ENV LD_LIBRARY_PATH=/work/jvm-toxcore-c/_install/host/lib
 ENV PATH=/work/jvm-toxcore-c/_install/host/bin:$PATH
 RUN ./gradlew build
+
+RUN javac -h . -cp /work/jvm-toxcore-c/lib/build/classes/kotlin/main:/work/jvm-toxcore-c/lib/build/classes/java/main \
+ lib/src/main/java/im/tox/tox4j/impl/jni/ToxAvJni.java \
+ lib/src/main/java/im/tox/tox4j/impl/jni/ToxCoreJni.java \
+ lib/src/main/java/im/tox/tox4j/impl/jni/ToxCryptoJni.java
+RUN diff -u lib/src/main/cpp/ToxCore/generated/im_tox_tox4j_impl_jni_ToxCoreJni.h im_tox_tox4j_impl_jni_ToxCoreJni.h \
+ && diff -u lib/src/main/cpp/ToxAv/generated/im_tox_tox4j_impl_jni_ToxAvJni.h im_tox_tox4j_impl_jni_ToxAvJni.h \
+ && diff -u lib/src/main/cpp/ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h im_tox_tox4j_impl_jni_ToxCryptoJni.h
