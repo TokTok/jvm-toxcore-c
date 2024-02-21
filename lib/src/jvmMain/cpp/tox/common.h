@@ -1,7 +1,5 @@
 #pragma once
 
-#include "util/debug_log.h"
-
 #include <cassert>
 #include <memory>
 
@@ -25,10 +23,7 @@ namespace tox
         invoke (Subsystem *tox, Args ...args, void *user_data)
         {
           assert (tox != nullptr);
-          LogEntry log_entry (Callback, args...);
-          return log_entry.print_result (
-            Callback, args..., static_cast<UserData *> (user_data)
-          ).unwrap ();
+          return Callback(args..., static_cast<UserData *> (user_data));
         }
 
         template<typename UserData, type<UserData> Callback>

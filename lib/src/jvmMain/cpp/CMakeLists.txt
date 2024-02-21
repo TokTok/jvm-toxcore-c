@@ -121,8 +121,6 @@ add_library(
   util/exceptions.cpp
   util/exceptions.h
   util/instance_manager.h
-  util/logging.cpp
-  util/logging.h
   util/pp_attributes.h
   util/pp_cat.h
   util/to_bytes.cpp

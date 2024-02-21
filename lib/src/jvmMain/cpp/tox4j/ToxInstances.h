@@ -1,10 +1,11 @@
 #pragma once
 
-#include "util/instance_manager.h"
-#include "util/pp_cat.h"
-#include "util/debug_log.h"
-
 #include <iostream>
+
+#include "util/instance_manager.h"
+#include "util/jni/ArrayFromJava.h"
+#include "util/pp_cat.h"
+#include "util/wrap_void.h"
 
 
 
@@ -55,9 +56,9 @@ struct conversions
   }
 
   static auto
-  to_java (JNIEnv *env, LogEntry &log_entry, ToxFunc func, Args ...args)
+  to_java (JNIEnv *env, ToxFunc func, Args ...args)
   {
-    return to_java (env, log_entry.print_result (func, from_java (args)...));
+    return to_java (env, wrap_void (func, from_java (args)...));
   }
 };
 
@@ -228,12 +229,9 @@ throw_tox_exception (JNIEnv *env, ErrorType error)
  * The return type of with_error_handling is the result type of calling
  * success_func with the return value of tox_func called with args.
  *
- * It stores the result of the function call in the passed LogEntry.
- *
  * @param Object Tox or ToxAV, the type of the first parameter to the tox
  *               function without pointer.
  *
- * @param log_entry A LogEntry to store the function result in.
  * @param env The current JNIEnv.
  * @param success_func Function to be called when the error code is OK.
  * @param tox_func The native function to call. Must have an error code as
@@ -243,8 +241,7 @@ throw_tox_exception (JNIEnv *env, ErrorType error)
  */
 template<typename Object, typename SuccessFunc, typename ToxFunc, typename ...Args>
 auto
-with_error_handling (LogEntry &log_entry,
-                     JNIEnv *env,
+with_error_handling (JNIEnv *env,
                      SuccessFunc success_func,
                      ToxFunc tox_func,
                      Args &&...args)
@@ -254,7 +251,7 @@ with_error_handling (LogEntry &log_entry,
   // Create an error code value and pass a pointer to the tox function.
   error_type error;
   auto value = conversions<ToxFunc, Args..., error_type *>::to_java (
-    env, log_entry, tox_func, std::forward<Args> (args)..., &error
+    env, tox_func, std::forward<Args> (args)..., &error
   );
   // Handle it, producing either a SUCCESS or a FAILURE with the error code.
   ErrorHandling result = handle_error_enum<error_type> (error);
@@ -283,8 +280,6 @@ with_error_handling (LogEntry &log_entry,
  * A Tox instance manager. In addition to the facilities provided by
  * instance_manager, this provides with_error_handling member functions for
  * tox error code to exception translation.
- *
- * All function calls are logged to a LogEntry.
  */
 template<typename ObjectP, typename EventsP>
 struct ToxInstances
@@ -307,9 +302,8 @@ struct ToxInstances
                        ToxFunc tox_func,
                        Args &&...args)
   {
-    LogEntry log_entry (tox_func, args...);
     return ::with_error_handling<Object> (
-      log_entry, env, success_func,
+      env, success_func,
       tox_func, std::forward<Args> (args)...
     );
   }
@@ -330,9 +324,8 @@ struct ToxInstances
       [&] (Object *tox, Events &events)
         {
           unused (events);
-          InstanceLogEntry log_entry (instanceNumber, tox_func, tox, args...);
           return ::with_error_handling<Object> (
-            log_entry, env, success_func,
+            env, success_func,
             tox_func, tox, std::forward<Args> (args)...
           );
         }
@@ -376,9 +369,8 @@ struct ToxInstances
       [&] (Object *tox, Events &events)
         {
           unused (events);
-          InstanceLogEntry log_entry (instanceNumber, tox_func, tox, args...);
           return conversions<ToxFunc, Object *, Args...>::to_java (
-            env, log_entry, tox_func, tox, std::forward<Args> (args)...
+            env, tox_func, tox, std::forward<Args> (args)...
           );
         }
     );
