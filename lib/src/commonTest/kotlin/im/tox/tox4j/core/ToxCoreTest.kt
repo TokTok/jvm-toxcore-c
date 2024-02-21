@@ -4,7 +4,6 @@ import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.core.options.ToxOptions
-import im.tox.tox4j.impl.jni.ToxCoreImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -13,36 +12,37 @@ import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
 @kotlin.ExperimentalStdlibApi
-class ToxCoreTest {
-    private class Toxes : CoroutineContext.Element {
-        private val list: MutableList<ToxCore> = mutableListOf()
+class Toxes : CoroutineContext.Element {
+    private val list: MutableList<ToxCore> = mutableListOf()
 
-        override val key = Toxes
+    override val key = Toxes
 
-        companion object : CoroutineContext.Key<Toxes> {
-            suspend fun add(makeTox: () -> ToxCore): ToxCore {
-                val ctx = coroutineContext.get(Toxes)
-                if (ctx == null) {
-                    throw IllegalStateException("coroutine context has no Toxes object")
-                }
-                val tox = makeTox()
-                ctx.list.add(tox)
-                return tox
+    companion object : CoroutineContext.Key<Toxes> {
+        suspend fun add(makeTox: () -> ToxCore): ToxCore {
+            val ctx = coroutineContext.get(Toxes)
+            if (ctx == null) {
+                throw IllegalStateException("coroutine context has no Toxes object")
             }
+            val tox = makeTox()
+            ctx.list.add(tox)
+            return tox
+        }
 
-            suspend fun close() {
-                val ctx = coroutineContext.get(Toxes)
-                if (ctx == null) {
-                    throw IllegalStateException("coroutine context has no Toxes object")
-                }
-                for (tox in ctx.list) {
-                    tox.close()
-                }
+        suspend fun close() {
+            val ctx = coroutineContext.get(Toxes)
+            if (ctx == null) {
+                throw IllegalStateException("coroutine context has no Toxes object")
+            }
+            for (tox in ctx.list) {
+                tox.close()
             }
         }
     }
+}
 
-    private suspend fun newToxCore(options: ToxOptions): ToxCore = Toxes.add { ToxCoreImpl(options) }
+@kotlin.ExperimentalStdlibApi
+class ToxCoreTest {
+    private suspend fun localToxCore(options: ToxOptions): ToxCore = Toxes.add { newToxCore(options) }
 
     private fun runTox(block: suspend CoroutineScope.() -> Unit): Unit =
         runBlocking(Toxes()) {
@@ -56,8 +56,8 @@ class ToxCoreTest {
     @Test
     fun addFriendNorequest_shouldConnectTwoToxes() =
         runTox {
-            val tox1 = newToxCore(ToxOptions())
-            val tox2 = newToxCore(ToxOptions())
+            val tox1 = localToxCore(ToxOptions())
+            val tox2 = localToxCore(ToxOptions())
 
             tox2.bootstrap("localhost", tox1.getUdpPort, tox1.getDhtId)
 

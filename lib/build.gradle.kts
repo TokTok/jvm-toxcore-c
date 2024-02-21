@@ -11,21 +11,34 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+sourceSets["main"].proto {
+    srcDir("src/jvmMain/proto")
+    dependencies {
+        implementation("com.google.protobuf:protobuf-java:3.24.4")
+    }
 }
 
 kotlin {
     jvm()
+//  linuxX64()
 
     sourceSets {
         val jvmMain by getting {
+            kotlin.srcDir("${project.layout.buildDirectory}/generated/source/proto/main/java")
             dependencies {
                 implementation("com.google.protobuf:protobuf-java:3.24.4")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+            }
+        }
     }
 }
+
+tasks["compileKotlinJvm"].dependsOn("generateProto")
 
 testing {
     suites {

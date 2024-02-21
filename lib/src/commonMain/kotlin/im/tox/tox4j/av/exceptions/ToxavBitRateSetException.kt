@@ -25,5 +25,6 @@ class ToxavBitRateSetException : ToxException {
         SYNC,
     }
 
-    constructor(code: Code, message: String = "") : super(code, message)
+    constructor(code: Code) : this(code, "")
+    constructor(code: Code, message: String) : super(code, message)
 }

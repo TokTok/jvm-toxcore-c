@@ -19,6 +19,9 @@ import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.ToxOptions
 
+@kotlin.ExperimentalStdlibApi
+expect fun newToxCore(options: ToxOptions): ToxCore
+
 /**
  * Interface for a basic wrapper of tox chat functionality.
  *

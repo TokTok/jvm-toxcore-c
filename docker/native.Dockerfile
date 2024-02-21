@@ -26,6 +26,7 @@ ENV PATH=$PATH:/opt/kotlin/bin
 
 RUN ["touch", "Boot.kt"]
 RUN ["kotlinc-native", "-p", "library", "Boot.kt"]
+#RUN ["kotlinc-native", "-help", "-X"]
 
 WORKDIR /work/jvm-toxcore-c
 COPY lib/ /work/jvm-toxcore-c/lib/
