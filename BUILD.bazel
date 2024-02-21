@@ -1,6 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_proto_library")
 load("@rules_java//java:defs.bzl", "java_proto_library")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library", "kt_jvm_test")
+load("@rules_kotlin//kotlin:lint.bzl", "ktlint_fix", "ktlint_test")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//tools/project:build_defs.bzl", "project")
 
@@ -96,4 +97,15 @@ kt_jvm_test(
         "@maven//:org_jetbrains_kotlin_kotlin_test_junit",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
     ],
+)
+
+ktlint_fix(
+    name = "ktlint_fix",
+    srcs = glob(["**/*.kt"]),
+)
+
+ktlint_test(
+    name = "ktlint_test",
+    size = "small",
+    srcs = glob(["**/*.kt"]),
 )
