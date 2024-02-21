@@ -3,6 +3,7 @@ package im.tox.tox4j.core
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
+import im.tox.tox4j.core.exceptions.ToxBootstrapException
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 import kotlinx.coroutines.CoroutineScope
@@ -11,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @kotlin.ExperimentalStdlibApi
 class ToxCoreTest {
@@ -50,6 +52,15 @@ class ToxCoreTest {
                 block()
             } finally {
                 Toxes.close()
+            }
+        }
+
+    @Test
+    fun bootstrap_withWrongHost_shouldFail() =
+        runTox {
+            val tox = newToxCore(ToxOptions())
+            assertFailsWith<ToxBootstrapException> {
+                tox.bootstrap("host-does-not-exist", tox.getUdpPort, tox.getDhtId)
             }
         }
 
