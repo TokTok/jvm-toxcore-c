@@ -47,14 +47,14 @@ object ToxCoreConstants {
     const val FileIdLength = ToxCryptoConstants.HashLength
 
     /** Default port for HTTP proxies. */
-    val DefaultProxyPort = 8080.toUShort()
+    const val DefaultProxyPort: UShort = 8080u
 
     /** Default start port for Tox UDP sockets. */
-    val DefaultStartPort = 33445.toUShort()
+    const val DefaultStartPort: UShort = 33445u
 
     /** Default end port for Tox UDP sockets. */
-    val DefaultEndPort = (DefaultStartPort + 100.toUShort()).toUShort()
+    val DefaultEndPort: UShort = (DefaultStartPort + 100u).toUShort()
 
     /** Default port for Tox TCP relays. A value of 0 means disabled. */
-    val DefaultTcpPort = 0.toUShort()
+    const val DefaultTcpPort: UShort = 0u
 }
