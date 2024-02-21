@@ -1,6 +1,21 @@
 package im.tox.tox4j.impl.jni;
 
-import im.tox.tox4j.core.exceptions.*;
+import im.tox.tox4j.core.exceptions.ToxBootstrapException;
+import im.tox.tox4j.core.exceptions.ToxFileControlException;
+import im.tox.tox4j.core.exceptions.ToxFileGetException;
+import im.tox.tox4j.core.exceptions.ToxFileSeekException;
+import im.tox.tox4j.core.exceptions.ToxFileSendChunkException;
+import im.tox.tox4j.core.exceptions.ToxFileSendException;
+import im.tox.tox4j.core.exceptions.ToxFriendAddException;
+import im.tox.tox4j.core.exceptions.ToxFriendByPublicKeyException;
+import im.tox.tox4j.core.exceptions.ToxFriendCustomPacketException;
+import im.tox.tox4j.core.exceptions.ToxFriendDeleteException;
+import im.tox.tox4j.core.exceptions.ToxFriendGetPublicKeyException;
+import im.tox.tox4j.core.exceptions.ToxFriendSendMessageException;
+import im.tox.tox4j.core.exceptions.ToxGetPortException;
+import im.tox.tox4j.core.exceptions.ToxNewException;
+import im.tox.tox4j.core.exceptions.ToxSetInfoException;
+import im.tox.tox4j.core.exceptions.ToxSetTypingException;
 
 @SuppressWarnings({"checkstyle:emptylineseparator", "checkstyle:linelength"})
 public final class ToxCoreJni {

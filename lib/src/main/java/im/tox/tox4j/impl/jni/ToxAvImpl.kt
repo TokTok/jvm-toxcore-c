@@ -1,13 +1,15 @@
 package im.tox.tox4j.impl.jni
 
-import im.tox.tox4j.av.*
-import im.tox.tox4j.av.callbacks.*
-import im.tox.tox4j.av.data.*
-import im.tox.tox4j.av.enums.*
-import im.tox.tox4j.av.exceptions.*
+import im.tox.tox4j.av.ToxAv
+import im.tox.tox4j.av.callbacks.ToxAvEventListener
+import im.tox.tox4j.av.data.AudioChannels
+import im.tox.tox4j.av.data.BitRate
+import im.tox.tox4j.av.data.SampleCount
+import im.tox.tox4j.av.data.SamplingRate
+import im.tox.tox4j.av.enums.ToxavCallControl
+import im.tox.tox4j.av.exceptions.ToxavNewException
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
-import java.util.EnumSet
 
 /**
  * Initialise an A/V session for the existing Tox instance.
@@ -43,7 +45,12 @@ final class ToxAvImpl(private val tox: ToxCoreImpl) : ToxAv {
       audioBitRate: BitRate,
       videoBitRate: BitRate
   ): Unit =
-      ToxAvJni.toxavCall(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
+      ToxAvJni.toxavCall(
+          instanceNumber,
+          friendNumber.value,
+          audioBitRate.value,
+          videoBitRate.value,
+      )
 
   // @throws[ToxavAnswerException]
   override fun answer(
@@ -52,7 +59,11 @@ final class ToxAvImpl(private val tox: ToxCoreImpl) : ToxAv {
       videoBitRate: BitRate
   ): Unit =
       ToxAvJni.toxavAnswer(
-          instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
+          instanceNumber,
+          friendNumber.value,
+          audioBitRate.value,
+          videoBitRate.value,
+      )
 
   // @throws[ToxavCallControlException]
   override fun callControl(friendNumber: ToxFriendNumber, control: ToxavCallControl): Unit =

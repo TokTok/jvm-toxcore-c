@@ -1,6 +1,11 @@
 package im.tox.tox4j.impl.jni;
 
-import im.tox.tox4j.av.exceptions.*;
+import im.tox.tox4j.av.exceptions.ToxavAnswerException;
+import im.tox.tox4j.av.exceptions.ToxavBitRateSetException;
+import im.tox.tox4j.av.exceptions.ToxavCallControlException;
+import im.tox.tox4j.av.exceptions.ToxavCallException;
+import im.tox.tox4j.av.exceptions.ToxavNewException;
+import im.tox.tox4j.av.exceptions.ToxavSendFrameException;
 
 @SuppressWarnings({"checkstyle:emptylineseparator", "checkstyle:linelength"})
 public final class ToxAvJni {

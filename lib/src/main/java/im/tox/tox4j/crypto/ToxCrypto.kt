@@ -1,7 +1,5 @@
 package im.tox.tox4j.crypto
 
-import im.tox.tox4j.crypto.exceptions.*
-
 /**
  * To perform encryption, first derive an encryption key from a password with
  * [[ToxCrypto.passKeyDerive]], and use the returned key to encrypt the data.

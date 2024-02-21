@@ -1,9 +1,11 @@
 package im.tox.tox4j.av
 
-import im.tox.tox4j.av.callbacks.*
-import im.tox.tox4j.av.data.*
+import im.tox.tox4j.av.callbacks.ToxAvEventListener
+import im.tox.tox4j.av.data.AudioChannels
+import im.tox.tox4j.av.data.BitRate
+import im.tox.tox4j.av.data.SampleCount
+import im.tox.tox4j.av.data.SamplingRate
 import im.tox.tox4j.av.enums.ToxavCallControl
-import im.tox.tox4j.av.exceptions.*
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
 import java.io.Closeable

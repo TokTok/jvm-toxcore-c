@@ -1,10 +1,26 @@
 package im.tox.tox4j.impl.jni
 
 import com.google.protobuf.ByteString
-import im.tox.tox4j.av.callbacks.*
-import im.tox.tox4j.av.data.*
+import im.tox.tox4j.av.callbacks.AudioBitRateCallback
+import im.tox.tox4j.av.callbacks.AudioReceiveFrameCallback
+import im.tox.tox4j.av.callbacks.CallCallback
+import im.tox.tox4j.av.callbacks.CallStateCallback
+import im.tox.tox4j.av.callbacks.ToxAvEventListener
+import im.tox.tox4j.av.callbacks.VideoBitRateCallback
+import im.tox.tox4j.av.callbacks.VideoReceiveFrameCallback
+import im.tox.tox4j.av.data.AudioChannels
+import im.tox.tox4j.av.data.BitRate
+import im.tox.tox4j.av.data.Height
+import im.tox.tox4j.av.data.SamplingRate
+import im.tox.tox4j.av.data.Width
 import im.tox.tox4j.av.enums.ToxavFriendCallState
-import im.tox.tox4j.av.proto.*
+import im.tox.tox4j.av.proto.AudioBitRate
+import im.tox.tox4j.av.proto.AudioReceiveFrame
+import im.tox.tox4j.av.proto.AvEvents
+import im.tox.tox4j.av.proto.Call
+import im.tox.tox4j.av.proto.CallState
+import im.tox.tox4j.av.proto.VideoBitRate
+import im.tox.tox4j.av.proto.VideoReceiveFrame
 import im.tox.tox4j.core.data.ToxFriendNumber
 import java.util.EnumSet
 

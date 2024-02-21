@@ -1,10 +1,22 @@
 package im.tox.tox4j.core
 
 import im.tox.core.network.Port
-import im.tox.tox4j.core.callbacks.*
-import im.tox.tox4j.core.data.*
-import im.tox.tox4j.core.enums.*
-import im.tox.tox4j.core.exceptions.*
+import im.tox.tox4j.core.callbacks.ToxCoreEventListener
+import im.tox.tox4j.core.data.ToxFileId
+import im.tox.tox4j.core.data.ToxFilename
+import im.tox.tox4j.core.data.ToxFriendAddress
+import im.tox.tox4j.core.data.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendNumber
+import im.tox.tox4j.core.data.ToxFriendRequestMessage
+import im.tox.tox4j.core.data.ToxLosslessPacket
+import im.tox.tox4j.core.data.ToxLossyPacket
+import im.tox.tox4j.core.data.ToxNickname
+import im.tox.tox4j.core.data.ToxPublicKey
+import im.tox.tox4j.core.data.ToxSecretKey
+import im.tox.tox4j.core.data.ToxStatusMessage
+import im.tox.tox4j.core.enums.ToxFileControl
+import im.tox.tox4j.core.enums.ToxMessageType
+import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.ToxOptions
 import java.io.Closeable
 

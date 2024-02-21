@@ -1,9 +1,39 @@
 package im.tox.tox4j.impl.jni
 
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
-import im.tox.tox4j.core.data.*
-import im.tox.tox4j.core.enums.*
-import im.tox.tox4j.core.proto.*
+import im.tox.tox4j.core.data.ToxFilename
+import im.tox.tox4j.core.data.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendNumber
+import im.tox.tox4j.core.data.ToxFriendRequestMessage
+import im.tox.tox4j.core.data.ToxLosslessPacket
+import im.tox.tox4j.core.data.ToxLossyPacket
+import im.tox.tox4j.core.data.ToxNickname
+import im.tox.tox4j.core.data.ToxPublicKey
+import im.tox.tox4j.core.data.ToxStatusMessage
+import im.tox.tox4j.core.enums.ToxConnection
+import im.tox.tox4j.core.enums.ToxFileControl
+import im.tox.tox4j.core.enums.ToxMessageType
+import im.tox.tox4j.core.enums.ToxUserStatus
+import im.tox.tox4j.core.proto.Connection
+import im.tox.tox4j.core.proto.CoreEvents
+import im.tox.tox4j.core.proto.FileChunkRequest
+import im.tox.tox4j.core.proto.FileControl
+import im.tox.tox4j.core.proto.FileRecv
+import im.tox.tox4j.core.proto.FileRecvChunk
+import im.tox.tox4j.core.proto.FileRecvControl
+import im.tox.tox4j.core.proto.FriendConnectionStatus
+import im.tox.tox4j.core.proto.FriendLosslessPacket
+import im.tox.tox4j.core.proto.FriendLossyPacket
+import im.tox.tox4j.core.proto.FriendMessage
+import im.tox.tox4j.core.proto.FriendName
+import im.tox.tox4j.core.proto.FriendReadReceipt
+import im.tox.tox4j.core.proto.FriendRequest
+import im.tox.tox4j.core.proto.FriendStatus
+import im.tox.tox4j.core.proto.FriendStatusMessage
+import im.tox.tox4j.core.proto.FriendTyping
+import im.tox.tox4j.core.proto.MessageType
+import im.tox.tox4j.core.proto.SelfConnectionStatus
+import im.tox.tox4j.core.proto.UserStatus
 
 object ToxCoreEventDispatch {
 

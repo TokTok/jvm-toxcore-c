@@ -5,10 +5,10 @@ import im.tox.tox4j.crypto.ToxCryptoConstants
 object ToxCoreConstants {
 
   /** The size of a Tox Public Key in bytes. */
-  val PublicKeySize = ToxCryptoConstants.PublicKeyLength
+  const val PublicKeySize = ToxCryptoConstants.PublicKeyLength
 
   /** The size of a Tox Secret Key in bytes. */
-  val SecretKeySize = ToxCryptoConstants.SecretKeyLength
+  const val SecretKeySize = ToxCryptoConstants.SecretKeyLength
 
   /**
    * The size of a Tox address in bytes. Tox addresses are in the format
@@ -18,34 +18,34 @@ object ToxCoreConstants {
    * all the odd bytes, the second byte is an XOR of all the even bytes of the Public Key and
    * nospam.
    */
-  val AddressSize = PublicKeySize + 4 + 2
+  const val AddressSize = PublicKeySize + 4 + 2
 
   /** Maximum length of a nickname in bytes. */
-  val MaxNameLength = 128
+  const val MaxNameLength = 128
 
   /** Maximum length of a status message in bytes. */
-  val MaxStatusMessageLength = 1007
+  const val MaxStatusMessageLength = 1007
 
   /** Maximum length of a friend request message in bytes. */
-  val MaxFriendRequestLength = 1016
+  const val MaxFriendRequestLength = 1016
 
   /** Maximum length of a single message after which it should be split. */
-  val MaxMessageLength = 1372
+  const val MaxMessageLength = 1372
 
   /** Maximum size of custom packets. */
-  val MaxCustomPacketSize = 1373
+  const val MaxCustomPacketSize = 1373
 
   /** Maximum file name length for file transfers. */
-  val MaxFilenameLength = 255
+  const val MaxFilenameLength = 255
 
   /**
    * Maximum hostname length. This is determined by calling `getconf HOST_NAME_MAX` on the console.
    * The value presented here is valid for most systems.
    */
-  val MaxHostnameLength = 255
+  const val MaxHostnameLength = 255
 
   /** The number of bytes in a file id. */
-  val FileIdLength = ToxCryptoConstants.HashLength
+  const val FileIdLength = ToxCryptoConstants.HashLength
 
   /** Default port for HTTP proxies. */
   val DefaultProxyPort = 8080.toUShort()

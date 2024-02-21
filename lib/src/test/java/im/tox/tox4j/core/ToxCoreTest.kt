@@ -75,7 +75,8 @@ class ToxCoreTest {
                     state: Boolean,
                 ) = connectionStatus != ToxConnection.NONE
               },
-              connected1)
+              connected1,
+          )
       connected2 =
           tox2.iterate(
               object : ToxCoreEventListener<Boolean> {
@@ -85,7 +86,8 @@ class ToxCoreTest {
                     state: Boolean,
                 ) = connectionStatus != ToxConnection.NONE
               },
-              connected2)
+              connected2,
+          )
       delay(tox1.iterationInterval.toLong())
     }
   }
