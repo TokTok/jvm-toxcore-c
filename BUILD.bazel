@@ -1,6 +1,8 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_proto_library")
 load("@rules_java//java:defs.bzl", "java_proto_library")
+load("@rules_kotlin//kotlin:core.bzl", "kt_kotlinc_options")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library", "kt_jvm_test")
+load("@rules_kotlin//kotlin:lint.bzl", "ktlint_fix", "ktlint_test")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//tools/project:build_defs.bzl", "project")
 
@@ -73,20 +75,27 @@ cc_binary(
     ],
 )
 
+kt_kotlinc_options(
+    name = "kotlinc_options",
+    x_multi_platform = True,
+)
+
 kt_jvm_library(
     name = "jvm-toxcore-c",
     srcs = glob([
-        "lib/src/*Main/**/*.java",
-        "lib/src/*Main/**/*.kt",
+        "lib/src/commonMain/**/*.kt",
+        "lib/src/jvmMain/**/*.java",
+        "lib/src/jvmMain/**/*.kt",
     ]),
     data = ["libtox4j-c.so"],
+    kotlinc_opts = ":kotlinc_options",
     deps = [":jni_java_proto"],
 )
 
 kt_jvm_test(
     name = "ToxCoreTest",
     size = "small",
-    srcs = ["lib/src/jvmTest/java/im/tox/tox4j/core/ToxCoreTest.kt"],
+    srcs = ["lib/src/commonTest/kotlin/im/tox/tox4j/core/ToxCoreTest.kt"],
     jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
     test_class = "im.tox.tox4j.core.ToxCoreTest",
     deps = [
@@ -94,4 +103,15 @@ kt_jvm_test(
         "@maven//:org_jetbrains_kotlin_kotlin_test_junit",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
     ],
+)
+
+ktlint_fix(
+    name = "ktlint_fix",
+    srcs = glob(["lib/src/**/*.kt"]),
+)
+
+ktlint_test(
+    name = "ktlint_test",
+    size = "small",
+    srcs = glob(["lib/src/**/*.kt"]),
 )

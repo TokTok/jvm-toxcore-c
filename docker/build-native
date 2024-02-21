@@ -5,9 +5,11 @@ set -eux
 cat <<EOF >native.txt
 -p
 library
+-Xmulti-platform
 EOF
 
 find lib/src/commonMain -name '*.kt' -exec printf '{}\n-Xcommon-sources={}\n' ';' >>native.txt
+find lib/src/nativeMain -name '*.kt' -exec printf '{}\n' ';' >>native.txt
 
 kotlinc-native @native.txt
 ls
