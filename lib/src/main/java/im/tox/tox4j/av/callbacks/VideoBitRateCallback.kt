@@ -8,13 +8,13 @@ import im.tox.tox4j.core.data.ToxFriendNumber
  * point core suggests new bit rates.
  */
 interface VideoBitRateCallback<ToxCoreState> {
-  /**
-   * @param friendNumber The friend number of the friend for which to set the video bit rate.
-   * @param videoBitRate Suggested maximum video bit rate in Kb/sec.
-   */
-  fun videoBitRate(
-      friendNumber: ToxFriendNumber,
-      videoBitRate: BitRate,
-      state: ToxCoreState
-  ): ToxCoreState = state
+    /**
+     * @param friendNumber The friend number of the friend for which to set the video bit rate.
+     * @param videoBitRate Suggested maximum video bit rate in Kb/sec.
+     */
+    fun videoBitRate(
+        friendNumber: ToxFriendNumber,
+        videoBitRate: BitRate,
+        state: ToxCoreState,
+    ): ToxCoreState = state
 }

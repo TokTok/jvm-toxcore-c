@@ -7,14 +7,14 @@ import im.tox.tox4j.core.data.ToxFriendNumber
  * [ [ToxCore.friendSendMessage]] with the corresponding message ID.
  */
 interface FriendReadReceiptCallback<ToxCoreState> {
-  /**
-   * @param friendNumber The friend number of the friend who received the message.
-   * @param messageId The message ID as returned from [[ToxCore.friendSendMessage]] corresponding to
-   *   the message sent.
-   */
-  fun friendReadReceipt(
-      friendNumber: ToxFriendNumber,
-      messageId: Int,
-      state: ToxCoreState
-  ): ToxCoreState = state
+    /**
+     * @param friendNumber The friend number of the friend who received the message.
+     * @param messageId The message ID as returned from [[ToxCore.friendSendMessage]] corresponding to
+     *   the message sent.
+     */
+    fun friendReadReceipt(
+        friendNumber: ToxFriendNumber,
+        messageId: Int,
+        state: ToxCoreState,
+    ): ToxCoreState = state
 }

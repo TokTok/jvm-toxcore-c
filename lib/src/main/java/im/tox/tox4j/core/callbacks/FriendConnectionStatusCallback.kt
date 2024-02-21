@@ -11,13 +11,13 @@ import im.tox.tox4j.core.enums.ToxConnection
  * connection status is initially offline.
  */
 interface FriendConnectionStatusCallback<ToxCoreState> {
-  /**
-   * @param friendNumber The friend number of the friend whose connection status changed.
-   * @param connectionStatus The new connection status.
-   */
-  fun friendConnectionStatus(
-      friendNumber: ToxFriendNumber,
-      connectionStatus: ToxConnection,
-      state: ToxCoreState
-  ): ToxCoreState = state
+    /**
+     * @param friendNumber The friend number of the friend whose connection status changed.
+     * @param connectionStatus The new connection status.
+     */
+    fun friendConnectionStatus(
+        friendNumber: ToxFriendNumber,
+        connectionStatus: ToxConnection,
+        state: ToxCoreState,
+    ): ToxCoreState = state
 }

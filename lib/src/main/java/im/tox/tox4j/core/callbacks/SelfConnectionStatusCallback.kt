@@ -9,9 +9,9 @@ import im.tox.tox4j.core.enums.ToxConnection
  * not immediately bootstrap on receiving a disconnect.
  */
 interface SelfConnectionStatusCallback<ToxCoreState> {
-  /** @param connectionStatus The new connection status. */
-  fun selfConnectionStatus(
-      connectionStatus: ToxConnection,
-      state: ToxCoreState,
-  ): ToxCoreState = state
+    /** @param connectionStatus The new connection status. */
+    fun selfConnectionStatus(
+        connectionStatus: ToxConnection,
+        state: ToxCoreState,
+    ): ToxCoreState = state
 }
