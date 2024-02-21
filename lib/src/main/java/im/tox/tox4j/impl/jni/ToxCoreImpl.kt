@@ -126,12 +126,12 @@ final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
         address: ToxFriendAddress,
         message: ToxFriendRequestMessage,
     ): ToxFriendNumber {
-        ToxCoreImpl.checkLength("Friend Address", address.value, ToxCoreConstants.AddressSize)
+        ToxCoreImpl.checkLength("Friend Address", address.value, ToxCoreConstants.ADDRESS_SIZE)
         return ToxFriendNumber(ToxCoreJni.toxFriendAdd(instanceNumber, address.value, message.value))
     }
 
     override fun addFriendNorequest(publicKey: ToxPublicKey): ToxFriendNumber {
-        ToxCoreImpl.checkLength("Public Key", publicKey.value, ToxCoreConstants.PublicKeySize)
+        ToxCoreImpl.checkLength("Public Key", publicKey.value, ToxCoreConstants.PUBLIC_KEY_SIZE)
         return ToxFriendNumber(ToxCoreJni.toxFriendAddNorequest(instanceNumber, publicKey.value))
     }
 
@@ -219,10 +219,10 @@ final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
 
     private companion object {
         fun checkBootstrapArguments(publicKey: ByteArray) {
-            if (publicKey.size < ToxCoreConstants.PublicKeySize) {
+            if (publicKey.size < ToxCoreConstants.PUBLIC_KEY_SIZE) {
                 throw ToxBootstrapException(ToxBootstrapException.Code.BAD_KEY, "Key too short")
             }
-            if (publicKey.size > ToxCoreConstants.PublicKeySize) {
+            if (publicKey.size > ToxCoreConstants.PUBLIC_KEY_SIZE) {
                 throw ToxBootstrapException(ToxBootstrapException.Code.BAD_KEY, "Key too long")
             }
         }

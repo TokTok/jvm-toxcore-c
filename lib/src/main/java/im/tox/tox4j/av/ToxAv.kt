@@ -34,8 +34,8 @@ interface ToxAv : Closeable {
      *
      * @param tox A compatible ToxCore implementation.
      * @return the new A/V session.
+     * @throws ToxavNewException
      */
-    // @throws[ToxavNewException]
     fun create(tox: ToxCore): ToxAv
 
     /**
@@ -69,8 +69,8 @@ interface ToxAv : Closeable {
      * @param friendNumber The friend number of the friend that should be called.
      * @param audioBitRate Audio bit rate in Kb/sec. Set this to 0 to disable audio sending.
      * @param videoBitRate Video bit rate in Kb/sec. Set this to 0 to disable video sending.
+     * @throws ToxavCallException
      */
-    // @throws[ToxavCallException]
     fun call(
         friendNumber: ToxFriendNumber,
         audioBitRate: BitRate,
@@ -86,8 +86,8 @@ interface ToxAv : Closeable {
      * @param friendNumber The friend number of the friend that is calling.
      * @param audioBitRate Audio bit rate in Kb/sec. Set this to 0 to disable audio sending.
      * @param videoBitRate Video bit rate in Kb/sec. Set this to 0 to disable video sending.
+     * @throws ToxavAnswerException
      */
-    // @throws[ToxavAnswerException]
     fun answer(
         friendNumber: ToxFriendNumber,
         audioBitRate: BitRate,
@@ -99,8 +99,8 @@ interface ToxAv : Closeable {
      *
      * @param friendNumber The friend number of the friend to send the call control to.
      * @param control The control command to send.
+     * @throws ToxavCallControlException
      */
-    // @throws[ToxavCallControlException]
     fun callControl(
         friendNumber: ToxFriendNumber,
         control: ToxavCallControl,
@@ -112,8 +112,8 @@ interface ToxAv : Closeable {
      * @param friendNumber The friend number of the friend for which to set the audio bit rate.
      * @param audioBitRate The new audio bit rate in Kb/sec. Set to 0 to disable audio sending. Pass
      *   -1 to leave unchanged.
+     * @throws ToxavBitRateSetException
      */
-    // @throws[ToxavBitRateSetException]
     fun setAudioBitRate(
         friendNumber: ToxFriendNumber,
         audioBitRate: BitRate,
@@ -125,8 +125,8 @@ interface ToxAv : Closeable {
      * @param friendNumber The friend number of the friend for which to set the audio bit rate.
      * @param videoBitRate The new video bit rate in Kb/sec. Set to 0 to disable video sending. Pass
      *   -1 to leave unchanged.
+     * @throws ToxavBitRateSetException
      */
-    // @throws[ToxavBitRateSetException]
     fun setVideoBitRate(
         friendNumber: ToxFriendNumber,
         videoBitRate: BitRate,
@@ -148,8 +148,8 @@ interface ToxAv : Closeable {
      * @param channels Number of audio channels. Supported values are 1 and 2.
      * @param samplingRate Audio sampling rate used in this frame in Hz. Valid sampling rates are
      *   8000, 12000, 16000, 24000, or 48000.
+     * @throws ToxavSendFrameException
      */
-    // @throws[ToxavSendFrameException]
     fun audioSendFrame(
         friendNumber: ToxFriendNumber,
         pcm: ShortArray,
@@ -170,8 +170,8 @@ interface ToxAv : Closeable {
      * @param y Y (Luminance) plane data.
      * @param u U (Chroma) plane data.
      * @param v V (Chroma) plane data.
+     * @throws ToxavSendFrameException
      */
-    // @throws[ToxavSendFrameException]
     fun videoSendFrame(
         friendNumber: ToxFriendNumber,
         width: Int,

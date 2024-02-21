@@ -59,8 +59,8 @@ interface ToxCore : Closeable {
      * If loading failed or succeeded only partially, an exception will be thrown.
      *
      * @return a new [[ToxCore]] instance.
+     * @throws ToxNewException
      */
-    // @Throws(ToxNewException::class)
     fun load(options: ToxOptions): ToxCore
 
     /**
@@ -86,8 +86,8 @@ interface ToxCore : Closeable {
      * @param address the hostname, or an IPv4/IPv6 address of the node.
      * @param port the port of the node.
      * @param publicKey the public key of the node.
+     * @throws ToxBootstrapException
      */
-    // @Throws(ToxBootstrapException::class)
     fun bootstrap(
         address: String,
         port: Port,
@@ -103,8 +103,8 @@ interface ToxCore : Closeable {
      * @param address the hostname, or an IPv4/IPv6 address of the node.
      * @param port the TCP port the node is running a relay on.
      * @param publicKey the public key of the node.
+     * @throws ToxBootstrapException
      */
-    // @Throws(ToxBootstrapException::class)
     fun addTcpRelay(
         address: String,
         port: Port,
@@ -115,8 +115,8 @@ interface ToxCore : Closeable {
      * Get the UDP port this instance is bound to.
      *
      * @return a port number between 1 and 65535.
+     * @throws ToxGetPortException
      */
-    // @Throws(ToxGetPortException::class)
     val getUdpPort: Port
 
     /**
@@ -124,8 +124,8 @@ interface ToxCore : Closeable {
      * acting as a TCP relay.
      *
      * @return a port number between 1 and 65535.
+     * @throws ToxGetPortException
      */
-    // @Throws(ToxGetPortException::class)
     val getTcpPort: Port
 
     /**
@@ -137,7 +137,7 @@ interface ToxCore : Closeable {
      * Be aware that every time a new instance is created, the DHT public key changes, meaning this
      * cannot be used to run a permanent bootstrap node.
      *
-     * @return a byte array of size [[ToxCoreConstants.PublicKeySize]]
+     * @return a byte array of size [[ToxCoreConstants.PUBLIC_KEY_SIZE]]
      */
     val getDhtId: ToxPublicKey
 
@@ -161,14 +161,14 @@ interface ToxCore : Closeable {
     /**
      * Copy the Tox Public Key (long term) from the Tox object.
      *
-     * @return a byte array of size [[ToxCoreConstants.PublicKeySize]]
+     * @return a byte array of size [[ToxCoreConstants.PUBLIC_KEY_SIZE]]
      */
     val getPublicKey: ToxPublicKey
 
     /**
      * Copy the Tox Secret Key from the Tox object.
      *
-     * @return a byte array of size [[ToxCoreConstants.SecretKeySize]]
+     * @return a byte array of size [[ToxCoreConstants.SECRET_KEY_SIZE]]
      */
     val getSecretKey: ToxSecretKey
 
@@ -195,18 +195,18 @@ interface ToxCore : Closeable {
      * Note that it is not in a human-readable format. To display it to users, it needs to be
      * formatted.
      *
-     * @return a byte array of size [[ToxCoreConstants.AddressSize]]
+     * @return a byte array of size [[ToxCoreConstants.ADDRESS_SIZE]]
      */
     val getAddress: ToxFriendAddress
 
     /**
      * Set the nickname for the Tox client.
      *
-     * Cannot be longer than [[ToxCoreConstants.MaxNameLength]] bytes. Can be empty (zero-length).
+     * Cannot be longer than [[ToxCoreConstants.MAX_NAME_LENGTH]] bytes. Can be empty (zero-length).
      *
      * @param name A byte array containing the new nickname..
+     * @throws ToxSetInfoException
      */
-    // @Throws(ToxSetInfoException::class)
     fun setName(name: ToxNickname): Unit
 
     /** Get our own nickname. */
@@ -215,11 +215,11 @@ interface ToxCore : Closeable {
     /**
      * Set our status message.
      *
-     * Cannot be longer than [[ToxCoreConstants.MaxStatusMessageLength]] bytes.
+     * Cannot be longer than [[ToxCoreConstants.MAX_STATUS_MESSAGE_LENGTH]] bytes.
      *
      * @param message the status message to set.
+     * @throws ToxSetInfoException
      */
-    // @Throws(ToxSetInfoException::class)
     fun setStatusMessage(message: ToxStatusMessage): Unit
 
     /** Gets our own status message. May be null if the status message was empty. */
@@ -239,7 +239,7 @@ interface ToxCore : Closeable {
      * Add a friend to the friend list and send a friend request.
      *
      * A friend request message must be at least 1 byte long and at most
-     * [ [ToxCoreConstants.MaxFriendRequestLength]].
+     * [ [ToxCoreConstants.MAX_FRIEND_REQUEST_LENGTH]].
      *
      * Friend numbers are unique identifiers used in all functions that operate on friends. Once
      * added, a friend number is stable for the lifetime of the Tox object. After saving the state and
@@ -249,7 +249,7 @@ interface ToxCore : Closeable {
      *
      * If more than [[Int.MaxValue]] friends are added, this function throws an exception.
      *
-     * @param address the address to add as a friend ([[ToxCoreConstants.AddressSize]] bytes).
+     * @param address the address to add as a friend ([[ToxCoreConstants.ADDRESS_SIZE]] bytes).
      *
      * ```
      *                This is the byte array the friend got from their own [[getAddress]].
@@ -259,8 +259,9 @@ interface ToxCore : Closeable {
      * the message to send with the friend request (must not be empty).
      *
      * @return the new friend's friend number.
+     * @throws ToxFriendAddException
+     * @throws IllegalArgumentException
      */
-    // @Throws(ToxFriendAddException::class, IllegalArgumentException::class)
     fun addFriend(
         address: ToxFriendAddress,
         message: ToxFriendRequestMessage,
@@ -277,10 +278,11 @@ interface ToxCore : Closeable {
      * entity, so that this entity can perform the mutual friend adding. In this case, there is no
      * need for a friend request, either.
      *
-     * @param publicKey the Public Key to add as a friend ([[ToxCoreConstants.PublicKeySize]] bytes).
+     * @param publicKey the Public Key to add as a friend ([[ToxCoreConstants.PUBLIC_KEY_SIZE]] bytes).
      * @return the new friend's friend number.
+     * @throws ToxFriendAddException
+     * @throws IllegalArgumentException
      */
-    // @Throws(ToxFriendAddException::class, IllegalArgumentException::class)
     fun addFriendNorequest(publicKey: ToxPublicKey): ToxFriendNumber
 
     /**
@@ -290,8 +292,8 @@ interface ToxCore : Closeable {
      * will appear offline to the friend and no communication can occur between the two.
      *
      * @param friendNumber the friend number to delete.
+     * @throws ToxFriendDeleteException
      */
-    // @Throws(ToxFriendDeleteException::class)
     fun deleteFriend(friendNumber: ToxFriendNumber): Unit
 
     /**
@@ -299,8 +301,8 @@ interface ToxCore : Closeable {
      *
      * @param publicKey the Public Key.
      * @return the friend number that is associated with the Public Key.
+     * @throws ToxFriendByPublicKeyException
      */
-    // @Throws(ToxFriendByPublicKeyException::class)
     fun friendByPublicKey(publicKey: ToxPublicKey): ToxFriendNumber
 
     /**
@@ -308,8 +310,8 @@ interface ToxCore : Closeable {
      *
      * @param friendNumber the friend number.
      * @return the Public Key associated with the friend number.
+     * @throws ToxFriendGetPublicKeyException
      */
-    // @Throws(ToxFriendGetPublicKeyException::class)
     fun getFriendPublicKey(friendNumber: ToxFriendNumber): ToxPublicKey
 
     /**
@@ -352,8 +354,8 @@ interface ToxCore : Closeable {
      *
      * @param friendNumber the friend number to set typing status for.
      * @param typing <code>true</code> if we are currently typing.
+     * @throws ToxSetTypingException
      */
-    // @Throws(ToxSetTypingException::class)
     fun setTyping(
         friendNumber: ToxFriendNumber,
         typing: Boolean,
@@ -364,7 +366,7 @@ interface ToxCore : Closeable {
      *
      * This function creates a chat message packet and pushes it into the send queue.
      *
-     * The message length may not exceed [[ToxCoreConstants.MaxMessageLength]]. Larger messages must
+     * The message length may not exceed [[ToxCoreConstants.MAX_MESSAGE_LENGTH]]. Larger messages must
      * be split by the client and sent as separate messages. Other clients can then reassemble the
      * fragments. Messages may not be empty.
      *
@@ -383,8 +385,8 @@ interface ToxCore : Closeable {
      *   function.
      * @param message The message text
      * @return the message ID.
+     * @throws ToxFriendSendMessageException
      */
-    // @Throws(ToxFriendSendMessageException::class)
     fun friendSendMessage(
         friendNumber: ToxFriendNumber,
         messageType: ToxMessageType,
@@ -399,8 +401,8 @@ interface ToxCore : Closeable {
      *   received from.
      * @param fileNumber The friend-specific identifier for the file transfer.
      * @param control The control command to send.
+     * @throws ToxFileControlException
      */
-    // @Throws(ToxFileControlException::class)
     fun fileControl(
         friendNumber: ToxFriendNumber,
         fileNumber: Int,
@@ -416,8 +418,8 @@ interface ToxCore : Closeable {
      * @param friendNumber The friend number of the friend the file is being received from.
      * @param fileNumber The friend-specific identifier for the file transfer.
      * @param position The position that the file should be seeked to.
+     * @throws ToxFileSeekException
      */
-    // @Throws(ToxFileSeekException::class)
     fun fileSeek(
         friendNumber: ToxFriendNumber,
         fileNumber: Int,
@@ -430,8 +432,8 @@ interface ToxCore : Closeable {
      * @param friendNumber The friend number of the friend the file is being transferred to or
      *   received from.
      * @param fileNumber The friend-specific identifier for the file transfer.
+     * @throws ToxFileGetException
      */
-    // @Throws(ToxFileGetException::class)
     fun getFileFileId(
         friendNumber: ToxFriendNumber,
         fileNumber: Int,
@@ -440,7 +442,7 @@ interface ToxCore : Closeable {
     /**
      * Send a file transmission request.
      *
-     * Maximum filename length is [[ToxCoreConstants.MaxFilenameLength]] bytes. The filename should
+     * Maximum filename length is [[ToxCoreConstants.MAX_FILENAME_LENGTH]] bytes. The filename should
      * generally just be a file name, not a path with directory names.
      *
      * If a non-negative file size is provided, it can be used by both sides to determine the sending
@@ -500,7 +502,7 @@ interface ToxCore : Closeable {
      *
      * @param kind The meaning of the file to be sent.
      * @param fileSize Size in bytes of the file the client wants to send, -1 if unknown or streaming.
-     * @param fileId A file identifier of length [[ToxCoreConstants.FileIdLength]] that can be used to
+     * @param fileId A file identifier of length [[ToxCoreConstants.FILE_ID_LENGTH]] that can be used to
      *
      * ```
      *               uniquely identify file transfers across core restarts. If empty, a random one will
@@ -521,8 +523,8 @@ interface ToxCore : Closeable {
      *         number is per friend. File numbers are reused after a transfer terminates.
      *         Any pattern in file numbers should not be relied on.
      * ```
+     * @throws ToxFileSendException
      */
-    // @Throws(ToxFileSendException::class)
     fun fileSend(
         friendNumber: ToxFriendNumber,
         kind: Int,
@@ -545,8 +547,8 @@ interface ToxCore : Closeable {
      * @param fileNumber The file transfer identifier returned by [[fileSend]].
      * @param position The file or stream position from which the friend should continue writing.
      * @param data The chunk data.
+     * @throws ToxFileSendChunkException
      */
-    // @Throws(ToxFileSendChunkException::class)
     fun fileSendChunk(
         friendNumber: ToxFriendNumber,
         fileNumber: Int,
@@ -558,7 +560,7 @@ interface ToxCore : Closeable {
      * Send a custom lossy packet to a friend.
      *
      * The first byte of data must be in the range 200-254. Maximum length of a custom packet is
-     * [ [ToxCoreConstants.MaxCustomPacketSize]].
+     * [ [ToxCoreConstants.MAX_CUSTOM_PACKET_SIZE]].
      *
      * Lossy packets behave like UDP packets, meaning they might never reach the other side or might
      * arrive more than once (if someone is messing with the connection) or might arrive in the wrong
@@ -568,8 +570,8 @@ interface ToxCore : Closeable {
      *
      * @param friendNumber The friend number of the friend this lossy packet should be sent to.
      * @param data A byte array containing the packet data including packet id.
+     * @throws ToxFriendCustomPacketException
      */
-    // @Throws(ToxFriendCustomPacketException::class)
     fun friendSendLossyPacket(
         friendNumber: ToxFriendNumber,
         data: ToxLossyPacket,
@@ -579,15 +581,15 @@ interface ToxCore : Closeable {
      * Send a custom lossless packet to a friend.
      *
      * The first byte of data must be in the range 160-191. Maximum length of a custom packet is
-     * [ [ToxCoreConstants.MaxCustomPacketSize]].
+     * [ [ToxCoreConstants.MAX_CUSTOM_PACKET_SIZE]].
      *
      * Lossless packet behaviour is comparable to TCP (reliability, arrive in order) but with packets
      * instead of a stream.
      *
      * @param friendNumber The friend number of the friend this lossless packet should be sent to.
      * @param data A byte array containing the packet data including packet id.
+     * @throws ToxFriendCustomPacketException
      */
-    // @Throws(ToxFriendCustomPacketException::class)
     fun friendSendLosslessPacket(
         friendNumber: ToxFriendNumber,
         data: ToxLosslessPacket,

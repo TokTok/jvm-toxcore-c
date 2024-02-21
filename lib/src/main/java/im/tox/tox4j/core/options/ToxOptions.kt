@@ -37,9 +37,9 @@ final data class ToxOptions(
     val udpEnabled: Boolean = true,
     val localDiscoveryEnabled: Boolean = true,
     val proxy: ProxyOptions.Type = ProxyOptions.None,
-    val startPort: UShort = ToxCoreConstants.DefaultStartPort,
-    val endPort: UShort = ToxCoreConstants.DefaultEndPort,
-    val tcpPort: UShort = ToxCoreConstants.DefaultTcpPort,
+    val startPort: UShort = ToxCoreConstants.DEFAULT_START_PORT,
+    val endPort: UShort = ToxCoreConstants.DEFAULT_END_PORT,
+    val tcpPort: UShort = ToxCoreConstants.DEFAULT_TCP_PORT,
     val saveData: SaveDataOptions.Type = SaveDataOptions.None,
     val fatalErrors: Boolean = true,
 )

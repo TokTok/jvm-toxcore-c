@@ -1,6 +1,7 @@
 package im.tox.tox4j.av.data
 
 /** Length in microseconds. */
+@Suppress("ktlint:standard:enum-entry-name-case")
 enum class AudioLength(val value: Int) {
     Length2_5(2500),
     Length5(5000),

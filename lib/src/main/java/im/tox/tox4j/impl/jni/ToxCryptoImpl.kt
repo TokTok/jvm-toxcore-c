@@ -14,7 +14,7 @@ object ToxCryptoImpl : ToxCrypto<ByteArray> {
     override fun passKeyToBytes(passKey: PassKey): List<Byte> = passKey.toList()
 
     override fun passKeyFromBytes(bytes: List<Byte>): PassKey? =
-        if (bytes.size == ToxCryptoConstants.KeyLength + ToxCryptoConstants.SaltLength) {
+        if (bytes.size == ToxCryptoConstants.KEY_LENGTH + ToxCryptoConstants.SALT_LENGTH) {
             bytes.toByteArray()
         } else {
             null

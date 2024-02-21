@@ -4,6 +4,7 @@ import im.tox.tox4j.core.data.ToxSecretKey
 import im.tox.tox4j.core.enums.ToxSavedataType
 
 /** Base type for all save data kinds. */
+@Suppress("ktlint:standard:no-consecutive-comments")
 object SaveDataOptions {
     sealed interface Type {
         /** The low level [[ToxSavedataType]] enum to pass to [[ToxCore.load]]. */

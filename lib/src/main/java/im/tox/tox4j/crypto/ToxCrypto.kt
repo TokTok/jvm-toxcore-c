@@ -47,17 +47,17 @@ interface ToxCrypto<PassKey> {
      *
      * @param passphrase A non-empty byte array containing the passphrase.
      * @return the generated symmetric key.
+     * @throws ToxKeyDerivationException
      */
-    // @throws[ToxKeyDerivationException]
     fun passKeyDerive(passphrase: ByteArray): PassKey
 
     /**
      * Same as above, except use the given salt for deterministic key derivation.
      *
      * @param passphrase A non-empty byte array containing the passphrase.
-     * @param salt Array of size [[ToxCryptoConstants.SaltLength]].
+     * @param salt Array of size [[ToxCryptoConstants.SALT_LENGTH]].
+     * @throws ToxKeyDerivationException
      */
-    // @throws[ToxKeyDerivationException]
     fun passKeyDeriveWithSalt(
         passphrase: ByteArray,
         salt: ByteArray,
@@ -72,8 +72,8 @@ interface ToxCrypto<PassKey> {
      * size was copied.
      *
      * @return the salt, or an empty array if the magic number did not match.
+     * @throws ToxGetSaltException
      */
-    // @throws[ToxGetSaltException]
     fun getSalt(data: ByteArray): ByteArray
 
     // Now come the functions that are analogous to the part 2 functions.
@@ -81,14 +81,14 @@ interface ToxCrypto<PassKey> {
     /**
      * Encrypt arbitrary data with a key produced by [[passKeyDerive]] or [[passKeyDeriveWithSalt]].
      *
-     * The output array will be [[ToxCryptoConstants.EncryptionExtraLength]] bytes longer than the
+     * The output array will be [[ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH]] bytes longer than the
      * input array.
      *
      * The result will be different on each call.
      *
      * @return the encrypted output array.
+     * @throws ToxEncryptionException
      */
-    // @throws[ToxEncryptionException]
     fun encrypt(
         data: ByteArray,
         passKey: PassKey,
@@ -97,11 +97,11 @@ interface ToxCrypto<PassKey> {
     /**
      * This is the inverse of [[encrypt]], also using only keys produced by [[passKeyDerive]].
      *
-     * The output data has size data_length - [[ToxCryptoConstants.EncryptionExtraLength]].
+     * The output data has size data_length - [[ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH]].
      *
      * @return the decrypted output array.
+     * @throws ToxDecryptionException
      */
-    // @throws[ToxDecryptionException]
     fun decrypt(
         data: ByteArray,
         passKey: PassKey,

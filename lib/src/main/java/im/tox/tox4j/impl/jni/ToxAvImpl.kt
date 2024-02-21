@@ -15,8 +15,8 @@ import im.tox.tox4j.core.data.ToxFriendNumber
  * Initialise an A/V session for the existing Tox instance.
  *
  * @param tox An instance of the C-backed ToxCore implementation.
+ * @throws ToxavNewException If there was already an A/V session.
  */
-// @throws[ToxavNewException]("If there was already an A/V session.")
 final class ToxAvImpl(private val tox: ToxCoreImpl) : ToxAv {
     internal val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)
 
