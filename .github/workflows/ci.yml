@@ -24,3 +24,10 @@ jobs:
         with:
           file: docker/jvm.Dockerfile
           tags: toxchat/jvm-toxcore-c:jvm
+
+  ktlint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.1.1/ktlint && chmod a+x ktlint
+      - run: ./ktlint
