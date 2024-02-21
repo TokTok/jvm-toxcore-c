@@ -14,22 +14,22 @@ genrule(
         "//tools/config:osx": ["@bazel_tools//tools/jdk:jni_md_header-darwin"],
         "//tools/config:windows": ["@bazel_tools//tools/jdk:jni_md_header-windows"],
     }),
-    outs = ["lib/src/main/cpp/jni_md.h"],
+    outs = ["lib/src/jvmMain/cpp/jni_md.h"],
     cmd = "cp -f $< $@",
 )
 
 genrule(
     name = "copy_link_jni_header",
     srcs = ["@bazel_tools//tools/jdk:jni_header"],
-    outs = ["lib/src/main/cpp/jni.h"],
+    outs = ["lib/src/jvmMain/cpp/jni.h"],
     cmd = "cp -f $< $@",
 )
 
 proto_library(
     name = "jni_proto",
     srcs = [
-        "lib/src/main/proto/Av.proto",
-        "lib/src/main/proto/Core.proto",
+        "lib/src/jvmMain/proto/Av.proto",
+        "lib/src/jvmMain/proto/Core.proto",
     ],
 )
 
@@ -46,28 +46,28 @@ java_proto_library(
 cc_binary(
     name = "libtox4j-c.so",
     srcs = glob([
-        "lib/src/main/cpp/**/*.cpp",
-        "lib/src/main/cpp/**/*.h",
+        "lib/src/jvmMain/cpp/**/*.cpp",
+        "lib/src/jvmMain/cpp/**/*.h",
     ]) + [
-        ":lib/src/main/cpp/jni.h",
-        ":lib/src/main/cpp/jni_md.h",
+        ":lib/src/jvmMain/cpp/jni.h",
+        ":lib/src/jvmMain/cpp/jni_md.h",
     ],
     copts = [
         "-DHAVE_TO_STRING",
     ],
     includes = [
-        "lib/src/main/cpp",
-        "lib/src/main/proto",
+        "lib/src/jvmMain/cpp",
+        "lib/src/jvmMain/proto",
     ],
     linkopts = select({
-        "//tools/config:freebsd": ["-Wl,--version-script,$(location lib/src/main/cpp/libtox4j-c.ld)"],
-        "//tools/config:linux": ["-Wl,--version-script,$(location lib/src/main/cpp/libtox4j-c.ld)"],
+        "//tools/config:freebsd": ["-Wl,--version-script,$(location lib/src/jvmMain/cpp/libtox4j-c.ld)"],
+        "//tools/config:linux": ["-Wl,--version-script,$(location lib/src/jvmMain/cpp/libtox4j-c.ld)"],
         "//tools/config:osx": [],
         "//tools/config:windows": [],
     }),
     linkshared = True,
     deps = [
-        "lib/src/main/cpp/libtox4j-c.ld",
+        "lib/src/jvmMain/cpp/libtox4j-c.ld",
         ":jni_cc_proto",
         "//c-toxcore",
     ],
@@ -76,8 +76,8 @@ cc_binary(
 kt_jvm_library(
     name = "jvm-toxcore-c",
     srcs = glob([
-        "lib/src/main/java/**/*.java",
-        "lib/src/main/java/**/*.kt",
+        "lib/src/*Main/**/*.java",
+        "lib/src/*Main/**/*.kt",
     ]),
     data = ["libtox4j-c.so"],
     deps = [":jni_java_proto"],
@@ -86,7 +86,7 @@ kt_jvm_library(
 kt_jvm_test(
     name = "ToxCoreTest",
     size = "small",
-    srcs = ["lib/src/test/java/im/tox/tox4j/core/ToxCoreTest.kt"],
+    srcs = ["lib/src/jvmTest/java/im/tox/tox4j/core/ToxCoreTest.kt"],
     jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
     test_class = "im.tox.tox4j.core.ToxCoreTest",
     deps = [

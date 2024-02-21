@@ -14,16 +14,19 @@ jobs:
   common:
     uses: TokTok/ci-tools/.github/workflows/common-ci.yml@master
 
-  docker-jvm:
+  docker:
+    strategy:
+      matrix:
+        target: [jvm, native]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build toxchat/jvm-toxcore-c:jvm
+      - name: Build toxchat/jvm-toxcore-c:${{ matrix.target }}
         uses: docker/build-push-action@v5
         with:
-          file: docker/jvm.Dockerfile
-          tags: toxchat/jvm-toxcore-c:jvm
+          file: docker/${{ matrix.target }}.Dockerfile
+          tags: toxchat/jvm-toxcore-c:${{ matrix.target }}
 
   ktlint:
     runs-on: ubuntu-22.04

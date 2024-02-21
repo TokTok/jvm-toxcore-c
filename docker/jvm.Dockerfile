@@ -7,6 +7,7 @@ RUN apt-get update \
  build-essential \
  ca-certificates \
  cmake \
+ curl \
  default-jdk \
  git \
  libtool \
@@ -23,8 +24,8 @@ RUN scripts/build-host "$PWD/_install/host/protobuf.stamp" "-j$(nproc)"
 RUN scripts/build-host "$PWD/_install/host/toxcore.stamp" "-j$(nproc)"
 
 # Native code, changes less frequently.
-COPY lib/src/main/cpp/ /work/jvm-toxcore-c/lib/src/main/cpp/
-COPY lib/src/main/proto/ /work/jvm-toxcore-c/lib/src/main/proto/
+COPY lib/src/jvmMain/cpp/ /work/jvm-toxcore-c/lib/src/jvmMain/cpp/
+COPY lib/src/jvmMain/proto/ /work/jvm-toxcore-c/lib/src/jvmMain/proto/
 RUN touch "$PWD/_install/host/.stamp" \
  && touch "$PWD/_install/host/libsodium.stamp" \
  && touch "$PWD/_install/host/libvpx.stamp" \
@@ -42,10 +43,10 @@ ENV LD_LIBRARY_PATH=/work/jvm-toxcore-c/_install/host/lib
 ENV PATH=/work/jvm-toxcore-c/_install/host/bin:$PATH
 RUN ./gradlew build
 
-RUN javac -h . -cp /work/jvm-toxcore-c/lib/build/classes/kotlin/main:/work/jvm-toxcore-c/lib/build/classes/java/main \
- lib/src/main/java/im/tox/tox4j/impl/jni/ToxAvJni.java \
- lib/src/main/java/im/tox/tox4j/impl/jni/ToxCoreJni.java \
- lib/src/main/java/im/tox/tox4j/impl/jni/ToxCryptoJni.java
-RUN diff -u lib/src/main/cpp/ToxCore/generated/im_tox_tox4j_impl_jni_ToxCoreJni.h im_tox_tox4j_impl_jni_ToxCoreJni.h \
- && diff -u lib/src/main/cpp/ToxAv/generated/im_tox_tox4j_impl_jni_ToxAvJni.h im_tox_tox4j_impl_jni_ToxAvJni.h \
- && diff -u lib/src/main/cpp/ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h im_tox_tox4j_impl_jni_ToxCryptoJni.h
+RUN javac -h . -cp /work/jvm-toxcore-c/lib/build/classes/kotlin/jvm/main:/work/jvm-toxcore-c/lib/build/classes/java/jvm/main \
+ lib/src/jvmMain/java/im/tox/tox4j/impl/jni/ToxAvJni.java \
+ lib/src/jvmMain/java/im/tox/tox4j/impl/jni/ToxCoreJni.java \
+ lib/src/jvmMain/java/im/tox/tox4j/impl/jni/ToxCryptoJni.java
+RUN diff -u lib/src/jvmMain/cpp/ToxCore/generated/im_tox_tox4j_impl_jni_ToxCoreJni.h im_tox_tox4j_impl_jni_ToxCoreJni.h \
+ && diff -u lib/src/jvmMain/cpp/ToxAv/generated/im_tox_tox4j_impl_jni_ToxAvJni.h im_tox_tox4j_impl_jni_ToxAvJni.h \
+ && diff -u lib/src/jvmMain/cpp/ToxCrypto/generated/im_tox_tox4j_impl_jni_ToxCryptoJni.h im_tox_tox4j_impl_jni_ToxCryptoJni.h

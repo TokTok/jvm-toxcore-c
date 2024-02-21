@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eux
+
+cat <<EOF >native.txt
+-p
+library
+EOF
+
+find lib/src/commonMain -name '*.kt' -exec printf '{}\n-Xcommon-sources={}\n' ';' >>native.txt
+
+kotlinc-native @native.txt
+ls
