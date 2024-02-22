@@ -78,7 +78,6 @@ add_library(
   util/exceptions.cpp
   util/exceptions.h
   util/instance_manager.h
-  util/pp_attributes.h
   util/pp_cat.h
   util/to_bytes.cpp
   util/to_bytes.h

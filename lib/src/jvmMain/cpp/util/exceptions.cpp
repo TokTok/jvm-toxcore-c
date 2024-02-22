@@ -4,7 +4,7 @@
 #include <sstream>
 
 
-PP_NORETURN void
+[[noreturn]] void
 tox4j_fatal_error (JNIEnv *env, char const *message)
 {
   env->FatalError (message);
