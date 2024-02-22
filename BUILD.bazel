@@ -66,6 +66,7 @@ cc_binary(
         "//tools/config:windows": [],
     }),
     linkshared = True,
+    visibility = ["//visibility:public"],
     deps = [
         "lib/src/jvmMain/cpp/libtox4j-c.ld",
         ":jni_cc_proto",
@@ -80,6 +81,7 @@ kt_jvm_library(
         "lib/src/*Main/**/*.kt",
     ]),
     data = ["libtox4j-c.so"],
+    visibility = ["//visibility:public"],
     deps = [":jni_java_proto"],
 )
 
