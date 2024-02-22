@@ -1,7 +1,5 @@
 #pragma once
 
-#include "cpp14compat.h"
-
 #include "ToxInstances.h"
 #include "util/jni/ArrayFromJava.h"
 #include "util/jni/ArrayToJava.h"

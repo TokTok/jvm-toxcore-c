@@ -53,9 +53,6 @@ cc_binary(
         ":lib/src/jvmMain/cpp/jni.h",
         ":lib/src/jvmMain/cpp/jni_md.h",
     ],
-    copts = [
-        "-DHAVE_TO_STRING",
-    ],
     includes = [
         "lib/src/jvmMain/cpp",
         "lib/src/jvmMain/proto",

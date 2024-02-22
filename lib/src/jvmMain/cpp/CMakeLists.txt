@@ -18,48 +18,6 @@ find_package(JNI)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 #
-# C++ standard library features
-#
-
-include(CheckCXXSourceCompiles)
-
-# ::gets
-check_cxx_source_compiles(
-  "
-#include <cstdio>
-using ::gets;
-int main() {}
-"
-  HAVE_GETS)
-if(HAVE_GETS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_GETS=1")
-endif()
-
-# std::make_unique
-check_cxx_source_compiles(
-  "
-#include <memory>
-using std::make_unique;
-int main() {}
-"
-  HAVE_MAKE_UNIQUE)
-if(HAVE_MAKE_UNIQUE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_MAKE_UNIQUE=1")
-endif()
-
-# std::to_string
-check_cxx_source_compiles(
-  "
-#include <string>
-using std::to_string;
-int main() {}
-"
-  HAVE_TO_STRING)
-if(HAVE_TO_STRING)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_TO_STRING=1")
-endif()
-
-#
 # Build
 #
 
@@ -101,7 +59,6 @@ add_library(
   ToxCrypto/ToxCrypto.cpp
   ToxCrypto/ToxCrypto.h
   Tox4j.cpp
-  cpp14compat.h
   tox4j/ToxInstances.h
   tox4j/Tox4j.h
   tox/av.cpp

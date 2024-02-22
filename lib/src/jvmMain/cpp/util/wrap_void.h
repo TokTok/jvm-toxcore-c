@@ -1,8 +1,7 @@
 #pragma once
 
+#include <type_traits>
 #include <utility>
-
-#include "cpp14compat.h"
 
 /**
  * Helper template to capture the return value of a function call so that

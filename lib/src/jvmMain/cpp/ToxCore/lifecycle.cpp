@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "ToxCore.h"
 
 using namespace core;
@@ -269,7 +271,7 @@ TOX_METHOD (jint, New,
         tox4j_assert (tox != nullptr);
 
         // Create the master events object and set up our callbacks.
-        auto events = tox::callbacks<Tox> (make_unique<Events> ())
+        auto events = tox::callbacks<Tox> (std::make_unique<Events> ())
 #define CALLBACK(NAME)   .set<tox::callback_##NAME, tox4j_##NAME##_cb> ()
 #include "tox/generated/core.h"
 #undef CALLBACK
