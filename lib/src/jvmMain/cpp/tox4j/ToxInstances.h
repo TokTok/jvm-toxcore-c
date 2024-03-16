@@ -134,25 +134,28 @@ struct error_type_of<Result (*) (ErrorCode *)>
 
 
 
+#define ERROR_ENUM(METHOD)                          \
+  PP_CAT(STRUCT, _Err_##METHOD)
+
 #define ERROR_CODE(METHOD)                          \
-  PP_CAT (SUBSYSTEM, _ERR_##METHOD)
+  PP_CAT(SUBSYSTEM, _ERR_##METHOD)
 
 #define success_case(METHOD)                        \
-  case PP_CAT (ERROR_CODE (METHOD), _OK):           \
+  case PP_CAT(ERROR_CODE(METHOD), _OK):             \
     return success()
 
 #define failure_case(METHOD, ERROR)                 \
-  case PP_CAT (ERROR_CODE (METHOD), _##ERROR):      \
+  case PP_CAT(ERROR_CODE(METHOD), _##ERROR):        \
     return failure (#ERROR)
 
 
 #define HANDLE(NAME, METHOD)                                      \
 template<>                                                        \
-char const *method_name<ERROR_CODE (METHOD)>() { return NAME; }   \
+char const *method_name<ERROR_ENUM(METHOD)>() { return NAME; }    \
                                                                   \
 template<>                                                        \
 ErrorHandling                                                     \
-handle_error_enum<ERROR_CODE (METHOD)> (ERROR_CODE (METHOD) error)
+handle_error_enum<ERROR_ENUM(METHOD)>(ERROR_ENUM(METHOD) error)
 
 
 /**

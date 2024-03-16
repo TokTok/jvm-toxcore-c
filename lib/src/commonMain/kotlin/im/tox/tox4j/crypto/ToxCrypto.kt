@@ -39,11 +39,11 @@ interface ToxCrypto<PassKey> {
     /**
      * Generates a secret symmetric key from the given passphrase.
      *
-     * Be sure to not compromise the key! Only keep it in memory, do not write to disk. The key should
-     * only be used with the other functions in this module, as it includes a salt.
+     * Be sure to not compromise the key! Only keep it in memory, do not write to disk. The key
+     * should only be used with the other functions in this module, as it includes a salt.
      *
-     * Note that this function is not deterministic; to derive the same key from a password, you also
-     * must know the random salt that was used. See below.
+     * Note that this function is not deterministic; to derive the same key from a password, you
+     * also must know the random salt that was used. See below.
      *
      * @param passphrase A non-empty byte array containing the passphrase.
      * @return the generated symmetric key.
@@ -68,8 +68,8 @@ interface ToxCrypto<PassKey> {
      * [[passKeyDeriveWithSalt]] to produce the same key as was previously used. Any encrypted data
      * with this module can be used as input.
      *
-     * Success does not say anything about the validity of the data, only that data of the appropriate
-     * size was copied.
+     * Success does not say anything about the validity of the data, only that data of the
+     * appropriate size was copied.
      *
      * @return the salt, or an empty array if the magic number did not match.
      * @throws ToxGetSaltException
@@ -113,8 +113,9 @@ interface ToxCrypto<PassKey> {
     /**
      * Generates a cryptographic hash of the given data.
      *
-     * This function may be used by clients for any purpose, but is provided primarily for validating
-     * cached avatars. This use is highly recommended to avoid unnecessary avatar updates.
+     * This function may be used by clients for any purpose, but is provided primarily for
+     * validating cached avatars. This use is highly recommended to avoid unnecessary avatar
+     * updates.
      *
      * This function is a wrapper to internal message-digest functions.
      *

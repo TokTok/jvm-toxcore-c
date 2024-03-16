@@ -4,43 +4,32 @@ import im.tox.tox4j.exceptions.ToxException
 
 class ToxFriendCustomPacketException : ToxException {
     enum class Code {
-        /**
-         * Attempted to send an empty packet.
-         */
-        EMPTY,
+        /** One of the arguments to the function was NULL when it was not expected. */
+        NULL,
 
-        /**
-         * This client is currently not connected to the friend.
-         */
+        /** The friend number did not designate a valid friend. */
+        FRIEND_NOT_FOUND,
+
+        /** This client is currently not connected to the friend. */
         FRIEND_NOT_CONNECTED,
 
         /**
-         * The friendNumber passed did not designate a valid friend.
-         */
-        FRIEND_NOT_FOUND,
-
-        /**
-         * The first byte of data was not in the specified range for the packet type.
-         * This range is 200-254 for lossy, and 160-191 for lossless packets.
+         * The first byte of data was not in the specified range for the packet type. This range is
+         * 192-254 for lossy, and 69, 160-191 for lossless packets.
          */
         INVALID,
 
-        /**
-         * An argument was null.
-         */
-        NULL,
+        /** Attempted to send an empty packet. */
+        EMPTY,
 
-        /**
-         * An allocation error occurred while increasing the send queue size.
-         */
-        SENDQ,
-
-        /**
-         * Packet data length exceeded {@link ToxCoreConstants#MAX_CUSTOM_PACKET_SIZE}.
-         */
+        /** Packet data length exceeded TOX_MAX_CUSTOM_PACKET_SIZE. */
         TOO_LONG,
+
+        /** Packet queue is full. */
+        SENDQ,
     }
 
     constructor(code: Code) : this(code, "")
+
     constructor(code: Code, message: String) : super(code, message)
 }
