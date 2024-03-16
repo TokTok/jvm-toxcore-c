@@ -1,6 +1,6 @@
 #include "../ToxAv.h"
 
-HANDLE ("Answer", ANSWER)
+HANDLE ("Answer", Answer)
 {
   switch (error)
     {
@@ -14,7 +14,7 @@ HANDLE ("Answer", ANSWER)
   return unhandled ();
 }
 
-HANDLE ("BitRateSet", BIT_RATE_SET)
+HANDLE ("BitRateSet", Bit_Rate_Set)
 {
   switch (error)
     {
@@ -27,7 +27,7 @@ HANDLE ("BitRateSet", BIT_RATE_SET)
   return unhandled ();
 }
 
-HANDLE ("CallControl", CALL_CONTROL)
+HANDLE ("CallControl", Call_Control)
 {
   switch (error)
     {
@@ -40,7 +40,7 @@ HANDLE ("CallControl", CALL_CONTROL)
   return unhandled ();
 }
 
-HANDLE ("Call", CALL)
+HANDLE ("Call", Call)
 {
   switch (error)
     {
@@ -55,7 +55,7 @@ HANDLE ("Call", CALL)
   return unhandled ();
 }
 
-HANDLE ("New", NEW)
+HANDLE ("New", New)
 {
   switch (error)
     {
@@ -67,7 +67,7 @@ HANDLE ("New", NEW)
   return unhandled ();
 }
 
-HANDLE ("SendFrame", SEND_FRAME)
+HANDLE ("SendFrame", Send_Frame)
 {
   switch (error)
     {

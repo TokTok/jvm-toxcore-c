@@ -7,7 +7,8 @@ import im.tox.tox4j.core.data.ToxNickname
 interface FriendNameCallback<ToxCoreState> {
     /**
      * @param friendNumber The friend number of the friend whose name changed.
-     * @param name The new nickname.
+     * @param name A byte array containing the same data as tox_friend_get_name would write to its
+     *   `name` parameter.
      */
     fun friendName(
         friendNumber: ToxFriendNumber,

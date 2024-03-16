@@ -7,7 +7,8 @@ import im.tox.tox4j.core.data.ToxStatusMessage
 interface FriendStatusMessageCallback<ToxCoreState> {
     /**
      * @param friendNumber The friend number of the friend whose status message changed.
-     * @param message The new status message.
+     * @param message A byte array containing the same data as tox_friend_get_status_message would
+     *   write to its `status_message` parameter.
      */
     fun friendStatusMessage(
         friendNumber: ToxFriendNumber,

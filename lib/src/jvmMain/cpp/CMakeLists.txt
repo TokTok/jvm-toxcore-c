@@ -41,12 +41,9 @@ add_library(
   ToxCore/generated/impls.h
   ToxCore/generated/im_tox_tox4j_impl_jni_ToxCoreJni.h
   ToxCore/generated/natives.h
-  ToxCore/clientinfo.cpp
   ToxCore/connection.cpp
-  ToxCore/custom.cpp
   ToxCore/filetransfer.cpp
   ToxCore/friendlist.cpp
-  ToxCore/interaction.cpp
   ToxCore/lifecycle.cpp
   ToxCore/ToxCore.cpp
   ToxCore/ToxCore.h

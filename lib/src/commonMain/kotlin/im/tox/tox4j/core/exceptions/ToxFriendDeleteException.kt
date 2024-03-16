@@ -2,14 +2,16 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.exceptions.ToxException
 
+/**
+ * An exception thrown when a friend could not be deleted.
+ */
 class ToxFriendDeleteException : ToxException {
     enum class Code {
-        /**
-         * There was no friend with the given friend number. No friends were deleted.
-         */
+        /** There was no friend with the given friend number. No friends were deleted. */
         FRIEND_NOT_FOUND,
     }
 
     constructor(code: Code) : this(code, "")
+
     constructor(code: Code, message: String) : super(code, message)
 }

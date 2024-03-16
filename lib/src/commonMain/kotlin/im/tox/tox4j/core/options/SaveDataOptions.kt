@@ -33,9 +33,9 @@ object SaveDataOptions {
     }
 
     /**
-     * Minimal save data with just the secret key. The public key can be derived from it. Saving this
-     * secret key, the friend list, name, and noSpam value is sufficient to restore the observable
-     * behaviour of a Tox instance without the full save data in [[ToxSave]].
+     * Minimal save data with just the secret key. The public key can be derived from it. Saving
+     * this secret key, the friend list, name, and noSpam value is sufficient to restore the
+     * observable behaviour of a Tox instance without the full save data in [[ToxSave]].
      */
     final data class SecretKey(
         private val key: ToxSecretKey,

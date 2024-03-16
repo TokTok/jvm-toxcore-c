@@ -62,9 +62,9 @@ interface ToxAv : AutoCloseable {
     /**
      * Call a friend. This will start ringing the friend.
      *
-     * It is the client's responsibility to stop ringing after a certain timeout, if such behaviour is
-     * desired. If the client does not stop ringing, the library will not stop until the friend is
-     * disconnected.
+     * It is the client's responsibility to stop ringing after a certain timeout, if such behaviour
+     * is desired. If the client does not stop ringing, the library will not stop until the friend
+     * is disconnected.
      *
      * @param friendNumber The friend number of the friend that should be called.
      * @param audioBitRate Audio bit rate in Kb/sec. Set this to 0 to disable audio sending.
@@ -80,8 +80,8 @@ interface ToxAv : AutoCloseable {
     /**
      * Accept an incoming call.
      *
-     * If answering fails for any reason, the call will still be pending and it is possible to try and
-     * answer it later.
+     * If answering fails for any reason, the call will still be pending and it is possible to try
+     * and answer it later.
      *
      * @param friendNumber The friend number of the friend that is calling.
      * @param audioBitRate Audio bit rate in Kb/sec. Set this to 0 to disable audio sending.
@@ -135,10 +135,10 @@ interface ToxAv : AutoCloseable {
     /**
      * Send an audio frame to a friend.
      *
-     * The expected format of the PCM data is: [s1c1][s1c2][...][s2c1][s2c2][...]... Meaning: sample 1
-     * for channel 1, sample 1 for channel 2, ... For mono audio, this has no meaning, every sample is
-     * subsequent. For stereo, this means the expected format is LRLRLR... with samples for left and
-     * right alternating.
+     * The expected format of the PCM data is: [s1c1][s1c2][...][s2c1][s2c2][...]... Meaning: sample
+     * 1 for channel 1, sample 1 for channel 2, ... For mono audio, this has no meaning, every
+     * sample is subsequent. For stereo, this means the expected format is LRLRLR... with samples
+     * for left and right alternating.
      *
      * @param friendNumber The friend number of the friend to which to send an audio frame.
      * @param pcm An array of audio samples. The size of this array must be sample_count * channels.
@@ -161,8 +161,8 @@ interface ToxAv : AutoCloseable {
     /**
      * Send a video frame to a friend.
      *
-     * Y - plane should be of size: height * width U - plane should be of size: (height/2) * (width/2)
-     * V - plane should be of size: (height/2) * (width/2)
+     * Y - plane should be of size: height * width U - plane should be of size: (height/2) *
+     * (width/2) V - plane should be of size: (height/2) * (width/2)
      *
      * @param friendNumber The friend number of the friend to which to send a video frame.
      * @param width Width of the frame in pixels.

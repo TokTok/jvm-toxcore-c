@@ -12,7 +12,7 @@ TOX_METHOD (void, FileControl,
   jint instanceNumber, jint friendNumber, jint fileNumber, jint control)
 {
   return instances.with_instance_ign (env, instanceNumber,
-    tox_file_control, friendNumber, fileNumber, Enum::valueOf<TOX_FILE_CONTROL> (env, control)
+    tox_file_control, friendNumber, fileNumber, Enum::valueOf<Tox_File_Control> (env, control)
   );
 }
 

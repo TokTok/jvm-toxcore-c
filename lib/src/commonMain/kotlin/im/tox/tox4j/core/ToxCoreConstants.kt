@@ -13,8 +13,8 @@ object ToxCoreConstants {
      * The size of a Tox address in bytes. Tox addresses are in the format
      * [Public Key ([ [PUBLIC_KEY_SIZE]] bytes)][nospam (4 bytes)][checksum (2 bytes)].
      *
-     * The checksum is computed over the Public Key and the nospam value. The first byte is an XOR of
-     * all the odd bytes, the second byte is an XOR of all the even bytes of the Public Key and
+     * The checksum is computed over the Public Key and the nospam value. The first byte is an XOR
+     * of all the odd bytes, the second byte is an XOR of all the even bytes of the Public Key and
      * nospam.
      */
     const val ADDRESS_SIZE = PUBLIC_KEY_SIZE + 4 + 2
@@ -38,8 +38,8 @@ object ToxCoreConstants {
     const val MAX_FILENAME_LENGTH = 255
 
     /**
-     * Maximum hostname length. This is determined by calling `getconf HOST_NAME_MAX` on the console.
-     * The value presented here is valid for most systems.
+     * Maximum hostname length. This is determined by calling `getconf HOST_NAME_MAX` on the
+     * console. The value presented here is valid for most systems.
      */
     const val MAX_HOSTNAME_LENGTH = 255
 
