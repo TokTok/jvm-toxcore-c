@@ -7,8 +7,8 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 interface CallStateCallback<ToxCoreState> {
     /**
      * @param friendNumber The friend number this call state change is for.
-     * @param callState A set of ToxCallState values comprising the new call state. Although this is a
-     *   Collection (therefore might actually be a List), this is effectively a Set. Any
+     * @param callState A set of ToxCallState values comprising the new call state. Although this is
+     *   a Collection (therefore might actually be a List), this is effectively a Set. Any
      *   [[ToxavFriendCallState]] value is contained exactly 0 or 1 times.
      */
     fun callState(

@@ -12,6 +12,7 @@
 
 #ifndef SUBSYSTEM
 #define SUBSYSTEM TOXAV
+#define STRUCT    Toxav
 #define CLASS     ToxAv
 #define PREFIX    toxav
 #endif

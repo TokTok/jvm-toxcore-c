@@ -8,6 +8,7 @@
 #include <tox/toxencryptsave.h>
 
 #define SUBSYSTEM TOX
+#define STRUCT    Tox
 #define CLASS     ToxCrypto
 #define PREFIX    tox
 

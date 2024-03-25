@@ -112,5 +112,6 @@ final class ToxAvImpl(private val tox: ToxCoreImpl) : ToxAv {
         y: ByteArray,
         u: ByteArray,
         v: ByteArray,
-    ): Unit = ToxAvJni.toxavVideoSendFrame(instanceNumber, friendNumber.value, width, height, y, u, v)
+    ): Unit =
+        ToxAvJni.toxavVideoSendFrame(instanceNumber, friendNumber.value, width, height, y, u, v)
 }

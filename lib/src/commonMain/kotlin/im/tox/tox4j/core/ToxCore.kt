@@ -2,19 +2,42 @@ package im.tox.tox4j.core
 
 import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.Port
+import im.tox.tox4j.core.data.ToxConferenceId
+import im.tox.tox4j.core.data.ToxConferenceMessage
+import im.tox.tox4j.core.data.ToxConferenceNumber
+import im.tox.tox4j.core.data.ToxConferenceOfflinePeerNumber
+import im.tox.tox4j.core.data.ToxConferencePeerName
+import im.tox.tox4j.core.data.ToxConferencePeerNumber
+import im.tox.tox4j.core.data.ToxConferenceTitle
+import im.tox.tox4j.core.data.ToxConferenceUid
 import im.tox.tox4j.core.data.ToxFileId
 import im.tox.tox4j.core.data.ToxFilename
 import im.tox.tox4j.core.data.ToxFriendAddress
 import im.tox.tox4j.core.data.ToxFriendMessage
+import im.tox.tox4j.core.data.ToxFriendMessageId
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.data.ToxFriendRequestMessage
+import im.tox.tox4j.core.data.ToxGroupChatId
+import im.tox.tox4j.core.data.ToxGroupMessage
+import im.tox.tox4j.core.data.ToxGroupName
+import im.tox.tox4j.core.data.ToxGroupNumber
+import im.tox.tox4j.core.data.ToxGroupPartMessage
+import im.tox.tox4j.core.data.ToxGroupPassword
+import im.tox.tox4j.core.data.ToxGroupPeerNumber
+import im.tox.tox4j.core.data.ToxGroupTopic
 import im.tox.tox4j.core.data.ToxLosslessPacket
 import im.tox.tox4j.core.data.ToxLossyPacket
 import im.tox.tox4j.core.data.ToxNickname
 import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.core.data.ToxSecretKey
 import im.tox.tox4j.core.data.ToxStatusMessage
+import im.tox.tox4j.core.enums.ToxConferenceType
+import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.core.enums.ToxFileControl
+import im.tox.tox4j.core.enums.ToxGroupPrivacyState
+import im.tox.tox4j.core.enums.ToxGroupRole
+import im.tox.tox4j.core.enums.ToxGroupTopicLock
+import im.tox.tox4j.core.enums.ToxGroupVoiceState
 import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.ToxOptions
@@ -35,8 +58,8 @@ interface ToxCore : AutoCloseable {
     /**
      * Store all information associated with the tox instance to a byte array.
      *
-     * The data in the byte array can be used to create a new instance with [[load]] by passing it to
-     * the [[ToxOptions]] constructor. The concrete format in this serialised instance is
+     * The data in the byte array can be used to create a new instance with [[load]] by passing it
+     * to the [[ToxOptions]] constructor. The concrete format in this serialised instance is
      * implementation-defined. Passing save data created by one class to a different class may not
      * work.
      *
@@ -77,8 +100,8 @@ interface ToxCore : AutoCloseable {
     /**
      * Bootstrap into the tox network.
      *
-     * Sends a "get nodes" request to the given bootstrap node with IP, port, and public key to setup
-     * connections.
+     * Sends a "get nodes" request to the given bootstrap node with IP, port, and public key to
+     * setup connections.
      *
      * This function will only attempt to connect to the node using UDP. If you want to additionally
      * attempt to connect using TCP, use [[addTcpRelay]] together with this function.
@@ -97,8 +120,8 @@ interface ToxCore : AutoCloseable {
     /**
      * Connect to a TCP relay to forward traffic.
      *
-     * This function can be used to initiate TCP connections to different ports on the same bootstrap
-     * node, or to add TCP relays without using them as bootstrap nodes.
+     * This function can be used to initiate TCP connections to different ports on the same
+     * bootstrap node, or to add TCP relays without using them as bootstrap nodes.
      *
      * @param address the hostname, or an IPv4/IPv6 address of the node.
      * @param port the TCP port the node is running a relay on.
@@ -142,7 +165,8 @@ interface ToxCore : AutoCloseable {
     val getDhtId: ToxPublicKey
 
     /**
-     * Get the time in milliseconds until [[iterate]] should be called again for optimal performance.
+     * Get the time in milliseconds until [[iterate]] should be called again for optimal
+     * performance.
      *
      * @return the time in milliseconds until [[iterate]] should be called again.
      */
@@ -175,8 +199,8 @@ interface ToxCore : AutoCloseable {
     /**
      * Set the 4-byte nospam part of the address.
      *
-     * Setting the nospam makes it impossible for others to send us friend requests that contained the
-     * old nospam number.
+     * Setting the nospam makes it impossible for others to send us friend requests that contained
+     * the old nospam number.
      *
      * @param nospam the new nospam number.
      */
@@ -239,13 +263,13 @@ interface ToxCore : AutoCloseable {
      * Add a friend to the friend list and send a friend request.
      *
      * A friend request message must be at least 1 byte long and at most
-     * [ [ToxCoreConstants.MAX_FRIEND_REQUEST_LENGTH]].
+     * [[ToxCoreConstants.MAX_FRIEND_REQUEST_LENGTH]].
      *
      * Friend numbers are unique identifiers used in all functions that operate on friends. Once
-     * added, a friend number is stable for the lifetime of the Tox object. After saving the state and
-     * reloading it, the friend numbers may not be the same as before. Deleting a friend creates a gap
-     * in the friend number set, which is filled by the next adding of a friend. Any pattern in friend
-     * numbers should not be relied on.
+     * added, a friend number is stable for the lifetime of the Tox object. After saving the state
+     * and reloading it, the friend numbers may not be the same as before. Deleting a friend creates
+     * a gap in the friend number set, which is filled by the next adding of a friend. Any pattern
+     * in friend numbers should not be relied on.
      *
      * If more than [[Int.MaxValue]] friends are added, this function throws an exception.
      *
@@ -270,15 +294,16 @@ interface ToxCore : AutoCloseable {
     /**
      * Add a friend without sending a friend request.
      *
-     * This function is used to add a friend in response to a friend request. If the client receives a
-     * friend request, it can be reasonably sure that the other client added this client as a friend,
-     * eliminating the need for a friend request.
+     * This function is used to add a friend in response to a friend request. If the client receives
+     * a friend request, it can be reasonably sure that the other client added this client as a
+     * friend, eliminating the need for a friend request.
      *
      * This function is also useful in a situation where both instances are controlled by the same
      * entity, so that this entity can perform the mutual friend adding. In this case, there is no
      * need for a friend request, either.
      *
-     * @param publicKey the Public Key to add as a friend ([[ToxCoreConstants.PUBLIC_KEY_SIZE]] bytes).
+     * @param publicKey the Public Key to add as a friend ([[ToxCoreConstants.PUBLIC_KEY_SIZE]]
+     *   bytes).
      * @return the new friend's friend number.
      * @throws ToxFriendAddException
      * @throws IllegalArgumentException
@@ -340,7 +365,8 @@ interface ToxCore : AutoCloseable {
     /**
      * Get an array of [[ToxFriendNumber]] objects with the same values as [[getFriendList]].
      *
-     * This method exists for Java compatibility, because [[getFriendList]] must return an int array.
+     * This method exists for Java compatibility, because [[getFriendList]] must return an int
+     * array.
      *
      * @return [[getFriendList]] mapped to [[ToxFriendNumber]].
      */
@@ -366,23 +392,21 @@ interface ToxCore : AutoCloseable {
      *
      * This function creates a chat message packet and pushes it into the send queue.
      *
-     * The message length may not exceed [[ToxCoreConstants.MAX_MESSAGE_LENGTH]]. Larger messages must
-     * be split by the client and sent as separate messages. Other clients can then reassemble the
-     * fragments. Messages may not be empty.
+     * The message length may not exceed [[ToxCoreConstants.MAX_MESSAGE_LENGTH]]. Larger messages
+     * must be split by the client and sent as separate messages. Other clients can then reassemble
+     * the fragments. Messages may not be empty.
      *
      * The return value of this function is the message ID. If a read receipt is received, the
      * triggered [[FriendReadReceiptCallback]] event will be passed this message ID.
      *
      * Message IDs are unique per friend per instance. The first message ID is 0. Message IDs are
-     * incremented by 1 each time a message is sent. If [[Int.MaxValue]] messages were sent, the next
-     * message ID is [[Int.MinValue]].
+     * incremented by 1 each time a message is sent. If [[Int.MaxValue]] messages were sent, the
+     * next message ID is [[Int.MinValue]].
      *
      * Message IDs are not stored in the array returned by [[getSavedata]].
      *
      * @param friendNumber The friend number of the friend to send the message to.
      * @param messageType Message type (normal, action, ...).
-     * @param timeDelta The time between composition (user created the message) and calling this
-     *   function.
      * @param message The message text
      * @return the message ID.
      * @throws ToxFriendSendMessageException
@@ -390,9 +414,8 @@ interface ToxCore : AutoCloseable {
     fun friendSendMessage(
         friendNumber: ToxFriendNumber,
         messageType: ToxMessageType,
-        timeDelta: Int,
         message: ToxFriendMessage,
-    ): Int
+    ): ToxFriendMessageId
 
     /**
      * Sends a file control command to a friend for a given file transfer.
@@ -442,16 +465,18 @@ interface ToxCore : AutoCloseable {
     /**
      * Send a file transmission request.
      *
-     * Maximum filename length is [[ToxCoreConstants.MAX_FILENAME_LENGTH]] bytes. The filename should
-     * generally just be a file name, not a path with directory names.
+     * Maximum filename length is [[ToxCoreConstants.MAX_FILENAME_LENGTH]] bytes. The filename
+     * should generally just be a file name, not a path with directory names.
      *
-     * If a non-negative file size is provided, it can be used by both sides to determine the sending
-     * progress. File size can be set to a negative value for streaming data of unknown size.
+     * If a non-negative file size is provided, it can be used by both sides to determine the
+     * sending progress. File size can be set to a negative value for streaming data of unknown
+     * size.
      *
-     * File transmission occurs in chunks, which are requested through the [[FileChunkRequestCallback]
-     * ] event.
+     * File transmission occurs in chunks, which are requested through the
+     * [[FileChunkRequestCallback] ] event.
      *
-     * When a friend goes offline, all file transfers associated with the friend are purged from core.
+     * When a friend goes offline, all file transfers associated with the friend are purged from
+     * core.
      *
      * If the file contents change during a transfer, the behaviour is unspecified in general. What
      * will actually happen depends on the mode in which the file was modified and how the client
@@ -501,8 +526,10 @@ interface ToxCore : AutoCloseable {
      * The friend number of the friend the file send request should be sent to.
      *
      * @param kind The meaning of the file to be sent.
-     * @param fileSize Size in bytes of the file the client wants to send, -1 if unknown or streaming.
-     * @param fileId A file identifier of length [[ToxCoreConstants.FILE_ID_LENGTH]] that can be used to
+     * @param fileSize Size in bytes of the file the client wants to send, -1 if unknown or
+     *   streaming.
+     * @param fileId A file identifier of length [[ToxCoreConstants.FILE_ID_LENGTH]] that can be
+     *   used to
      *
      * ```
      *               uniquely identify file transfers across core restarts. If empty, a random one will
@@ -523,6 +550,7 @@ interface ToxCore : AutoCloseable {
      *         number is per friend. File numbers are reused after a transfer terminates.
      *         Any pattern in file numbers should not be relied on.
      * ```
+     *
      * @throws ToxFileSendException
      */
     fun fileSend(
@@ -537,11 +565,11 @@ interface ToxCore : AutoCloseable {
      * Send a chunk of file data to a friend.
      *
      * This function is called in response to the [[FileChunkRequestCallback]] callback. The length
-     * parameter should be equal to the one received though the callback. If it is zero, the transfer
-     * is assumed complete. For files with known size, Core will know that the transfer is complete
-     * after the last byte has been received, so it is not necessary (though not harmful) to send a
-     * zero-length chunk to terminate. For streams, core will know that the transfer is finished if a
-     * chunk with length less than the length requested in the callback is sent.
+     * parameter should be equal to the one received though the callback. If it is zero, the
+     * transfer is assumed complete. For files with known size, Core will know that the transfer is
+     * complete after the last byte has been received, so it is not necessary (though not harmful)
+     * to send a zero-length chunk to terminate. For streams, core will know that the transfer is
+     * finished if a chunk with length less than the length requested in the callback is sent.
      *
      * @param friendNumber The friend number of the receiving friend for this file.
      * @param fileNumber The file transfer identifier returned by [[fileSend]].
@@ -563,8 +591,8 @@ interface ToxCore : AutoCloseable {
      * [ [ToxCoreConstants.MAX_CUSTOM_PACKET_SIZE]].
      *
      * Lossy packets behave like UDP packets, meaning they might never reach the other side or might
-     * arrive more than once (if someone is messing with the connection) or might arrive in the wrong
-     * order.
+     * arrive more than once (if someone is messing with the connection) or might arrive in the
+     * wrong order.
      *
      * Unless latency is an issue, it is recommended that you use lossless custom packets instead.
      *
@@ -583,8 +611,8 @@ interface ToxCore : AutoCloseable {
      * The first byte of data must be in the range 160-191. Maximum length of a custom packet is
      * [ [ToxCoreConstants.MAX_CUSTOM_PACKET_SIZE]].
      *
-     * Lossless packet behaviour is comparable to TCP (reliability, arrive in order) but with packets
-     * instead of a stream.
+     * Lossless packet behaviour is comparable to TCP (reliability, arrive in order) but with
+     * packets instead of a stream.
      *
      * @param friendNumber The friend number of the friend this lossless packet should be sent to.
      * @param data A byte array containing the packet data including packet id.
@@ -593,5 +621,243 @@ interface ToxCore : AutoCloseable {
     fun friendSendLosslessPacket(
         friendNumber: ToxFriendNumber,
         data: ToxLosslessPacket,
+    ): Unit
+
+    fun conferenceNew(): ToxConferenceNumber
+
+    fun conferenceDelete(conferenceNumber: ToxConferenceNumber): Unit
+
+    fun conferencePeerCount(conferenceNumber: ToxConferenceNumber): Int
+
+    fun conferencePeerGetName(
+        conferenceNumber: ToxConferenceNumber,
+        peerNumber: ToxConferencePeerNumber,
+    ): ToxConferencePeerName
+
+    fun conferencePeerGetPublicKey(
+        conferenceNumber: ToxConferenceNumber,
+        peerNumber: ToxConferencePeerNumber,
+    ): ToxPublicKey
+
+    fun conferencePeerNumberIsOurs(
+        conferenceNumber: ToxConferenceNumber,
+        peerNumber: ToxConferencePeerNumber,
+    ): Boolean
+
+    fun conferenceOfflinePeerCount(conferenceNumber: ToxConferenceNumber): Int
+
+    fun conferenceOfflinePeerGetName(
+        conferenceNumber: ToxConferenceNumber,
+        offlinePeerNumber: ToxConferenceOfflinePeerNumber,
+    ): ToxConferencePeerName
+
+    fun conferenceOfflinePeerGetPublicKey(
+        conferenceNumber: ToxConferenceNumber,
+        offlinePeerNumber: ToxConferenceOfflinePeerNumber,
+    ): ToxPublicKey
+
+    fun conferenceOfflinePeerGetLastActive(
+        conferenceNumber: ToxConferenceNumber,
+        offlinePeerNumber: ToxConferenceOfflinePeerNumber,
+    ): Long
+
+    fun conferenceSetMaxOffline(
+        conferenceNumber: ToxConferenceNumber,
+        maxOffline: Int,
+    ): Unit
+
+    fun conferenceInvite(
+        friendNumber: ToxFriendNumber,
+        conferenceNumber: ToxConferenceNumber,
+    ): Unit
+
+    fun conferenceJoin(
+        friendNumber: ToxFriendNumber,
+        cookie: ByteArray,
+    ): ToxConferenceNumber
+
+    fun conferenceSendMessage(
+        conferenceNumber: ToxConferenceNumber,
+        messageType: ToxMessageType,
+        message: ToxConferenceMessage,
+    ): Unit
+
+    fun conferenceGetTitle(conferenceNumber: ToxConferenceNumber): ToxConferenceTitle
+
+    fun conferenceSetTitle(
+        conferenceNumber: ToxConferenceNumber,
+        title: ToxConferenceTitle,
+    ): Unit
+
+    val conferenceGetChatlist: IntArray
+
+    val conferenceGetChatNumbers: List<ToxConferenceNumber>
+        get() = conferenceGetChatlist.map { ToxConferenceNumber(it) }
+
+    fun conferenceGetType(conferenceNumber: ToxConferenceNumber): ToxConferenceType
+
+    fun conferenceGetId(conferenceNumber: ToxConferenceNumber): ToxConferenceId
+
+    fun conferenceById(conferenceId: ToxConferenceId): ToxConferenceNumber
+
+    fun conferenceGetUid(conferenceNumber: ToxConferenceNumber): ToxConferenceUid
+
+    fun conferenceByUid(conferenceUid: ToxConferenceUid): ToxConferenceNumber
+
+    fun groupNew(
+        privacyState: ToxGroupPrivacyState,
+        groupName: ToxGroupName,
+        name: ToxGroupName,
+    ): ToxGroupNumber
+
+    fun groupJoin(
+        chatId: ToxGroupChatId,
+        name: ToxGroupName,
+        password: ToxGroupPassword,
+    ): ToxGroupNumber
+
+    fun groupIsConnected(groupNumber: ToxGroupNumber): Boolean
+
+    fun groupDisconnect(groupNumber: ToxGroupNumber): Unit
+
+    fun groupReconnect(groupNumber: ToxGroupNumber): Unit
+
+    fun groupLeave(groupNumber: ToxGroupNumber, partMessage: ToxGroupPartMessage): Unit
+
+    fun groupSelfSetName(groupNumber: ToxGroupNumber, name: ToxGroupName): Unit
+
+    fun groupSelfGetName(groupNumber: ToxGroupNumber): ToxGroupName
+
+    fun groupSelfSetStatus(groupNumber: ToxGroupNumber, status: ToxUserStatus): Unit
+
+    fun groupSelfGetStatus(groupNumber: ToxGroupNumber): ToxUserStatus
+
+    fun groupSelfGetRole(groupNumber: ToxGroupNumber): ToxGroupRole
+
+    fun groupSelfGetPeerId(groupNumber: ToxGroupNumber): ToxGroupPeerNumber
+
+    fun groupSelfGetPublicKey(groupNumber: ToxGroupNumber): ToxPublicKey
+
+    fun groupPeerGetName(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+    ): ToxGroupName
+
+    fun groupPeerGetStatus(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+    ): ToxUserStatus
+
+    fun groupPeerGetRole(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+    ): ToxGroupRole
+
+    fun groupPeerGetConnectionStatus(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+    ): ToxConnection
+
+    fun groupPeerGetPublicKey(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+    ): ToxPublicKey
+
+    fun groupSetTopic(groupNumber: ToxGroupNumber, topic: ToxGroupTopic): Unit
+
+    fun groupGetTopic(groupNumber: ToxGroupNumber): ToxGroupTopic
+
+    fun groupGetName(groupNumber: ToxGroupNumber): ToxGroupName
+
+    fun groupGetChatId(groupNumber: ToxGroupNumber): ToxGroupChatId
+
+    fun groupGetPrivacyState(groupNumber: ToxGroupNumber): ToxGroupPrivacyState
+
+    fun groupGetVoiceState(groupNumber: ToxGroupNumber): ToxGroupVoiceState
+
+    fun groupGetTopicLock(groupNumber: ToxGroupNumber): ToxGroupTopicLock
+
+    fun groupGetPeerLimit(groupNumber: ToxGroupNumber): Int
+
+    fun groupGetPassword(groupNumber: ToxGroupNumber): ToxGroupPassword
+
+    fun groupSendMessage(
+        groupNumber: ToxGroupNumber,
+        messageType: ToxMessageType,
+        message: ToxGroupMessage,
+    ): Int
+
+    fun groupSendPrivateMessage(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+        messageType: ToxMessageType,
+        message: ToxGroupMessage,
+    ): Int
+
+    fun groupSendCustomPacket(
+        groupNumber: ToxGroupNumber,
+        lossless: Boolean,
+        data: ByteArray,
+    ): Unit
+
+    fun groupSendCustomPrivatePacket(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+        lossless: Boolean,
+        data: ByteArray,
+    ): Unit
+
+    fun groupInviteFriend(
+        groupNumber: ToxGroupNumber,
+        friendNumber: ToxFriendNumber,
+    ): Unit
+
+    fun groupInviteAccept(
+        friendNumber: ToxFriendNumber,
+        inviteData: ByteArray,
+        name: ToxGroupName,
+        password: ToxGroupPassword,
+    ): ToxGroupNumber
+
+    fun groupSetPassword(
+        groupNumber: ToxGroupNumber,
+        password: ToxGroupPassword,
+    ): Unit
+
+    fun groupSetTopicLock(
+        groupNumber: ToxGroupNumber,
+        topicLock: ToxGroupTopicLock,
+    ): Unit
+
+    fun groupSetVoiceState(
+        groupNumber: ToxGroupNumber,
+        voiceState: ToxGroupVoiceState,
+    ): Unit
+
+    fun groupSetPrivacyState(
+        groupNumber: ToxGroupNumber,
+        privacyState: ToxGroupPrivacyState,
+    ): Unit
+
+    fun groupSetPeerLimit(
+        groupNumber: ToxGroupNumber,
+        peerLimit: Int,
+    ): Unit
+
+    fun groupSetIgnore(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+        ignore: Boolean,
+    ): Unit
+
+    fun groupSetRole(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
+        role: ToxGroupRole,
+    ): Unit
+
+    fun groupKickPeer(
+        groupNumber: ToxGroupNumber,
+        peerId: ToxGroupPeerNumber,
     ): Unit
 }
