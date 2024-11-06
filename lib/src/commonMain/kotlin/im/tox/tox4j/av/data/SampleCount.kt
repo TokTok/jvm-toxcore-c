@@ -3,7 +3,9 @@ package im.tox.tox4j.av.data
 import kotlin.jvm.JvmInline
 
 @JvmInline
-value class SampleCount(val value: Int) {
+value class SampleCount(
+    val value: Int,
+) {
     constructor(
         audioLength: AudioLength,
         samplingRate: SamplingRate,

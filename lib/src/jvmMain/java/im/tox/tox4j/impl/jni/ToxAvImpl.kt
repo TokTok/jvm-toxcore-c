@@ -18,7 +18,9 @@ import im.tox.tox4j.core.data.ToxFriendNumber
  * @throws ToxavNewException If there was already an A/V session.
  */
 @kotlin.ExperimentalStdlibApi
-final class ToxAvImpl(private val tox: ToxCoreImpl) : ToxAv {
+final class ToxAvImpl(
+    private val tox: ToxCoreImpl,
+) : ToxAv {
     internal val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)
 
     override fun create(tox: ToxCore): ToxAv =

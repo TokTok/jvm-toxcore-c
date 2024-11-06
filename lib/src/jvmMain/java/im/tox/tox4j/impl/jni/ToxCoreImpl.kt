@@ -28,7 +28,9 @@ import im.tox.tox4j.core.options.ToxOptions
  * @param options Connection options object with optional save-data.
  */
 @kotlin.ExperimentalStdlibApi
-final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
+final class ToxCoreImpl(
+    val options: ToxOptions,
+) : ToxCore {
     /** This field has package visibility for [[ToxAvImpl]]. */
     internal val instanceNumber =
         ToxCoreJni.toxNew(
@@ -232,9 +234,7 @@ final class ToxCoreImpl(val options: ToxOptions) : ToxCore {
             name: String,
             message: String,
             expectedSize: Int,
-        ) {
-            throw IllegalArgumentException("$name too $message, must be $expectedSize bytes")
-        }
+        ): Unit = throw IllegalArgumentException("$name too $message, must be $expectedSize bytes")
 
         fun checkLength(
             name: String,

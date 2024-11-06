@@ -1,6 +1,8 @@
 package im.tox.tox4j.av.data
 
-enum class SamplingRate(val value: Int) {
+enum class SamplingRate(
+    val value: Int,
+) {
     Rate8k(8000),
     Rate12k(12000),
     Rate16k(16000),

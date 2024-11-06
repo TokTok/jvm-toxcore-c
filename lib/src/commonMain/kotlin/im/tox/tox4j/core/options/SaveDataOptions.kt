@@ -26,7 +26,9 @@ object SaveDataOptions {
      * Full save data containing friend list, last seen DHT nodes, name, and all other information
      * contained within a Tox instance.
      */
-    final data class ToxSave(override val data: ByteArray) : Type {
+    final data class ToxSave(
+        override val data: ByteArray,
+    ) : Type {
         override val kind: ToxSavedataType = ToxSavedataType.TOX_SAVE
     }
 
@@ -35,7 +37,9 @@ object SaveDataOptions {
      * secret key, the friend list, name, and noSpam value is sufficient to restore the observable
      * behaviour of a Tox instance without the full save data in [[ToxSave]].
      */
-    final data class SecretKey(private val key: ToxSecretKey) : Type {
+    final data class SecretKey(
+        private val key: ToxSecretKey,
+    ) : Type {
         override val kind: ToxSavedataType = ToxSavedataType.SECRET_KEY
         override val data: ByteArray = key.value
     }
