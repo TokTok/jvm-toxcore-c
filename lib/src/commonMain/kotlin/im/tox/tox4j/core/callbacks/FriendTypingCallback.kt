@@ -6,11 +6,11 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 interface FriendTypingCallback<ToxCoreState> {
     /**
      * @param friendNumber The friend number of the friend who started or stopped typing.
-     * @param isTyping Whether the friend started (true) or stopped (false) typing.
+     * @param typing Whether the friend is currently typing.
      */
     fun friendTyping(
         friendNumber: ToxFriendNumber,
-        isTyping: Boolean,
+        typing: Boolean,
         state: ToxCoreState,
     ): ToxCoreState = state
 }

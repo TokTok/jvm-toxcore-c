@@ -3,3 +3,4 @@ exclude:
   - "gradlew"
   - "**/*.cpp"
   - "**/*.h"
+  - "**/*Jni.java"

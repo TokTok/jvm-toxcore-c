@@ -36,7 +36,32 @@ message FileControl {
   }
 }
 
+message ConferenceType {
+  enum Type {
+    TEXT = 0;
+    AV   = 1;
+  }
+}
 
+message GroupExitType {
+  enum Type {
+    QUIT            = 0;
+    TIMEOUT         = 1;
+    DISCONNECTED    = 2;
+    SELF_DISCONNECTED = 3;
+    KICK            = 4;
+    SYNC_ERROR      = 5;
+  }
+}
+
+message GroupModEvent {
+  enum Type {
+    KICK      = 0;
+    OBSERVER  = 1;
+    USER      = 2;
+    MODERATOR = 3;
+  }
+}
 
 message SelfConnectionStatus {
   Connection.Type connection_status = 1;
@@ -66,7 +91,6 @@ message FriendTyping {
   uint32 friend_number        = 1;
   bool   is_typing            = 2;
 }
-
 message FriendReadReceipt {
   uint32 friend_number        = 1;
   uint32 message_id           = 2;
@@ -74,15 +98,13 @@ message FriendReadReceipt {
 
 message FriendRequest {
   bytes  public_key           = 1;
-  uint32 time_delta           = 2;
-  bytes  message              = 3;
+  bytes  message              = 2;
 }
 
 message FriendMessage {
   uint32 friend_number        = 1;
-  MessageType.Type type       = 2;
-  uint32 time_delta           = 3;
-  bytes message               = 4;
+  MessageType.Type message_type = 2;
+  bytes message               = 3;
 }
 
 message FileRecvControl {
@@ -123,20 +145,207 @@ message FriendLosslessPacket {
   bytes  data                 = 2;
 }
 
+message ConferenceInvite {
+  uint32 friend_number        = 1;
+  ConferenceType.Type type    = 2;
+  bytes  cookie               = 3;
+}
+
+message ConferenceConnected {
+  uint32 conference_number    = 1;
+}
+
+message ConferenceMessage {
+  uint32 conference_number    = 1;
+  uint32 peer_number          = 2;
+  MessageType.Type message_type = 3;
+  bytes message               = 4;
+}
+
+message ConferenceTitle {
+  uint32 conference_number    = 1;
+  uint32 peer_number          = 2;
+  bytes title                 = 3;
+}
+
+message ConferencePeerName {
+  uint32 conference_number    = 1;
+  uint32 peer_number          = 2;
+  bytes name                  = 3;
+}
+
+message ConferencePeerListChanged {
+  uint32 conference_number    = 1;
+}
+
+message GroupPeerName {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  bytes name                  = 3;
+}
+
+message GroupPeerStatus {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  UserStatus.Type status      = 3;
+}
+
+message GroupTopic {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  bytes topic                 = 3;
+}
+
+message GroupPrivacyState {
+  enum Type {
+    PUBLIC  = 0;
+    PRIVATE = 1;
+  }
+  uint32 group_number         = 1;
+  Type privacy_state          = 2;
+}
+
+message GroupVoiceState {
+  enum Type {
+    ALL       = 0;
+    MODERATOR = 1;
+    FOUNDER   = 2;
+  }
+  uint32 group_number         = 1;
+  Type voice_state            = 2;
+}
+
+message GroupTopicLock {
+  enum Type {
+    ENABLED  = 0;
+    DISABLED = 1;
+  }
+  uint32 group_number         = 1;
+  Type topic_lock             = 2;
+}
+
+message GroupPeerLimit {
+  uint32 group_number         = 1;
+  uint32 peer_limit           = 2;
+}
+
+message GroupPassword {
+  uint32 group_number         = 1;
+  bytes password              = 2;
+}
+
+message GroupMessage {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  MessageType.Type message_type = 3;
+  bytes message               = 4;
+  uint32 message_id           = 5;
+}
+
+message GroupPrivateMessage {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  MessageType.Type message_type = 3;
+  bytes message               = 4;
+  uint32 message_id           = 5;
+}
+
+message GroupCustomPacket {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  bytes data                  = 3;
+}
+
+message GroupCustomPrivatePacket {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  bytes data                  = 3;
+}
+
+message GroupInvite {
+  uint32 friend_number        = 1;
+  bytes  invite_data          = 2;
+  bytes  group_name           = 3;
+}
+
+message GroupPeerJoin {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+}
+
+message GroupPeerExit {
+  uint32 group_number         = 1;
+  uint32 peer_id              = 2;
+  GroupExitType.Type exit_type = 3;
+  bytes name                  = 4;
+  bytes part_message          = 5;
+}
+
+message GroupSelfJoin {
+  uint32 group_number         = 1;
+}
+
+message GroupJoinFail {
+  enum Type {
+    PEER_LIMIT        = 0;
+    INVALID_PASSWORD  = 1;
+    UNKNOWN           = 2;
+  }
+  uint32 group_number         = 1;
+  Type fail_type              = 2;
+}
+
+message GroupModeration {
+  uint32 group_number         = 1;
+  uint32 source_peer_id       = 2;
+  uint32 target_peer_id       = 3;
+  GroupModEvent.Type mod_type = 4;
+}
+
 message CoreEvents {
-  repeated SelfConnectionStatus   self_connection_status   =  1;
-  repeated FriendName             friend_name              =  2;
-  repeated FriendStatusMessage    friend_status_message    =  3;
-  repeated FriendStatus           friend_status            =  4;
-  repeated FriendConnectionStatus friend_connection_status =  5;
-  repeated FriendTyping           friend_typing            =  6;
-  repeated FriendReadReceipt      friend_read_receipt      =  7;
-  repeated FriendRequest          friend_request           =  8;
-  repeated FriendMessage          friend_message           =  9;
-  repeated FileRecvControl        file_recv_control        = 10;
-  repeated FileChunkRequest       file_chunk_request       = 11;
-  repeated FileRecv               file_recv                = 12;
-  repeated FileRecvChunk          file_recv_chunk          = 13;
-  repeated FriendLossyPacket      friend_lossy_packet      = 14;
-  repeated FriendLosslessPacket   friend_lossless_packet   = 15;
+  repeated Event events = 1;
+
+  message Event {
+    oneof event_type {
+      SelfConnectionStatus self_connection_status = 1;
+      FriendName friend_name = 2;
+      FriendStatusMessage friend_status_message = 3;
+      FriendStatus friend_status = 4;
+      FriendConnectionStatus friend_connection_status = 5;
+      FriendTyping friend_typing = 6;
+      FriendReadReceipt friend_read_receipt = 7;
+      FriendRequest friend_request = 8;
+      FriendMessage friend_message = 9;
+      FileRecvControl file_recv_control = 10;
+      FileChunkRequest file_chunk_request = 11;
+      FileRecv file_recv = 12;
+      FileRecvChunk file_recv_chunk = 13;
+      FriendLossyPacket friend_lossy_packet = 14;
+      FriendLosslessPacket friend_lossless_packet = 15;
+      ConferenceInvite conference_invite = 16;
+      ConferenceConnected conference_connected = 17;
+      ConferenceMessage conference_message = 18;
+      ConferenceTitle conference_title = 19;
+      ConferencePeerName conference_peer_name = 20;
+      ConferencePeerListChanged conference_peer_list_changed = 21;
+      GroupPeerName group_peer_name = 22;
+      GroupPeerStatus group_peer_status = 23;
+      GroupTopic group_topic = 24;
+      GroupPrivacyState group_privacy_state = 25;
+      GroupVoiceState group_voice_state = 26;
+      GroupTopicLock group_topic_lock = 27;
+      GroupPeerLimit group_peer_limit = 28;
+      GroupPassword group_password = 29;
+      GroupMessage group_message = 30;
+      GroupPrivateMessage group_private_message = 31;
+      GroupCustomPacket group_custom_packet = 32;
+      GroupCustomPrivatePacket group_custom_private_packet = 33;
+      GroupInvite group_invite = 34;
+      GroupPeerJoin group_peer_join = 35;
+      GroupPeerExit group_peer_exit = 36;
+      GroupSelfJoin group_self_join = 37;
+      GroupJoinFail group_join_fail = 38;
+      GroupModeration group_moderation = 39;
+    }
+  }
 }

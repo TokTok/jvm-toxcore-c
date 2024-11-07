@@ -250,10 +250,10 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxSelfSetTyping
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
  * Method:    toxFriendSendMessage
- * Signature: (IIII[B)I
+ * Signature: (III[B)I
  */
 JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxFriendSendMessage
-  (JNIEnv *, jclass, jint, jint, jint, jint, jbyteArray);
+  (JNIEnv *, jclass, jint, jint, jint, jbyteArray);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
@@ -310,6 +310,510 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxFriendSendLossyP
  */
 JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxFriendSendLosslessPacket
   (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceNew
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceNew
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceDelete
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceDelete
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferencePeerCount
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferencePeerCount
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferencePeerGetName
+ * Signature: (III)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferencePeerGetName
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferencePeerGetPublicKey
+ * Signature: (III)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferencePeerGetPublicKey
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferencePeerNumberIsOurs
+ * Signature: (III)Z
+ */
+JNIEXPORT jboolean JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferencePeerNumberIsOurs
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceOfflinePeerCount
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceOfflinePeerCount
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceOfflinePeerGetName
+ * Signature: (III)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceOfflinePeerGetName
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceOfflinePeerGetPublicKey
+ * Signature: (III)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceOfflinePeerGetPublicKey
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceOfflinePeerGetLastActive
+ * Signature: (III)J
+ */
+JNIEXPORT jlong JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceOfflinePeerGetLastActive
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceSetMaxOffline
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceSetMaxOffline
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceInvite
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceInvite
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceJoin
+ * Signature: (II[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceJoin
+  (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceSendMessage
+ * Signature: (III[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceSendMessage
+  (JNIEnv *, jclass, jint, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceGetTitle
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceGetTitle
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceSetTitle
+ * Signature: (II[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceSetTitle
+  (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceGetChatlist
+ * Signature: (I)[I
+ */
+JNIEXPORT jintArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceGetChatlist
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceGetType
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceGetType
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceGetId
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceGetId
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceById
+ * Signature: (I[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceById
+  (JNIEnv *, jclass, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceGetUid
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceGetUid
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxConferenceByUid
+ * Signature: (I[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceByUid
+  (JNIEnv *, jclass, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupNew
+ * Signature: (II[B[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupNew
+  (JNIEnv *, jclass, jint, jint, jbyteArray, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupJoin
+ * Signature: (I[B[B[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupJoin
+  (JNIEnv *, jclass, jint, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupIsConnected
+ * Signature: (II)Z
+ */
+JNIEXPORT jboolean JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupIsConnected
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupDisconnect
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupDisconnect
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupReconnect
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupReconnect
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupLeave
+ * Signature: (II[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupLeave
+  (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfSetName
+ * Signature: (II[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfSetName
+  (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfGetName
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfGetName
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfSetStatus
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfSetStatus
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfGetStatus
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfGetStatus
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfGetRole
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfGetRole
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfGetPeerId
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfGetPeerId
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSelfGetPublicKey
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSelfGetPublicKey
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupPeerGetName
+ * Signature: (III)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupPeerGetName
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupPeerGetStatus
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupPeerGetStatus
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupPeerGetRole
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupPeerGetRole
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupPeerGetConnectionStatus
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupPeerGetConnectionStatus
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupPeerGetPublicKey
+ * Signature: (III)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupPeerGetPublicKey
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetTopic
+ * Signature: (II[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetTopic
+  (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetTopic
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetTopic
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetName
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetName
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetChatId
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetChatId
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetPrivacyState
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetPrivacyState
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetVoiceState
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetVoiceState
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetTopicLock
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetTopicLock
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetPeerLimit
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetPeerLimit
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupGetPassword
+ * Signature: (II)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupGetPassword
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSendMessage
+ * Signature: (III[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSendMessage
+  (JNIEnv *, jclass, jint, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSendPrivateMessage
+ * Signature: (IIII[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSendPrivateMessage
+  (JNIEnv *, jclass, jint, jint, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSendCustomPacket
+ * Signature: (IIZ[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSendCustomPacket
+  (JNIEnv *, jclass, jint, jint, jboolean, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSendCustomPrivatePacket
+ * Signature: (IIIZ[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSendCustomPrivatePacket
+  (JNIEnv *, jclass, jint, jint, jint, jboolean, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupInviteFriend
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupInviteFriend
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupInviteAccept
+ * Signature: (II[B[B[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupInviteAccept
+  (JNIEnv *, jclass, jint, jint, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetPassword
+ * Signature: (II[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetPassword
+  (JNIEnv *, jclass, jint, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetTopicLock
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetTopicLock
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetVoiceState
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetVoiceState
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetPrivacyState
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetPrivacyState
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetPeerLimit
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetPeerLimit
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetIgnore
+ * Signature: (IIIZ)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetIgnore
+  (JNIEnv *, jclass, jint, jint, jint, jboolean);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupSetRole
+ * Signature: (IIII)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupSetRole
+  (JNIEnv *, jclass, jint, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
+ * Method:    toxGroupKickPeer
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupKickPeer
+  (JNIEnv *, jclass, jint, jint, jint);
 
 #ifdef __cplusplus
 }

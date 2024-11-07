@@ -34,7 +34,8 @@ object ToxCryptoImpl : ToxCrypto<ByteArray> {
         salt: ByteArray,
     ): PassKey = ToxCryptoJni.toxPassKeyDeriveWithSalt(passphrase, salt)
 
-    override fun passKeyDerive(passphrase: ByteArray): PassKey = ToxCryptoJni.toxPassKeyDerive(passphrase)
+    override fun passKeyDerive(passphrase: ByteArray): PassKey =
+        ToxCryptoJni.toxPassKeyDerive(passphrase)
 
     override fun decrypt(
         data: ByteArray,

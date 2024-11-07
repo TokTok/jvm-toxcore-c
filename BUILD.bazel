@@ -86,7 +86,7 @@ kt_jvm_library(
 kt_jvm_test(
     name = "ToxCoreTest",
     size = "small",
-    srcs = ["lib/src/jvmTest/java/im/tox/tox4j/core/ToxCoreTest.kt"],
+    srcs = glob(["lib/src/jvmTest/**/*.kt"]),
     jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
     test_class = "im.tox.tox4j.core.ToxCoreTest",
     deps = [

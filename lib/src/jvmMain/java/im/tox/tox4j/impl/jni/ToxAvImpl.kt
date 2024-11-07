@@ -114,5 +114,6 @@ final class ToxAvImpl(
         y: ByteArray,
         u: ByteArray,
         v: ByteArray,
-    ): Unit = ToxAvJni.toxavVideoSendFrame(instanceNumber, friendNumber.value, width, height, y, u, v)
+    ): Unit =
+        ToxAvJni.toxavVideoSendFrame(instanceNumber, friendNumber.value, width, height, y, u, v)
 }
