@@ -17,6 +17,7 @@ genrule(
     }),
     outs = ["lib/src/jvmMain/cpp/jni_md.h"],
     cmd = "cp -f $< $@",
+    tags = ["java"],
 )
 
 genrule(
@@ -24,6 +25,7 @@ genrule(
     srcs = ["@bazel_tools//tools/jdk:jni_header"],
     outs = ["lib/src/jvmMain/cpp/jni.h"],
     cmd = "cp -f $< $@",
+    tags = ["java"],
 )
 
 proto_library(
@@ -32,15 +34,18 @@ proto_library(
         "lib/src/jvmMain/proto/Av.proto",
         "lib/src/jvmMain/proto/Core.proto",
     ],
+    tags = ["java"],
 )
 
 cc_proto_library(
     name = "jni_cc_proto",
+    tags = ["java"],
     deps = [":jni_proto"],
 )
 
 java_proto_library(
     name = "jni_java_proto",
+    tags = ["java"],
     deps = [":jni_proto"],
 )
 
@@ -64,11 +69,13 @@ cc_binary(
         "@platforms//os:windows": [],
     }),
     linkshared = True,
+    tags = ["java"],
     visibility = ["//visibility:public"],
     deps = [
         "lib/src/jvmMain/cpp/libtox4j-c.ld",
         ":jni_cc_proto",
         "//c-toxcore",
+        "@libsodium",
     ],
 )
 
@@ -79,6 +86,7 @@ kt_jvm_library(
         "lib/src/*Main/**/*.kt",
     ]),
     data = ["libtox4j-c.so"],
+    tags = ["java"],
     visibility = ["//visibility:public"],
     deps = [":jni_java_proto"],
 )
@@ -88,6 +96,7 @@ kt_jvm_test(
     size = "small",
     srcs = glob(["lib/src/jvmTest/**/*.kt"]),
     jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
+    tags = ["java"],
     test_class = "im.tox.tox4j.core.ToxCoreTest",
     deps = [
         ":jvm-toxcore-c",
@@ -105,4 +114,5 @@ ktlint_test(
     name = "ktlint_test",
     size = "small",
     srcs = glob(["**/*.kt"]),
+    tags = ["java"],
 )

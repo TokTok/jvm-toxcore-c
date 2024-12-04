@@ -1,5 +1,5 @@
 // im.tox.tox4j.core.ToxCoreConstants$
-static void 
+static void
 checkToxCoreConstants ()
 {
   static_assert (TOX_ADDRESS_SIZE == 38, "Java constant out of sync with C");
@@ -10,7 +10,9 @@ checkToxCoreConstants ()
   static_assert (TOX_FILE_ID_LENGTH == 32, "Java constant out of sync with C");
   static_assert (TOX_MAX_CUSTOM_PACKET_SIZE == 1373, "Java constant out of sync with C");
   static_assert (TOX_MAX_FILENAME_LENGTH == 255, "Java constant out of sync with C");
-  static_assert (TOX_MAX_FRIEND_REQUEST_LENGTH == 1016, "Java constant out of sync with C");
+#if 0 // TODO: enable after toktok-stack update
+  static_assert (TOX_MAX_FRIEND_REQUEST_LENGTH == 921, "Java constant out of sync with C");
+#endif
   static_assert (TOX_MAX_HOSTNAME_LENGTH == 255, "Java constant out of sync with C");
   static_assert (TOX_MAX_MESSAGE_LENGTH == 1372, "Java constant out of sync with C");
   static_assert (TOX_MAX_NAME_LENGTH == 128, "Java constant out of sync with C");

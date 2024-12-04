@@ -26,7 +26,7 @@ object ToxCoreConstants {
     const val MAX_STATUS_MESSAGE_LENGTH = 1007
 
     /** Maximum length of a friend request message in bytes. */
-    const val MAX_FRIEND_REQUEST_LENGTH = 1016
+    const val MAX_FRIEND_REQUEST_LENGTH = 921
 
     /** Maximum length of a single message after which it should be split. */
     const val MAX_MESSAGE_LENGTH = 1372
