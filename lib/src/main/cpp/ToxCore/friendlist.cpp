@@ -554,21 +554,6 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConference
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
- * Method:    toxConferenceByUid
- * Signature: (I[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceByUid
-  (JNIEnv *env, jclass, jint instanceNumber, jbyteArray uid)
-{
-  auto uidData = fromJavaArray (env, uid);
-  return instances.with_instance_err (env, instanceNumber,
-    identity,
-    tox_conference_by_uid, uidData.data ()
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
  * Method:    toxGroupNew
  * Signature: (II[B[B)I
  */
@@ -625,19 +610,6 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupDisconnect
 {
   return instances.with_instance_ign (env, instanceNumber,
     tox_group_disconnect, groupNumber
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
- * Method:    toxGroupReconnect
- * Signature: (II)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupReconnect
-  (JNIEnv *env, jclass, jint instanceNumber, jint groupNumber)
-{
-  return instances.with_instance_ign (env, instanceNumber,
-    tox_group_reconnect, groupNumber
   );
 }
 

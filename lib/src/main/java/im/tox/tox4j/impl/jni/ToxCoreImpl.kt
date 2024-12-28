@@ -11,7 +11,6 @@ import im.tox.tox4j.core.data.ToxConferenceOfflinePeerNumber
 import im.tox.tox4j.core.data.ToxConferencePeerName
 import im.tox.tox4j.core.data.ToxConferencePeerNumber
 import im.tox.tox4j.core.data.ToxConferenceTitle
-import im.tox.tox4j.core.data.ToxConferenceUid
 import im.tox.tox4j.core.data.ToxFileId
 import im.tox.tox4j.core.data.ToxFilename
 import im.tox.tox4j.core.data.ToxFriendAddress
@@ -376,12 +375,6 @@ final class ToxCoreImpl(
     override fun conferenceById(conferenceId: ToxConferenceId): ToxConferenceNumber =
         ToxConferenceNumber(ToxCoreJni.toxConferenceById(instanceNumber, conferenceId.value))
 
-    override fun conferenceGetUid(conferenceNumber: ToxConferenceNumber): ToxConferenceUid =
-        ToxConferenceUid(ToxCoreJni.toxConferenceGetUid(instanceNumber, conferenceNumber.value))
-
-    override fun conferenceByUid(conferenceUid: ToxConferenceUid): ToxConferenceNumber =
-        ToxConferenceNumber(ToxCoreJni.toxConferenceByUid(instanceNumber, conferenceUid.value))
-
     override fun groupNew(
         privacyState: ToxGroupPrivacyState,
         groupName: ToxGroupName,
@@ -408,8 +401,6 @@ final class ToxCoreImpl(
     override fun groupIsConnected(groupNumber: ToxGroupNumber): Boolean = ToxCoreJni.toxGroupIsConnected(instanceNumber, groupNumber.value)
 
     override fun groupDisconnect(groupNumber: ToxGroupNumber): Unit = ToxCoreJni.toxGroupDisconnect(instanceNumber, groupNumber.value)
-
-    override fun groupReconnect(groupNumber: ToxGroupNumber): Unit = ToxCoreJni.toxGroupReconnect(instanceNumber, groupNumber.value)
 
     override fun groupLeave(
         groupNumber: ToxGroupNumber,

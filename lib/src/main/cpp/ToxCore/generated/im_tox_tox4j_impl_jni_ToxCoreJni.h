@@ -473,22 +473,6 @@ JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceById
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
- * Method:    toxConferenceGetUid
- * Signature: (II)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceGetUid
-  (JNIEnv *, jclass, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
- * Method:    toxConferenceByUid
- * Signature: (I[B)I
- */
-JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxConferenceByUid
-  (JNIEnv *, jclass, jint, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
  * Method:    toxGroupNew
  * Signature: (II[B[B)I
  */
@@ -517,14 +501,6 @@ JNIEXPORT jboolean JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupIsConne
  * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupDisconnect
-  (JNIEnv *, jclass, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCoreJni
- * Method:    toxGroupReconnect
- * Signature: (II)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCoreJni_toxGroupReconnect
   (JNIEnv *, jclass, jint, jint);
 
 /*
