@@ -279,6 +279,7 @@ HANDLE ("ConferenceJoin", Conference_Join)
     failure_case (CONFERENCE_JOIN, INIT_FAIL);
     failure_case (CONFERENCE_JOIN, INVALID_LENGTH);
     failure_case (CONFERENCE_JOIN, WRONG_TYPE);
+    failure_case (CONFERENCE_JOIN, NULL);
     }
   return unhandled ();
 }
@@ -329,17 +330,6 @@ HANDLE ("ConferenceById", Conference_By_Id)
   return unhandled ();
 }
 
-HANDLE ("ConferenceByUid", Conference_By_Uid)
-{
-  switch (error)
-    {
-    success_case (CONFERENCE_BY_UID);
-    failure_case (CONFERENCE_BY_UID, NULL);
-    failure_case (CONFERENCE_BY_UID, NOT_FOUND);
-    }
-  return unhandled ();
-}
-
 HANDLE ("GroupNew", Group_New)
 {
   switch (error)
@@ -386,17 +376,6 @@ HANDLE ("GroupDisconnect", Group_Disconnect)
     success_case (GROUP_DISCONNECT);
     failure_case (GROUP_DISCONNECT, ALREADY_DISCONNECTED);
     failure_case (GROUP_DISCONNECT, GROUP_NOT_FOUND);
-    }
-  return unhandled ();
-}
-
-HANDLE ("GroupReconnect", Group_Reconnect)
-{
-  switch (error)
-    {
-    success_case (GROUP_RECONNECT);
-    failure_case (GROUP_RECONNECT, CORE);
-    failure_case (GROUP_RECONNECT, GROUP_NOT_FOUND);
     }
   return unhandled ();
 }
@@ -571,6 +550,7 @@ HANDLE ("GroupInviteAccept", Group_Invite_Accept)
     failure_case (GROUP_INVITE_ACCEPT, INIT_FAILED);
     failure_case (GROUP_INVITE_ACCEPT, PASSWORD);
     failure_case (GROUP_INVITE_ACCEPT, TOO_LONG);
+    failure_case (GROUP_INVITE_ACCEPT, NULL);
     }
   return unhandled ();
 }
