@@ -9,7 +9,6 @@ import im.tox.tox4j.core.data.ToxConferenceOfflinePeerNumber
 import im.tox.tox4j.core.data.ToxConferencePeerName
 import im.tox.tox4j.core.data.ToxConferencePeerNumber
 import im.tox.tox4j.core.data.ToxConferenceTitle
-import im.tox.tox4j.core.data.ToxConferenceUid
 import im.tox.tox4j.core.data.ToxFileId
 import im.tox.tox4j.core.data.ToxFilename
 import im.tox.tox4j.core.data.ToxFriendAddress
@@ -835,16 +834,6 @@ interface ToxCore : AutoCloseable {
     fun conferenceById(conferenceId: ToxConferenceId): ToxConferenceNumber
 
     /**
-     * Get the conference unique ID.
-     */
-    fun conferenceGetUid(conferenceNumber: ToxConferenceNumber): ToxConferenceUid
-
-    /**
-     * Return the conference number associated with the specified uid.
-     */
-    fun conferenceByUid(conferenceUid: ToxConferenceUid): ToxConferenceNumber
-
-    /**
      * Creates a new group chat.
      *
      * This function creates a new group chat object and adds it to the chats array.
@@ -898,17 +887,6 @@ interface ToxCore : AutoCloseable {
      * @param groupNumber The group number of the group we wish to disconnect from.
      */
     fun groupDisconnect(groupNumber: ToxGroupNumber): Unit
-
-    /**
-     * Reconnects to a group.
-     *
-     * This function disconnects from all peers in the group, then attempts to
-     * reconnect with the group. The caller's state is not changed (i.e. name,
-     * status, role, chat public key etc.).
-     *
-     * @param groupNumber The group number of the group we wish to reconnect to.
-     */
-    fun groupReconnect(groupNumber: ToxGroupNumber): Unit
 
     /**
      * Leaves a group.

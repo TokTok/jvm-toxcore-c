@@ -2,7 +2,6 @@ package im.tox.tox4j.impl.jni;
 
 import im.tox.tox4j.core.exceptions.ToxBootstrapException;
 import im.tox.tox4j.core.exceptions.ToxConferenceByIdException;
-import im.tox.tox4j.core.exceptions.ToxConferenceByUidException;
 import im.tox.tox4j.core.exceptions.ToxConferenceDeleteException;
 import im.tox.tox4j.core.exceptions.ToxConferenceGetTypeException;
 import im.tox.tox4j.core.exceptions.ToxConferenceInviteException;
@@ -33,7 +32,6 @@ import im.tox.tox4j.core.exceptions.ToxGroupKickPeerException;
 import im.tox.tox4j.core.exceptions.ToxGroupLeaveException;
 import im.tox.tox4j.core.exceptions.ToxGroupNewException;
 import im.tox.tox4j.core.exceptions.ToxGroupPeerQueryException;
-import im.tox.tox4j.core.exceptions.ToxGroupReconnectException;
 import im.tox.tox4j.core.exceptions.ToxGroupSelfNameSetException;
 import im.tox.tox4j.core.exceptions.ToxGroupSelfQueryException;
 import im.tox.tox4j.core.exceptions.ToxGroupSelfStatusSetException;
@@ -274,12 +272,6 @@ public final class ToxCoreJni {
     // Tox_Conference_Number tox_conference_by_id(
     //     const Tox *tox, const uint8_t id[TOX_CONFERENCE_ID_SIZE], Tox_Err_Conference_By_Id *error);
     static native int toxConferenceById(int instanceNumber, byte[] id) throws ToxConferenceByIdException;
-    // bool tox_conference_get_uid(
-    //     const Tox *tox, Tox_Conference_Number conference_number, uint8_t uid[TOX_CONFERENCE_UID_SIZE]);
-    static native byte[] toxConferenceGetUid(int instanceNumber, int conferenceNumber);
-    // Tox_Conference_Number tox_conference_by_uid(
-    //     const Tox *tox, const uint8_t uid[TOX_CONFERENCE_UID_SIZE], Tox_Err_Conference_By_Uid *error);
-    static native int toxConferenceByUid(int instanceNumber, byte[] uid) throws ToxConferenceByUidException;
 
     // Tox_Group_Number tox_group_new(
     //     Tox *tox, Tox_Group_Privacy_State privacy_state,
@@ -300,9 +292,6 @@ public final class ToxCoreJni {
     // bool tox_group_disconnect(const Tox *tox, Tox_Group_Number group_number, Tox_Err_Group_Disconnect *error);
     static native void toxGroupDisconnect(int instanceNumber, int groupNumber)
         throws ToxGroupDisconnectException;
-    // bool tox_group_reconnect(Tox *tox, Tox_Group_Number group_number, Tox_Err_Group_Reconnect *error);
-    static native void toxGroupReconnect(int instanceNumber, int groupNumber)
-        throws ToxGroupReconnectException;
     // bool tox_group_leave(
     //     Tox *tox, Tox_Group_Number group_number,
     //     const uint8_t part_message[], size_t length,
