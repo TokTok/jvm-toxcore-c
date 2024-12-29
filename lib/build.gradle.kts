@@ -4,7 +4,13 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+
+    // https://docs.gradle.org/current/userguide/publishing_maven.html
+    `maven-publish`
 }
+
+group = "org.toktok"
+version = "0.3.0"
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -30,6 +36,15 @@ testing {
         val test by getting(JvmTestSuite::class) {
             // Use Kotlin Test test framework
             useKotlinTest("1.9.22")
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "tox4j-c"
+            from(components["java"])
         }
     }
 }
