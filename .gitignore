@@ -25,3 +25,6 @@ hsdis-*.*
 
 # Ignore Gradle build output directory
 build
+
+# Local Gradle configuration
+local.properties
