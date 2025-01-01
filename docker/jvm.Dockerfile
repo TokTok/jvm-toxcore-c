@@ -40,7 +40,6 @@ COPY gradlew gradle.properties settings.gradle.kts /work/jvm-toxcore-c/
 COPY gradle /work/jvm-toxcore-c/gradle/
 COPY lib/ /work/jvm-toxcore-c/lib/
 ENV LD_LIBRARY_PATH=/work/jvm-toxcore-c/_install/host/lib
-ENV PATH=/work/jvm-toxcore-c/_install/host/bin:$PATH
 RUN ./gradlew build
 
 RUN javac -h . -cp /work/jvm-toxcore-c/lib/build/classes/kotlin/main:/work/jvm-toxcore-c/lib/build/classes/java/main \

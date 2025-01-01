@@ -11,9 +11,17 @@ repositories {
     mavenCentral()
 }
 
+val protobufVersion = "3.24.4"
+
 dependencies {
-    implementation("com.google.protobuf:protobuf-java:3.24.4")
+    implementation("com.google.protobuf:protobuf-java:$protobufVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
 }
 
 testing {
