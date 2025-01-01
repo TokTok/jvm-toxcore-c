@@ -4,7 +4,13 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+
+    // https://docs.gradle.org/current/userguide/publishing_maven.html
+    `maven-publish`
 }
+
+group = "org.toktok"
+version = "0.3.0"
 
 repositories {
     // Use Maven Central for resolving dependencies.
