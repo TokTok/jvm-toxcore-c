@@ -17,7 +17,7 @@ jobs:
   docker:
     strategy:
       matrix:
-        target: [jvm, native]
+        target: [jvm]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx

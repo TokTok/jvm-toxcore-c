@@ -3,7 +3,7 @@ POST_RULE = ls -ld $@
 
 GIT_CLONE = git clone --depth=1 --recurse-submodules --shallow-submodules
 
-$(BUILDDIR)/tox4j/Makefile: $(CURDIR)/lib/src/jvmMain/cpp/CMakeLists.txt $(TOOLCHAIN_FILE) $(foreach i,protobuf toxcore,$(PREFIX)/$i.stamp)
+$(BUILDDIR)/tox4j/Makefile: $(CURDIR)/lib/src/main/cpp/CMakeLists.txt $(TOOLCHAIN_FILE) $(foreach i,protobuf toxcore,$(PREFIX)/$i.stamp)
 	@$(PRE_RULE)
 	mkdir -p $(@D)
 	cd $(@D) && cmake $(<D) $($(notdir $(@D))_CONFIGURE)
