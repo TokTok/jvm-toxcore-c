@@ -1,0 +1,18 @@
+version: "0.2"
+dictionaryDefinitions: []
+dictionaries: []
+ignoreWords: []
+flagWords: []
+import: []
+ignorePaths:
+  - "*.json"
+  - "*.yaml"
+  - "*.yml"
+  - "BUILD.bazel"
+  - "LICENSE*"
+words:
+  - "abilinski"
+  - "kotlinx"
+  - "norequest"
+  - "stdlib"
+  - "toxes"
