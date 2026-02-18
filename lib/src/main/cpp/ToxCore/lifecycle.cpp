@@ -506,6 +506,7 @@ tox_options_new_unique ()
 {
   struct Tox_Options_Deleter
   {
+    [[maybe_unused]]
     void operator () (Tox_Options *options)
     {
       tox_options_free (options);
@@ -567,7 +568,7 @@ TOX_METHOD (jint, New,
 
   auto save_data = fromJavaArray (env, saveData);
   tox_options_set_savedata_type (opts.get (), Enum::valueOf<Tox_Savedata_Type> (env, saveDataType));
-  tox_options_set_savedata_data (opts.get (), save_data.data (), save_data.size ());
+  tox_options_set_savedata (opts.get (), save_data.data (), save_data.size ());
 
   return instances.with_error_handling (env,
     [env] (tox::core_ptr tox)
