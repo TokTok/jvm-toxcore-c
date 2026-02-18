@@ -9,18 +9,21 @@ PROTOC		:= $(DESTDIR)/host/bin/protoc
 
 export CC		:= $(TOOLCHAIN)/bin/$(TARGET)$(NDK_API)-clang
 export CXX		:= $(TOOLCHAIN)/bin/$(TARGET)$(NDK_API)-clang++
-export LDFLAGS		:= -llog
 export PKG_CONFIG_LIBDIR:= $(PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
 export PATH		:= $(TOOLCHAIN)/bin:$(PATH)
 export TOX4J_PLATFORM	:= $(TARGET)
 
-protobuf_CONFIGURE	:= --prefix=$(PREFIX) --host=$(TARGET) --with-sysroot=$(SYSROOT) --disable-shared --with-protoc=$(PROTOC)
-libsodium_CONFIGURE	:= --prefix=$(PREFIX) --host=$(TARGET) --with-sysroot=$(SYSROOT) --disable-shared
-opus_CONFIGURE		:= --prefix=$(PREFIX) --host=$(TARGET) --with-sysroot=$(SYSROOT) --disable-shared
-libvpx_CONFIGURE	:= --prefix=$(PREFIX) --sdk-path=$(NDK_HOME) --libc=$(SYSROOT) --target=$(VPX_ARCH) --disable-examples --disable-unit-tests --enable-pic
-toxcore_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c -DENABLE_STATIC=ON -DENABLE_SHARED=OFF
-tox4j_CONFIGURE		:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c
+protobuf_CONFIGURE	:= -D CMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -D WITH_PROTOC=$(PROTOC) -D CMAKE_EXE_LINKER_FLAGS=-llog
+libsodium_CONFIGURE	:= --host=$(TARGET) --with-sysroot=$(SYSROOT)
+opus_CONFIGURE		:= --host=$(TARGET) --with-sysroot=$(SYSROOT)
+libvpx_CONFIGURE	:= --libc=$(SYSROOT) --target=$(VPX_ARCH)
+toxcore_CONFIGURE	:= -D CMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -D ANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c
+tox4j_CONFIGURE		:= -D CMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -D ANDROID_CPU_FEATURES=$(NDK_HOME)/sources/android/cpufeatures/cpu-features.c -D protobuf_DIR=$(PREFIX)/lib/cmake/protobuf -D absl_DIR=$(PREFIX)/lib/cmake/absl -D utf8_range_DIR=$(PREFIX)/lib/cmake/utf8_range
+
+libvpx_PATCH	:=							\
+	sed -i -e 's!^AS=as!AS=$(CC) -c!' $(BUILDDIR)/libvpx/*.mk &&	\
+	sed -i -e 's!^STRIP=strip!STRIP=$(TOOLCHAIN)/bin/llvm-strip!' $(BUILDDIR)/libvpx/*.mk
 
 build: $(PREFIX)/tox4j.stamp
 
@@ -31,10 +34,9 @@ $(NDK_HOME):
 	@$(PRE_RULE)
 	@mkdir -p $(@D)
 	# This is put into the root dir, not into $(SRCDIR), because it's huge and
-	# clutters the Travis CI cache.
+	# clutters the CI cache.
 	test -f $(NDK_PACKAGE) || curl -s $(NDK_URL) -o $(NDK_PACKAGE)
-	7z x $(NDK_PACKAGE) $(foreach x,$(NDK_FILES),'-ir!$(NDK_DIR)/$x')
-	test -d $@ && find $@ -exec chmod +w {} \; && rm -rf $@
+	$(SEVEN_ZIP) x -snld $(NDK_PACKAGE)
 	mv $(NDK_DIR) $@
 	mkdir -p $(TOOLCHAIN)/bin
 	ln -f $(CC) $(TOOLCHAIN)/bin/$(TARGET)-gcc
