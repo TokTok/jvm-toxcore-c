@@ -9,11 +9,43 @@ extern "C" {
 #endif
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
+ * Method:    toxPassKeyFree
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyFree
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
+ * Method:    toxPassKeyDerive
+ * Signature: ([B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDerive
+  (JNIEnv *, jclass, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
+ * Method:    toxPassKeyDeriveWithSalt
+ * Signature: ([B[B)I
+ */
+JNIEXPORT jint JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDeriveWithSalt
+  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
  * Method:    toxPassKeyEncrypt
- * Signature: ([B[B)[B
+ * Signature: (I[B)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyEncrypt
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jint, jbyteArray);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
+ * Method:    toxPassKeyDecrypt
+ * Signature: (I[B)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDecrypt
+  (JNIEnv *, jclass, jint, jbyteArray);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
@@ -30,30 +62,6 @@ JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxGetSalt
  */
 JNIEXPORT jboolean JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxIsDataEncrypted
   (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    toxPassKeyDeriveWithSalt
- * Signature: ([B[B)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDeriveWithSalt
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    toxPassKeyDerive
- * Signature: ([B)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDerive
-  (JNIEnv *, jclass, jbyteArray);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni
- * Method:    toxPassKeyDecrypt
- * Signature: ([B[B)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_im_tox_tox4j_impl_jni_ToxCryptoJni_toxPassKeyDecrypt
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxCryptoJni

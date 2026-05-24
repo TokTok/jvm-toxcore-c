@@ -2,12 +2,9 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.exceptions.ToxException
 
-/**
- * An exception thrown when a file seek could not be performed.
- */
 class ToxFileSeekException : ToxException {
     enum class Code {
-        /** The friendNumber passed did not designate a valid friend. */
+        /** The friend_number passed did not designate a valid friend. */
         FRIEND_NOT_FOUND,
 
         /** This client is currently not connected to the friend. */

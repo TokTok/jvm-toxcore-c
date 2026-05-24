@@ -19,6 +19,7 @@ void
 reference_symbols_core ()
 {
   int tox_finalize; // For Java only.
+  unused (tox_finalize);
 
   checkToxCoreConstants();
 #define JAVA_METHOD_REF(NAME)  unused (JAVA_METHOD_NAME (NAME));

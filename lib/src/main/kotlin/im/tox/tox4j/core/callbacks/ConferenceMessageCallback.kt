@@ -4,7 +4,6 @@ import im.tox.tox4j.core.data.ToxConferenceNumber
 import im.tox.tox4j.core.data.ToxConferencePeerNumber
 import im.tox.tox4j.core.enums.ToxMessageType
 
-/** This event is triggered when the client receives a conference message. */
 interface ConferenceMessageCallback<ToxCoreState> {
     /**
      * @param conferenceNumber The conference number of the conference the message is intended for.

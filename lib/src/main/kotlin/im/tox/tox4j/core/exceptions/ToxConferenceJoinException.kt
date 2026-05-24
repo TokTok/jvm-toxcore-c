@@ -21,6 +21,9 @@ class ToxConferenceJoinException : ToxException {
 
         /** The join packet failed to send. */
         FAIL_SEND,
+
+        /** The cookie passed was null. */
+        NULL,
     }
 
     constructor(code: Code) : this(code, "")

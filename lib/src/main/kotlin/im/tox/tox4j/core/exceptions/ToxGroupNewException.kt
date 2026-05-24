@@ -2,26 +2,18 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.exceptions.ToxException
 
-/**
- * An exception thrown when a new group could not be created.
- */
 class ToxGroupNewException : ToxException {
     enum class Code {
-        /**
-         * name exceeds TOX_MAX_NAME_LENGTH or group_name exceeded TOX_GROUP_MAX_GROUP_NAME_LENGTH.
-         */
+        /** name exceeds [ToxCoreConstants.MAX_NAME_LENGTH] or group_name exceeded [ToxCoreConstants.GROUP_MAX_GROUP_NAME_LENGTH]. */
         TOO_LONG,
 
-        /** name or group_name is NULL or length is zero. */
+        /** name or group_name is null or length is zero. */
         EMPTY,
 
         /** The group instance failed to initialize. */
         INIT,
 
-        /**
-         * The group state failed to initialize. This usually indicates that something went wrong
-         * related to cryptographic signing.
-         */
+        /** The group state failed to initialize. This usually indicates that something went wrong related to cryptographic signing. */
         STATE,
 
         /** The group failed to announce to the DHT. This indicates a network related error. */

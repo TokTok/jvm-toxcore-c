@@ -1,126 +1,98 @@
 package im.tox.tox4j.crypto
 
-/**
- * To perform encryption, first derive an encryption key from a password with
- * [[ToxCrypto.passKeyDerive]], and use the returned key to encrypt the data.
- *
- * The encrypted data is prepended with a magic number, to aid validity checking (no guarantees are
- * made of course). Any data to be decrypted must start with the magic number.
- *
- * Clients should consider alerting their users that, unlike plain data, if even one bit becomes
- * corrupted, the data will be entirely unrecoverable. Ditto if they forget their password, there is
- * no way to recover the data.
- */
+import im.tox.tox4j.core.data.ToxPassSalt
+
 interface ToxCrypto<PassKey> {
-    /**
-     * Compares two [[PassKey]]s for equality.
-     *
-     * @return true if the [[PassKey]]s are equal.
-     */
-    fun passKeyEquals(
-        a: PassKey,
-        b: PassKey,
-    ): Boolean
-
-    /**
-     * Serialise the [[PassKey]] to a byte sequence.
-     *
-     * @return A sequence of bytes making up a [[PassKey]].
-     */
-    fun passKeyToBytes(passKey: PassKey): List<Byte>
-
-    /**
-     * Deserialise a [[PassKey]] from a byte sequence.
-     *
-     * @return [[Some]]([[PassKey]]) if the key was valid, [[None]] otherwise.
-     */
-    fun passKeyFromBytes(bytes: List<Byte>): PassKey?
-
     /**
      * Generates a secret symmetric key from the given passphrase.
      *
-     * Be sure to not compromise the key! Only keep it in memory, do not write to disk. The key
-     * should only be used with the other functions in this module, as it includes a salt.
+     * Be sure to not compromise the key! Only keep it in memory, do not write it to disk.
      *
-     * Note that this function is not deterministic; to derive the same key from a password, you
-     * also must know the random salt that was used. See below.
+     * Note that this function is not deterministic; to derive the same key from a password, you also must know the random salt that was used. A deterministic version of this function is [passKeyDeriveWithSalt].
      *
-     * @param passphrase A non-empty byte array containing the passphrase.
-     * @return the generated symmetric key.
-     * @throws ToxKeyDerivationException
+     * @param passphrase The user-provided password. Can be empty.
+     * @param passphraseLen The length of the password.
+     *
+     * @return new symmetric key on success, null on failure.
      */
     fun passKeyDerive(passphrase: ByteArray): PassKey
 
     /**
      * Same as above, except use the given salt for deterministic key derivation.
      *
-     * @param passphrase A non-empty byte array containing the passphrase.
-     * @param salt Array of size [[ToxCryptoConstants.SALT_LENGTH]].
-     * @throws ToxKeyDerivationException
+     * @param passphrase The user-provided password. Can be empty.
+     * @param passphraseLen The length of the password.
+     * @param salt An array of exactly [ToxCryptoConstants.SALT_LENGTH] bytes.
+     *
+     * @return new symmetric key on success, null on failure.
      */
     fun passKeyDeriveWithSalt(
         passphrase: ByteArray,
-        salt: ByteArray,
+        salt: ToxPassSalt,
     ): PassKey
 
     /**
-     * This retrieves the salt used to encrypt the given data, which can then be passed to
-     * [[passKeyDeriveWithSalt]] to produce the same key as was previously used. Any encrypted data
-     * with this module can be used as input.
+     * Encrypt a plain text with a key produced by [passKeyDerive] or [passKeyDeriveWithSalt].
      *
-     * Success does not say anything about the validity of the data, only that data of the
-     * appropriate size was copied.
+     * The output array must be at least `plaintext_len + [ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH]` bytes long.
      *
-     * @return the salt, or an empty array if the magic number did not match.
-     * @throws ToxGetSaltException
-     */
-    fun getSalt(data: ByteArray): ByteArray
-
-    // Now come the functions that are analogous to the part 2 functions.
-
-    /**
-     * Encrypt arbitrary data with a key produced by [[passKeyDerive]] or [[passKeyDeriveWithSalt]].
+     * @param plaintext A byte array of length `plaintext_len`.
+     * @param plaintextLen The length of the plain text array. Bigger than 0.
+     * @param ciphertext The cipher text array to write the encrypted data to.
      *
-     * The output array will be [[ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH]] bytes longer than the
-     * input array.
-     *
-     * The result will be different on each call.
-     *
-     * @return the encrypted output array.
-     * @throws ToxEncryptionException
+     * @return true on success.
      */
     fun encrypt(
-        data: ByteArray,
         passKey: PassKey,
+        plaintext: ByteArray,
     ): ByteArray
 
     /**
-     * This is the inverse of [[encrypt]], also using only keys produced by [[passKeyDerive]].
+     * This is the inverse of [encrypt], also using only keys produced by [passKeyDerive] or [passKeyDeriveWithSalt].
      *
-     * The output data has size data_length - [[ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH]].
+     * @param ciphertext A byte array of length `ciphertext_len`.
+     * @param ciphertextLen The length of the cipher text array. At least [ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH].
+     * @param plaintext The plain text array to write the decrypted data to.
      *
-     * @return the decrypted output array.
-     * @throws ToxDecryptionException
+     * @return true on success.
      */
     fun decrypt(
-        data: ByteArray,
         passKey: PassKey,
+        ciphertext: ByteArray,
     ): ByteArray
 
-    /** Determines whether or not the given data is encrypted (by checking the magic number) */
-    fun isDataEncrypted(data: ByteArray): Boolean
+    /**
+     * Retrieves the salt used to encrypt the given data.
+     *
+     * The retrieved salt can then be passed to [passKeyDeriveWithSalt] to produce the same key as was previously used. Any data encrypted with this module can be used as input.
+     *
+     * The cipher text must be at least [ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH] bytes in length. The salt must be [ToxCryptoConstants.SALT_LENGTH] bytes in length. If the passed byte arrays are smaller than required, the behaviour is undefined.
+     *
+     * If the cipher text pointer or the salt is null, this function returns false.
+     *
+     * Success does not say anything about the validity of the data, only that data of the appropriate size was copied.
+     *
+     * @param ciphertext The encrypted data; at least [ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH] bytes are read.
+     * @param salt An array of exactly [ToxCryptoConstants.SALT_LENGTH] bytes to write the salt to.
+     *
+     * @return true on success.
+     */
+    fun getSalt(ciphertext: ByteArray): ToxPassSalt
 
     /**
-     * Generates a cryptographic hash of the given data.
+     * Determines whether or not the given data is encrypted by this module.
      *
-     * This function may be used by clients for any purpose, but is provided primarily for
-     * validating cached avatars. This use is highly recommended to avoid unnecessary avatar
-     * updates.
+     * It does this check by verifying that the magic number is the one put in place by the encryption functions.
      *
-     * This function is a wrapper to internal message-digest functions.
+     * The data must be at least [ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH] bytes in length. If the passed byte array is smaller than required, the behaviour is undefined.
      *
-     * @param data Data to be hashed.
-     * @return hash of the data.
+     * If the data pointer is null, the behaviour is undefined
+     *
+     * @param data The data to check; at least [ToxCryptoConstants.ENCRYPTION_EXTRA_LENGTH] bytes are read.
+     *
+     * @return true if the data is encrypted by this module.
      */
+    fun isDataEncrypted(data: ByteArray): Boolean
+
     fun hash(data: ByteArray): ByteArray
 }

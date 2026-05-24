@@ -2,8 +2,9 @@ load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary")
-load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library", "kt_jvm_test")
+load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_kotlin//kotlin:lint.bzl", "ktlint_fix", "ktlint_test")
+load("//jvm-toxcore-c:tox4j_test.bzl", "tox4j_test")
 load("//tools/project:build_defs.bzl", "project")
 
 project()
@@ -92,27 +93,184 @@ kt_jvm_library(
     deps = [":jni_java_proto"],
 )
 
-kt_jvm_test(
+tox4j_test(
     name = "ToxCoreTest",
-    srcs = glob(["lib/src/test/**/*.kt"]),
-    jvm_flags = ["-Djava.library.path=jvm-toxcore-c"],
-    tags = ["java"],
-    test_class = "im.tox.tox4j.core.ToxCoreTest",
-    deps = [
-        ":jvm-toxcore-c",
-        "@maven//:org_jetbrains_kotlin_kotlin_test_junit",
-        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+    srcs = [
+        "lib/src/test/java/im/tox/tox4j/core/TestContext.kt",
+        "lib/src/test/java/im/tox/tox4j/core/ToxCoreTest.kt",
+    ],
+    package = "im.tox.tox4j.core",
+    deps = ["@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core"],
+)
+
+tox4j_test(
+    name = "ToxCoreConstantsTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCryptoConstantsTest",
+    package = "im.tox.tox4j.crypto",
+)
+
+tox4j_test(
+    name = "ToxEnumsTest",
+    package = "im.tox.tox4j.core.enums",
+)
+
+tox4j_test(
+    name = "ToxAvEnumsTest",
+    package = "im.tox.tox4j.av.enums",
+)
+
+tox4j_test(
+    name = "ToxCoreLifecycleTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreSelfTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreFriendTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCryptoImplTest",
+    package = "im.tox.tox4j.crypto",
+)
+
+tox4j_test(
+    name = "ToxCryptoConcurrencyTest",
+    package = "im.tox.tox4j.crypto",
+)
+
+tox4j_test(
+    name = "ToxOptionsTest",
+    package = "im.tox.tox4j.core.options",
+)
+
+tox4j_test(
+    name = "ToxCoreIterateTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxAvLifecycleTest",
+    package = "im.tox.tox4j.av",
+)
+
+tox4j_test(
+    name = "ToxAvErrorPathTest",
+    package = "im.tox.tox4j.av",
+)
+
+tox4j_test(
+    name = "ToxAvEventDispatchTest",
+    package = "im.tox.tox4j.impl.jni",
+)
+
+tox4j_test(
+    name = "AvValueClassTest",
+    package = "im.tox.tox4j.av.data",
+)
+
+tox4j_test(
+    name = "ToxByteArrayValueEqualityTest",
+    package = "im.tox.tox4j.core.data",
+)
+
+tox4j_test(
+    name = "ToxCoreEventDispatchTest",
+    package = "im.tox.tox4j.impl.jni",
+)
+
+tox4j_test(
+    name = "ToxCryptoJniNullGuardTest",
+    package = "im.tox.tox4j.impl.jni",
+)
+
+tox4j_test(
+    name = "ToxJniEnumOrdinalsTest",
+    package = "im.tox.tox4j.impl.jni",
+)
+
+tox4j_test(
+    name = "ToxProtoEnumAlignmentTest",
+    package = "im.tox.tox4j.impl.jni",
+)
+
+tox4j_test(
+    name = "ToxCoreConferenceTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreConferencePeerTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreGroupPeerAdminTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreGroupTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreErrorPathTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreFriendPacketTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "ToxCoreFileMethodsTest",
+    package = "im.tox.tox4j.core",
+)
+
+tox4j_test(
+    name = "Tox4jIntegrationTest",
+    # Slow (toxes connecting over loopback), so it only runs when named.
+    size = "medium",
+    srcs = [
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestConference.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestCustomPacket.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestFile.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestFileCancel.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestFriendInfo.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestGroup.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestMessage.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestPersistence.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/SubtestToxav.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/Tox4jHarness.kt",
+        "lib/src/test/java/im/tox/tox4j/e2e/Tox4jIntegrationTest.kt",
+    ],
+    package = "im.tox.tox4j.e2e",
+    tags = [
+        "e2e",
+        "manual",
     ],
 )
 
 ktlint_fix(
     name = "ktlint_fix",
     srcs = glob(["**/*.kt"]),
+    tags = ["java"],
 )
 
 ktlint_test(
     name = "ktlint_test",
-    size = "small",
+    size = "medium",
     srcs = glob(["**/*.kt"]),
     tags = ["java"],
 )

@@ -25,14 +25,6 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavKill
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    toxavFinalize
- * Signature: (I)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavFinalize
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
  * Method:    toxavIterationInterval
  * Signature: (I)I
  */
@@ -73,11 +65,27 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavCallControl
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
+ * Method:    toxavAudioSendFrame
+ * Signature: (II[SJBI)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavAudioSendFrame
+  (JNIEnv *, jclass, jint, jint, jshortArray, jlong, jbyte, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxAvJni
  * Method:    toxavAudioSetBitRate
  * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavAudioSetBitRate
   (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     im_tox_tox4j_impl_jni_ToxAvJni
+ * Method:    toxavVideoSendFrame
+ * Signature: (IIII[B[B[B)V
+ */
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavVideoSendFrame
+  (JNIEnv *, jclass, jint, jint, jint, jint, jbyteArray, jbyteArray, jbyteArray);
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
@@ -89,19 +97,11 @@ JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavVideoSetBitRate
 
 /*
  * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    toxavAudioSendFrame
- * Signature: (II[SIII)V
+ * Method:    toxavFinalize
+ * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavAudioSendFrame
-  (JNIEnv *, jclass, jint, jint, jshortArray, jint, jint, jint);
-
-/*
- * Class:     im_tox_tox4j_impl_jni_ToxAvJni
- * Method:    toxavVideoSendFrame
- * Signature: (IIII[B[B[B)V
- */
-JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavVideoSendFrame
-  (JNIEnv *, jclass, jint, jint, jint, jint, jbyteArray, jbyteArray, jbyteArray);
+JNIEXPORT void JNICALL Java_im_tox_tox4j_impl_jni_ToxAvJni_toxavFinalize
+  (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

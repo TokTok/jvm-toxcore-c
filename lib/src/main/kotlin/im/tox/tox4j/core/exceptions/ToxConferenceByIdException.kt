@@ -4,14 +4,11 @@ import im.tox.tox4j.exceptions.ToxException
 
 class ToxConferenceByIdException : ToxException {
     enum class Code {
-        /** The conference number passed did not designate a valid conference. */
-        CONFERENCE_NOT_FOUND,
+        /** One of the arguments to the function was null when it was not expected. */
+        NULL,
 
-        /** The invite packet failed to send. */
-        FAIL_SEND,
-
-        /** The client is not connected to the conference. */
-        NO_CONNECTION,
+        /** No conference with the given id exists on the conference list. */
+        NOT_FOUND,
     }
 
     constructor(code: Code) : this(code, "")

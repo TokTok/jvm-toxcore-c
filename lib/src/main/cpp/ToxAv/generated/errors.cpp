@@ -27,19 +27,6 @@ HANDLE ("BitRateSet", Bit_Rate_Set)
   return unhandled ();
 }
 
-HANDLE ("CallControl", Call_Control)
-{
-  switch (error)
-    {
-    success_case (CALL_CONTROL);
-    failure_case (CALL_CONTROL, FRIEND_NOT_FOUND);
-    failure_case (CALL_CONTROL, FRIEND_NOT_IN_CALL);
-    failure_case (CALL_CONTROL, INVALID_TRANSITION);
-    failure_case (CALL_CONTROL, SYNC);
-    }
-  return unhandled ();
-}
-
 HANDLE ("Call", Call)
 {
   switch (error)
@@ -51,6 +38,19 @@ HANDLE ("Call", Call)
     failure_case (CALL, INVALID_BIT_RATE);
     failure_case (CALL, MALLOC);
     failure_case (CALL, SYNC);
+    }
+  return unhandled ();
+}
+
+HANDLE ("CallControl", Call_Control)
+{
+  switch (error)
+    {
+    success_case (CALL_CONTROL);
+    failure_case (CALL_CONTROL, FRIEND_NOT_FOUND);
+    failure_case (CALL_CONTROL, FRIEND_NOT_IN_CALL);
+    failure_case (CALL_CONTROL, INVALID_TRANSITION);
+    failure_case (CALL_CONTROL, SYNC);
     }
   return unhandled ();
 }
@@ -82,3 +82,4 @@ HANDLE ("SendFrame", Send_Frame)
     }
   return unhandled ();
 }
+

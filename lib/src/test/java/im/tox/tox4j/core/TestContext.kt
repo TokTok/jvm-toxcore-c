@@ -7,7 +7,6 @@ import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-@kotlin.ExperimentalStdlibApi
 private class TestContext : CoroutineContext.Element {
     private val list: MutableList<ToxCore> = mutableListOf()
 
@@ -36,10 +35,8 @@ private class TestContext : CoroutineContext.Element {
     }
 }
 
-@kotlin.ExperimentalStdlibApi
 suspend fun newToxCore(options: ToxOptions): ToxCore = TestContext.add { ToxCoreImpl(options) }
 
-@kotlin.ExperimentalStdlibApi
 fun runTox(block: suspend CoroutineScope.() -> Unit): Unit =
     runBlocking(TestContext()) {
         try {

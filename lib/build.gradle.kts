@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.1.10"
-    id("com.google.protobuf") version "0.9.4"
+    kotlin("jvm") version "2.3.21"
+    id("com.google.protobuf") version "0.10.0"
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
@@ -17,11 +17,11 @@ repositories {
     mavenCentral()
 }
 
-val protobufVersion = "4.29.3"
+val protobufVersion = "4.35.0"
 
 dependencies {
     implementation("com.google.protobuf:protobuf-java:$protobufVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
 }
 
 protobuf {
@@ -35,7 +35,7 @@ testing {
         // Configure the built-in test suite
         val test by getting(JvmTestSuite::class) {
             // Use Kotlin Test test framework
-            useKotlinTest("2.1.10")
+            useKotlinTest("2.3.21")
         }
     }
 }

@@ -2,6 +2,7 @@
 
 #include "tox/common.h"
 #include <tox/tox.h>
+#include <tox/tox_events.h>
 
 
 namespace tox
@@ -15,6 +16,16 @@ namespace tox
   };
 
   typedef std::unique_ptr<Tox, core_deleter> core_ptr;
+
+  struct options_deleter
+  {
+    void operator () (Tox_Options *opts)
+    {
+      tox_options_free (opts);
+    }
+  };
+
+  typedef std::unique_ptr<Tox_Options, options_deleter> options_ptr;
 
 #define CALLBACK(CB) \
   inline void tox_callback_##CB(Tox *tox, tox_##CB##_cb *callback, void *) \

@@ -6,10 +6,12 @@
 using namespace av;
 
 
+// The CallState bitset is forwarded as a raw uint32; Kotlin decodes it.
+
 static void
 tox4j_call_cb (uint32_t friend_number, bool audio_enabled, bool video_enabled, Events *events)
 {
-  auto msg = events->add_call ();
+  auto msg = events->add_events ()->mutable_call ();
   msg->set_friend_number (friend_number);
   msg->set_audio_enabled (audio_enabled);
   msg->set_video_enabled (video_enabled);
@@ -19,20 +21,9 @@ tox4j_call_cb (uint32_t friend_number, bool audio_enabled, bool video_enabled, E
 static void
 tox4j_call_state_cb (uint32_t friend_number, uint32_t state, Events *events)
 {
-  auto msg = events->add_call_state ();
+  auto msg = events->add_events ()->mutable_call_state ();
   msg->set_friend_number (friend_number);
-
-  using proto::CallState;
-#define call_state_case(STATE)                  \
-  if (state & TOXAV_FRIEND_CALL_STATE_##STATE)  \
-    msg->add_call_state (CallState::STATE)
-  call_state_case (ERROR);
-  call_state_case (FINISHED);
-  call_state_case (SENDING_A);
-  call_state_case (SENDING_V);
-  call_state_case (ACCEPTING_A);
-  call_state_case (ACCEPTING_V);
-#undef call_state_case
+  msg->set_state (state);
 }
 
 
@@ -41,7 +32,7 @@ tox4j_audio_bit_rate_cb (uint32_t friend_number,
                          uint32_t audio_bit_rate,
                          Events *events)
 {
-  auto msg = events->add_audio_bit_rate ();
+  auto msg = events->add_events ()->mutable_audio_bit_rate ();
   msg->set_friend_number (friend_number);
   msg->set_audio_bit_rate (audio_bit_rate);
 }
@@ -52,7 +43,7 @@ tox4j_video_bit_rate_cb (uint32_t friend_number,
                          uint32_t video_bit_rate,
                          Events *events)
 {
-  auto msg = events->add_video_bit_rate ();
+  auto msg = events->add_events ()->mutable_video_bit_rate ();
   msg->set_friend_number (friend_number);
   msg->set_video_bit_rate (video_bit_rate);
 }
@@ -66,11 +57,10 @@ tox4j_audio_receive_frame_cb (uint32_t friend_number,
                               uint32_t sampling_rate,
                               Events *events)
 {
-  auto msg = events->add_audio_receive_frame ();
+  auto msg = events->add_events ()->mutable_audio_receive_frame ();
   msg->set_friend_number (friend_number);
-
   to_bytes (pcm, pcm + sample_count * channels, *msg->mutable_pcm ());
-
+  msg->set_sample_count (sample_count);
   msg->set_channels (channels);
   msg->set_sampling_rate (sampling_rate);
 }
@@ -86,17 +76,17 @@ tox4j_video_receive_frame_cb (uint32_t friend_number,
   assert (ystride < 0 == ustride < 0);
   assert (ystride < 0 == vstride < 0);
 
-  auto msg = events->add_video_receive_frame ();
+  auto msg = events->add_events ()->mutable_video_receive_frame ();
   msg->set_friend_number (friend_number);
   msg->set_width (width);
   msg->set_height (height);
 
   msg->set_y (y, std::max<std::size_t> (width    , std::abs (ystride)) * height);
-  msg->set_u (u, std::max<std::size_t> (width / 2, std::abs (ustride)) * (height / 2));
-  msg->set_v (v, std::max<std::size_t> (width / 2, std::abs (vstride)) * (height / 2));
-  msg->set_y_stride (ystride);
-  msg->set_u_stride (ustride);
-  msg->set_v_stride (vstride);
+  msg->set_u (u, std::max<std::size_t> ((width + 1) / 2, std::abs (ustride)) * ((height + 1) / 2));
+  msg->set_v (v, std::max<std::size_t> ((width + 1) / 2, std::abs (vstride)) * ((height + 1) / 2));
+  msg->set_ystride (ystride);
+  msg->set_ustride (ustride);
+  msg->set_vstride (vstride);
 }
 
 

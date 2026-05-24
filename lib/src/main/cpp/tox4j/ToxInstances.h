@@ -166,7 +166,7 @@ template<typename Subsystem>
 char const *module_name();
 
 /**
- * Exception name prefix (Tox, Toxav).
+ * What exception names have after Tox: nothing, or Av for toxav.
  */
 template<typename Subsystem>
 char const *exn_prefix();
@@ -250,19 +250,23 @@ with_error_handling (JNIEnv *env,
                      Args &&...args)
 {
   using error_type = typename error_type_of<ToxFunc>::type;
+  using conv = conversions<ToxFunc, Args..., error_type *>;
 
   // Create an error code value and pass a pointer to the tox function.
   error_type error;
-  auto value = conversions<ToxFunc, Args..., error_type *>::to_java (
-    env, tox_func, std::forward<Args> (args)..., &error
+  // The return value is only defined when the call succeeded, so convert
+  // it to Java after checking the error.
+  auto wrapped = wrap_void (
+    tox_func,
+    conv::from_java (std::forward<Args> (args))...,
+    &error
   );
   // Handle it, producing either a SUCCESS or a FAILURE with the error code.
   ErrorHandling result = handle_error_enum<error_type> (error);
   switch (result.result)
     {
     case ErrorHandling::SUCCESS:
-      // Call the success function to produce a Java value.
-      return success_func (std::move (value));
+      return success_func (conv::to_java (env, std::move (wrapped)));
     case ErrorHandling::FAILURE:
       // Throw an exception in case of error.
       throw_tox_exception<Object, error_type> (env, result.error);
@@ -275,7 +279,7 @@ with_error_handling (JNIEnv *env,
 
   // Return a default value in case of error. This won't be used, since the
   // error will be translated to an exception.
-  return decltype (success_func (std::move (value))) ();
+  return decltype (success_func (conv::to_java (env, std::move (wrapped)))) ();
 }
 
 

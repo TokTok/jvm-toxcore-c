@@ -5,13 +5,15 @@ template<> char const *exn_prefix<ToxCrypto>() { return ""; }
 
 #include <tox/tox.h>
 #include <sodium.h>
-#define TOX_PASS_HASH_LENGTH       TOX_HASH_LENGTH
-#define TOX_PASS_PUBLIC_KEY_LENGTH crypto_box_PUBLICKEYBYTES
-#define TOX_PASS_SECRET_KEY_LENGTH crypto_box_SECRETKEYBYTES
-#define TOX_PASS_SHARED_KEY_LENGTH crypto_box_BEFORENMBYTES
-#define TOX_PASS_NONCE_LENGTH      crypto_box_NONCEBYTES
-#define TOX_PASS_ZERO_BYTES        crypto_box_ZEROBYTES
-#define TOX_PASS_BOX_ZERO_BYTES    crypto_box_BOXZEROBYTES
+
+// libsodium sizes the encryptsave layer relies on.
+static_assert (crypto_box_PUBLICKEYBYTES == 32, "libsodium pubkey size changed");
+static_assert (crypto_box_SECRETKEYBYTES == 32, "libsodium seckey size changed");
+static_assert (crypto_box_BEFORENMBYTES  == 32, "libsodium shared-key size changed");
+static_assert (crypto_box_NONCEBYTES     == 24, "libsodium nonce size changed");
+static_assert (crypto_box_ZEROBYTES      == 32, "libsodium zero-byte prefix changed");
+static_assert (crypto_box_BOXZEROBYTES   == 16, "libsodium boxzero-byte prefix changed");
+
 #include "generated/constants.h"
 
 void

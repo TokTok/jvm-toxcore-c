@@ -39,4 +39,5 @@ interface ToxCoreEventListener<ToxCoreState> :
     GroupTopicCallback<ToxCoreState>,
     GroupTopicLockCallback<ToxCoreState>,
     GroupVoiceStateCallback<ToxCoreState>,
+    LogCallback<ToxCoreState>,
     SelfConnectionStatusCallback<ToxCoreState>

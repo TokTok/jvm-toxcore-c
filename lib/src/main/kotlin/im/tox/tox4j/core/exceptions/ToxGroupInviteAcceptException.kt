@@ -2,9 +2,6 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.exceptions.ToxException
 
-/**
- * An exception thrown when a group invite could not be accepted.
- */
 class ToxGroupInviteAcceptException : ToxException {
     enum class Code {
         /** The invite data is not in the expected format. */
@@ -13,16 +10,13 @@ class ToxGroupInviteAcceptException : ToxException {
         /** The group instance failed to initialize. */
         INIT_FAILED,
 
-        /** name exceeds TOX_MAX_NAME_LENGTH */
+        /** name exceeds [ToxCoreConstants.MAX_NAME_LENGTH] */
         TOO_LONG,
 
-        /** name is NULL or name_length is zero. */
+        /** name is null or name_length is zero. */
         EMPTY,
 
-        /**
-         * Failed to set password. This usually occurs if the password exceeds
-         * TOX_GROUP_MAX_PASSWORD_SIZE.
-         */
+        /** Failed to set password. This usually occurs if the password exceeds [ToxCoreConstants.GROUP_MAX_PASSWORD_SIZE]. */
         PASSWORD,
 
         /** The friend number passed did not designate a valid friend. */
@@ -30,6 +24,9 @@ class ToxGroupInviteAcceptException : ToxException {
 
         /** Packet failed to send. */
         FAIL_SEND,
+
+        /** Invite data or name is null. */
+        NULL,
     }
 
     constructor(code: Code) : this(code, "")

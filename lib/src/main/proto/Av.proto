@@ -5,61 +5,92 @@ package im.tox.tox4j.av.proto;
 option java_multiple_files = true;
 option optimize_for = LITE_RUNTIME;
 
-message Call {
-  int32         friend_number     = 1;
-  bool          audio_enabled     = 2;
-  bool          video_enabled     = 3;
+message CallControl {
+  enum Type {
+    RESUME = 0;
+    PAUSE = 1;
+    CANCEL = 2;
+    MUTE_AUDIO = 3;
+    UNMUTE_AUDIO = 4;
+    HIDE_VIDEO = 5;
+    SHOW_VIDEO = 6;
+  }
 }
 
-message CallState {
-  enum Kind {
-    ERROR        = 0;
-    FINISHED     = 1;
-    SENDING_A    = 2;
-    SENDING_V    = 3;
-    ACCEPTING_A  = 4;
-    ACCEPTING_V  = 5;
+message FriendCallState {
+  enum Type {
+    NONE = 0;
+    ERROR = 1;
+    FINISHED = 2;
+    SENDING_A = 3;
+    SENDING_V = 4;
+    ACCEPTING_A = 5;
+    ACCEPTING_V = 6;
   }
-
-  uint32        friend_number    = 1;
-  repeated Kind call_state       = 2;
 }
 
 message AudioBitRate {
-  uint32        friend_number    = 1;
-  uint32        audio_bit_rate   = 2;
+  uint32 friend_number = 1;
+  uint32 audio_bit_rate = 2;
 }
 
-message VideoBitRate {
-  uint32        friend_number    = 1;
-  uint32        video_bit_rate   = 2;
+message AudioData {
+  uint32 conference_number = 1;
+  uint32 peer_number = 2;
+  bytes pcm = 3;
+  uint32 sample_count = 4;
+  uint32 channels = 5;
+  uint32 sampling_rate = 6;
 }
 
 message AudioReceiveFrame {
-  uint32        friend_number    = 1;
-  bytes         pcm              = 2;
-  uint32        channels         = 3;
-  uint32        sampling_rate    = 4;
+  uint32 friend_number = 1;
+  bytes pcm = 2;
+  uint64 sample_count = 3;
+  uint32 channels = 4;
+  uint32 sampling_rate = 5;
+}
+
+message Call {
+  uint32 friend_number = 1;
+  bool audio_enabled = 2;
+  bool video_enabled = 3;
+}
+
+message CallState {
+  uint32 friend_number = 1;
+  uint32 state = 2;
+}
+
+message VideoBitRate {
+  uint32 friend_number = 1;
+  uint32 video_bit_rate = 2;
 }
 
 message VideoReceiveFrame {
-  uint32        friend_number    = 1;
-  uint32        width            = 2;
-  uint32        height           = 3;
-  bytes         y                = 4;
-  bytes         u                = 5;
-  bytes         v                = 6;
-  int32         y_stride         = 7;
-  int32         u_stride         = 8;
-  int32         v_stride         = 9;
+  uint32 friend_number = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  bytes y = 4;
+  bytes u = 5;
+  bytes v = 6;
+  int32 ystride = 7;
+  int32 ustride = 8;
+  int32 vstride = 9;
 }
 
-
 message AvEvents {
-  repeated Call               call                = 1;
-  repeated CallState          call_state          = 2;
-  repeated AudioBitRate       audio_bit_rate      = 3;
-  repeated VideoBitRate       video_bit_rate      = 4;
-  repeated AudioReceiveFrame  audio_receive_frame = 5;
-  repeated VideoReceiveFrame  video_receive_frame = 6;
+  repeated Event events = 1;
+
+  message Event {
+    oneof event_type {
+      AudioBitRate audio_bit_rate = 1;
+      AudioData audio_data = 2;
+      AudioReceiveFrame audio_receive_frame = 3;
+      Call call = 4;
+      CallState call_state = 5;
+      VideoBitRate video_bit_rate = 6;
+      VideoReceiveFrame video_receive_frame = 7;
+    }
+  }
 }

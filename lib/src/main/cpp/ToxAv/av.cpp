@@ -4,120 +4,24 @@ using namespace av;
 
 /*
  * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavIterationInterval
- * Signature: (I)I
- */
-TOX_METHOD (jint, IterationInterval,
-  jint instanceNumber)
-{
-  return instances.with_instance_noerr (env, instanceNumber,
-    toxav_iteration_interval);
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavIterate
- * Signature: (I)[B
- */
-TOX_METHOD (jbyteArray, Iterate,
-  jint instanceNumber)
-{
-  return instances.with_instance (env, instanceNumber,
-    [=] (ToxAV *av, Events &events) -> jbyteArray
-      {
-        toxav_iterate(av);
-        if (events.ByteSizeLong () == 0)
-          return nullptr;
-
-        std::vector<char> buffer (events.ByteSizeLong ());
-        events.SerializeToArray (buffer.data (), buffer.size ());
-        events.Clear ();
-
-        return toJavaArray (env, buffer);
-      }
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavCall
- * Signature: (IIII)V
- */
-TOX_METHOD (void, Call,
-  jint instanceNumber, jint friendNumber, jint audioBitRate, jint videoBitRate)
-{
-  return instances.with_instance_ign (env, instanceNumber,
-    toxav_call, friendNumber, audioBitRate, videoBitRate
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavAnswer
- * Signature: (IIII)V
- */
-TOX_METHOD (void, Answer,
-  jint instanceNumber, jint friendNumber, jint audioBitRate, jint videoBitRate)
-{
-  return instances.with_instance_ign (env, instanceNumber,
-    toxav_answer, friendNumber, audioBitRate, videoBitRate
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavCallControl
- * Signature: (III)V
- */
-TOX_METHOD (void, CallControl,
-  jint instanceNumber, jint friendNumber, jint control)
-{
-  return instances.with_instance_ign (env, instanceNumber,
-    toxav_call_control, friendNumber, Enum::valueOf<TOXAV_CALL_CONTROL> (env, control)
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavAudioSetBitRate
- * Signature: (III)V
- */
-TOX_METHOD (void, AudioSetBitRate,
-  jint instanceNumber, jint friendNumber, jint audioBitRate)
-{
-  return instances.with_instance_ign (env, instanceNumber,
-    toxav_audio_set_bit_rate, friendNumber, audioBitRate
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
- * Method:    toxavVideoSetBitRate
- * Signature: (III)V
- */
-TOX_METHOD (void, VideoSetBitRate,
-  jint instanceNumber, jint friendNumber, jint videoBitRate)
-{
-  return instances.with_instance_ign (env, instanceNumber,
-    toxav_video_set_bit_rate, friendNumber, videoBitRate
-  );
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxAvJni
  * Method:    toxavAudioSendFrame
- * Signature: (II[SIII)V
+ * Signature: (II[SJBI)V
  */
 TOX_METHOD (void, AudioSendFrame,
-  jint instanceNumber, jint friendNumber, jshortArray pcm, jint sampleCount, jint channels, jint samplingRate)
+  jint instanceNumber, jint friendNumber, jshortArray pcm, jlong sampleCount, jbyte channels, jint samplingRate)
 {
-  tox4j_assert (sampleCount >= 0);
-  tox4j_assert (channels >= 0);
-  tox4j_assert (channels <= 255);
-  tox4j_assert (samplingRate >= 0);
+  // A negative number would be a huge one in C.
+  if (sampleCount < 0 || channels < 0 || samplingRate < 0)
+    return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
+
+  // In 64 bits, so the product can't wrap in a 32-bit size_t.
+  uint64_t expected = static_cast<uint64_t> (sampleCount)
+                    * static_cast<uint64_t> (channels);
+  if (expected > SIZE_MAX)
+    return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
 
   auto pcmData = fromJavaArray (env, pcm);
-  if (pcmData.size () != size_t (sampleCount * channels))
+  if (pcmData.size () != static_cast<size_t> (expected))
     return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
 
   return instances.with_instance_ign (env, instanceNumber,
@@ -133,8 +37,13 @@ TOX_METHOD (void, AudioSendFrame,
 TOX_METHOD (void, VideoSendFrame,
   jint instanceNumber, jint friendNumber, jint width, jint height, jbyteArray y, jbyteArray u, jbyteArray v)
 {
-  size_t ySize = width * height;
-  size_t uvSize = (width / 2) * (height / 2);
+  // Java callers can bypass the Kotlin range checks.
+  if (width < 0 || height < 0)
+    return throw_tox_exception<ToxAV> (env, TOXAV_ERR_SEND_FRAME_INVALID);
+
+  // 65535 * 65535 overflows int.
+  size_t ySize = static_cast<size_t> (width) * static_cast<size_t> (height);
+  size_t uvSize = static_cast<size_t> (width / 2) * static_cast<size_t> (height / 2);
 
   auto yData = fromJavaArray (env, y);
   auto uData = fromJavaArray (env, u);

@@ -43,7 +43,7 @@ protobuf_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -Dprotobuf_BUILD_TES
 libsodium_CONFIGURE	:= --prefix=$(PREFIX) --disable-shared
 opus_CONFIGURE		:= --prefix=$(PREFIX) --disable-shared
 libvpx_CONFIGURE	:= --prefix=$(PREFIX) --disable-examples --disable-unit-tests --enable-pic
-toxcore_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DENABLE_STATIC=ON -DENABLE_SHARED=OFF
+toxcore_CONFIGURE	:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX) -DENABLE_STATIC=ON -DENABLE_SHARED=OFF -DEXPERIMENTAL_API=ON
 tox4j_CONFIGURE		:= -DCMAKE_INSTALL_PREFIX:PATH=$(PREFIX)
 
 $(TOOLCHAIN):

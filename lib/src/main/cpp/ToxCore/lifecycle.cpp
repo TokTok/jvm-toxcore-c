@@ -85,7 +85,7 @@ tox4j_friend_typing_cb (Tox_Friend_Number friend_number, bool is_typing, Events 
 {
   auto msg = events->add_events()->mutable_friend_typing ();
   msg->set_friend_number (friend_number);
-  msg->set_is_typing (is_typing);
+  msg->set_typing (is_typing);
 }
 
 static void
@@ -104,8 +104,22 @@ tox4j_friend_request_cb (uint8_t const *public_key, uint8_t const *message, size
   msg->set_message (message, length);
 }
 
+// Group messages name the proto field `message_type`, others `type`.
 template<typename Message>
 static void set_message_type(Message *msg, Tox_Message_Type type) {
+  using proto::MessageType;
+  switch (type) {
+    case TOX_MESSAGE_TYPE_NORMAL:
+      msg->set_type(MessageType::NORMAL);
+      break;
+    case TOX_MESSAGE_TYPE_ACTION:
+      msg->set_type(MessageType::ACTION);
+      break;
+  }
+}
+
+template<typename Message>
+static void set_group_message_type(Message *msg, Tox_Message_Type type) {
   using proto::MessageType;
   switch (type) {
     case TOX_MESSAGE_TYPE_NORMAL:
@@ -288,14 +302,14 @@ tox4j_group_privacy_state_cb (Tox_Group_Number group_number, Tox_Group_Privacy_S
   auto msg = events->add_events()->mutable_group_privacy_state();
   msg->set_group_number (group_number);
 
-  using proto::GroupPrivacyState;
+  using proto::GroupPrivacyStateKind;
   switch (privacy_state)
     {
     case TOX_GROUP_PRIVACY_STATE_PUBLIC:
-      msg->set_privacy_state (GroupPrivacyState::PUBLIC);
+      msg->set_privacy_state (GroupPrivacyStateKind::PUBLIC);
       break;
     case TOX_GROUP_PRIVACY_STATE_PRIVATE:
-      msg->set_privacy_state (GroupPrivacyState::PRIVATE);
+      msg->set_privacy_state (GroupPrivacyStateKind::PRIVATE);
       break;
     }
 }
@@ -306,17 +320,17 @@ tox4j_group_voice_state_cb (uint32_t group_number, Tox_Group_Voice_State voice_s
   auto msg = events->add_events()->mutable_group_voice_state();
   msg->set_group_number (group_number);
 
-  using proto::GroupVoiceState;
+  using proto::GroupVoiceStateKind;
   switch (voice_state)
     {
     case TOX_GROUP_VOICE_STATE_ALL:
-      msg->set_voice_state (GroupVoiceState::ALL);
+      msg->set_voice_state (GroupVoiceStateKind::ALL);
       break;
     case TOX_GROUP_VOICE_STATE_MODERATOR:
-      msg->set_voice_state (GroupVoiceState::MODERATOR);
+      msg->set_voice_state (GroupVoiceStateKind::MODERATOR);
       break;
     case TOX_GROUP_VOICE_STATE_FOUNDER:
-      msg->set_voice_state (GroupVoiceState::FOUNDER);
+      msg->set_voice_state (GroupVoiceStateKind::FOUNDER);
       break;
     }
 }
@@ -327,14 +341,14 @@ tox4j_group_topic_lock_cb (uint32_t group_number, Tox_Group_Topic_Lock topic_loc
   auto msg = events->add_events()->mutable_group_topic_lock();
   msg->set_group_number (group_number);
 
-  using proto::GroupTopicLock;
+  using proto::GroupTopicLockKind;
   switch (topic_lock)
     {
     case TOX_GROUP_TOPIC_LOCK_ENABLED:
-      msg->set_topic_lock (GroupTopicLock::ENABLED);
+      msg->set_topic_lock (GroupTopicLockKind::ENABLED);
       break;
     case TOX_GROUP_TOPIC_LOCK_DISABLED:
-      msg->set_topic_lock (GroupTopicLock::DISABLED);
+      msg->set_topic_lock (GroupTopicLockKind::DISABLED);
       break;
     }
 }
@@ -361,7 +375,7 @@ tox4j_group_message_cb (Tox_Group_Number group_number, Tox_Group_Peer_Number pee
   auto msg = events->add_events()->mutable_group_message();
   msg->set_group_number (group_number);
   msg->set_peer_id (peer_id);
-  set_message_type (msg, message_type);
+  set_group_message_type (msg, message_type);
   msg->set_message (message, message_length);
   msg->set_message_id (message_id);
 }
@@ -372,7 +386,7 @@ tox4j_group_private_message_cb (Tox_Group_Number group_number, Tox_Group_Peer_Nu
   auto msg = events->add_events()->mutable_group_private_message();
   msg->set_group_number (group_number);
   msg->set_peer_id (peer_id);
-  set_message_type (msg, message_type);
+  set_group_message_type (msg, message_type);
   msg->set_message (message, message_length);
   msg->set_message_id (message_id);
 }
@@ -459,17 +473,17 @@ tox4j_group_join_fail_cb (Tox_Group_Number group_number, Tox_Group_Join_Fail fai
   auto msg = events->add_events()->mutable_group_join_fail();
   msg->set_group_number (group_number);
 
-  using proto::GroupJoinFail;
+  using proto::GroupJoinFailKind;
   switch (fail_type)
     {
     case TOX_GROUP_JOIN_FAIL_PEER_LIMIT:
-      msg->set_fail_type (GroupJoinFail::PEER_LIMIT);
+      msg->set_fail_type (GroupJoinFailKind::PEER_LIMIT);
       break;
     case TOX_GROUP_JOIN_FAIL_INVALID_PASSWORD:
-      msg->set_fail_type (GroupJoinFail::INVALID_PASSWORD);
+      msg->set_fail_type (GroupJoinFailKind::INVALID_PASSWORD);
       break;
     case TOX_GROUP_JOIN_FAIL_UNKNOWN:
-      msg->set_fail_type (GroupJoinFail::UNKNOWN);
+      msg->set_fail_type (GroupJoinFailKind::UNKNOWN);
       break;
     }
 }
@@ -501,21 +515,6 @@ tox4j_group_moderation_cb (Tox_Group_Number group_number, Tox_Group_Peer_Number 
 }
 
 
-static auto
-tox_options_new_unique ()
-{
-  struct Tox_Options_Deleter
-  {
-    void operator () (Tox_Options *options)
-    {
-      tox_options_free (options);
-    }
-  };
-
-  return std::unique_ptr<Tox_Options, Tox_Options_Deleter> (tox_options_new (nullptr));
-}
-
-
 static tox::core_ptr
 tox_new_unique (Tox_Options const *options, Tox_Err_New *error)
 {
@@ -523,51 +522,46 @@ tox_new_unique (Tox_Options const *options, Tox_Err_New *error)
 }
 
 
+#include "generated/options.h"
+
 /*
  * Class:     im_tox_tox4j_impl_ToxCoreJni
  * Method:    toxNew
- * Signature: (ZZILjava/lang/String;IIII)I
+ * Signature: ([B)I
  */
 TOX_METHOD (jint, New,
-  jboolean ipv6Enabled, jboolean udpEnabled, jboolean localDiscoveryEnabled,
-  jint proxyType, jstring proxyHost, jint proxyPort,
-  jint startPort, jint endPort, jint tcpPort,
-  jint saveDataType, jbyteArray saveData)
+  jbyteArray optionsBytes)
 {
-  auto opts = tox_options_new_unique ();
-  if (!opts)
+  // Owns the proxy host and savedata that tox_options_set_* point to,
+  // so it must outlive tox_new.
+  proto::Options msg;
+  {
+    auto bytes = fromJavaArray (env, optionsBytes);
+    if (!msg.ParseFromArray (bytes.data (), bytes.size ()))
+      {
+        // Only a build mismatch with the Kotlin side can cause this.
+        throw_illegal_state_exception (env, 0, "Malformed Options message");
+        return 0;
+      }
+  }
+
+  tox::options_ptr opts_owner;
+  {
+    Tox_Err_Options_New options_error = TOX_ERR_OPTIONS_NEW_OK;
+    opts_owner.reset (tox_options_new (&options_error));
+    if (!opts_owner || options_error != TOX_ERR_OPTIONS_NEW_OK)
+      {
+        throw_tox_exception<Tox> (env, TOX_ERR_NEW_MALLOC);
+        return 0;
+      }
+  }
+  Tox_Options *opts = opts_owner.get ();
+
+  if (!set_options_from_proto (env, opts, msg))
     {
       throw_tox_exception<Tox> (env, TOX_ERR_NEW_MALLOC);
       return 0;
     }
-
-  tox_options_set_ipv6_enabled (opts.get (), ipv6Enabled);
-  tox_options_set_udp_enabled (opts.get (), udpEnabled);
-  tox_options_set_local_discovery_enabled (opts.get (), localDiscoveryEnabled);
-
-  tox_options_set_proxy_type (opts.get (), Enum::valueOf<Tox_Proxy_Type> (env, proxyType));
-  UTFChars proxy_host (env, proxyHost);
-  tox_options_set_proxy_host (opts.get (), proxy_host.data ());
-  tox_options_set_proxy_port (opts.get (), proxyPort);
-
-  tox_options_set_start_port (opts.get (), startPort);
-  tox_options_set_end_port (opts.get (), endPort);
-  tox_options_set_tcp_port (opts.get (), tcpPort);
-
-  auto assert_valid_uint16 = [env](int port) {
-    tox4j_assert (port >= 0);
-    tox4j_assert (port <= 65535);
-  };
-  if (tox_options_get_proxy_type (opts.get ()) != TOX_PROXY_TYPE_NONE) {
-    assert_valid_uint16 (proxyPort);
-  }
-  assert_valid_uint16 (startPort);
-  assert_valid_uint16 (endPort);
-  assert_valid_uint16 (tcpPort);
-
-  auto save_data = fromJavaArray (env, saveData);
-  tox_options_set_savedata_type (opts.get (), Enum::valueOf<Tox_Savedata_Type> (env, saveDataType));
-  tox_options_set_savedata_data (opts.get (), save_data.data (), save_data.size ());
 
   return instances.with_error_handling (env,
     [env] (tox::core_ptr tox)
@@ -589,7 +583,7 @@ TOX_METHOD (jint, New,
           std::move (events)
         );
       },
-    tox_new_unique, opts.get ()
+    tox_new_unique, opts
   );
 }
 
@@ -613,19 +607,4 @@ TOX_METHOD (void, Finalize,
   jint instanceNumber)
 {
   instances.finalize (env, instanceNumber);
-}
-
-/*
- * Class:     im_tox_tox4j_impl_ToxCoreJni
- * Method:    toxGetSavedata
- * Signature: (I)[B
- */
-TOX_METHOD (jbyteArray, GetSavedata,
-  jint instanceNumber)
-{
-  return instances.with_instance_noerr (env, instanceNumber,
-    get_vector<uint8_t,
-      tox_get_savedata_size,
-      tox_get_savedata>::make
-  );
 }
