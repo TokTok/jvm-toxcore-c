@@ -160,9 +160,9 @@ class ToxAvEventDispatchTest {
         return ToxAvEventDispatch.dispatch(Recorder(), payload, emptyList())
     }
 
-    /** Little-endian, as in `AvEvents`. */
+    /** Big-endian, as in `AvEvents`. */
     private fun pcmBytes(samples: ShortArray): ByteString {
-        val buf = ByteBuffer.allocate(samples.size * 2).order(ByteOrder.LITTLE_ENDIAN)
+        val buf = ByteBuffer.allocate(samples.size * 2).order(ByteOrder.BIG_ENDIAN)
         samples.forEach(buf::putShort)
         return ByteString.copyFrom(buf.array())
     }

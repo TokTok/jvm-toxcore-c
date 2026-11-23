@@ -12,11 +12,12 @@ import im.tox.tox4j.core.data.ToxConferencePeerNumber
 import im.tox.tox4j.core.data.ToxFriendNumber
 
 object ToxAvEventDispatch {
+    /** Big-endian, as `to_bytes` writes it. */
     private fun toShortArray(bytes: com.google.protobuf.ByteString): ShortArray {
         val sb =
             bytes
                 .asReadOnlyByteBuffer()
-                .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                .order(java.nio.ByteOrder.BIG_ENDIAN)
                 .asShortBuffer()
         return ShortArray(sb.remaining()).also(sb::get)
     }

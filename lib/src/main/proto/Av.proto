@@ -37,6 +37,7 @@ message AudioBitRate {
 message AudioData {
   uint32 conference_number = 1;
   uint32 peer_number = 2;
+  // 16-bit samples, big-endian.
   bytes pcm = 3;
   uint32 sample_count = 4;
   uint32 channels = 5;
@@ -45,6 +46,7 @@ message AudioData {
 
 message AudioReceiveFrame {
   uint32 friend_number = 1;
+  // 16-bit samples, big-endian.
   bytes pcm = 2;
   uint64 sample_count = 3;
   uint32 channels = 4;
